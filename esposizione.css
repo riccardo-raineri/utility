@@ -1,0 +1,104 @@
+:root {
+    --bg: #e0dcd0;              /* Colore tavolo/scrivania vintage */
+    --surface: #fcfbf7;         /* Colore carta vecchia/panna */
+    --border: #8b8575;          /* Metallo invecchiato */
+    --text: #3d3b36;            /* Grigio scuro per leggibilità */
+    --accent: #a64d2e;          /* Arancio ruggine (stile otturatore) */
+    --font-mono: "Courier New", Courier, monospace;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    padding: 30px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.1); /* Effetto "spessore" fisico */
+}
+
+.card-header {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.card-header h2 {
+    font-size: 20px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    border-bottom: 2px solid var(--text);
+    display: inline-block;
+}
+
+/* Tabs: Stile interruttori meccanici */
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    background: #d1ccc0;
+    border: 1px solid var(--border);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.tab-btn.active {
+    background: var(--accent);
+    color: white;
+}
+
+.input-row {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    background: #f0ede5;
+    border: 1px inset var(--border);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--text);
+}
+
+.calculate-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--text);
+    color: white;
+    border: none;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 2px 2px 0px var(--accent);
+}
+
+.calculate-btn:hover {
+    background: var(--accent);
+}

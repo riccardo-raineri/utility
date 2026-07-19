@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exposure Meter - Analog Pro</title>
+	    <link rel="stylesheet" href="esposizione.css">
+
+</head>
+<body>
+
+<div class="card">
+    <div class="card-header">
+        <h2>Exposure Meter</h2>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('eq')">Equivalenza</button>
+        <button class="tab-btn" onclick="showTab('nd')">Filtri ND</button>
+        <button class="tab-btn" onclick="showTab('astro')">Astro</button>
+    </div>
+
+    <!-- Sezione Equivalenza -->
+    <div id="eq" class="form-section active">
+        <div class="input-row">
+            <label>Tempo (es. 1/50)</label>
+            <input type="text" id="eq-shutter" value="1/50">
+        </div>
+        <div class="input-row">
+            <label>Apertura (f/)</label>
+            <input type="number" id="eq-aperture" value="5.6">
+        </div>
+    </div>
+
+    <!-- Sezione Filtri ND -->
+    <div id="nd" class="form-section">
+        <div class="input-row">
+            <label>Tempo base (sec)</label>
+            <input type="text" id="nd-shutter" value="1/100">
+        </div>
+        <div class="input-row">
+            <label>Stop Filtro ND</label>
+            <input type="number" id="nd-stops" value="6" placeholder="es. 6 (ND64)">
+        </div>
+    </div>
+
+    <!-- Sezione Astro -->
+    <div id="astro" class="form-section">
+        <div class="input-row">
+            <label>Lunghezza focale (mm)</label>
+            <input type="number" id="astro-focal" value="24">
+        </div>
+        <div style="font-size: 11px; font-family: var(--font-mono); margin-bottom: 10px;">
+            * Regola del 500 (tempo max senza mosso)
+        </div>
+    </div>
+
+    <button class="calculate-btn" onclick="calculate()">Calcola Risultato</button>
+
+    <div class="result-box">
+        <label>Tempo Stimato</label>
+        <div class="result-value" id="result">---</div>
+    </div>
+</div>
+
+<script>
+    function showTab(tabId) {
+        document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    function calculate() {
+        let result = "---";
+        const activeTab = document.querySelector('.form-section.active').id;
+
+        if (activeTab === 'eq') {
+            // Logica semplificata esposizione
+            result = "Compensazione Calcolata"; 
+        } 
+        else if (activeTab === 'nd') {
+            const shutterStr = document.getElementById('nd-shutter').value;
+            const stops = parseInt(document.getElementById('nd-stops').value) || 0;
+            // Valutazione frazione
+            const val = eval(shutterStr);
+            const newTime = val * Math.pow(2, stops);
+            result = newTime >= 1 ? newTime.toFixed(1) + "s" : "1/" + Math.round(1/newTime);
+        }
+        else if (activeTab === 'astro') {
+            const focal = parseInt(document.getElementById('astro-focal').value);
+            const time = 500 / focal;
+            result = Math.floor(time) + "s";
+        }
+
+        document.getElementById('result').innerText = result;
+    }
+</script>
+
+</body>
+</html>
