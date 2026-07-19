@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Costo Carburante</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .dashboard {
+            background: #1e1e1e;
+            border: 2px solid #ff9800; /* Dettagli arancioni stile cruscotto */
+            padding: 30px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 0 15px rgba(255, 152, 0, 0.2);
+        }
+        h2 { text-align: center; color: #ff9800; text-transform: uppercase; margin-top: 0;}
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; color: #ccc; }
+        input {
+            width: 100%;
+            padding: 10px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #ff9800;
+            color: #121212;
+            border: none;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 10px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        button:hover { background-color: #e68a00; }
+        .output {
+            margin-top: 25px;
+            border-top: 1px dashed #555;
+            padding-top: 15px;
+        }
+        .output p { font-size: 18px; margin: 10px 0; }
+        .highlight { color: #ff9800; font-size: 24px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="dashboard">
+    <h2>Trip Computer</h2>
+    
+    <div class="input-group">
+        <label>Distanza da percorrere (Km)</label>
+        <input type="number" id="distance" placeholder="es. 350">
+    </div>
+    <div class="input-group">
+        <label>Consumo auto (Km al Litro)</label>
+        <input type="number" id="consumption" placeholder="es. 15">
+    </div>
+    <div class="input-group">
+        <label>Prezzo Carburante (€/Litro)</label>
+        <input type="number" id="price" placeholder="es. 1.85" step="0.01">
+    </div>
+
+    <button onclick="calculateTrip()">Calcola Costo</button>
+
+    <div class="output" id="output" style="display:none;">
+        <p>Litri necessari: <span id="liters" class="highlight">0</span> L</p>
+        <p>Costo Totale: <span id="cost" class="highlight">0</span> €</p>
+    </div>
+</div>
+
+<script>
+    function calculateTrip() {
+        // Lettura dati
+        const distance = parseFloat(document.getElementById('distance').value);
+        const consumption = parseFloat(document.getElementById('consumption').value);
+        const price = parseFloat(document.getElementById('price').value);
+
+        // Validazione base
+        if (!distance || !consumption || !price) {
+            alert("Compila tutti i campi correttamente.");
+            return;
+        }
+
+        // Calcolo quanti litri servono e il costo totale
+        const litersNeeded = distance / consumption;
+        const totalCost = litersNeeded * price;
+
+        // Scrittura risultati nell'HTML
+        document.getElementById('liters').innerText = litersNeeded.toFixed(1);
+        document.getElementById('cost').innerText = totalCost.toFixed(2);
+        
+        // Mostro il blocco dei risultati
+        document.getElementById('output').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
