@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertitore Universale</title>
+    <style>
+        /* =========================================
+           1. VARIABILI CSS (TEMA CHIARO)
+           Usare le variabili permette di cambiare i colori 
+           di tutto il sito modificando un solo valore.
+           ========================================= */
+        :root {
+            --bg-color: #f5f3ff;          /* Colore di sfondo della pagina */
+            --card-bg: #ffffff;           /* Sfondo del riquadro centrale */
+            --text-main: #1e1b4b;         /* Colore del testo principale */
+            --text-muted: #6b7280;        /* Colore del testo secondario/piccolo */
+            --border-color: #e5e7eb;      /* Colore dei bordi degli input */
+            --accent-color: #8b5cf6;      /* Colore principale (Viola) */
+            --input-bg: #f8fafc;          /* Sfondo interno alle caselle di testo */
+            --shadow: 0 10px 30px rgba(139, 92, 246, 0.1); /* Ombra morbida viola */
+        }
+
+        /* =========================================
+           2. VARIABILI CSS (TEMA SCURO)
+           Queste si attivano automaticamente quando 
+           il tag <body> riceve l'attributo data-theme="dark"
+           ========================================= */
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #a78bfa;      /* Viola più chiaro per risaltare sul nero */
+            --input-bg: #0f172a;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Ombra nera scura */
+        }
+
+        /* =========================================
+           3. STILI GENERALI (LAYOUT E GRAFICA)
+           ========================================= */
+        * { 
+            box-sizing: border-box; 
+            font-family: -apple-system, "Segoe UI", Roboto, sans-serif; 
+        }
+        
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            display: flex;                /* Centra il contenuto... */
+            justify-content: center;      /* ...orizzontalmente... */
+            align-items: center;          /* ...e verticalmente */
+            min-height: 100vh;            /* Occupa tutta l'altezza dello schermo */
+            margin: 0; 
+            padding: 20px; 
+            transition: background-color 0.3s, color 0.3s; /* Animazione fluida al cambio tema */
+        }
+
+        .converter-card { 
+            background: var(--card-bg); 
+            border-radius: 24px;          /* Bordi molto arrotondati */
+            padding: 35px; 
+            width: 100%; 
+            max-width: 450px; 
+            box-shadow: var(--shadow); 
+            transition: background-color 0.3s, box-shadow 0.3s; 
+            border: 1px solid var(--border-color); 
+        }
+
+        /* Intestazione (Titolo + Bottone Tema) */
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+        }
+        
+        h2 { 
+            margin: 0; 
+            font-size: 24px; 
+            font-weight: 700; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+
+        .theme-toggle { 
+            background: none; 
+            border: none; 
+            font-size: 24px; 
+            cursor: pointer; 
+            color: var(--text-main); 
+            transition: transform 0.2s; 
+        }
+        
+        /* Effetto quando passi il mouse sul bottone del tema */
+        .theme-toggle:hover { 
+            transform: scale(1.1) rotate(15deg); 
+        }
+
+        /* Stili condivisi tra menu a tendina (select) e caselle di testo (input) */
+        select, input { 
+            width: 100%; 
+            padding: 15px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color); 
+            background: var(--input-bg); 
+            color: var(--text-main); 
+            font-size: 16px; 
+            outline: none; 
+            transition: border-color 0.3s, box-shadow 0.3s; 
+        }
+        
+        /* Effetto quando clicchi dentro una casella di testo */
+        select:focus, input:focus { 
+            border-color: var(--accent-color); 
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2); 
+        }
+
+        .category-select { margin-bottom: 25px; font-weight: 600; cursor: pointer; }
+        
+        /* Disposizione affiancata per "Valore" e "Unità di misura" */
+        .input-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        input[type="number"] { flex: 2; font-size: 20px; font-weight: 600; }
+        select.unit-select { flex: 1.5; cursor: pointer; }
+        
+        .swap-icon { text-align: center; color: var(--accent-color); font-size: 24px; margin: 10px 0; opacity: 0.7; }
+        .status { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="converter-card">
+    <div class="header">
+        <h2>🪄 Convertitore</h2>
+        <!-- Al clic esegue la funzione toggleTheme() -->
+        <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">🌙</button>
+    </div>
+
+    <!-- onchange significa: appena scegli una voce diversa, esegui la funzione changeCategory() -->
+    <select class="category-select" id="category" onchange="changeCategory()">
+        <option value="lunghezza">📏 Lunghezza</option>
+        <option value="peso">⚖️ Peso & Massa</option>
+        <option value="temperatura">🌡️ Temperatura</option>
+        <option value="valuta">💶 Valuta (Live)</option>
+        <option value="area">📐 Area</option>
+        <option value="volume">🧊 Volume</option>
+        <option value="velocita">🚀 Velocità</option>
+        <option value="tempo">⏳ Tempo</option>
+        <option value="dati">💾 Dati Digitali</option>
+    </select>
+
+    <!-- Primo blocco: Input in alto -->
+    <div class="input-row">
+        <!-- oninput significa: calcola il risultato a OGNI tasto che premi (in tempo reale) -->
+        <input type="number" id="input1" placeholder="0" oninput="calculate(1)">
+        <select class="unit-select" id="unit1" onchange="calculate(1)"></select>
+    </div>
+    
+    <div class="swap-icon">⇅</div>
+    
+    <!-- Secondo blocco: Input in basso -->
+    <div class="input-row">
+        <!-- Passiamo il numero 2 per far capire al JS che stiamo digitando nel box in basso -->
+        <input type="number" id="input2" placeholder="0" oninput="calculate(2)">
+        <select class="unit-select" id="unit2" onchange="calculate(1)"></select>
+    </div>
+    
+    <div class="status" id="status-text">Pronto.</div>
+</div>
+
+<script>
+    // ---------------------------------------------------------
+    // 1. CAMBIO TEMA CHIARO/SCURO
+    // ---------------------------------------------------------
+    function toggleTheme() {
+        const body = document.body;
+        const btn = document.getElementById('theme-btn');
+        
+        // Se c'è già il tema dark, lo rimuove
+        if (body.getAttribute('data-theme') === 'dark') { 
+            body.removeAttribute('data-theme'); 
+            btn.innerText = '🌙'; 
+        } 
+        // Altrimenti lo aggiunge
+        else { 
+            body.setAttribute('data-theme', 'dark'); 
+            btn.innerText = '☀️'; 
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 2. DIZIONARIO DELLE CONVERSIONI
+    // Ogni unità ha un valore rispetto a un'unità base.
+    // Es. per la lunghezza l'unità base è il Metro (valore 1).
+    // Il chilometro vale 1000 metri.
+    // ---------------------------------------------------------
+    let conversionData = {
+        lunghezza: { "Metri (m)": 1, "Millimetri (mm)": 0.001, "Centimetri (cm)": 0.01, "Chilometri (km)": 1000, "Pollici (in)": 0.0254, "Piedi (ft)": 0.3048, "Miglia (mi)": 1609.344 },
+        peso: { "Grammi (g)": 1, "Chilogrammi (kg)": 1000, "Once (oz)": 28.3495, "Libbre (lb)": 453.592 },
+        area: { "Metri quadri (m²)": 1, "Ettari (ha)": 10000, "Chilometri quadri (km²)": 1000000, "Acri (ac)": 4046.86 },
+        volume: { "Litri (l)": 1, "Millilitri (ml)": 0.001, "Metri cubi (m³)": 1000, "Galloni US (gal)": 3.78541 },
+        velocita: { "Km/h": 1, "Metri/sec (m/s)": 3.6, "Miglia/h (mph)": 1.60934, "Nodi (kn)": 1.852 },
+        tempo: { "Secondi (s)": 1, "Minuti (min)": 60, "Ore (h)": 3600, "Giorni (d)": 86400 },
+        dati: { "Byte (B)": 1, "Kilobyte (KB)": 1024, "Megabyte (MB)": 1048576, "Gigabyte (GB)": 1073741824 },
+        
+        // La temperatura usa formule complesse, quindi mettiamo un flag "special"
+        temperatura: { "Celsius (°C)": "special", "Fahrenheit (°F)": "special", "Kelvin (K)": "special" },
+        
+        // Le valute partono come "loading", verranno sovrascritte dalle API
+        valuta: { "EUR (€)": 1, "USD ($)": "loading", "GBP (£)": "loading", "JPY (¥)": "loading", "CHF (Fr)": "loading" }
+    };
+
+    // ---------------------------------------------------------
+    // 3. RECUPERO VALUTE IN TEMPO REALE TRAMITE API
+    // (async/await permette di scaricare dati senza bloccare la pagina)
+    // ---------------------------------------------------------
+    async function fetchCurrencies() {
+        try {
+            document.getElementById('status-text').innerText = "Aggiornamento valute in corso...";
+            
+            // Richiesta all'API gratuita ER-API
+            const res = await fetch('https://open.er-api.com/v6/latest/EUR');
+            const data = await res.json(); // Converte la risposta in oggetto JavaScript
+            
+            // Sostituisco i valori "loading" con i veri tassi di cambio (riferimento: 1 Euro)
+            conversionData.valuta = { 
+                "EUR (€)": 1, 
+                "USD ($)": data.rates.USD, 
+                "GBP (£)": data.rates.GBP, 
+                "JPY (¥)": data.rates.JPY, 
+                "CHF (Fr)": data.rates.CHF, 
+                "CNY (¥)": data.rates.CNY 
+            };
+            
+            // Se l'utente si trovava già sulla pagina Valute, ricarico la tendina
+            if(document.getElementById('category').value === 'valuta') changeCategory();
+            
+            // Mostro la data dell'ultimo aggiornamento
+            document.getElementById('status-text').innerText = "Valute aggiornate: " + data.time_last_update_utc.split(' ')[0];
+        } catch (e) {
+            document.getElementById('status-text').innerText = "Errore connessione valute.";
+        }
+    }
+
+    // ---------------------------------------------------------
+    // 4. CAMBIO CATEGORIA (Popola le tendine)
+    // ---------------------------------------------------------
+    function changeCategory() {
+        const cat = document.getElementById('category').value;
+        const u1 = document.getElementById('unit1'); 
+        const u2 = document.getElementById('unit2');
+        
+        // Svuota i menu a tendina attuali
+        u1.innerHTML = ''; 
+        u2.innerHTML = '';
+        
+        // Estrae i nomi delle unità (es: "Metri", "Millimetri") e li inserisce come opzioni (<option>)
+        Object.keys(conversionData[cat]).forEach(unit => {
+            u1.innerHTML += `<option value="${unit}">${unit}</option>`;
+            u2.innerHTML += `<option value="${unit}">${unit}</option>`;
+        });
+        
+        // Imposta la tendina in basso (u2) sul secondo elemento per non avere la conversione Metri -> Metri
+        if(u1.options.length > 1) u2.selectedIndex = 1;
+        
+        // Ricalcola subito il risultato
+        calculate(1);
+    }
+
+    // ---------------------------------------------------------
+    // 5. FUNZIONE SPECIALE PER LA TEMPERATURA
+    // La temperatura non si moltiplica semplicemente, serve una formula matematica.
+    // ---------------------------------------------------------
+    function calcTemp(val, from, to) {
+        let celsius;
+        // Passo 1: Converto l'unità di partenza in Celsius
+        if(from.includes("Celsius")) celsius = val;
+        else if(from.includes("Fahrenheit")) celsius = (val - 32) * 5/9;
+        else if(from.includes("Kelvin")) celsius = val - 273.15;
+
+        // Passo 2: Converto i Celsius nell'unità di destinazione
+        if(to.includes("Celsius")) return celsius;
+        if(to.includes("Fahrenheit")) return (celsius * 9/5) + 32;
+        if(to.includes("Kelvin")) return celsius + 273.15;
+    }
+
+    // ---------------------------------------------------------
+    // 6. MOTORE DI CALCOLO PRINCIPALE
+    // (source = 1 significa che l'utente scrive in alto, 2 in basso)
+    // ---------------------------------------------------------
+    function calculate(source) {
+        const cat = document.getElementById('category').value;
+        const val1 = document.getElementById('input1').value;
+        const val2 = document.getElementById('input2').value;
+        const u1 = document.getElementById('unit1').value;
+        const u2 = document.getElementById('unit2').value;
+
+        // Se l'utente cancella tutto il testo, svuoto anche l'altro box
+        if(source === 1 && val1 === '') { document.getElementById('input2').value = ''; return; }
+        if(source === 2 && val2 === '') { document.getElementById('input1').value = ''; return; }
+
+        let result;
+        
+        // CASO A: TEMPERATURA
+        if(cat === "temperatura") {
+            let v = parseFloat(source === 1 ? val1 : val2); // Leggo il numero digitato
+            result = source === 1 ? calcTemp(v, u1, u2) : calcTemp(v, u2, u1);
+        } 
+        // CASO B: TUTTE LE ALTRE UNITÀ
+        else {
+            const r1 = conversionData[cat][u1]; 
+            const r2 = conversionData[cat][u2];
+            
+            // Se le valute non sono ancora state caricate da internet, fermo tutto
+            if(r1 === "loading" || r2 === "loading") return; 
+            
+            let v = parseFloat(source === 1 ? val1 : val2);
+            
+            // Formula magica universale
+            result = source === 1 ? (v * r1) / r2 : (v * r2) / r1;
+        }
+        
+        // Decido dove scrivere il risultato (se scrivo in alto, il target è basso, e viceversa)
+        let target = source === 1 ? 'input2' : 'input1';
+        
+        // Scrivo il risultato formattato a massimo 5 decimali
+        document.getElementById(target).value = parseFloat(result.toFixed(5));
+    }
+
+    // ---------------------------------------------------------
+    // 7. INIZIALIZZAZIONE ALL'AVVIO
+    // ---------------------------------------------------------
+    fetchCurrencies();  // Chiamo l'API delle valute in background
+    changeCategory();   // Carico la prima categoria (Lunghezza) appena apri la pagina
+</script>
+</body>
+</html>

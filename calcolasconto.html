@@ -2,107 +2,138 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <!-- Meta tag fondamentale per la responsività su smartphone -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calcola Sconto</title>
     <style>
-        /* Reset di base e font */
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        /* Reset per margin e padding per consistenza tra i vari browser */
+        * { box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        
         body { 
-            background-color: #f0f4f8; 
+            /* Sfondo: unisco un filtro nero semitrasparente (rgba) con un'immagine di sfondo */
+            background: linear-gradient(rgba(10, 10, 15, 0.85), rgba(10, 10, 15, 0.85)), 
+                        url('https://static.vecteezy.com/system/resources/previews/071/506/567/non_2x/flat-lay-presenting-eco-friendly-fashion-items-white-t-shirt-denim-jeans-black-sunglasses-and-tan-wallet-minimalist-style-complemented-by-green-accents-and-a-neutral-beige-backdrop-photo.jpg') no-repeat center center fixed;
+            background-size: cover;       /* L'immagine copre tutto lo schermo */
+            color: #fff;                  /* Testo bianco per contrastare lo sfondo scuro */
             display: flex; 
             justify-content: center; 
             align-items: center; 
             height: 100vh; 
             margin: 0; 
+            padding: 20px;
         }
-        /* Contenitore principale a forma di card */
+        
+        /* Effetto Vetro (Glassmorphism) per la card principale */
         .card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            width: 100%;
+            background: rgba(30, 41, 59, 0.6); /* Sfondo blu scurissimo ma trasparente al 60% */
+            backdrop-filter: blur(12px);       /* Sfoca ciò che c'è dietro (magia del CSS) */
+            -webkit-backdrop-filter: blur(12px); /* Supporto per Safari */
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1); /* Bordino sottile semitrasparente */
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); /* Ombra per dare profondità */
+            width: 100%; 
             max-width: 400px;
         }
-        h2 { text-align: center; color: #333; margin-top: 0; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #666; font-weight: bold; }
+        
+        h2 { text-align: center; color: #10b981; margin-top: 0; font-weight: 300; letter-spacing: 1px;}
+        .input-group { margin-bottom: 25px; }
+        label { display: block; margin-bottom: 8px; color: #cbd5e1; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;}
+        
+        /* Stile caselle di testo */
         input { 
             width: 100%; 
-            padding: 12px; 
-            border: 2px solid #ddd; 
-            border-radius: 8px; 
-            font-size: 16px;
-        }
-        /* Stile al focus dell'input */
-        input:focus { border-color: #4CAF50; outline: none; }
-        button {
-            width: 100%;
-            padding: 15px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 8px;
+            padding: 15px; 
+            background: rgba(15, 23, 42, 0.6); /* Sfondo molto scuro e trasparente */
+            border: 1px solid rgba(255,255,255,0.2); 
+            color: white; 
+            border-radius: 10px; 
             font-size: 18px;
-            cursor: pointer;
-            transition: background 0.3s;
+            transition: border-color 0.3s, background 0.3s;
         }
-        button:hover { background-color: #45a049; }
-        /* Area dei risultati */
-        .result {
-            margin-top: 20px;
+        
+        input:focus { 
+            border-color: #10b981; /* Bordo verde acceso quando cliccato */
+            outline: none; 
+            background: rgba(15, 23, 42, 0.9); 
+        }
+        
+        /* Bottone principale */
+        button {
+            width: 100%; 
             padding: 15px;
-            background-color: #e8f5e9;
-            border-radius: 8px;
-            display: none; /* Nascosto di default, lo mostriamo col JS */
+            background-color: #10b981; 
+            color: #064e3b;               /* Verde molto scuro per il testo */
+            border: none; 
+            border-radius: 10px;
+            font-size: 18px; 
+            font-weight: bold; 
+            cursor: pointer; 
+            transition: transform 0.3s, background-color 0.3s;
         }
-        .result p { margin: 5px 0; font-size: 18px; color: #2e7d32; }
-        .result span { font-weight: bold; font-size: 22px; }
+        
+        button:hover { 
+            background-color: #059669; 
+            color: white; 
+            transform: translateY(-2px); /* Il bottone si "solleva" leggermente */
+        }
+        
+        /* Area dove compare il risultato */
+        .result {
+            margin-top: 25px; 
+            padding: 20px;
+            background: rgba(16, 185, 129, 0.1); /* Sfondo verde trasparente */
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 10px; 
+            display: none; /* Nascondo il riquadro finché l'utente non calcola */
+            text-align: center;
+        }
+        .result p { margin: 10px 0; font-size: 16px; color: #a7f3d0; }
+        .result span { font-weight: bold; font-size: 26px; color: #fff; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <h2>Calcola Sconto</h2>
+    <h2>🏷️ SCONTO</h2>
+    
     <div class="input-group">
-        <label for="price">Prezzo Originale (€)</label>
-        <input type="number" id="price" placeholder="es. 100" min="0" step="0.01">
+        <label for="price">Prezzo di listino (€)</label>
+        <input type="number" id="price" placeholder="0.00" min="0" step="0.01">
     </div>
+    
     <div class="input-group">
-        <label for="discount">Sconto (%)</label>
-        <input type="number" id="discount" placeholder="es. 20" min="0" max="100">
+        <label for="discount">Percentuale Sconto (%)</label>
+        <input type="number" id="discount" placeholder="0" min="0" max="100">
     </div>
-    <button onclick="calculateDiscount()">Calcola</button>
+    
+    <button onclick="calculateDiscount()">Calcola Risparmio</button>
 
+    <!-- Questo div è invisibile di default (display: none) -->
     <div class="result" id="result-box">
         <p>Risparmi: <span id="saved-amount">0.00</span> €</p>
-        <p>Prezzo Finale: <span id="final-price">0.00</span> €</p>
+        <p>Paghi solo: <span id="final-price">0.00</span> €</p>
     </div>
 </div>
 
 <script>
-    // Funzione chiamata quando si clicca il pulsante
     function calculateDiscount() {
-        // Prendo i valori inseriti dall'utente e li converto in numeri decimali (float)
+        // Leggo il valore dai box e li converto in numeri decimali (parseFloat)
         const price = parseFloat(document.getElementById('price').value);
         const discount = parseFloat(document.getElementById('discount').value);
+        
+        // Controllo di sicurezza: se l'utente non ha scritto nulla (isNaN = is Not a Number) 
+        // o ha messo numeri negativi, fermo l'esecuzione.
+        if (isNaN(price) || isNaN(discount) || price < 0 || discount < 0) return;
 
-        // Controllo che i dati inseriti siano validi
-        if (isNaN(price) || isNaN(discount) || price < 0 || discount < 0) {
-            alert("Per favore, inserisci valori validi.");
-            return;
-        }
-
-        // Logica matematica
+        // Calcolo matematico
         const saved = price * (discount / 100);
         const final = price - saved;
 
-        // Aggiorno l'interfaccia con i risultati, formattati a 2 decimali
+        // Scrivo i risultati all'interno dell'HTML (toFixed(2) forza 2 cifre decimali)
         document.getElementById('saved-amount').innerText = saved.toFixed(2);
         document.getElementById('final-price').innerText = final.toFixed(2);
         
-        // Rendo visibile il box dei risultati
+        // Mostro il riquadro dei risultati cambiando display da "none" a "block"
         document.getElementById('result-box').style.display = 'block';
     }
 </script>
