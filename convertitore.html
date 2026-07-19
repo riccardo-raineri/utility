@@ -17,7 +17,7 @@
                 <div class="subtitle">Unità, valute e altro in tempo reale</div>
             </div>
             <!-- Al clic esegue toggleTheme() -->
-            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">🌙</button>
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">⏾</button>
         </div>
 
         <select class="category-select" id="category" onchange="changeCategory()">
@@ -61,10 +61,10 @@
 
             if (body.getAttribute('data-theme') === 'dark') {
                 body.removeAttribute('data-theme');
-                btn.innerText = '🌙';
+                btn.innerText = '⏾';
             } else {
                 body.setAttribute('data-theme', 'dark');
-                btn.innerText = '☀️';
+                btn.innerText = '☼';
             }
         }
 
@@ -179,7 +179,7 @@
         }
 
         // ---------------------------------------------------------
-        // 7. COPIA NEGLI APPUNTI (nuova funzione)
+        // 7. COPIA NEGLI APPUNTI
         // Copia il valore del campo indicato e mostra un piccolo
         // feedback "Copiato!" per 1.2 secondi accanto al pulsante.
         // ---------------------------------------------------------
@@ -204,4 +204,5 @@
     </script>
 
 </body>
+
 </html>
