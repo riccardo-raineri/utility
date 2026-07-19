@@ -10,6 +10,9 @@
 
     <!-- Link di ritorno alla dashboard, presente su tutti gli strumenti -->
     <a class="back-link" href="dashboard.html">← Dashboard</a>
+    
+    <!-- Pulsante per alternare il tema chiaro/scuro -->
+    <button id="theme-btn" class="theme-toggle" onclick="toggleTheme()" aria-label="Cambia tema">🌙</button>
 
     <div class="card">
         <div class="card-header">
@@ -105,6 +108,22 @@
             document.getElementById('quantity').value = 1;
             document.getElementById('result-box').style.display = 'none';
             document.getElementById('savings-bar').style.width = '0%';
+        }
+
+        /**
+         * Alterna il tema scuro attivando o rimuovendo il dataset sul body.
+         */
+        function toggleTheme() {
+            const body = document.body;
+            const btn = document.getElementById('theme-btn');
+            
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                btn.innerText = '🌙';
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                btn.innerText = '☀️';
+            }
         }
     </script>
 

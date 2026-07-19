@@ -51,6 +51,7 @@ body {
     justify-content: center;
     align-items: center;
     padding: 24px;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Link "torna alla dashboard", uguale su tutti gli strumenti */
@@ -82,6 +83,7 @@ body {
     width: 100%;
     max-width: 380px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .card-header {
@@ -137,7 +139,7 @@ input {
     border-radius: 8px;
     font-size: 16px;
     font-family: var(--font-mono);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
 input:focus {
@@ -246,4 +248,38 @@ button:hover {
     border-radius: 999px;
     width: 0%; /* impostata dinamicamente in base allo sconto % */
     transition: width 0.4s ease;
+}
+
+/* =========================================================
+   TEMA SCURO (Variabili e pulsante)
+   ========================================================= */
+[data-theme="dark"] {
+    --bg: #1c1a17;              /* sfondo scuro */
+    --surface: #2b2824;         /* sfondo della card scuro */
+    --border: #403d38;          /* bordo scuro sottile */
+    --text: #e8e6e1;            /* testo principale chiaro */
+    --text-muted: #9e9a92;      /* testo secondario / etichette */
+    --accent: #2eb88a;          /* verde smeraldo adattato al buio */
+    --accent-soft: rgba(46, 184, 138, 0.15);
+    --accent-strong: #45d9a8;
+}
+
+/* Pulsante per l'attivazione/disattivazione del tema scuro */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: transform 0.2s ease, background 0.2s ease;
+    color: var(--text);
+}
+
+.theme-toggle:hover {
+    background: var(--border);
+    transform: scale(1.1);
 }
