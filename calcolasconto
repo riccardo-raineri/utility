@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <!-- Meta tag fondamentale per la responsività su smartphone -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcola Sconto</title>
+    <style>
+        /* Reset di base e font */
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { 
+            background-color: #f0f4f8; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        /* Contenitore principale a forma di card */
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        h2 { text-align: center; color: #333; margin-top: 0; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #666; font-weight: bold; }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 2px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 16px;
+        }
+        /* Stile al focus dell'input */
+        input:focus { border-color: #4CAF50; outline: none; }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #45a049; }
+        /* Area dei risultati */
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f5e9;
+            border-radius: 8px;
+            display: none; /* Nascosto di default, lo mostriamo col JS */
+        }
+        .result p { margin: 5px 0; font-size: 18px; color: #2e7d32; }
+        .result span { font-weight: bold; font-size: 22px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Calcola Sconto</h2>
+    <div class="input-group">
+        <label for="price">Prezzo Originale (€)</label>
+        <input type="number" id="price" placeholder="es. 100" min="0" step="0.01">
+    </div>
+    <div class="input-group">
+        <label for="discount">Sconto (%)</label>
+        <input type="number" id="discount" placeholder="es. 20" min="0" max="100">
+    </div>
+    <button onclick="calculateDiscount()">Calcola</button>
+
+    <div class="result" id="result-box">
+        <p>Risparmi: <span id="saved-amount">0.00</span> €</p>
+        <p>Prezzo Finale: <span id="final-price">0.00</span> €</p>
+    </div>
+</div>
+
+<script>
+    // Funzione chiamata quando si clicca il pulsante
+    function calculateDiscount() {
+        // Prendo i valori inseriti dall'utente e li converto in numeri decimali (float)
+        const price = parseFloat(document.getElementById('price').value);
+        const discount = parseFloat(document.getElementById('discount').value);
+
+        // Controllo che i dati inseriti siano validi
+        if (isNaN(price) || isNaN(discount) || price < 0 || discount < 0) {
+            alert("Per favore, inserisci valori validi.");
+            return;
+        }
+
+        // Logica matematica
+        const saved = price * (discount / 100);
+        const final = price - saved;
+
+        // Aggiorno l'interfaccia con i risultati, formattati a 2 decimali
+        document.getElementById('saved-amount').innerText = saved.toFixed(2);
+        document.getElementById('final-price').innerText = final.toFixed(2);
+        
+        // Rendo visibile il box dei risultati
+        document.getElementById('result-box').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
