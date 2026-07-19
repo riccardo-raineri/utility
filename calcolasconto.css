@@ -1,0 +1,249 @@
+/* =====================================================================
+   CALCOLASCONTO.CSS
+   Foglio di stile dello strumento "Calcola Sconto".
+
+   DIREZIONE GRAFICA
+   Tema "carta": sfondo chiaro e caldo che richiama uno scontrino da
+   negozio, con un pattern di righe diagonali sottilissime (texture
+   della carta) generato via CSS, senza foto esterne.
+   Verde smeraldo desaturato come colore guida (prezzo/risparmio),
+   card bianca con bordo netto invece del glassmorphism/blur originale:
+   più leggibile e più coerente con lo stile minimale del resto del sito.
+   ===================================================================== */
+
+:root {
+    --bg: #f6f4ef;              /* sfondo "carta" */
+    --surface: #ffffff;         /* sfondo della card */
+    --border: #e3ddd0;          /* bordo sottile */
+    --text: #24211c;            /* testo principale */
+    --text-muted: #6f6a60;      /* testo secondario / etichette */
+    --accent: #1f7a5c;          /* verde smeraldo desaturato */
+    --accent-soft: rgba(31, 122, 92, 0.08);
+    --accent-strong: #175f47;
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans);
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+
+    /* Pattern "carta": righe diagonali larghe 14px, quasi invisibili
+       (opacità 0.025) per dare texture senza sporcare la lettura. */
+    background-image: repeating-linear-gradient(
+        135deg,
+        rgba(0, 0, 0, 0.025) 0px,
+        rgba(0, 0, 0, 0.025) 1px,
+        transparent 1px,
+        transparent 14px
+    );
+
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+/* Link "torna alla dashboard", uguale su tutti gli strumenti */
+.back-link {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    font-size: 13px;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease;
+}
+
+.back-link:hover {
+    color: var(--text);
+}
+
+/* =========================================================
+   CARD PRINCIPALE
+   ========================================================= */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.card-header .icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.card-header h2 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.card-header p {
+    font-size: 12.5px;
+    color: var(--text-muted);
+}
+
+.input-group {
+    margin-bottom: 18px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    color: var(--text-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: var(--font-mono);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input:focus {
+    border-color: var(--accent);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Riga con due campi affiancati: sconto % e quantità pezzi (nuova funzione) */
+.input-row {
+    display: flex;
+    gap: 12px;
+}
+
+.input-row .input-group {
+    flex: 1;
+}
+
+button {
+    width: 100%;
+    padding: 13px;
+    background-color: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background-color 0.2s ease;
+}
+
+button:hover {
+    background-color: var(--accent-strong);
+}
+
+/* Bottone secondario "Nuovo calcolo" (nuova funzione, resetta il form) */
+.btn-secondary {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-secondary:hover {
+    border-color: var(--text-muted);
+    color: var(--text);
+}
+
+/* =========================================================
+   RIQUADRO RISULTATO
+   ========================================================= */
+.result {
+    margin-top: 22px;
+    padding: 18px;
+    background: var(--accent-soft);
+    border: 1px solid rgba(31, 122, 92, 0.2);
+    border-radius: 10px;
+    display: none; /* rivelato via JS dopo il calcolo */
+}
+
+.result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 8px;
+}
+
+.result-row:last-child {
+    margin-bottom: 0;
+}
+
+.result-row .label {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-transform: none;
+    font-weight: 500;
+}
+
+.result-row .value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--accent-strong);
+}
+
+/* Barra che visualizza in modo grafico la percentuale risparmiata (nuova funzione) */
+.savings-bar-track {
+    margin-top: 14px;
+    height: 6px;
+    background: rgba(31, 122, 92, 0.15);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.savings-bar-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 999px;
+    width: 0%; /* impostata dinamicamente in base allo sconto % */
+    transition: width 0.4s ease;
+}

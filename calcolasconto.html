@@ -4,139 +4,109 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calcola Sconto</title>
-    <style>
-        /* Reset per margin e padding per consistenza tra i vari browser */
-        * { box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        
-        body { 
-            /* Sfondo: unisco un filtro nero semitrasparente (rgba) con un'immagine di sfondo */
-            background: linear-gradient(rgba(10, 10, 15, 0.85), rgba(10, 10, 15, 0.85)), 
-                        url('https://static.vecteezy.com/system/resources/previews/071/506/567/non_2x/flat-lay-presenting-eco-friendly-fashion-items-white-t-shirt-denim-jeans-black-sunglasses-and-tan-wallet-minimalist-style-complemented-by-green-accents-and-a-neutral-beige-backdrop-photo.jpg') no-repeat center center fixed;
-            background-size: cover;       /* L'immagine copre tutto lo schermo */
-            color: #fff;                  /* Testo bianco per contrastare lo sfondo scuro */
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            padding: 20px;
-        }
-        
-        /* Effetto Vetro (Glassmorphism) per la card principale */
-        .card {
-            background: rgba(30, 41, 59, 0.6); /* Sfondo blu scurissimo ma trasparente al 60% */
-            backdrop-filter: blur(12px);       /* Sfoca ciò che c'è dietro (magia del CSS) */
-            -webkit-backdrop-filter: blur(12px); /* Supporto per Safari */
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Bordino sottile semitrasparente */
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5); /* Ombra per dare profondità */
-            width: 100%; 
-            max-width: 400px;
-        }
-        
-        h2 { text-align: center; color: #10b981; margin-top: 0; font-weight: 300; letter-spacing: 1px;}
-        .input-group { margin-bottom: 25px; }
-        label { display: block; margin-bottom: 8px; color: #cbd5e1; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;}
-        
-        /* Stile caselle di testo */
-        input { 
-            width: 100%; 
-            padding: 15px; 
-            background: rgba(15, 23, 42, 0.6); /* Sfondo molto scuro e trasparente */
-            border: 1px solid rgba(255,255,255,0.2); 
-            color: white; 
-            border-radius: 10px; 
-            font-size: 18px;
-            transition: border-color 0.3s, background 0.3s;
-        }
-        
-        input:focus { 
-            border-color: #10b981; /* Bordo verde acceso quando cliccato */
-            outline: none; 
-            background: rgba(15, 23, 42, 0.9); 
-        }
-        
-        /* Bottone principale */
-        button {
-            width: 100%; 
-            padding: 15px;
-            background-color: #10b981; 
-            color: #064e3b;               /* Verde molto scuro per il testo */
-            border: none; 
-            border-radius: 10px;
-            font-size: 18px; 
-            font-weight: bold; 
-            cursor: pointer; 
-            transition: transform 0.3s, background-color 0.3s;
-        }
-        
-        button:hover { 
-            background-color: #059669; 
-            color: white; 
-            transform: translateY(-2px); /* Il bottone si "solleva" leggermente */
-        }
-        
-        /* Area dove compare il risultato */
-        .result {
-            margin-top: 25px; 
-            padding: 20px;
-            background: rgba(16, 185, 129, 0.1); /* Sfondo verde trasparente */
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-radius: 10px; 
-            display: none; /* Nascondo il riquadro finché l'utente non calcola */
-            text-align: center;
-        }
-        .result p { margin: 10px 0; font-size: 16px; color: #a7f3d0; }
-        .result span { font-weight: bold; font-size: 26px; color: #fff; }
-    </style>
+    <link rel="stylesheet" href="calcolasconto.css">
 </head>
 <body>
 
-<div class="card">
-    <h2>🏷️ SCONTO</h2>
-    
-    <div class="input-group">
-        <label for="price">Prezzo di listino (€)</label>
-        <input type="number" id="price" placeholder="0.00" min="0" step="0.01">
+    <!-- Link di ritorno alla dashboard, presente su tutti gli strumenti -->
+    <a class="back-link" href="dashboard.html">← Dashboard</a>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="icon">%</div>
+            <div>
+                <h2>Calcola Sconto</h2>
+                <p>Prezzo, risparmio e totale in un colpo d'occhio</p>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="price">Prezzo di listino (€)</label>
+            <input type="number" id="price" placeholder="0.00" min="0" step="0.01">
+        </div>
+
+        <!-- Sconto e quantità affiancati: la quantità è la nuova funzione
+             che permette di calcolare il risparmio su più pezzi uguali -->
+        <div class="input-row">
+            <div class="input-group">
+                <label for="discount">Sconto (%)</label>
+                <input type="number" id="discount" placeholder="0" min="0" max="100">
+            </div>
+            <div class="input-group">
+                <label for="quantity">Quantità</label>
+                <input type="number" id="quantity" placeholder="1" min="1" step="1" value="1">
+            </div>
+        </div>
+
+        <button onclick="calculateDiscount()">Calcola risparmio</button>
+        <button class="btn-secondary" onclick="resetForm()">Nuovo calcolo</button>
+
+        <!-- Riquadro risultati, nascosto finché non si calcola -->
+        <div class="result" id="result-box">
+            <div class="result-row">
+                <span class="label">Risparmio per pezzo</span>
+                <span class="value"><span id="saved-unit">0.00</span> €</span>
+            </div>
+            <div class="result-row">
+                <span class="label">Risparmio totale (× quantità)</span>
+                <span class="value"><span id="saved-total">0.00</span> €</span>
+            </div>
+            <div class="result-row">
+                <span class="label">Totale da pagare</span>
+                <span class="value"><span id="final-price">0.00</span> €</span>
+            </div>
+
+            <!-- Barra visiva che mostra a colpo d'occhio la percentuale di sconto -->
+            <div class="savings-bar-track">
+                <div class="savings-bar-fill" id="savings-bar"></div>
+            </div>
+        </div>
     </div>
-    
-    <div class="input-group">
-        <label for="discount">Percentuale Sconto (%)</label>
-        <input type="number" id="discount" placeholder="0" min="0" max="100">
-    </div>
-    
-    <button onclick="calculateDiscount()">Calcola Risparmio</button>
 
-    <!-- Questo div è invisibile di default (display: none) -->
-    <div class="result" id="result-box">
-        <p>Risparmi: <span id="saved-amount">0.00</span> €</p>
-        <p>Paghi solo: <span id="final-price">0.00</span> €</p>
-    </div>
-</div>
+    <script>
+        /**
+         * Calcola risparmio unitario, risparmio totale (considerando la
+         * quantità) e prezzo finale, poi aggiorna il riquadro risultati
+         * e la barra visiva della percentuale di sconto.
+         */
+        function calculateDiscount() {
+            const price = parseFloat(document.getElementById('price').value);
+            const discount = parseFloat(document.getElementById('discount').value);
+            // Se la quantità non è valorizzata, si assume 1 pezzo
+            const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
-<script>
-    function calculateDiscount() {
-        // Leggo il valore dai box e li converto in numeri decimali (parseFloat)
-        const price = parseFloat(document.getElementById('price').value);
-        const discount = parseFloat(document.getElementById('discount').value);
-        
-        // Controllo di sicurezza: se l'utente non ha scritto nulla (isNaN = is Not a Number) 
-        // o ha messo numeri negativi, fermo l'esecuzione.
-        if (isNaN(price) || isNaN(discount) || price < 0 || discount < 0) return;
+            // Controllo di sicurezza sui valori numerici
+            if (isNaN(price) || isNaN(discount) || price < 0 || discount < 0) return;
 
-        // Calcolo matematico
-        const saved = price * (discount / 100);
-        const final = price - saved;
+            const savedPerUnit = price * (discount / 100);
+            const finalPerUnit = price - savedPerUnit;
+            const savedTotal = savedPerUnit * quantity;
+            const finalTotal = finalPerUnit * quantity;
 
-        // Scrivo i risultati all'interno dell'HTML (toFixed(2) forza 2 cifre decimali)
-        document.getElementById('saved-amount').innerText = saved.toFixed(2);
-        document.getElementById('final-price').innerText = final.toFixed(2);
-        
-        // Mostro il riquadro dei risultati cambiando display da "none" a "block"
-        document.getElementById('result-box').style.display = 'block';
-    }
-</script>
+            document.getElementById('saved-unit').innerText = savedPerUnit.toFixed(2);
+            document.getElementById('saved-total').innerText = savedTotal.toFixed(2);
+            document.getElementById('final-price').innerText = finalTotal.toFixed(2);
+
+            // La barra si riempie in proporzione diretta alla percentuale di sconto
+            // (bloccata tra 0 e 100 per evitare valori fuori scala con input anomali)
+            const clampedDiscount = Math.min(Math.max(discount, 0), 100);
+            document.getElementById('savings-bar').style.width = clampedDiscount + '%';
+
+            document.getElementById('result-box').style.display = 'block';
+        }
+
+        /**
+         * Riporta il form allo stato iniziale: svuota i campi, nasconde
+         * il riquadro risultati e azzera la barra visiva.
+         */
+        function resetForm() {
+            document.getElementById('price').value = '';
+            document.getElementById('discount').value = '';
+            document.getElementById('quantity').value = 1;
+            document.getElementById('result-box').style.display = 'none';
+            document.getElementById('savings-bar').style.width = '0%';
+        }
+    </script>
 
 </body>
 </html>

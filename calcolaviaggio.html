@@ -4,139 +4,111 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trip Computer</title>
-    <style>
-        /* Font monospace (stile terminale/digitale) per tutto il sito */
-        * { box-sizing: border-box; font-family: 'Courier New', Courier, monospace; }
-        
-        body {
-            /* Sfondo fotografico di un cruscotto notturno oscurato */
-            background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(15, 5, 0, 0.9)), 
-                        url('https://encrypted-tbn0.gstatic.com/licensed-image?q=tbn:ANd9GcRAgYhqbTfsRhBbPowEd7E0kwIlU1-LaqFjUbi73HTD2LRqO84ishHBsoAzBfsVmiPrmklZYGr4i1aJcDk') no-repeat center center fixed;
-            background-size: cover;
-            color: #ffffff;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; margin: 0; padding: 20px;
-        }
-        
-        /* Contenitore stile schermo dell'auto */
-        .dashboard {
-            background: rgba(18, 18, 18, 0.7); /* Quasi nero con poca trasparenza */
-            backdrop-filter: blur(8px);
-            border: 2px solid #f97316;         /* Bordo Arancione */
-            padding: 35px; 
-            border-radius: 15px;
-            width: 100%; 
-            max-width: 450px;
-            /* Doppia ombra: una esterna e una interna (inset) per l'effetto schermo incassato */
-            box-shadow: 0 0 30px rgba(249, 115, 22, 0.15), inset 0 0 20px rgba(249, 115, 22, 0.05);
-        }
-        
-        /* Effetto testo luminescente (text-shadow) */
-        h2 { 
-            text-align: center; color: #f97316; text-transform: uppercase; margin-top: 0; 
-            letter-spacing: 2px; text-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
-        }
-        
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #fdba74; font-size: 14px; text-transform: uppercase; }
-        
-        /* Box dove si digitano i numeri */
-        input {
-            width: 100%; 
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.5);  /* Fondo nerissimo per dare contrasto all'arancione */
-            border: 1px solid #431407;
-            color: #f97316; 
-            font-size: 20px; 
-            border-radius: 6px;
-            text-align: right;               /* Testo allineato a destra (tipico dei contachilometri) */
-        }
-        input:focus { 
-            outline: none; border-color: #f97316; 
-            box-shadow: 0 0 10px rgba(249, 115, 22, 0.3); /* Effetto bagliore on focus */
-        }
-        input::placeholder { color: #78350f; }
-        
-        /* Pulsante "Avvia calcolo" con stile outline */
-        button {
-            width: 100%; padding: 15px;
-            background-color: transparent; /* Sfondo invisibile, si vede solo il bordo */
-            color: #f97316; border: 2px solid #f97316;
-            font-weight: bold; font-size: 18px; margin-top: 10px;
-            cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
-            transition: 0.3s; border-radius: 6px;
-        }
-        button:hover { 
-            background-color: #f97316; /* Il pulsante si "riempie" al passaggio del mouse */
-            color: #000; 
-            box-shadow: 0 0 15px #f97316; 
-        }
-        
-        /* Area dei risultati (nascosta all'inizio) */
-        .output { margin-top: 30px; border-top: 1px dashed #ea580c; padding-top: 20px; text-align: center; }
-        .output p { font-size: 16px; margin: 10px 0; color: #fdba74; text-transform: uppercase;}
-        .highlight { 
-            color: #f97316; font-size: 32px; font-weight: bold; 
-            text-shadow: 0 0 15px rgba(249, 115, 22, 0.6); 
-            display: block; margin-top: 5px;
-        }
-    </style>
+    <link rel="stylesheet" href="calcolaviaggio.css">
 </head>
 <body>
 
-<div class="dashboard">
-    <h2>// TRIP_COMPUTER //</h2>
-    
-    <div class="input-group">
-        <label>DISTANZA (KM)</label>
-        <input type="number" id="distance" placeholder="000">
+    <a class="back-link" href="dashboard.html">← Dashboard</a>
+
+    <div class="dashboard">
+        <div class="panel-header">
+            <h2>Trip Computer</h2>
+            <div class="status-dot"></div>
+        </div>
+
+        <div class="input-group">
+            <label>Distanza (km)</label>
+            <input type="number" id="distance" placeholder="000">
+        </div>
+        <div class="input-group">
+            <label>Consumo (km/l)</label>
+            <input type="number" id="consumption" placeholder="00.0">
+        </div>
+        <div class="input-group">
+            <label>Prezzo alla pompa (€/l)</label>
+            <input type="number" id="price" placeholder="1.85" step="0.01">
+        </div>
+
+        <!-- OPZIONI AGGIUNTIVE: andata/ritorno raddoppia la distanza,
+             il numero di passeggeri divide il costo totale -->
+        <div class="options-row">
+            <button type="button" class="toggle-btn active" id="btn-solo-andata" onclick="setTripType(false)">Solo andata</button>
+            <button type="button" class="toggle-btn" id="btn-andata-ritorno" onclick="setTripType(true)">Andata/ritorno</button>
+        </div>
+
+        <div class="input-group">
+            <label>Numero passeggeri (per dividere la spesa)</label>
+            <input type="number" id="passengers" placeholder="1" min="1" step="1" value="1">
+        </div>
+
+        <button class="calculate" onclick="calculateTrip()">Avvia calcolo</button>
+
+        <div class="output" id="output" style="display:none;">
+            <div class="output-row">
+                <span class="label">Litri richiesti</span>
+                <span class="value" id="liters">0.0 L</span>
+            </div>
+            <div class="output-row">
+                <span class="label">Costo stimato</span>
+                <span class="value" id="cost">0.00 €</span>
+            </div>
+            <!-- Mostrata solo se passengers > 1 -->
+            <div class="per-person" id="per-person">
+                Quota a persona: <span id="cost-per-person">0.00 €</span>
+            </div>
+        </div>
     </div>
-    <div class="input-group">
-        <label>CONSUMO (KM/L)</label>
-        <input type="number" id="consumption" placeholder="00.0">
-    </div>
-    <div class="input-group">
-        <label>PREZZO ALLA POMPA (€/L)</label>
-        <input type="number" id="price" placeholder="1.85" step="0.01">
-    </div>
 
-    <!-- Pulsante per attivare il calcolo -->
-    <button onclick="calculateTrip()">AVVIA CALCOLO</button>
+    <script>
+        // Stato: se il viaggio è di sola andata (false) o andata/ritorno (true).
+        // Viene aggiornato dai due bottoni toggle e usato nel calcolo finale.
+        let isRoundTrip = false;
 
-    <!-- Questo blocco è nascosto (display: none), apparirà via JS -->
-    <div class="output" id="output" style="display:none;">
-        <p>Litri Richiesti <span id="liters" class="highlight">0.0 L</span></p>
-        <p>Costo Stimato <span id="cost" class="highlight">0.00 €</span></p>
-    </div>
-</div>
+        /**
+         * Aggiorna lo stato andata/ritorno e lo stile dei due bottoni toggle,
+         * in modo che sia sempre visibile quale modalità è selezionata.
+         */
+        function setTripType(roundTrip) {
+            isRoundTrip = roundTrip;
+            document.getElementById('btn-solo-andata').classList.toggle('active', !roundTrip);
+            document.getElementById('btn-andata-ritorno').classList.toggle('active', roundTrip);
+        }
 
-<script>
-    function calculateTrip() {
-        // Estraggo i valori dagli input e li forzo a essere numeri con i decimali
-        const distance = parseFloat(document.getElementById('distance').value);
-        const consumption = parseFloat(document.getElementById('consumption').value);
-        const price = parseFloat(document.getElementById('price').value);
+        /**
+         * Calcola litri necessari e costo totale del viaggio, raddoppiando
+         * la distanza se è stato selezionato "andata/ritorno", e mostra
+         * anche la quota a persona se i passeggeri sono più di uno.
+         */
+        function calculateTrip() {
+            const distanceInput = parseFloat(document.getElementById('distance').value);
+            const consumption = parseFloat(document.getElementById('consumption').value);
+            const price = parseFloat(document.getElementById('price').value);
+            const passengers = parseInt(document.getElementById('passengers').value) || 1;
 
-        // Controllo se mancano dei dati. Se uno dei 3 è vuoto, mi fermo.
-        if (!distance || !consumption || !price) return;
+            if (!distanceInput || !consumption || !price) return;
 
-        // 1. Quanti litri di carburante servono? (Km totali divisi per i Km percorsi con un litro)
-        const litersNeeded = distance / consumption;
-        
-        // 2. Quanto costa? (Litri calcolati moltiplicati per il prezzo al litro)
-        const totalCost = litersNeeded * price;
+            // Se è andata/ritorno, la distanza reale percorsa è doppia
+            const distance = isRoundTrip ? distanceInput * 2 : distanceInput;
 
-        // Scrivo il risultato nell'HTML. 
-        // toFixed(1) fa apparire un solo decimale (es. 15.5 L)
-        document.getElementById('liters').innerText = litersNeeded.toFixed(1) + " L";
-        
-        // toFixed(2) fa apparire due decimali (es. 25.50 €)
-        document.getElementById('cost').innerText = totalCost.toFixed(2) + " €";
-        
-        // Rivelo il pannello dei risultati
-        document.getElementById('output').style.display = 'block';
-    }
-</script>
+            const litersNeeded = distance / consumption;
+            const totalCost = litersNeeded * price;
+
+            document.getElementById('liters').innerText = litersNeeded.toFixed(1) + ' L';
+            document.getElementById('cost').innerText = totalCost.toFixed(2) + ' €';
+
+            // Riga "quota a persona": visibile solo se ha senso dividerla (> 1 persona)
+            const perPersonRow = document.getElementById('per-person');
+            if (passengers > 1) {
+                const perPerson = totalCost / passengers;
+                document.getElementById('cost-per-person').innerText = perPerson.toFixed(2) + ' €';
+                perPersonRow.style.display = 'block';
+            } else {
+                perPersonRow.style.display = 'none';
+            }
+
+            document.getElementById('output').style.display = 'block';
+        }
+    </script>
 
 </body>
 </html>

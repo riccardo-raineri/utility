@@ -4,263 +4,171 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toolbox Dashboard</title>
-    <style>
-        /* =========================================
-           1. VARIABILI E RESET
-           ========================================= */
-        :root {
-            --bg-color: #0f172a;        /* Blu notte scuro per lo sfondo */
-            --header-bg: #1e293b;       /* Sfondo della barra superiore */
-            --card-bg: #1e293b;         /* Sfondo delle singole schede */
-            --text-main: #f8fafc;       /* Bianco brillante per i testi principali */
-            --text-muted: #94a3b8;      /* Grigio azzurrino per le descrizioni */
-            --accent: #3b82f6;          /* Azzurro per i bottoni e i dettagli */
-            --accent-hover: #2563eb;    /* Azzurro più scuro per l'effetto hover */
-            --border: #334155;          /* Colore dei bordi sottili */
-        }
-
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-        }
-
-        /* =========================================
-           2. BARRA SUPERIORE (HEADER) E RICERCA
-           ========================================= */
-        header {
-            background-color: var(--header-bg);
-            padding: 20px 40px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between; /* Spinge il titolo a sx e la ricerca a dx */
-            align-items: center;
-            flex-wrap: wrap; /* Se lo schermo è piccolo, manda a capo la barra di ricerca */
-            gap: 20px;
-        }
-
-        header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Contenitore della barra di ricerca */
-        .search-container {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .search-container input {
-            width: 100%;
-            padding: 12px 20px 12px 40px; /* Più spazio a sinistra per l'icona della lente */
-            border-radius: 30px;          /* Bordi molto arrotondati */
-            border: 1px solid var(--border);
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .search-container input:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
-
-        /* Lente d'ingrandimento finta creata col testo e posizionata sopra l'input */
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%); /* Centra perfettamente in verticale */
-            font-size: 16px;
-        }
-
-        /* =========================================
-           3. GRIGLIA DEGLI STRUMENTI (MAIN)
-           ========================================= */
-        main {
-            padding: 40px;
-            max-width: 1200px;
-            margin: 0 auto; /* Centra il blocco principale nella pagina */
-        }
-
-        .grid {
-            display: grid;
-            /* Crea colonne responsive che non scendono mai sotto i 300px di larghezza */
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 25px; /* Spazio tra una card e l'altra */
-        }
-
-        /* =========================================
-           4. STILE DELLE SCHEDE (CARD)
-           ========================================= */
-        .tool-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 25px;
-            transition: transform 0.3s, box-shadow 0.3s; /* Animazioni fluide */
-            display: flex;
-            flex-direction: column; /* Impila il contenuto dall'alto verso il basso */
-        }
-
-        /* Effetto quando il mouse passa sopra una card */
-        .tool-card:hover {
-            transform: translateY(-5px); /* Solleva la card di 5 pixel */
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Aumenta l'ombra */
-            border-color: var(--accent); /* Illumina il bordo */
-        }
-
-        .card-icon {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
-
-        .tool-card h3 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        .tool-card p {
-            color: var(--text-muted);
-            font-size: 15px;
-            line-height: 1.5;
-            margin-bottom: 25px;
-            flex-grow: 1; /* Spinge il bottone sempre in fondo, anche se il testo è corto */
-        }
-
-        /* Bottone per "aprire" lo strumento */
-        .tool-card a {
-            display: block;
-            text-align: center;
-            background-color: var(--accent);
-            color: white;
-            text-decoration: none; /* Rimuove la sottolineatura tipica dei link */
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: background-color 0.3s;
-        }
-
-        .tool-card a:hover {
-            background-color: var(--accent-hover);
-        }
-
-        /* Messaggio che appare se la ricerca non trova nulla */
-        #no-results {
-            display: none; /* Nascosto di default */
-            text-align: center;
-            grid-column: 1 / -1; /* Occupa tutta la larghezza della griglia */
-            color: var(--text-muted);
-            padding: 40px;
-            font-size: 18px;
-        }
-    </style>
+    <!-- Stile separato in dashboard.css: questa pagina fa da "indice",
+         quindi ha senso tenerne il CSS a parte dagli strumenti veri e propri. -->
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
 
-    <!-- Intestazione con il titolo e la barra di ricerca -->
+    <!-- =========================================================
+         HEADER: titolo + barra di ricerca
+         ========================================================= -->
     <header>
-        <h1>🛠️ My Toolbox</h1>
+        <div class="header-title">
+            <span class="eyebrow">Pannello strumenti</span>
+            <h1>My Toolbox</h1>
+        </div>
+
         <div class="search-container">
-            <span class="search-icon">🔍</span>
-            <!-- onkeyup fa partire la funzione filterTools() ogni volta che rilasci un tasto -->
-            <input type="text" id="searchInput" placeholder="Cerca uno strumento..." onkeyup="filterTools()">
+            <span class="search-icon">⌕</span>
+            <!-- onkeyup richiama filterTools() ad ogni tasto rilasciato -->
+            <input type="text" id="searchInput" placeholder="Cerca uno strumento…" onkeyup="filterTools()">
+            <span class="search-hint">/</span>
         </div>
     </header>
 
-    <!-- Contenitore principale dove stanno le card -->
+    <!-- =========================================================
+         FILTRI PER CATEGORIA (nuova funzione)
+         Ogni chip ha un data-filter che deve corrispondere al
+         data-category scritto sulle card qui sotto, oppure "tutti".
+         ========================================================= -->
+    <div class="filters" id="filterBar">
+        <button class="filter-chip active" data-filter="tutti">Tutti</button>
+        <button class="filter-chip" data-filter="finanza">Finanza</button>
+        <button class="filter-chip" data-filter="viaggi">Viaggi</button>
+        <button class="filter-chip" data-filter="tempo">Tempo</button>
+        <button class="filter-chip" data-filter="utilita">Utilità</button>
+    </div>
+
+    <!-- =========================================================
+         GRIGLIA STRUMENTI
+         ========================================================= -->
     <main>
         <div class="grid" id="toolsGrid">
-            
+
             <!-- SCHEDA 1: Convertitore -->
-            <div class="tool-card">
-                <div class="card-icon">🪄</div>
+            <div class="tool-card" data-category="utilita">
+                <div class="card-top">
+                    <div class="card-icon">⇄</div>
+                    <span class="card-tag">Utilità</span>
+                </div>
                 <h3>Convertitore Universale</h3>
-                <p>Converti rapidamente lunghezze, pesi, temperature e valute in tempo reale. Con supporto al tema chiaro e scuro.</p>
-                <!-- In un progetto reale qui metterai href="convertitore.html" -->
-                <a href="convertitore.html">Apri Strumento</a>
+                <p>Converti lunghezze, pesi, temperature, valute e altro in tempo reale, con tema chiaro e scuro.</p>
+                <a href="convertitore.html">Apri strumento →</a>
             </div>
 
             <!-- SCHEDA 2: Calcolatore Sconto -->
-            <div class="tool-card">
-                <div class="card-icon">🏷️</div>
+            <div class="tool-card" data-category="finanza">
+                <div class="card-top">
+                    <div class="card-icon">%</div>
+                    <span class="card-tag">Finanza</span>
+                </div>
                 <h3>Calcola Sconto</h3>
-                <p>Inserisci il prezzo di listino e la percentuale di sconto per scoprire subito quanto pagherai e quanto risparmi.</p>
-                <a href="calcolasconto.html">Apri Strumento</a>
+                <p>Inserisci prezzo, sconto e quantità: scopri subito quanto risparmi e quanto paghi in totale.</p>
+                <a href="calcolasconto.html">Apri strumento →</a>
             </div>
 
             <!-- SCHEDA 3: Trip Computer (Carburante) -->
-            <div class="tool-card">
-                <div class="card-icon">🚗</div>
+            <div class="tool-card" data-category="viaggi">
+                <div class="card-top">
+                    <div class="card-icon">⛽</div>
+                    <span class="card-tag">Viaggi</span>
+                </div>
                 <h3>Costo Carburante</h3>
-                <p>Pianifica il tuo viaggio: calcola i litri necessari e la spesa totale basandoti sulla distanza e il consumo dell'auto.</p>
-                <a href="calcolaviaggio.html">Apri Strumento</a>
+                <p>Calcola litri e spesa del viaggio, con opzione andata/ritorno e divisione del costo tra passeggeri.</p>
+                <a href="calcolaviaggio.html">Apri strumento →</a>
             </div>
 
-            <!-- SCHEDA 4: Esempio extra per far vedere la griglia -->
-            <div class="tool-card">
-                <div class="card-icon">⏱️</div>
+            <!-- SCHEDA 4: Cronometro Pomodoro (non ancora sviluppato) -->
+            <div class="tool-card disabled" data-category="tempo">
+                <div class="card-top">
+                    <div class="card-icon">◷</div>
+                    <span class="card-tag">Tempo</span>
+                </div>
                 <h3>Cronometro Pomodoro</h3>
-                <p>Gestisci il tuo tempo di studio e lavoro con la tecnica del pomodoro. (Strumento in arrivo!)</p>
+                <p>Gestisci il tempo di studio e lavoro con la tecnica del pomodoro.</p>
                 <a href="#">Prossimamente</a>
             </div>
 
-            <!-- Questo messaggio compare solo se JS non trova nessuna card -->
-            <div id="no-results">Nessuno strumento trovato per questa ricerca. 😢</div>
+            <!-- Messaggio mostrato solo se ricerca/filtro non trovano nulla -->
+            <div id="no-results">Nessuno strumento trovato. Prova un'altra parola chiave o rimuovi il filtro.</div>
 
         </div>
     </main>
 
-    <script>
-        // =========================================
-        // 5. MOTORE DI RICERCA INTERNO
-        // =========================================
-        function filterTools() {
-            // 1. Prendo quello che l'utente ha scritto e lo trasformo tutto in minuscolo
-            // (così se cerca "SCONTO" o "sconto" funziona allo stesso modo)
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            
-            // 2. Seleziono tutte le card presenti nella pagina
-            const cards = document.querySelectorAll('.tool-card');
-            
-            let visibleCount = 0; // Contatore per sapere quante card sono rimaste visibili
+    <footer>
+        Aggiornato a luglio 2026 · <span>Pepe Handmade Toolbox</span>
+    </footer>
 
-            // 3. Faccio un ciclo (loop) per controllare ogni singola card
+    <script>
+        // =====================================================================
+        // STATO CONDIVISO: quale filtro categoria è attivo in questo momento.
+        // Viene incrociato con il testo di ricerca in applyVisibility().
+        // =====================================================================
+        let activeFilter = 'tutti';
+
+        /**
+         * Nasconde/mostra le card in base a:
+         * 1) il testo digitato nella barra di ricerca (titolo o descrizione)
+         * 2) la categoria attualmente selezionata nei filtri
+         * Le due condizioni si combinano con AND: una card deve rispettare
+         * entrambe per restare visibile.
+         */
+        function applyVisibility() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.tool-card');
+            let visibleCount = 0;
+
             cards.forEach(card => {
-                // Prendo il titolo e la descrizione della card attuale e li metto in minuscolo
                 const title = card.querySelector('h3').innerText.toLowerCase();
                 const description = card.querySelector('p').innerText.toLowerCase();
+                const category = card.dataset.category;
 
-                // 4. Se il testo cercato (query) è contenuto nel titolo OPPURE (||) nella descrizione...
-                if (title.includes(query) || description.includes(query)) {
-                    card.style.display = "flex"; // ...mostro la card
-                    visibleCount++;              // Aumento il contatore delle card visibili
+                const matchesSearch = title.includes(query) || description.includes(query);
+                const matchesFilter = activeFilter === 'tutti' || category === activeFilter;
+
+                if (matchesSearch && matchesFilter) {
+                    card.style.display = 'flex';
+                    visibleCount++;
                 } else {
-                    card.style.display = "none"; // ...altrimenti nascondo la card
+                    card.style.display = 'none';
                 }
             });
 
-            // 5. Gestione del messaggio "Nessun risultato"
-            const noResultsMsg = document.getElementById('no-results');
-            if (visibleCount === 0) {
-                noResultsMsg.style.display = "block"; // Se contatore a 0, mostro il messaggio
-            } else {
-                noResultsMsg.style.display = "none";  // Altrimenti lo tengo nascosto
-            }
+            // Mostro il messaggio "nessun risultato" solo se non resta nulla di visibile
+            document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
         }
+
+        // Alias mantenuto per compatibilità con l'attributo onkeyup nell'HTML
+        function filterTools() {
+            applyVisibility();
+        }
+
+        // =====================================================================
+        // GESTIONE CLIC SUI FILTRI: aggiorna lo stato attivo, evidenzia la
+        // chip selezionata e ricalcola la visibilità delle card.
+        // =====================================================================
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                activeFilter = chip.dataset.filter;
+                applyVisibility();
+            });
+        });
+
+        // =====================================================================
+        // SCORCIATOIA DA TASTIERA: premendo "/" da qualsiasi punto della pagina
+        // si porta il focus direttamente sulla barra di ricerca, comodo per chi
+        // usa solo la tastiera. Se si sta già scrivendo in un campo, non fa nulla.
+        // =====================================================================
+        document.addEventListener('keydown', (event) => {
+            const isTypingElsewhere = document.activeElement.tagName === 'INPUT';
+            if (event.key === '/' && !isTypingElsewhere) {
+                event.preventDefault();
+                document.getElementById('searchInput').focus();
+            }
+        });
     </script>
 
 </body>

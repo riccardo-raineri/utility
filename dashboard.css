@@ -1,0 +1,324 @@
+/* =====================================================================
+   DASHBOARD.CSS
+   Foglio di stile della pagina principale (Toolbox).
+
+   DIREZIONE GRAFICA
+   Tema "grafite": sfondo blu-grigio molto scuro, quasi neutro, con un
+   pattern di puntini leggerissimo (griglia da 22px) che dà texture
+   senza distrarre. Nessuna immagine esterna: il pattern è generato
+   al 100% via CSS (radial-gradient ripetuto).
+   Le etichette piccole (eyebrow, meta) usano un font monospace per
+   dare un tocco "da pannello di controllo" senza appesantire il resto,
+   che rimane in un sans-serif di sistema pulito.
+   ===================================================================== */
+
+:root {
+    /* --- Palette neutra "grafite" ------------------------------------ */
+    --bg: #0b0f17;               /* sfondo pagina */
+    --surface: #121826;          /* sfondo header e card */
+    --surface-hover: #161d2e;    /* card in hover */
+    --border: #232b3d;           /* bordi sottili (1px) */
+    --border-strong: #2f3a52;    /* bordo in evidenza (hover/focus) */
+    --text: #e8ebf2;             /* testo principale */
+    --text-muted: #8992a6;       /* testo secondario */
+    --accent: #6f8cff;           /* blu indaco tenue, colore guida */
+    --accent-soft: rgba(111, 140, 255, 0.12);
+    --accent-strong: #a8b8ff;
+
+    /* --- Spaziature e forme ------------------------------------------ */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
+}
+
+/* =========================================================
+   1. RESET DI BASE
+   ========================================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    /* Scroll più dolce quando si clicca sui filtri */
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+
+    /* Pattern a puntini: un radial-gradient minuscolo ripetuto ogni 22px.
+       L'opacità è bassissima (0.05) per restare sullo sfondo. */
+    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+/* =========================================================
+   2. HEADER: titolo, contatore strumenti, ricerca
+   ========================================================= */
+header {
+    background-color: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 28px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Piccola etichetta "eyebrow" sopra al titolo, in monospace maiuscolo:
+   è il dettaglio tipografico distintivo della pagina. */
+.eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent-strong);
+}
+
+header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+/* Barra di ricerca */
+.search-container {
+    position: relative;
+    width: 100%;
+    max-width: 340px;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 11px 16px 11px 38px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-container input::placeholder {
+    color: var(--text-muted);
+}
+
+.search-container input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.search-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    color: var(--text-muted);
+    pointer-events: none; /* così il click passa sempre all'input sottostante */
+}
+
+/* Piccolo suggerimento di scorciatoia da tastiera, mostrato accanto alla ricerca */
+.search-hint {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+    pointer-events: none;
+}
+
+/* =========================================================
+   3. FILTRI PER CATEGORIA (funzione aggiuntiva)
+   Riga di "chip" cliccabili che filtrano la griglia in base
+   all'attributo data-category presente su ogni card.
+   ========================================================= */
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 40px 0;
+}
+
+.filter-chip {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 7px 16px;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.filter-chip:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
+}
+
+/* Stato attivo del filtro selezionato */
+.filter-chip.active {
+    color: var(--bg);
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+/* =========================================================
+   4. GRIGLIA DEGLI STRUMENTI
+   ========================================================= */
+main {
+    padding: 28px 40px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+}
+
+/* =========================================================
+   5. CARD
+   ========================================================= */
+.tool-card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.tool-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--border-strong);
+    background-color: var(--surface-hover);
+}
+
+/* Riga superiore della card: icona + etichetta categoria */
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.card-icon {
+    font-size: 26px;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    border-radius: var(--radius-sm);
+}
+
+.card-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 3px 7px;
+    white-space: nowrap;
+}
+
+.tool-card h3 {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+}
+
+.tool-card p {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    line-height: 1.55;
+    margin-bottom: 22px;
+    flex-grow: 1;
+}
+
+/* Bottone "Apri strumento" */
+.tool-card a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+    background-color: transparent;
+    color: var(--text);
+    text-decoration: none;
+    border: 1px solid var(--border-strong);
+    padding: 10px;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.tool-card a:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #0b0f17;
+}
+
+/* Card non ancora disponibile ("Prossimamente") */
+.tool-card.disabled a {
+    opacity: 0.5;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Messaggio "nessun risultato" */
+#no-results {
+    display: none;
+    text-align: center;
+    grid-column: 1 / -1;
+    color: var(--text-muted);
+    padding: 60px 20px;
+    font-size: 14px;
+}
+
+/* =========================================================
+   6. FOOTER
+   ========================================================= */
+footer {
+    text-align: center;
+    padding: 24px 40px 40px;
+    color: var(--text-muted);
+    font-size: 12.5px;
+}
+
+footer span {
+    font-family: var(--font-mono);
+    color: var(--text);
+}
