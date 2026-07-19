@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toolbox Dashboard</title>
+    <style>
+        /* =========================================
+           1. VARIABILI E RESET
+           ========================================= */
+        :root {
+            --bg-color: #0f172a;        /* Blu notte scuro per lo sfondo */
+            --header-bg: #1e293b;       /* Sfondo della barra superiore */
+            --card-bg: #1e293b;         /* Sfondo delle singole schede */
+            --text-main: #f8fafc;       /* Bianco brillante per i testi principali */
+            --text-muted: #94a3b8;      /* Grigio azzurrino per le descrizioni */
+            --accent: #3b82f6;          /* Azzurro per i bottoni e i dettagli */
+            --accent-hover: #2563eb;    /* Azzurro più scuro per l'effetto hover */
+            --border: #334155;          /* Colore dei bordi sottili */
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        /* =========================================
+           2. BARRA SUPERIORE (HEADER) E RICERCA
+           ========================================= */
+        header {
+            background-color: var(--header-bg);
+            padding: 20px 40px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between; /* Spinge il titolo a sx e la ricerca a dx */
+            align-items: center;
+            flex-wrap: wrap; /* Se lo schermo è piccolo, manda a capo la barra di ricerca */
+            gap: 20px;
+        }
+
+        header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Contenitore della barra di ricerca */
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .search-container input {
+            width: 100%;
+            padding: 12px 20px 12px 40px; /* Più spazio a sinistra per l'icona della lente */
+            border-radius: 30px;          /* Bordi molto arrotondati */
+            border: 1px solid var(--border);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Lente d'ingrandimento finta creata col testo e posizionata sopra l'input */
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%); /* Centra perfettamente in verticale */
+            font-size: 16px;
+        }
+
+        /* =========================================
+           3. GRIGLIA DEGLI STRUMENTI (MAIN)
+           ========================================= */
+        main {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto; /* Centra il blocco principale nella pagina */
+        }
+
+        .grid {
+            display: grid;
+            /* Crea colonne responsive che non scendono mai sotto i 300px di larghezza */
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px; /* Spazio tra una card e l'altra */
+        }
+
+        /* =========================================
+           4. STILE DELLE SCHEDE (CARD)
+           ========================================= */
+        .tool-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 25px;
+            transition: transform 0.3s, box-shadow 0.3s; /* Animazioni fluide */
+            display: flex;
+            flex-direction: column; /* Impila il contenuto dall'alto verso il basso */
+        }
+
+        /* Effetto quando il mouse passa sopra una card */
+        .tool-card:hover {
+            transform: translateY(-5px); /* Solleva la card di 5 pixel */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3); /* Aumenta l'ombra */
+            border-color: var(--accent); /* Illumina il bordo */
+        }
+
+        .card-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .tool-card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .tool-card p {
+            color: var(--text-muted);
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            flex-grow: 1; /* Spinge il bottone sempre in fondo, anche se il testo è corto */
+        }
+
+        /* Bottone per "aprire" lo strumento */
+        .tool-card a {
+            display: block;
+            text-align: center;
+            background-color: var(--accent);
+            color: white;
+            text-decoration: none; /* Rimuove la sottolineatura tipica dei link */
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .tool-card a:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* Messaggio che appare se la ricerca non trova nulla */
+        #no-results {
+            display: none; /* Nascosto di default */
+            text-align: center;
+            grid-column: 1 / -1; /* Occupa tutta la larghezza della griglia */
+            color: var(--text-muted);
+            padding: 40px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Intestazione con il titolo e la barra di ricerca -->
+    <header>
+        <h1>🛠️ My Toolbox</h1>
+        <div class="search-container">
+            <span class="search-icon">🔍</span>
+            <!-- onkeyup fa partire la funzione filterTools() ogni volta che rilasci un tasto -->
+            <input type="text" id="searchInput" placeholder="Cerca uno strumento..." onkeyup="filterTools()">
+        </div>
+    </header>
+
+    <!-- Contenitore principale dove stanno le card -->
+    <main>
+        <div class="grid" id="toolsGrid">
+            
+            <!-- SCHEDA 1: Convertitore -->
+            <div class="tool-card">
+                <div class="card-icon">🪄</div>
+                <h3>Convertitore Universale</h3>
+                <p>Converti rapidamente lunghezze, pesi, temperature e valute in tempo reale. Con supporto al tema chiaro e scuro.</p>
+                <!-- In un progetto reale qui metterai href="convertitore.html" -->
+                <a href="convertitore.html">Apri Strumento</a>
+            </div>
+
+            <!-- SCHEDA 2: Calcolatore Sconto -->
+            <div class="tool-card">
+                <div class="card-icon">🏷️</div>
+                <h3>Calcola Sconto</h3>
+                <p>Inserisci il prezzo di listino e la percentuale di sconto per scoprire subito quanto pagherai e quanto risparmi.</p>
+                <a href="calcolasconto.html">Apri Strumento</a>
+            </div>
+
+            <!-- SCHEDA 3: Trip Computer (Carburante) -->
+            <div class="tool-card">
+                <div class="card-icon">🚗</div>
+                <h3>Costo Carburante</h3>
+                <p>Pianifica il tuo viaggio: calcola i litri necessari e la spesa totale basandoti sulla distanza e il consumo dell'auto.</p>
+                <a href="calcolaviaggio.html">Apri Strumento</a>
+            </div>
+
+            <!-- SCHEDA 4: Esempio extra per far vedere la griglia -->
+            <div class="tool-card">
+                <div class="card-icon">⏱️</div>
+                <h3>Cronometro Pomodoro</h3>
+                <p>Gestisci il tuo tempo di studio e lavoro con la tecnica del pomodoro. (Strumento in arrivo!)</p>
+                <a href="#">Prossimamente</a>
+            </div>
+
+            <!-- Questo messaggio compare solo se JS non trova nessuna card -->
+            <div id="no-results">Nessuno strumento trovato per questa ricerca. 😢</div>
+
+        </div>
+    </main>
+
+    <script>
+        // =========================================
+        // 5. MOTORE DI RICERCA INTERNO
+        // =========================================
+        function filterTools() {
+            // 1. Prendo quello che l'utente ha scritto e lo trasformo tutto in minuscolo
+            // (così se cerca "SCONTO" o "sconto" funziona allo stesso modo)
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            
+            // 2. Seleziono tutte le card presenti nella pagina
+            const cards = document.querySelectorAll('.tool-card');
+            
+            let visibleCount = 0; // Contatore per sapere quante card sono rimaste visibili
+
+            // 3. Faccio un ciclo (loop) per controllare ogni singola card
+            cards.forEach(card => {
+                // Prendo il titolo e la descrizione della card attuale e li metto in minuscolo
+                const title = card.querySelector('h3').innerText.toLowerCase();
+                const description = card.querySelector('p').innerText.toLowerCase();
+
+                // 4. Se il testo cercato (query) è contenuto nel titolo OPPURE (||) nella descrizione...
+                if (title.includes(query) || description.includes(query)) {
+                    card.style.display = "flex"; // ...mostro la card
+                    visibleCount++;              // Aumento il contatore delle card visibili
+                } else {
+                    card.style.display = "none"; // ...altrimenti nascondo la card
+                }
+            });
+
+            // 5. Gestione del messaggio "Nessun risultato"
+            const noResultsMsg = document.getElementById('no-results');
+            if (visibleCount === 0) {
+                noResultsMsg.style.display = "block"; // Se contatore a 0, mostro il messaggio
+            } else {
+                noResultsMsg.style.display = "none";  // Altrimenti lo tengo nascosto
+            }
+        }
+    </script>
+
+</body>
+</html>
