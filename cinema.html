@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Film al Cinema</title>
+    <link rel="stylesheet" href="cinema.css">
+</head>
+<body>
+
+    <a class="back-link" href="dashboard.html">← Dashboard</a>
+
+    <div class="filmstrip"></div>
+    <header>
+        <span class="eyebrow">Bacheca cinema</span>
+        <h1>Film al Cinema</h1>
+    </header>
+    <div class="filmstrip"></div>
+
+    <div class="controls">
+        <div class="tabs">
+            <button class="tab-btn active" id="tab-now" onclick="switchTab('now_playing')">Ora al cinema</button>
+            <button class="tab-btn" id="tab-upcoming" onclick="switchTab('upcoming')">Prossimamente</button>
+        </div>
+        <div class="search-box">
+            <span class="icon">⌕</span>
+            <input type="text" id="searchInput" placeholder="Cerca un titolo…" oninput="renderMovies()">
+        </div>
+        <button class="settings-btn" onclick="toggleSettings()" title="Impostazioni">⚙</button>
+    </div>
+
+    <!-- ================= PANNELLO IMPOSTAZIONI ================= -->
+    <div class="settings-panel" id="settingsPanel">
+        <div class="settings-card">
+            <p>
+                Questo strumento usa <strong>TMDB</strong> (The Movie Database) per l'elenco dei film.
+                Serve una chiave API gratuita: registrati su
+                <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noopener">themoviedb.org/settings/api</a>,
+                copia la "API Key (v3 auth)" e incollala qui sotto. Viene salvata solo nel tuo browser.
+            </p>
+            <div class="settings-row">
+                <input type="text" id="apiKeyInput" placeholder="15ddcd19bf57ce0265cb32766de25bab">
+                <button onclick="saveApiKey()">Salva</button>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="grid" id="moviesGrid"></div>
+        <div class="empty-state" id="emptyState" style="display:none;"></div>
+    </main>
+
+    <script>
+        // =====================================================================
+        // STATO GLOBALE
+        // - apiKey: chiave TMDB salvata in localStorage (persiste tra le visite)
+        // - currentTab: 'now_playing' oppure 'upcoming', decide l'endpoint TMDB
+        // - movies: ultimo elenco di film scaricato, riusato dal filtro ricerca
+        // - userCoords: coordinate dell'utente se la geolocalizzazione è concessa
+        // =====================================================================
+        let apiKey = localStorage.getItem('tmdb_api_key') || '';
+        let currentTab = 'now_playing';
+        let movies = [];
+        let userCoords = null;
+
+        /**
+         * Mostra/nasconde il pannello delle impostazioni (chiave API).
+         */
+        function toggleSettings() {
+            document.getElementById('settingsPanel').classList.toggle('open');
+        }
+
+        /**
+         * Salva la chiave API inserita dall'utente in localStorage e
+         * ricarica subito l'elenco dei film.
+         */
+        function saveApiKey() {
+            const value = document.getElementById('apiKeyInput').value.trim();
+            if (!value) return;
+            apiKey = value;
+            localStorage.setItem('tmdb_api_key', value);
+            document.getElementById('settingsPanel').classList.remove('open');
+            loadMovies();
+        }
+
+        /**
+         * Cambia tab tra "Ora al cinema" e "Prossimamente", aggiorna lo
+         * stile dei bottoni e ricarica l'elenco corrispondente da TMDB.
+         */
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tab-now').classList.toggle('active', tab === 'now_playing');
+            document.getElementById('tab-upcoming').classList.toggle('active', tab === 'upcoming');
+            loadMovies();
+        }
+
+        /**
+         * Scarica l'elenco film dall'endpoint TMDB corrispondente alla tab
+         * attiva, filtrato per il mercato italiano (region=IT, lingua it-IT).
+         */
+        async function loadMovies() {
+            const grid = document.getElementById('moviesGrid');
+            const empty = document.getElementById('emptyState');
+
+            if (!apiKey) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                empty.innerHTML = 'Per vedere i film serve una chiave API TMDB gratuita.<br>Aprila dalle impostazioni (⚙) qui sopra.';
+                return;
+            }
+
+            empty.style.display = 'none';
+            grid.innerHTML = '<p style="color:var(--text-muted); grid-column:1/-1;">Caricamento…</p>';
+
+            try {
+                const url = `https://api.themoviedb.org/3/movie/${currentTab}?api_key=${apiKey}&language=it-IT&region=IT&page=1`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('Chiave API non valida o richiesta fallita');
+                const data = await res.json();
+                movies = data.results || [];
+                renderMovies();
+            } catch (e) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                empty.innerHTML = 'Non è stato possibile caricare i film. Controlla la chiave API nelle impostazioni (⚙).';
+            }
+        }
+
+        /**
+         * Disegna le card dei film attualmente in "movies", applicando
+         * il filtro di ricerca testuale sul titolo. Per ogni film mostra
+         * poster, voto medio, anno e un pulsante che apre una ricerca
+         * geolocalizzata delle sale cinematografiche vicine.
+         */
+        function renderMovies() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const grid = document.getElementById('moviesGrid');
+            const empty = document.getElementById('emptyState');
+
+            const filtered = movies.filter(m => m.title.toLowerCase().includes(query));
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                empty.style.display = 'block';
+                empty.innerHTML = 'Nessun film trovato per questa ricerca.';
+                return;
+            }
+
+            empty.style.display = 'none';
+
+            grid.innerHTML = filtered.map(movie => {
+                const poster = movie.poster_path
+                    ? `https://image.tmdb.org/t/p/w342${movie.poster_path}`
+                    : '';
+                const year = movie.release_date ? movie.release_date.split('-')[0] : '—';
+                const rating = movie.vote_average ? movie.vote_average.toFixed(1) : '—';
+
+                return `
+                    <div class="movie-card">
+                        ${poster ? `<img src="${poster}" alt="Locandina di ${movie.title}" loading="lazy">` : ''}
+                        <div class="movie-info">
+                            <h3>${movie.title}</h3>
+                            <div class="movie-meta">
+                                <span>${year}</span>
+                                <span class="rating">★ ${rating}</span>
+                            </div>
+                            <p class="overview">${movie.overview || 'Sinossi non disponibile.'}</p>
+                            <a class="find-cinema-btn" href="#" onclick="findNearbyCinemas('${movie.title.replace(/'/g, "\\'")}'); return false;">Cerca sale vicine →</a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /**
+         * Apre Google Maps in una nuova scheda con una ricerca di cinema
+         * vicini all'utente, includendo il titolo del film nella query.
+         * Se la geolocalizzazione è stata concessa, centra la ricerca
+         * sulle coordinate reali; altrimenti lascia che sia Google a
+         * stimare la posizione (es. tramite IP).
+         */
+        function findNearbyCinemas(title) {
+            const query = encodeURIComponent(`cinema ${title}`);
+            let mapsUrl = `https://www.google.com/maps/search/?api=1&query=${query}`;
+            if (userCoords) {
+                mapsUrl += `&query=${query}&center=${userCoords.lat},${userCoords.lng}`;
+            }
+            window.open(mapsUrl, '_blank', 'noopener');
+        }
+
+        /**
+         * Richiede una volta la posizione dell'utente (se il browser lo
+         * consente) per rendere più precisa la ricerca "sale vicine".
+         * Nessun dato viene inviato altrove: resta solo in questa pagina.
+         */
+        function requestLocation() {
+            if (!navigator.geolocation) return;
+            navigator.geolocation.getCurrentPosition(
+                pos => { userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude }; },
+                () => { /* geolocalizzazione negata: si prosegue senza coordinate */ }
+            );
+        }
+
+        // ---------------------------------------------------------
+        // INIZIALIZZAZIONE ALL'AVVIO
+        // ---------------------------------------------------------
+        requestLocation();
+        loadMovies();
+    </script>
+
+</body>
+</html>
