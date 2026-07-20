@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Sharing & Chat P2P</title>
+    <link rel="stylesheet" href="datasharing.css">
+    <!-- Libreria WebRTC PeerJS -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+</head>
+<body>
+
+    <!-- Link di ritorno alla dashboard -->
+    <a class="back-link" href="dashboard.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Dashboard
+    </a>
+
+    <div class="card">
+        <!-- Header -->
+        <div class="card-header">
+            <div class="icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <div class="title-group">
+                <h2>Data Sharing & Chat</h2>
+                <p>Stanza privata protetta da PIN</p>
+            </div>
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"/>
+                    <line x1="12" y1="2" x2="12" y2="4"/>
+                    <line x1="12" y1="20" x2="12" y2="22"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="2" y1="12" x2="4" y2="12"/>
+                    <line x1="20" y1="12" x2="22" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- SCHERMATA 1: CREA O ENTRA NELLA STANZA -->
+        <div id="lobby-screen">
+            <div class="tab-menu">
+                <button class="tab-btn active" onclick="switchTab('create')">Crea Stanza</button>
+                <button class="tab-btn" onclick="switchTab('join')">Entra in Stanza</button>
+            </div>
+
+            <!-- Form Crea Stanza -->
+            <div id="tab-create" class="tab-content active">
+                <div class="input-group">
+                    <label for="create-nick">Tuo Nickname</label>
+                    <input type="text" id="create-nick" placeholder="es. Alex">
+                </div>
+                <div class="input-group">
+                    <label for="create-room">Nome Stanza</label>
+                    <input type="text" id="create-room" placeholder="es. stanza-segreta">
+                </div>
+                <div class="input-group">
+                    <label for="create-pin">PIN di Protezione (4+ cifre)</label>
+                    <input type="password" id="create-pin" placeholder="****" maxlength="8">
+                </div>
+                <button class="btn-primary" onclick="createRoom()">Crea e Apri Stanza</button>
+            </div>
+
+            <!-- Form Entra in Stanza -->
+            <div id="tab-join" class="tab-content">
+                <div class="input-group">
+                    <label for="join-nick">Tuo Nickname</label>
+                    <input type="text" id="join-nick" placeholder="es. Marco">
+                </div>
+                <div class="input-group">
+                    <label for="join-room">Nome Stanza</label>
+                    <input type="text" id="join-room" placeholder="es. stanza-segreta">
+                </div>
+                <div class="input-group">
+                    <label for="join-pin">Inserisci PIN Stanza</label>
+                    <input type="password" id="join-pin" placeholder="****" maxlength="8">
+                </div>
+                <button class="btn-primary" onclick="joinRoom()">Entra nella Stanza</button>
+            </div>
+            
+            <p id="lobby-status" class="status-msg"></p>
+        </div>
+
+        <!-- SCHERMATA 2: STANZA ATTIVA (CHAT E FILE SHARING) -->
+        <div id="room-screen" style="display: none;">
+            <div class="room-bar">
+                <div class="room-info">
+                    <span class="online-indicator"></span>
+                    <strong id="active-room-name">Stanza: ---</strong>
+                    <span class="users-badge" id="users-count">1 online</span>
+                </div>
+                <button class="btn-danger-sm" onclick="leaveRoom()">Esci</button>
+            </div>
+
+            <!-- Navigazione Sezioni Stanza (Chat / File) -->
+            <div class="room-tabs">
+                <button class="room-tab-btn active" onclick="switchRoomView('chat')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    Chat
+                </button>
+                <button class="room-tab-btn" onclick="switchRoomView('files')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                        <polyline points="13 2 13 9 20 9"></polyline>
+                    </svg>
+                    File
+                </button>
+            </div>
+
+            <!-- SEZIONE CHAT -->
+            <div id="view-chat" class="room-view active">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="msg system">Benvenuto nella stanza protetta!</div>
+                </div>
+                <div class="chat-input-row">
+                    <input type="text" id="chat-input" placeholder="Scrivi un messaggio..." onkeypress="handleChatEnter(event)">
+                    <button onclick="sendChatMessage()" aria-label="Invia messaggio">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SEZIONE FILE SHARING -->
+            <div id="view-files" class="room-view">
+                <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <p class="drop-title">Trascina un file qui</p>
+                    <p class="drop-subtitle">oppure <span>clicca per sfogliare</span></p>
+                    <input type="file" id="file-input" hidden onchange="sendFile(this.files[0])">
+                </div>
+
+                <div class="file-list-title">File Ricevuti / Condivisi</div>
+                <div class="files-container" id="files-container">
+                    <p class="empty-hint" id="no-files-hint">Nessun file scambiato finora.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Gestione Tema
+        function toggleTheme() {
+            const body = document.body;
+            if (body.getAttribute('data-theme') === 'light') {
+                body.removeAttribute('data-theme');
+            } else {
+                body.setAttribute('data-theme', 'light');
+            }
+        }
+
+        // Tab Lobby (Crea / Entra)
+        function switchTab(type) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (type === 'create') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('tab-create').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('tab-join').classList.add('active');
+            }
+        }
+
+        // Tab Stanza Attiva (Chat / File)
+        function switchRoomView(view) {
+            document.querySelectorAll('.room-tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.room-view').forEach(v => v.classList.remove('active'));
+
+            if (view === 'chat') {
+                document.querySelectorAll('.room-tab-btn')[0].classList.add('active');
+                document.getElementById('view-chat').classList.add('active');
+            } else {
+                document.querySelectorAll('.room-tab-btn')[1].classList.add('active');
+                document.getElementById('view-files').classList.add('active');
+            }
+        }
+
+        // --- LOGICA WEBRTC / PEERJS ---
+        let peer = null;
+        let connections = [];
+        let roomPin = "";
+        let currentRoomName = "";
+        let myNickname = "";
+        let isHost = false;
+
+        function sanitizeRoomId(name) {
+            return "scambio-room-" + name.trim().toLowerCase().replace(/[^a-z0-9]/g, '-');
+        }
+
+        function getNickname(inputId) {
+            const val = document.getElementById(inputId).value.trim();
+            if (val) return val;
+            return "Utente_" + Math.floor(1000 + Math.random() * 9000);
+        }
+
+        function updateUsersCount() {
+            const count = connections.length + 1;
+            document.getElementById('users-count').textContent = `${count} online`;
+        }
+
+        // Crea Stanza (Host)
+        function createRoom() {
+            const roomName = document.getElementById('create-room').value.trim();
+            const pin = document.getElementById('create-pin').value.trim();
+            const status = document.getElementById('lobby-status');
+
+            if (!roomName || !pin) {
+                status.textContent = "Inserisci nome stanza e PIN!";
+                status.className = "status-msg error";
+                return;
+            }
+
+            myNickname = getNickname('create-nick');
+            status.textContent = "Inizializzazione stanza...";
+            status.className = "status-msg";
+
+            const peerId = sanitizeRoomId(roomName);
+            roomPin = pin;
+            currentRoomName = roomName;
+            isHost = true;
+
+            peer = new Peer(peerId);
+
+            peer.on('open', () => {
+                openRoomUI(roomName);
+                addSystemMessage(`Stanza "${roomName}" creata. Benvenuto, ${myNickname}! In attesa di partecipanti...`);
+                updateUsersCount();
+            });
+
+            peer.on('connection', (conn) => {
+                conn.on('data', (data) => {
+                    // Handshake Autenticazione con PIN e Nickname
+                    if (data.type === 'AUTH') {
+                        if (data.pin === roomPin) {
+                            conn.nickname = data.nickname || "Ospite";
+                            conn.send({ type: 'AUTH_OK' });
+                            connections.push(conn);
+                            setupConnectionListeners(conn);
+                            addSystemMessage(`${conn.nickname} si è connesso alla stanza.`);
+                            updateUsersCount();
+                        } else {
+                            conn.send({ type: 'AUTH_FAIL', msg: 'PIN Errato!' });
+                            setTimeout(() => conn.close(), 500);
+                        }
+                    }
+                });
+            });
+
+            peer.on('error', (err) => {
+                if (err.type === 'unavailable-id') {
+                    status.textContent = "Questa stanza esiste già. Prova ad entrare o cambia nome.";
+                } else {
+                    status.textContent = "Errore di connessione: " + err.type;
+                }
+                status.className = "status-msg error";
+            });
+        }
+
+        // Entra in Stanza (Guest)
+        function joinRoom() {
+            const roomName = document.getElementById('join-room').value.trim();
+            const pin = document.getElementById('join-pin').value.trim();
+            const status = document.getElementById('lobby-status');
+
+            if (!roomName || !pin) {
+                status.textContent = "Inserisci nome stanza e PIN!";
+                status.className = "status-msg error";
+                return;
+            }
+
+            myNickname = getNickname('join-nick');
+            status.textContent = "Connessione alla stanza...";
+            status.className = "status-msg";
+
+            const hostPeerId = sanitizeRoomId(roomName);
+            currentRoomName = roomName;
+            isHost = false;
+
+            peer = new Peer(); // ID Casuale per il guest
+
+            peer.on('open', () => {
+                const conn = peer.connect(hostPeerId);
+
+                conn.on('open', () => {
+                    // Invia subito il PIN e il Nickname per la verifica
+                    conn.send({ type: 'AUTH', pin: pin, nickname: myNickname });
+                });
+
+                conn.on('data', (data) => {
+                    if (data.type === 'AUTH_OK') {
+                        connections.push(conn);
+                        setupConnectionListeners(conn);
+                        openRoomUI(roomName);
+                        addSystemMessage(`Sei entrato nella stanza "${roomName}" come ${myNickname}.`);
+                        updateUsersCount();
+                    } else if (data.type === 'AUTH_FAIL') {
+                        status.textContent = "PIN Errato o Accesso Negato!";
+                        status.className = "status-msg error";
+                        peer.destroy();
+                    }
+                });
+
+                conn.on('error', () => {
+                    status.textContent = "Impossibile connettersi alla stanza.";
+                    status.className = "status-msg error";
+                });
+            });
+
+            peer.on('error', () => {
+                status.textContent = "Stanza non trovata o non attiva.";
+                status.className = "status-msg error";
+            });
+        }
+
+        // Setup ascoltatori messaggi/file
+        function setupConnectionListeners(conn) {
+            conn.on('data', (data) => {
+                if (data.type === 'CHAT') {
+                    addChatMessage(data.sender, data.text, 'remote');
+                    if (isHost) broadcastExcept(data, conn);
+                } else if (data.type === 'FILE') {
+                    receiveFile(data);
+                    if (isHost) broadcastExcept(data, conn);
+                }
+            });
+
+            conn.on('close', () => {
+                const name = conn.nickname || "Un utente";
+                addSystemMessage(`${name} si è disconnesso.`);
+                connections = connections.filter(c => c !== conn);
+                updateUsersCount();
+            });
+        }
+
+        function broadcastExcept(data, senderConn) {
+            connections.forEach(conn => {
+                if (conn !== senderConn && conn.open) {
+                    conn.send(data);
+                }
+            });
+        }
+
+        function broadcastAll(data) {
+            connections.forEach(conn => {
+                if (conn.open) conn.send(data);
+            });
+        }
+
+        // --- UI STANZA ---
+        function openRoomUI(name) {
+            document.getElementById('lobby-screen').style.display = 'none';
+            document.getElementById('room-screen').style.display = 'block';
+            document.getElementById('active-room-name').textContent = "Stanza: " + name;
+        }
+
+        function leaveRoom() {
+            if (peer) peer.destroy();
+            connections = [];
+            document.getElementById('lobby-screen').style.display = 'block';
+            document.getElementById('room-screen').style.display = 'none';
+            document.getElementById('chat-messages').innerHTML = '<div class="msg system">Benvenuto nella stanza protetta!</div>';
+            document.getElementById('files-container').innerHTML = '<p class="empty-hint" id="no-files-hint">Nessun file scambiato finora.</p>';
+            document.getElementById('lobby-status').textContent = "";
+        }
+
+        // --- GESTIONE CHAT ---
+        function handleChatEnter(e) {
+            if (e.key === 'Enter') sendChatMessage();
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            addChatMessage('Tu', text, 'local');
+            broadcastAll({ type: 'CHAT', sender: myNickname, text: text });
+            input.value = '';
+        }
+
+        function addChatMessage(sender, text, type) {
+            const box = document.getElementById('chat-messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `msg ${type}`;
+            
+            const senderSpan = document.createElement('span');
+            senderSpan.className = 'msg-sender';
+            senderSpan.textContent = sender;
+
+            const textNode = document.createTextNode(text);
+
+            msgDiv.appendChild(senderSpan);
+            msgDiv.appendChild(textNode);
+            
+            box.appendChild(msgDiv);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function addSystemMessage(text) {
+            const box = document.getElementById('chat-messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'msg system';
+            msgDiv.textContent = text;
+            box.appendChild(msgDiv);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        // --- GESTIONE INVIO E RICEZIONE FILE ---
+        function sendFile(file) {
+            if (!file) return;
+            if (connections.length === 0) {
+                alert("Nessun altro utente è connesso nella stanza!");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const payload = {
+                    type: 'FILE',
+                    sender: myNickname,
+                    name: file.name,
+                    size: file.size,
+                    mime: file.type,
+                    buffer: e.target.result
+                };
+
+                broadcastAll(payload);
+                renderFileCard(file.name, file.size, e.target.result, true, 'Tu');
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function receiveFile(data) {
+            renderFileCard(data.name, data.size, data.buffer, false, data.sender);
+        }
+
+        function renderFileCard(name, size, arrayBuffer, isLocal, sender) {
+            const hint = document.getElementById('no-files-hint');
+            if (hint) hint.remove();
+
+            const container = document.getElementById('files-container');
+            const blob = new Blob([arrayBuffer]);
+            const url = URL.createObjectURL(blob);
+            const sizeFormatted = (size / 1024 < 1024) 
+                ? (size / 1024).toFixed(1) + ' KB' 
+                : (size / (1024 * 1024)).toFixed(1) + ' MB';
+
+            const card = document.createElement('div');
+            card.className = 'file-card';
+            card.innerHTML = `
+                <div class="file-card-info">
+                    <strong>${name}</strong>
+                    <span>${sizeFormatted} • Inviato da ${sender}</span>
+                </div>
+                <a href="${url}" download="${name}" class="btn-download">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Scarica
+                </a>
+            `;
+            container.appendChild(card);
+        }
+
+        // Drag & Drop File Eventi
+        const dropZone = document.getElementById('drop-zone');
+        ['dragenter', 'dragover'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('hover'); });
+        });
+        ['dragleave', 'drop'].forEach(name => {
+            dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('hover'); });
+        });
+        dropZone.addEventListener('drop', (e) => {
+            if (e.dataTransfer.files.length > 0) {
+                sendFile(e.dataTransfer.files[0]);
+            }
+        });
+    </script>
+</body>
+</html>
