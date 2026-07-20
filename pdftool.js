@@ -1,7 +1,14 @@
 let currentAction = null;
 let selectedFile = null;
 let subMode = ''; 
-let currentCardKey = ''; // Memorizza quale card di conversione è attiva
+
+// Stato delle direzioni per ciascuna card di conversione ('forward' o 'backward')
+const conversionState = {
+    'word-tab': 'forward',
+    'ppt-tab': 'forward',
+    'excel-tab': 'forward',
+    'image-tab': 'forward'
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) {
@@ -35,16 +42,68 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+// Funzioni di supporto per leggere lo stato corrente della card prima di aprirla
+function getActiveCardTitle(cardKey) {
+    const isForward = conversionState[cardKey] === 'forward';
+    switch(cardKey) {
+        let title = '';
+        case 'word-tab': title = isForward ? 'PDF a Word' : 'Word a PDF'; break;
+        case 'ppt-tab': title = isForward ? 'PDF a PowerPoint' : 'PowerPoint a PDF'; break;
+        case 'excel-tab': title = isForward ? 'PDF a Excel' : 'Excel a PDF'; break;
+        case 'image-tab': title = isForward ? 'PDF a Immagini' : 'Immagini a PDF'; break;
+    }
+    return getTitleString(cardKey, isForward);
+}
+
+function getTitleString(cardKey, isForward) {
+    if (cardKey === 'word-tab') return isForward ? 'PDF a Word' : 'Word a PDF';
+    if (cardKey === 'ppt-tab') return isForward ? 'PDF a PowerPoint' : 'PowerPoint a PDF';
+    if (cardKey === 'excel-tab') return isForward ? 'PDF a Excel' : 'Excel a PDF';
+    if (cardKey === 'image-tab') return isForward ? 'PDF a Immagini' : 'Immagini a PDF';
+    return '';
+}
+
+function getActiveCardAccept(cardKey) {
+    const isForward = conversionState[cardKey] === 'forward';
+    if (cardKey === 'word-tab') return isForward ? '.pdf' : '.doc,.docx';
+    if (cardKey === 'ppt-tab') return isForward ? '.pdf' : '.ppt,.pptx';
+    if (cardKey === 'excel-tab') return isForward ? '.pdf' : '.xls,.xlsx';
+    if (cardKey === 'image-tab') return isForward ? '.pdf' : 'image/*';
+    return '.pdf';
+}
+
+// Inverte lo stato dello switch direttamente sulla card senza aprirla
+function toggleCardDirection(cardKey) {
+    conversionState[cardKey] = conversionState[cardKey] === 'forward' ? 'backward' : 'forward';
+    const isForward = conversionState[cardKey] === 'forward';
+
+    // Aggiorna testi ed elementi visivi nella card specifica
+    const titleEl = document.getElementById(`card-title-${cardKey}`);
+    const descEl = document.getElementById(`card-desc-${cardKey}`);
+
+    if (cardKey === 'word-tab') {
+        titleEl.textContent = isForward ? 'PDF a Word' : 'Word a PDF';
+        descEl.textContent = isForward ? 'Converti da PDF a documento Word.' : 'Converti da Word a file PDF.';
+    } else if (cardKey === 'ppt-tab') {
+        titleEl.textContent = isForward ? 'PDF a PowerPoint' : 'PowerPoint a PDF';
+        descEl.textContent = isForward ? 'Converti da PDF a presentazioni PPT.' : 'Converti da PPT a file PDF.';
+    } else if (cardKey === 'excel-tab') {
+        titleEl.textContent = isForward ? 'PDF a Excel' : 'Excel a PDF';
+        descEl.textContent = isForward ? 'Converti da PDF a fogli Excel.' : 'Converti da Excel a file PDF.';
+    } else if (cardKey === 'image-tab') {
+        titleEl.textContent = isForward ? 'PDF a Immagini' : 'Immagini a PDF';
+        descEl.textContent = isForward ? 'Estrai immagini o crea PDF da foto.' : 'Unisci immagini in un unico PDF.';
+    }
+}
+
 function selectAction(actionKey, actionTitle, acceptedTypes) {
     currentAction = actionKey;
-    currentCardKey = actionKey;
     document.getElementById('workspaceTitle').textContent = actionTitle;
     document.getElementById('workspacePanel').style.display = 'block';
     
     document.querySelectorAll('.tool-card').forEach(card => card.classList.remove('active'));
-    if (window.event && window.event.currentTarget) {
-        window.event.currentTarget.classList.add('active');
-    }
+    const activeCardEl = document.getElementById(`card-${actionKey}`) || (window.event && window.event.currentTarget.closest('.tool-card'));
+    if (activeCardEl) activeCardEl.classList.add('active');
 
     selectedFile = null;
     document.getElementById('fileInfo').style.display = 'none';
@@ -54,18 +113,10 @@ function selectAction(actionKey, actionTitle, acceptedTypes) {
     const optionsContainer = document.getElementById('toolSpecificOptions');
     optionsContainer.innerHTML = '';
 
-    if (actionKey === 'word-tab') {
-        subMode = 'pdf-to-word';
-        optionsContainer.innerHTML = createConversionTabsHTML('PDF a Word', 'Word a PDF', '.pdf', '.doc,.docx');
-    } else if (actionKey === 'ppt-tab') {
-        subMode = 'pdf-to-ppt';
-        optionsContainer.innerHTML = createConversionTabsHTML('PDF a PowerPoint', 'PowerPoint a PDF', '.pdf', '.ppt,.pptx');
-    } else if (actionKey === 'excel-tab') {
-        subMode = 'pdf-to-excel';
-        optionsContainer.innerHTML = createConversionTabsHTML('PDF a Excel', 'Excel a PDF', '.pdf', '.xls,.xlsx');
-    } else if (actionKey === 'image-tab') {
-        subMode = 'pdf-to-jpg';
-        optionsContainer.innerHTML = createConversionTabsHTML('PDF a Immagini', 'Immagini a PDF', '.pdf', 'image/*');
+    // Imposta la subMode corretta in base allo stato attuale della card
+    if (['word-tab', 'ppt-tab', 'excel-tab', 'image-tab'].includes(actionKey)) {
+        subMode = conversionState[actionKey] === 'forward' ? 'from-pdf' : 'to-pdf';
+        document.getElementById('fileInput').accept = getActiveCardAccept(actionKey);
     } else if (actionKey === 'split') {
         optionsContainer.innerHTML = `
             <div style="margin-top: 8px;">
@@ -99,52 +150,6 @@ function selectAction(actionKey, actionTitle, acceptedTypes) {
     }
 
     document.getElementById('workspacePanel').scrollIntoView({ behavior: 'smooth' });
-}
-
-function createConversionTabsHTML(label1, label2, types1, types2) {
-    return `
-        <div class="conversion-header-wrapper">
-            <div class="sub-tabs" style="margin-bottom: 0; flex: 1;">
-                <button class="sub-tab-btn active" id="subBtn1" onclick="setConversionDirection(1, '${label1}', '${types1}')">${label1}</button>
-                <button class="sub-tab-btn" id="subBtn2" onclick="setConversionDirection(2, '${label2}', '${types2}')">${label2}</button>
-            </div>
-            <button class="switch-direction-btn" onclick="toggleConversionDirection('${label1}', '${label2}', '${types1}', '${types2}')" title="Inverti direzione">
-                <i data-lucide="arrow-left-right"></i>
-            </button>
-        </div>
-    `;
-}
-
-function setConversionDirection(btnIndex, label, acceptTypes) {
-    const btn1 = document.getElementById('subBtn1');
-    const btn2 = document.getElementById('subBtn2');
-    
-    if (btnIndex === 1) {
-        btn1.classList.add('active');
-        btn2.classList.remove('active');
-        subMode = currentCardKey === 'image-tab' ? 'pdf-to-jpg' : 'from-pdf';
-    } else {
-        btn1.classList.remove('active');
-        btn2.classList.add('active');
-        subMode = 'to-pdf';
-    }
-    document.getElementById('fileInput').accept = acceptTypes;
-    selectedFile = null;
-    document.getElementById('fileInfo').style.display = 'none';
-    document.getElementById('processBtn').disabled = true;
-    document.getElementById('resultArea').innerHTML = '';
-}
-
-function toggleConversionDirection(label1, label2, types1, types2) {
-    const btn1 = document.getElementById('subBtn1');
-    const btn2 = document.getElementById('subBtn2');
-    
-    // Se attualmente è attivo il pulsante 1, passa al 2 e viceversa
-    if (btn1.classList.contains('active')) {
-        setConversionDirection(2, label2, types2);
-    } else {
-        setConversionDirection(1, label1, types1);
-    }
 }
 
 function updateOrgInputs() {
