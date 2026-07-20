@@ -1,303 +1,467 @@
 /* =====================================================================
-   CALCOLASCONTO.CSS
-   Foglio di stile dello strumento "Calcola Sconto".
-
-   DIREZIONE GRAFICA
-   Tema "carta" con doppio schema colore: qui lo scuro è il tema di
-   default (--bg/--surface scuri nel :root) e il chiaro si attiva
-   aggiungendo data-theme="light" al <body> — l'opposto delle altre
-   pagine con doppio tema, dove il chiaro è il default. È una scelta
-   voluta per questo strumento, quindi le due varianti restano separate
-   così come sono: [data-theme="light"] sovrascrive le variabili scure.
+   CALCOLASCONTO.CSS — Theme: Financial Studio (Default Dark)
    ===================================================================== */
 
 :root {
-    /* Tema scuro (default): "carta" ma con toni caldi quasi carbone */
-    --bg: #17140f;
-    --surface: #201c16;
-    --border: #332d22;
-    --text: #f1ede4;
-    --text-muted: #a89f8f;
-    --accent: #35a179;          /* verde acceso, leggibile sullo scuro */
-    --accent-soft: rgba(53, 161, 121, 0.14);
-    --accent-strong: #4dbd8f;
-    --accent-border: rgba(53, 161, 121, 0.28);  /* bordo riquadro risultato */
-    --accent-track: rgba(53, 161, 121, 0.2);    /* binario barra risparmio */
-    --pattern-line: rgba(255, 255, 255, 0.03);  /* texture "carta" di sfondo */
-    --radius: 10px;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
+    /* 🌙 TEMA SCURO (DEFAULT) */
+    --bg-base: #090d16;
+    --card-bg: #131a29;
+    --card-hover: #192236;
+    --toolbar-bg: #0f1522;
+    --border-subtle: #212c42;
+    --border-highlight: #334155;
+
+    /* Accento Sconto (Smeraldo/Verde) */
+    --accent: #10b981;
+    --accent-soft: rgba(16, 185, 129, 0.12);
+    --accent-strong: #34d399;
+    --accent-border: rgba(16, 185, 129, 0.25);
+
+    /* Testi */
+    --text-primary: #f0f4f8;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
+
+    /* Tipografia */
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* Ombre e Dettagli */
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --grid-pattern: rgba(255, 255, 255, 0.025);
+
+    --radius: 16px;
+    --transition-smooth: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Tema chiaro: attivato aggiungendo data-theme="light" al <body>.
-   Sfondo crema da scontrino, verde smeraldo desaturato. */
+/* ☀️ TEMA CHIARO ([data-theme="light"]) */
 [data-theme="light"] {
-    --bg: #f6f4ef;
-    --surface: #ffffff;
-    --border: #e3ddd0;
-    --text: #24211c;
-    --text-muted: #6f6a60;
-    --accent: #1f7a5c;
-    --accent-soft: rgba(31, 122, 92, 0.08);
-    --accent-strong: #175f47;
-    --accent-border: rgba(31, 122, 92, 0.2);
-    --accent-track: rgba(31, 122, 92, 0.15);
-    --pattern-line: rgba(0, 0, 0, 0.025);
+    --bg-base: #f4f7fa;
+    --card-bg: #ffffff;
+    --card-hover: #f8fafc;
+    --toolbar-bg: #fafcff;
+    --border-subtle: #cbd5e1;
+    --border-highlight: #94a3b8;
+
+    --accent: #059669;
+    --accent-soft: rgba(5, 150, 105, 0.08);
+    --accent-strong: #047857;
+    --accent-border: rgba(5, 150, 105, 0.2);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
+
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.06);
+    --grid-pattern: rgba(0, 0, 0, 0.03);
 }
 
-* {
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: var(--font-sans);
 }
 
 body {
-    background-color: var(--bg);
-    color: var(--text);
-    /* Pattern "carta": righe diagonali larghe 14px, quasi invisibili.
-       --pattern-line cambia da sola con il tema, quindi il pattern
-       resta coerente in entrambe le varianti senza doppie regole. */
-    background-image: repeating-linear-gradient(
-        135deg,
-        var(--pattern-line) 0px,
-        var(--pattern-line) 1px,
-        transparent 1px,
-        transparent 14px
-    );
+    font-family: var(--font-sans);
+    background-color: var(--bg-base);
+    color: var(--text-primary);
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 24px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
     transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-/* Link "torna alla dashboard", uguale su tutti gli strumenti */
-.back-link {
+/* Texture di fondo */
+.bg-canvas {
     position: fixed;
-    top: 20px;
-    left: 20px;
-    font-size: 13px;
-    color: var(--text-muted);
-    text-decoration: none;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bg-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(var(--grid-pattern) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-pattern) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+/* Layout App */
+.app-container {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    min-height: 100vh;
+}
+
+/* Navigazione Superiore */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
-    transition: color 0.2s ease;
+    gap: 12px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
 }
 
 .back-link:hover {
-    color: var(--text);
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
 }
 
-/* =========================================================
-   CARD PRINCIPALE
-   ========================================================= */
+.back-link svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Toggle Tema */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+    color: var(--text-secondary);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
+}
+
+.theme-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.theme-toggle svg { width: 16px; height: 16px; }
+
+/* Icone Tema: di default (Dark) mostra il sole per attivare la modalità Light */
+.icon-sun { display: block; }
+.icon-moon { display: none; }
+
+[data-theme="light"] .icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: block; }
+
+/* Badge Strumento */
+.tool-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--accent-border);
+}
+
+.tool-badge svg { width: 13px; height: 13px; }
+
+/* Contenitore Principale */
+.tool-layout {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card */
 .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 36px;
     width: 100%;
-    max-width: 380px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    transition: background-color 0.25s ease, border-color 0.25s ease;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    transition: var(--transition-smooth);
 }
 
 .card-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 28px;
+    gap: 14px;
 }
 
 .card-header .icon {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--accent-soft);
     color: var(--accent);
-    border-radius: 8px;
-    font-weight: 700;
+    border: 1px solid var(--accent-border);
+    border-radius: 12px;
+}
+
+.card-header .icon svg {
+    width: 20px;
+    height: 20px;
 }
 
 .card-header h2 {
-    font-size: 17px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 800;
     letter-spacing: -0.01em;
 }
 
 .card-header p {
-    font-size: 12.5px;
-    color: var(--text-muted);
+    font-size: 13px;
+    color: var(--text-secondary);
 }
 
-.card-header .title-group {
-    flex-grow: 1;
+/* Form Body */
+.form-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
-/* =========================================================
-   BOTTONE CAMBIO TEMA (icona SVG sole/luna).
-   ========================================================= */
-.theme-toggle {
-    width: 40px;
-    height: 40px;
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-prefix {
+    position: absolute;
+    left: 14px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    outline: none;
+    transition: var(--transition-smooth);
+}
+
+.input-wrapper .input-prefix + input {
+    padding-left: 32px;
+}
+
+input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Rimuove freccette input numerici */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Pulsanti */
+.action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+button.btn-primary {
+    width: 100%;
+    padding: 12px 16px;
+    background-color: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent-soft);
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    cursor: pointer;
-    color: var(--text);
-    transition: border-color 0.2s ease;
+    gap: 8px;
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
 }
 
-.theme-toggle:hover {
-    border-color: var(--accent);
+button.btn-primary:hover {
+    background-color: var(--accent-strong);
+    transform: translateY(-1px);
 }
 
-.theme-toggle svg {
+button.btn-primary svg {
     width: 16px;
     height: 16px;
 }
 
-/* Di default (Tema Scuro) mostra il sole per passare al chiaro */
-.theme-toggle .icon-sun { display: block; }
-.theme-toggle .icon-moon { display: none; }
-
-/* In Tema Chiaro ([data-theme="light"]) mostra la luna per passare allo scuro */
-[data-theme="light"] .theme-toggle .icon-sun { display: none; }
-[data-theme="light"] .theme-toggle .icon-moon { display: block; }
-
-
-.input-group {
-    margin-bottom: 18px;
-}
-
-label {
-    display: block;
-    margin-bottom: 6px;
-    color: var(--text-muted);
-    font-size: 12.5px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-input {
+button.btn-secondary {
     width: 100%;
-    padding: 12px 14px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    border-radius: 8px;
-    font-size: 16px;
-    font-family: var(--font-mono);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.25s ease;
-}
-
-input:focus {
-    border-color: var(--accent);
-    outline: none;
-    box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
-/* Riga con due campi affiancati: sconto % e quantità pezzi */
-.input-row {
-    display: flex;
-    gap: 12px;
-}
-
-.input-row .input-group {
-    flex: 1;
-}
-
-button {
-    width: 100%;
-    padding: 13px;
-    background-color: var(--accent);
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-size: 14.5px;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 6px;
-    transition: background-color 0.2s ease;
-}
-
-button:hover {
-    background-color: var(--accent-strong);
-}
-
-/* Bottone secondario "Nuovo calcolo": resetta il form */
-.btn-secondary {
-    width: 100%;
-    padding: 11px;
+    padding: 10px 14px;
     background: transparent;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    margin-top: 10px;
-    transition: border-color 0.2s ease, color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition-smooth);
 }
 
-.btn-secondary:hover {
-    border-color: var(--text-muted);
-    color: var(--text);
+button.btn-secondary:hover {
+    background: var(--toolbar-bg);
+    border-color: var(--border-highlight);
+    color: var(--text-primary);
 }
 
-/* =========================================================
-   RIQUADRO RISULTATO
-   ========================================================= */
+button.btn-secondary svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Riquadro Risultato */
 .result {
-    margin-top: 22px;
-    padding: 18px;
+    padding: 20px;
     background: var(--accent-soft);
     border: 1px solid var(--accent-border);
-    border-radius: 10px;
+    border-radius: 12px;
     display: none;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .result-row {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 8px;
-}
-
-.result-row:last-child {
-    margin-bottom: 0;
+    align-items: center;
 }
 
 .result-row .label {
     font-size: 13px;
-    color: var(--text-muted);
-    text-transform: none;
+    color: var(--text-secondary);
     font-weight: 500;
 }
 
 .result-row .value {
     font-family: var(--font-mono);
     font-weight: 700;
-    font-size: 18px;
-    color: var(--accent-strong);
+    font-size: 16px;
+    color: var(--text-primary);
 }
 
-/* Barra che visualizza in modo grafico la percentuale risparmiata */
+.result-row.total {
+    border-top: 1px dashed var(--accent-border);
+    padding-top: 10px;
+    margin-top: 4px;
+}
+
+.result-row.total .label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.result-row.total .value.highlight {
+    font-size: 22px;
+    color: var(--accent);
+}
+
+/* Barra Risparmio */
+.savings-bar-container {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.savings-bar-header {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+}
+
 .savings-bar-track {
-    margin-top: 14px;
-    height: 6px;
-    background: var(--accent-track);
+    height: 8px;
+    background: var(--bg-base);
     border-radius: 999px;
     overflow: hidden;
+    border: 1px solid var(--border-subtle);
 }
 
 .savings-bar-fill {
@@ -305,5 +469,15 @@ button:hover {
     background: var(--accent);
     border-radius: 999px;
     width: 0%;
-    transition: width 0.4s ease;
+    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Footer */
+.app-footer {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 18px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
 }

@@ -4,134 +4,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calcola Sconto</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Foglio di Stile -->
     <link rel="stylesheet" href="calcolasconto.css">
 </head>
 <body>
 
-<!-- Link alla Dashboard -->
-    <a class="back-link" href="dashboard.html">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Dashboard
-    </a>
-
-    <div class="card">
-        <div class="card-header">
-            <div class="icon">%</div>
-            <div class="title-group">
-                <h2>Calcola Sconto</h2>
-                <p>Prezzo, risparmio e totale.</p>
-            </div>
-
-            <!-- Bottone tema: contiene entrambe le icone SVG, il CSS mostra solo quella giusta in base al tema attivo -->
-            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
-                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4"/>
-                    <line x1="12" y1="2" x2="12" y2="4"/>
-                    <line x1="12" y1="20" x2="12" y2="22"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="2" y1="12" x2="4" y2="12"/>
-                    <line x1="20" y1="12" x2="22" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-            </button>
-        </div>
-
-        <div class="input-group">
-            <label for="price">Prezzo di listino (€)</label>
-            <input type="number" id="price" placeholder="0.00" min="0" step="0.01">
-        </div>
-
-        <div class="input-row">
-            <div class="input-group">
-                <label for="discount">Sconto (%)</label>
-                <input type="number" id="discount" placeholder="0" min="0" max="100">
-            </div>
-            <div class="input-group">
-                <label for="quantity">Quantità</label>
-                <input type="number" id="quantity" placeholder="1" min="1" step="1" value="1">
-            </div>
-        </div>
-
-        <button onclick="calculateDiscount()">Calcola risparmio</button>
-        <button class="btn-secondary" onclick="resetForm()">Nuovo calcolo</button>
-
-        <div class="result" id="result-box">
-            <div class="result-row">
-                <span class="label">Risparmio per pezzo</span>
-                <span class="value"><span id="saved-unit">0.00</span> €</span>
-            </div>
-            <div class="result-row">
-                <span class="label">Risparmio totale (× quantità)</span>
-                <span class="value"><span id="saved-total">0.00</span> €</span>
-            </div>
-            <div class="result-row">
-                <span class="label">Totale da pagare</span>
-                <span class="value"><span id="final-price">0.00</span> €</span>
-            </div>
-
-            <div class="savings-bar-track">
-                <div class="savings-bar-fill" id="savings-bar"></div>
-            </div>
-        </div>
+    <!-- Canvas di Sfondo -->
+    <div class="bg-canvas">
+        <div class="bg-grid-pattern"></div>
     </div>
 
+    <div class="app-container">
+
+        <!-- Navigation Bar -->
+        <nav class="top-nav">
+            <!-- Link alla Dashboard -->
+            <a class="back-link" href="dashboard.html">
+                <i data-lucide="arrow-left"></i>
+                Dashboard
+            </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="percent"></i>
+                    Calcolo Sconti
+                </span>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="tool-layout">
+            <div class="card">
+                
+                <div class="card-header">
+                    <div class="icon">
+                        <i data-lucide="tag"></i>
+                    </div>
+                    <div class="title-group">
+                        <h2>Calcola Sconto</h2>
+                        <p>Prezzo, risparmio effettivo e totale finale.</p>
+                    </div>
+                </div>
+
+                <!-- Form Inputs -->
+                <div class="form-body">
+                    <div class="input-group">
+                        <label for="price">Prezzo di Listino (€)</label>
+                        <div class="input-wrapper">
+                            <span class="input-prefix">€</span>
+                            <input type="number" id="price" placeholder="0.00" min="0" step="0.01" autofocus>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="discount">Sconto (%)</label>
+                            <div class="input-wrapper">
+                                <span class="input-prefix">%</span>
+                                <input type="number" id="discount" placeholder="0" min="0" max="100">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="quantity">Quantità</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="quantity" placeholder="1" min="1" step="1" value="1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="action-group">
+                        <button class="btn-primary" onclick="calculateDiscount()">
+                            <i data-lucide="calculator"></i>
+                            Calcola Risparmio
+                        </button>
+                        <button class="btn-secondary" onclick="resetForm()">
+                            <i data-lucide="rotate-ccw"></i>
+                            Nuovo Calcolo
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Output Risultati -->
+                <div class="result" id="result-box">
+                    <div class="result-row">
+                        <span class="label">Risparmio unitario</span>
+                        <span class="value"><span id="saved-unit">0.00</span> €</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">Risparmio totale (× qta)</span>
+                        <span class="value"><span id="saved-total">0.00</span> €</span>
+                    </div>
+                    <div class="result-row total">
+                        <span class="label">Totale da pagare</span>
+                        <span class="value highlight"><span id="final-price">0.00</span> €</span>
+                    </div>
+
+                    <!-- Progress Bar della percentuale risparmiata -->
+                    <div class="savings-bar-container">
+                        <div class="savings-bar-header">
+                            <span>Percentuale Risparmiata</span>
+                            <span id="savings-bar-label">0%</span>
+                        </div>
+                        <div class="savings-bar-track">
+                            <div class="savings-bar-fill" id="savings-bar"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Creative Utility Toolbox — Riccardo Raineri</span>
+        </footer>
+
+    </div>
+
+    <!-- Script Logico del Tool e Tema -->
     <script>
-        /**
-         * Applica all'avvio il tema salvato in precedenza (in qualsiasi
-         * strumento del sito, la chiave è condivisa) oppure, se è la prima
-         * visita, quello preferito dal sistema operativo/browser. Così la
-         * scelta fatta una volta resta valida ovunque e anche ricaricando.
-         */
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+            applyStoredTheme();
+        });
+
+        /* -----------------------------------------------------------------
+           GESTIONE TEMA (DEFAULT SCURO / OPTIONAL LIGHT)
+           ----------------------------------------------------------------- */
         function applyStoredTheme() {
             const stored = localStorage.getItem('toolbox_theme');
-            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const wantsLight = stored ? stored === 'light' : !prefersDark;
-
-            if (wantsLight) {
+            // Il tema di default è Dark. Si passa al chiaro solo se specificato esplicitamente.
+            if (stored === 'light') {
                 document.body.setAttribute('data-theme', 'light');
             } else {
-                document.body.removeAttribute('data-theme'); // niente attributo = tema scuro, il default di questa pagina
+                document.body.removeAttribute('data-theme');
             }
         }
 
-        /**
-         * Alterna il tema scuro (default di questa pagina) e quello chiaro
-         * (data-theme="light"), salvando la scelta in localStorage così
-         * resta la stessa anche negli altri strumenti del sito.
-         */
         function toggleTheme() {
             const body = document.body;
-            const goingLight = body.getAttribute('data-theme') !== 'light';
+            const isLight = body.getAttribute('data-theme') === 'light';
 
-            if (goingLight) {
-                body.setAttribute('data-theme', 'light');
-            } else {
+            if (isLight) {
                 body.removeAttribute('data-theme');
+                localStorage.setItem('toolbox_theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                localStorage.setItem('toolbox_theme', 'light');
             }
-
-            localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
         }
 
-        /**
-         * Calcola risparmio unitario, risparmio totale (considerando la
-         * quantità) e prezzo finale, poi aggiorna il riquadro risultati
-         * e la barra visiva della percentuale di sconto.
-         */
+        /* -----------------------------------------------------------------
+           CALCOLO E LOGICA APPLICATIVA
+           ----------------------------------------------------------------- */
         function calculateDiscount() {
             const price = parseFloat(document.getElementById('price').value);
             const discount = parseFloat(document.getElementById('discount').value);
-            // Se la quantità non è valorizzata, si assume 1 pezzo
             const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
-            // Controllo di sicurezza sui valori numerici
             if (isNaN(price) || isNaN(discount) || price < 0 || discount < 0) return;
 
             const savedPerUnit = price * (discount / 100);
@@ -143,29 +189,21 @@
             document.getElementById('saved-total').innerText = savedTotal.toFixed(2);
             document.getElementById('final-price').innerText = finalTotal.toFixed(2);
 
-            // La barra si riempie in proporzione diretta alla percentuale di sconto
-            // (bloccata tra 0 e 100 per evitare valori fuori scala con input anomali)
             const clampedDiscount = Math.min(Math.max(discount, 0), 100);
             document.getElementById('savings-bar').style.width = clampedDiscount + '%';
+            document.getElementById('savings-bar-label').innerText = clampedDiscount.toFixed(0) + '%';
 
-            document.getElementById('result-box').style.display = 'block';
+            document.getElementById('result-box').style.display = 'flex';
         }
 
-        /**
-         * Riporta il form allo stato iniziale: svuota i campi, nasconde
-         * il riquadro risultati e azzera la barra visiva.
-         */
         function resetForm() {
             document.getElementById('price').value = '';
             document.getElementById('discount').value = '';
             document.getElementById('quantity').value = 1;
             document.getElementById('result-box').style.display = 'none';
             document.getElementById('savings-bar').style.width = '0%';
+            document.getElementById('savings-bar-label').innerText = '0%';
         }
-
-        // Applica subito il tema corretto all'apertura della pagina
-        applyStoredTheme();
     </script>
-
 </body>
 </html>
