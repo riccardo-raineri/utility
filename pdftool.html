@@ -14,7 +14,7 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Librerie essenziali (Funzionano anche offline e da smartphone) -->
+    <!-- Librerie essenziali -->
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
@@ -30,7 +30,7 @@
         <!-- Header Compatto Coerente -->
         <header class="app-header">
             <div class="header-left">
-                <a href="dashboard.html" class="back-btn">
+                <a href="dashboard_2.html" class="back-btn">
                     <i data-lucide="arrow-left"></i>
                     <span>Dashboard</span>
                 </a>
@@ -45,116 +45,74 @@
         <main class="main-content">
             <div class="tools-grid">
 
-                <!-- Unire PDF -->
-                <div class="tool-card" onclick="selectAction('merge', 'Unisci PDF', '.pdf')">
-                    <div class="card-icon blue"><i data-lucide="copy-plus"></i></div>
-                    <h3>Unisci PDF</h3>
-                    <p>Combina più file PDF in un unico documento.</p>
-                </div>
-
-                <!-- Dividi PDF -->
-                <div class="tool-card" onclick="selectAction('split', 'Dividi PDF', '.pdf')">
-                    <div class="card-icon purple"><i data-lucide="scissors"></i></div>
-                    <h3>Dividi PDF</h3>
-                    <p>Estrai pagine o suddividi il documento.</p>
-                </div>
-
-                <!-- Comprimi PDF -->
+                <!-- 1. Comprimi PDF -->
                 <div class="tool-card" onclick="selectAction('compress', 'Comprimi PDF', '.pdf')">
                     <div class="card-icon green"><i data-lucide="minimize-2"></i></div>
                     <h3>Comprimi PDF</h3>
                     <p>Riduci le dimensioni ottimizzando il file.</p>
                 </div>
 
-                <!-- OCR Testo -->
-                <div class="tool-card" onclick="selectAction('ocr', 'OCR Testo', '.pdf,image/*')">
+                <!-- 2. Unisci PDF -->
+                <div class="tool-card" onclick="selectAction('merge', 'Unisci PDF', '.pdf')">
+                    <div class="card-icon blue"><i data-lucide="copy-plus"></i></div>
+                    <h3>Unisci PDF</h3>
+                    <p>Combina più file PDF in un unico documento.</p>
+                </div>
+
+                <!-- 3. Dividi PDF -->
+                <div class="tool-card" onclick="selectAction('split', 'Dividi PDF', '.pdf')">
+                    <div class="card-icon purple"><i data-lucide="scissors"></i></div>
+                    <h3>Dividi PDF</h3>
+                    <p>Estrai o suddividi il documento in parti.</p>
+                </div>
+
+                <!-- 4. Organizza PDF (Elimina/Estrai/Ruota) -->
+                <div class="tool-card" onclick="selectAction('organize', 'Organizza PDF', '.pdf')">
+                    <div class="card-icon purple"><i data-lucide="folder-kanban"></i></div>
+                    <h3>Organizza PDF</h3>
+                    <p>Elimina, estrai o ruota le pagine del PDF.</p>
+                </div>
+
+                <!-- 5. OCR PDF -->
+                <div class="tool-card" onclick="selectAction('ocr', 'OCR PDF', '.pdf,image/*')">
                     <div class="card-icon orange"><i data-lucide="scan-text"></i></div>
-                    <h3>OCR Testo</h3>
+                    <h3>OCR PDF</h3>
                     <p>Estrai testo modificabile da scansioni o foto.</p>
                 </div>
 
-                <!-- PDF a Word -->
-                <div class="tool-card" onclick="selectAction('to-word', 'PDF a Word', '.pdf')">
+                <!-- 6. PDF to Word / Word to PDF -->
+                <div class="tool-card" onclick="selectAction('word-tab', 'PDF & Word Converter', '.pdf,.doc,.docx')">
                     <div class="card-icon blue"><i data-lucide="file-text"></i></div>
-                    <h3>PDF a Word</h3>
-                    <p>Esporta i contenuti in formato Word editabile.</p>
+                    <h3>PDF & Word</h3>
+                    <p>Converti da/verso Word in modo semplice.</p>
                 </div>
 
-                <!-- PDF a Excel -->
-                <div class="tool-card" onclick="selectAction('to-excel', 'PDF a Excel', '.pdf')">
-                    <div class="card-icon blue"><i data-lucide="sheet"></i></div>
-                    <h3>PDF a Excel</h3>
-                    <p>Estrai tabelle e dati in un foglio di calcolo.</p>
-                </div>
-
-                <!-- PDF a PPT -->
-                <div class="tool-card" onclick="selectAction('to-ppt', 'PDF a PowerPoint', '.pdf')">
+                <!-- 7. PDF to PPT / PPT to PDF -->
+                <div class="tool-card" onclick="selectAction('ppt-tab', 'PDF & PowerPoint', '.pdf,.ppt,.pptx')">
                     <div class="card-icon blue"><i data-lucide="presentation"></i></div>
-                    <h3>PDF a PowerPoint</h3>
-                    <p>Trasforma le pagine in diapositive.</p>
+                    <h3>PDF & PowerPoint</h3>
+                    <p>Converti tra PDF e presentazioni PPT.</p>
                 </div>
 
-                <!-- PDF a Immagini -->
-                <div class="tool-card" onclick="selectAction('to-images', 'PDF a Immagini', '.pdf')">
-                    <div class="card-icon blue"><i data-lucide="image"></i></div>
-                    <h3>PDF a Immagini</h3>
-                    <p>Salva ogni pagina come JPG o PNG.</p>
+                <!-- 8. PDF to Excel / Excel to PDF -->
+                <div class="tool-card" onclick="selectAction('excel-tab', 'PDF & Excel', '.pdf,.xls,.xlsx')">
+                    <div class="card-icon blue"><i data-lucide="sheet"></i></div>
+                    <h3>PDF & Excel</h3>
+                    <p>Converti tra fogli di calcolo ed Excel.</p>
                 </div>
 
-                <!-- Word a PDF -->
-                <div class="tool-card" onclick="selectAction('word-to-pdf', 'Word a PDF', '.doc,.docx')">
-                    <div class="card-icon green"><i data-lucide="file-up"></i></div>
-                    <h3>Word a PDF</h3>
-                    <p>Converti documenti Word in formato PDF.</p>
+                <!-- 9. PDF to JPG/PNG / JPG/PNG to PDF -->
+                <div class="tool-card" onclick="selectAction('image-tab', 'PDF & Immagini', '.pdf,image/*')">
+                    <div class="card-icon green"><i data-lucide="image"></i></div>
+                    <h3>PDF & Immagini</h3>
+                    <p>Converti PDF in immagini o viceversa.</p>
                 </div>
 
-                <!-- Excel a PDF -->
-                <div class="tool-card" onclick="selectAction('excel-to-pdf', 'Excel a PDF', '.xls,.xlsx')">
-                    <div class="card-icon green"><i data-lucide="sheet"></i></div>
-                    <h3>Excel a PDF</h3>
-                    <p>Trasforma fogli Excel in PDF stampabili.</p>
-                </div>
-
-                <!-- PPT a PDF -->
-                <div class="tool-card" onclick="selectAction('ppt-to-pdf', 'PowerPoint a PDF', '.ppt,.pptx')">
-                    <div class="card-icon green"><i data-lucide="presentation"></i></div>
-                    <h3>PPT a PDF</h3>
-                    <p>Esporta presentazioni PowerPoint in PDF.</p>
-                </div>
-
-                <!-- Immagini a PDF -->
-                <div class="tool-card" onclick="selectAction('img-to-pdf', 'Immagini a PDF', 'image/*')">
-                    <div class="card-icon green"><i data-lucide="images"></i></div>
-                    <h3>Immagini a PDF</h3>
-                    <p>Unisci foto e immagini in un unico PDF.</p>
-                </div>
-
-                <!-- HTML a PDF -->
-                <div class="tool-card" onclick="selectAction('html-to-pdf', 'HTML a PDF', '.html,.htm')">
+                <!-- 10. HTML to PDF -->
+                <div class="tool-card" onclick="selectAction('html-to-pdf', 'HTML to PDF', '.html,.htm')">
                     <div class="card-icon green"><i data-lucide="globe"></i></div>
-                    <h3>HTML a PDF</h3>
-                    <p>Converti pagine HTML direttamente in PDF.</p>
-                </div>
-
-                <!-- Ruota PDF -->
-                <div class="tool-card" onclick="selectAction('rotate', 'Ruota PDF', '.pdf')">
-                    <div class="card-icon purple"><i data-lucide="rotate-cw"></i></div>
-                    <h3>Ruota PDF</h3>
-                    <p>Ruota le pagine specificando i numeri.</p>
-                </div>
-
-                <!-- Elimina Pagine -->
-                <div class="tool-card" onclick="selectAction('delete-pages', 'Elimina Pagine', '.pdf')">
-                    <div class="card-icon purple"><i data-lucide="file-x"></i></div>
-                    <h3>Elimina Pagine</h3>
-                    <p>Rimuovi le pagine indesiderate.</p>
-                </div>
-
-                <!-- Estrai Pagine -->
-                <div class="tool-card" onclick="selectAction('extract-pages', 'Estrai Pagine', '.pdf')">
-                    <div class="card-icon purple"><i data-lucide="file-output"></i></div>
-                    <h3>Estrai Pagine</h3>
-                    <p>Isola e salva solo le pagine utili.</p>
+                    <h3>HTML to PDF</h3>
+                    <p>Trasforma pagine HTML direttamente in PDF.</p>
                 </div>
 
             </div>
@@ -168,7 +126,7 @@
                 
                 <div class="upload-dropzone" id="dropZone">
                     <i data-lucide="cloud-upload" class="drop-icon"></i>
-                    <p>Tocca qui per caricare il file</p>
+                    <p>Tocca o trascina qui il file da caricare</p>
                     <input type="file" id="fileInput" style="display: none;">
                 </div>
 
@@ -177,7 +135,7 @@
                     <span id="fileName">file.pdf</span>
                 </div>
 
-                <!-- Opzioni interattive testuali ottimizzate per mobile -->
+                <!-- Opzioni dinamiche e selettori per tab doppie -->
                 <div id="toolSpecificOptions" class="tool-options"></div>
 
                 <button id="processBtn" class="action-btn" disabled>

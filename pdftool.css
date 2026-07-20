@@ -1,5 +1,5 @@
 /* =========================================================
-   PDF TOOLBOX — STILI MOBILE-FRIENDLY
+   PDF TOOLBOX — STILI AGGIORNATI
    ========================================================= */
 
 .app-container {
@@ -38,7 +38,7 @@
 /* Griglia Card */
 .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
     gap: 12px;
 }
 
@@ -50,6 +50,12 @@
     cursor: pointer;
     display: flex;
     flex-direction: column;
+    transition: all 0.2s;
+}
+
+.tool-card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    background: rgba(25, 30, 42, 0.8);
 }
 
 .tool-card.active {
@@ -170,7 +176,7 @@
 }
 
 .tool-options {
-    margin-top: 12px;
+    margin-top: 14px;
 }
 
 .tool-options label {
@@ -188,8 +194,34 @@
     border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
     color: var(--text-primary, #ffffff);
     border-radius: 6px;
-    font-size: 14px; /* Dimensione ideale per non far zoomare iOS */
+    font-size: 14px;
     outline: none;
+}
+
+/* Sub-tabs interne alle card doppie */
+.sub-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.sub-tab-btn {
+    flex: 1;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    color: var(--text-secondary, #94a3b8);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sub-tab-btn.active {
+    background: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
 }
 
 .action-btn {
@@ -223,4 +255,37 @@
     margin-top: 12px;
     font-size: 12px;
     text-align: center;
+}
+
+/* Stile per il container delle tab con switch di inversione */
+.conversion-header-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.switch-direction-btn {
+    background: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #3b82f6;
+    border-radius: 6px;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.switch-direction-btn:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.switch-direction-btn svg {
+    width: 18px;
+    height: 18px;
 }

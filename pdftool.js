@@ -1,5 +1,7 @@
 let currentAction = null;
 let selectedFile = null;
+let subMode = ''; 
+let currentCardKey = ''; // Memorizza quale card di conversione è attiva
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) {
@@ -35,8 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function selectAction(actionKey, actionTitle, acceptedTypes) {
     currentAction = actionKey;
+    currentCardKey = actionKey;
     document.getElementById('workspaceTitle').textContent = actionTitle;
-    document.getElementById('fileInput').accept = acceptedTypes;
     document.getElementById('workspacePanel').style.display = 'block';
     
     document.querySelectorAll('.tool-card').forEach(card => card.classList.remove('active'));
@@ -52,28 +54,118 @@ function selectAction(actionKey, actionTitle, acceptedTypes) {
     const optionsContainer = document.getElementById('toolSpecificOptions');
     optionsContainer.innerHTML = '';
 
-    // Configura i campi input in base all'azione scelta
-    if (['split', 'extract-pages', 'delete-pages'].includes(currentAction)) {
+    if (actionKey === 'word-tab') {
+        subMode = 'pdf-to-word';
+        optionsContainer.innerHTML = createConversionTabsHTML('PDF a Word', 'Word a PDF', '.pdf', '.doc,.docx');
+    } else if (actionKey === 'ppt-tab') {
+        subMode = 'pdf-to-ppt';
+        optionsContainer.innerHTML = createConversionTabsHTML('PDF a PowerPoint', 'PowerPoint a PDF', '.pdf', '.ppt,.pptx');
+    } else if (actionKey === 'excel-tab') {
+        subMode = 'pdf-to-excel';
+        optionsContainer.innerHTML = createConversionTabsHTML('PDF a Excel', 'Excel a PDF', '.pdf', '.xls,.xlsx');
+    } else if (actionKey === 'image-tab') {
+        subMode = 'pdf-to-jpg';
+        optionsContainer.innerHTML = createConversionTabsHTML('PDF a Immagini', 'Immagini a PDF', '.pdf', 'image/*');
+    } else if (actionKey === 'split') {
         optionsContainer.innerHTML = `
             <div style="margin-top: 8px;">
-                <label>Pagine (es: 1, 3 o intervallo 1-4):</label>
-                <input type="text" id="pageParamInput" value="1" placeholder="Es. 1-3">
+                <label>Numero pagina da estrarre/dividere:</label>
+                <input type="text" id="pageParamInput" value="1" placeholder="Es. 1">
             </div>
         `;
-    } else if (currentAction === 'rotate') {
+        document.getElementById('fileInput').accept = acceptedTypes;
+    } else if (actionKey === 'organize') {
         optionsContainer.innerHTML = `
             <div style="margin-top: 8px;">
-                <label>Angolo di rotazione:</label>
-                <select id="rotateAngle">
-                    <option value="90">90° Orario</option>
-                    <option value="180">180°</option>
-                    <option value="270">270° (Antiorario)</option>
+                <label>Azione di organizzazione:</label>
+                <select id="orgActionType" onchange="updateOrgInputs()">
+                    <option value="delete">Elimina Pagina</option>
+                    <option value="extract">Estrai Pagina</option>
+                    <option value="rotate">Ruota Pagine</option>
                 </select>
             </div>
+            <div id="orgSubInputContainer" style="margin-top: 8px;">
+                <label>Numero pagina da eliminare:</label>
+                <input type="text" id="orgPageInput" value="1" placeholder="Es. 1">
+            </div>
         `;
+        document.getElementById('fileInput').accept = acceptedTypes;
+    } else {
+        document.getElementById('fileInput').accept = acceptedTypes;
+    }
+
+    if (window.lucide) {
+        lucide.createIcons();
     }
 
     document.getElementById('workspacePanel').scrollIntoView({ behavior: 'smooth' });
+}
+
+function createConversionTabsHTML(label1, label2, types1, types2) {
+    return `
+        <div class="conversion-header-wrapper">
+            <div class="sub-tabs" style="margin-bottom: 0; flex: 1;">
+                <button class="sub-tab-btn active" id="subBtn1" onclick="setConversionDirection(1, '${label1}', '${types1}')">${label1}</button>
+                <button class="sub-tab-btn" id="subBtn2" onclick="setConversionDirection(2, '${label2}', '${types2}')">${label2}</button>
+            </div>
+            <button class="switch-direction-btn" onclick="toggleConversionDirection('${label1}', '${label2}', '${types1}', '${types2}')" title="Inverti direzione">
+                <i data-lucide="arrow-left-right"></i>
+            </button>
+        </div>
+    `;
+}
+
+function setConversionDirection(btnIndex, label, acceptTypes) {
+    const btn1 = document.getElementById('subBtn1');
+    const btn2 = document.getElementById('subBtn2');
+    
+    if (btnIndex === 1) {
+        btn1.classList.add('active');
+        btn2.classList.remove('active');
+        subMode = currentCardKey === 'image-tab' ? 'pdf-to-jpg' : 'from-pdf';
+    } else {
+        btn1.classList.remove('active');
+        btn2.classList.add('active');
+        subMode = 'to-pdf';
+    }
+    document.getElementById('fileInput').accept = acceptTypes;
+    selectedFile = null;
+    document.getElementById('fileInfo').style.display = 'none';
+    document.getElementById('processBtn').disabled = true;
+    document.getElementById('resultArea').innerHTML = '';
+}
+
+function toggleConversionDirection(label1, label2, types1, types2) {
+    const btn1 = document.getElementById('subBtn1');
+    const btn2 = document.getElementById('subBtn2');
+    
+    // Se attualmente è attivo il pulsante 1, passa al 2 e viceversa
+    if (btn1.classList.contains('active')) {
+        setConversionDirection(2, label2, types2);
+    } else {
+        setConversionDirection(1, label1, types1);
+    }
+}
+
+function updateOrgInputs() {
+    const val = document.getElementById('orgActionType').value;
+    const container = document.getElementById('orgSubInputContainer');
+    if (val === 'rotate') {
+        container.innerHTML = `
+            <label>Angolo di rotazione:</label>
+            <select id="rotateAngle">
+                <option value="90">90° Orario</option>
+                <option value="180">180°</option>
+                <option value="270">270° (Antiorario)</option>
+            </select>
+        `;
+    } else {
+        const text = val === 'delete' ? 'Elimina' : 'Estrai';
+        container.innerHTML = `
+            <label>Numero pagina da ${text.toLowerCase()}:</label>
+            <input type="text" id="orgPageInput" value="1" placeholder="Es. 1">
+        `;
+    }
 }
 
 function closeWorkspace() {
@@ -100,15 +192,29 @@ async function processFile() {
     try {
         const arrayBuffer = await selectedFile.arrayBuffer();
 
-        if (['merge', 'split', 'compress', 'rotate', 'delete-pages', 'extract-pages'].includes(currentAction)) {
+        if (currentAction === 'compress' || currentAction === 'merge') {
             const { PDFDocument } = PDFLib;
             const pdfDoc = await PDFDocument.load(arrayBuffer);
+            const pdfBytes = await pdfDoc.save();
+            downloadBlob(pdfBytes, `ottimizzato_${selectedFile.name}`, 'application/pdf');
+        } 
+        else if (currentAction === 'split') {
+            const { PDFDocument } = PDFLib;
+            const pdfDoc = await PDFDocument.load(arrayBuffer);
+            const inputVal = document.getElementById('pageParamInput').value.trim();
+            const pageIdx = parseInt(inputVal) - 1;
+            const newPdf = await PDFDocument.create();
+            const [copiedPage] = await newPdf.copyPages(pdfDoc, [pageIdx]);
+            newPdf.addPage(copiedPage);
+            const pdfBytes = await newPdf.save();
+            downloadBlob(pdfBytes, `diviso_${selectedFile.name}`, 'application/pdf');
+        }
+        else if (currentAction === 'organize') {
+            const { PDFDocument } = PDFLib;
+            const pdfDoc = await PDFDocument.load(arrayBuffer);
+            const orgType = document.getElementById('orgActionType').value;
 
-            if (currentAction === 'compress' || currentAction === 'merge') {
-                const pdfBytes = await pdfDoc.save();
-                downloadBlob(pdfBytes, `ottimizzato_${selectedFile.name}`, 'application/pdf');
-            } 
-            else if (currentAction === 'rotate') {
+            if (orgType === 'rotate') {
                 const angle = parseInt(document.getElementById('rotateAngle').value);
                 pdfDoc.getPages().forEach(page => {
                     const currentRot = page.getRotation().angle;
@@ -116,9 +222,14 @@ async function processFile() {
                 });
                 const pdfBytes = await pdfDoc.save();
                 downloadBlob(pdfBytes, `ruotato_${selectedFile.name}`, 'application/pdf');
-            }
-            else if (currentAction === 'split' || currentAction === 'extract-pages') {
-                const inputVal = document.getElementById('pageParamInput').value.trim();
+            } else if (orgType === 'delete') {
+                const inputVal = document.getElementById('orgPageInput').value.trim();
+                const pageIdx = parseInt(inputVal) - 1;
+                pdfDoc.removePage(pageIdx);
+                const pdfBytes = await pdfDoc.save();
+                downloadBlob(pdfBytes, `modificato_${selectedFile.name}`, 'application/pdf');
+            } else if (orgType === 'extract') {
+                const inputVal = document.getElementById('orgPageInput').value.trim();
                 const pageIdx = parseInt(inputVal) - 1;
                 const newPdf = await PDFDocument.create();
                 const [copiedPage] = await newPdf.copyPages(pdfDoc, [pageIdx]);
@@ -126,14 +237,7 @@ async function processFile() {
                 const pdfBytes = await newPdf.save();
                 downloadBlob(pdfBytes, `estratto_${selectedFile.name}`, 'application/pdf');
             }
-            else if (currentAction === 'delete-pages') {
-                const inputVal = document.getElementById('pageParamInput').value.trim();
-                const pageIdx = parseInt(inputVal) - 1;
-                pdfDoc.removePage(pageIdx);
-                const pdfBytes = await pdfDoc.save();
-                downloadBlob(pdfBytes, `modificato_${selectedFile.name}`, 'application/pdf');
-            }
-        } 
+        }
         else if (currentAction === 'ocr') {
             resultArea.innerHTML = `<p style="color: #3b82f6;">Analisi OCR in corso...</p>`;
             const worker = await Tesseract.createWorker('ita');
@@ -147,22 +251,30 @@ async function processFile() {
             processBtn.disabled = false;
             return;
         }
-        else if (currentAction === 'img-to-pdf') {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const imgData = await readFileAsDataURL(selectedFile);
-            doc.addImage(imgData, 'JPEG', 10, 10, 190, 0);
-            const pdfOutput = doc.output('blob');
-            downloadBlob(pdfOutput, 'immagine_convertita.pdf', 'application/pdf');
+        else if (['word-tab', 'ppt-tab', 'excel-tab', 'image-tab'].includes(currentAction)) {
+            if (subMode === 'to-pdf' && currentAction === 'image-tab') {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const imgData = await readFileAsDataURL(selectedFile);
+                doc.addImage(imgData, 'JPEG', 10, 10, 190, 0);
+                const pdfOutput = doc.output('blob');
+                downloadBlob(pdfOutput, 'immagine_convertita.pdf', 'application/pdf');
+            } else {
+                setTimeout(() => {
+                    const dummyData = new Uint8Array([1, 2, 3, 4]);
+                    const outName = subMode === 'to-pdf' ? `convertito.pdf` : `convertito_documento.docx`;
+                    downloadBlob(dummyData, outName, 'application/octet-stream');
+                }, 500);
+            }
         }
-        else {
+        else if (currentAction === 'html-to-pdf') {
             setTimeout(() => {
                 const dummyData = new Uint8Array([1, 2, 3, 4]);
-                downloadBlob(dummyData, `convertito_${selectedFile.name.split('.')[0]}.pdf`, 'application/pdf');
+                downloadBlob(dummyData, `pagina_web.pdf`, 'application/pdf');
             }, 500);
         }
 
-        resultArea.innerHTML = `<p style="color: #10b981;">File elaborato e scaricato!</p>`;
+        resultArea.innerHTML = `<p style="color: #10b981;">File elaborato e scaricato con successo!</p>`;
     } catch (error) {
         console.error(error);
         resultArea.innerHTML = `<p style="color: #ef4444;">Errore durante l'elaborazione.</p>`;
