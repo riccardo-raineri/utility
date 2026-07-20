@@ -5,35 +5,11 @@
    DIREZIONE GRAFICA
    Unico strumento con doppio tema (chiaro/scuro), viola desaturato e
    pattern a puntini che si adatta al tema attivo tramite --pattern-dot.
-   Rispetto alla versione precedente:
-   - l'icona di cambio tema non è più un emoji/carattere unicode ma due
-     piccole icone SVG a tratto (sole/luna) disegnate con currentColor,
-     così seguono sempre il colore del testo e restano nitide a ogni
-     dimensione dello schermo;
-   - è comparsa una barra "Unità / Valuta" sopra la tendina delle
-     categorie: la valuta non è più una voce nel menu a tendina ma una
-     modalità a sé stante, sempre raggiungibile con un tap.
    ===================================================================== */
 
 :root {
-    /* --- Tema chiaro (default) ---------------------------------------- */
-    --bg: #f7f6fb;
-    --surface: #ffffff;
-    --text: #1c1a2b;
-    --text-muted: #6d6b7c;
-    --border: #e6e4ee;
-    --accent: #7c6fe0;
-    --accent-soft: rgba(124, 111, 224, 0.1);
-    --accent-strong: #6357c9;
-    --pattern-dot: rgba(28, 26, 43, 0.045);
-    --radius: 14px;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
-}
-
-/* --- Tema scuro: attivato aggiungendo data-theme="dark" al <body> ----- */
-[data-theme="dark"] {
-    --bg: #0f1117;
+    /* --- Tema scuro (default) ---------------------------------------- */
+     --bg: #0f1117;
     --surface: #171922;
     --text: #f2f1f8;
     --text-muted: #92909e;
@@ -42,6 +18,22 @@
     --accent-soft: rgba(157, 147, 245, 0.12);
     --accent-strong: #b4abf7;
     --pattern-dot: rgba(255, 255, 255, 0.045);
+    --radius: 14px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
+}
+
+/* --- Tema chiaro: attivato aggiungendo data-theme="light" al <body> ----- */
+[data-theme="light"] {
+	--bg: #f7f6fb;
+    --surface: #ffffff;
+    --text: #1c1a2b;
+    --text-muted: #6d6b7c;
+    --border: #e6e4ee;
+    --accent: #7c6fe0;
+    --accent-soft: rgba(124, 111, 224, 0.1);
+    --accent-strong: #6357c9;
+    --pattern-dot: rgba(28, 26, 43, 0.045);
 }
 
 * {
@@ -56,7 +48,7 @@ body {
     color: var(--text);
 
     /* Pattern a puntini: la variabile --pattern-dot cambia colore da sola
-       quando si passa al tema scuro, quindi il pattern resta coerente
+       quando si passa al tema chiaro, quindi il pattern resta coerente
        senza bisogno di due regole separate. */
     background-image: radial-gradient(circle, var(--pattern-dot) 1px, transparent 1px);
     background-size: 20px 20px;
@@ -119,11 +111,7 @@ body {
 }
 
 /* =========================================================
-   BOTTONE CAMBIO TEMA (icona SVG sole/luna)
-   Le due icone sono entrambe nel markup: mostriamo/nascondiamo l'una
-   o l'altra in base all'attributo data-theme sul <body>, invece di
-   riscrivere un'emoji via JS. Così l'icona resta un tratto vettoriale
-   sempre nitido, coerente con il resto della grafica "a linee".
+   BOTTONE CAMBIO TEMA (icona SVG sole/luna).
    ========================================================= */
 .theme-toggle {
     width: 36px;
@@ -148,21 +136,18 @@ body {
     height: 16px;
 }
 
-/* Di default (tema chiaro) è visibile solo l'icona "luna": cliccandola
+/* Di default è visibile solo l'icona "luna": cliccandola
    si passa al tema scuro. */
 .theme-toggle .icon-sun { display: none; }
 .theme-toggle .icon-moon { display: block; }
 
 /* In tema scuro si inverte: resta visibile solo l'icona "sole", che
    riporta al tema chiaro. */
-[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
-[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+[data-theme="light"] .theme-toggle .icon-sun { display: block; }
+[data-theme="light"] .theme-toggle .icon-moon { display: none; }
 
 /* =========================================================
    TAB "UNITÀ / VALUTA"
-   Sostituisce la vecchia voce "Valuta" dentro il menu a tendina:
-   ora è una modalità sempre visibile e raggiungibile con un tap,
-   con lo stesso stile a pillola usato altrove nel sito.
    ========================================================= */
 .mode-tabs {
     display: flex;
@@ -239,6 +224,83 @@ select.unit-select {
 }
 
 /* Bottone copia accanto a ciascun input */
+
+.card-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+}
+
+.card-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.tool-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+}
+
+.tool-card p {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    flex-grow: 1;
+}
+
+.tool-card a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-main);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 11px;
+    border-radius: var(--radius-sm);
+    font-size: 13.5px;
+    font-weight: 600;
+    transition: all 0.25s ease;
+}
+
+.tool-card a:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg-deep);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.tool-card.disabled {
+    opacity: 0.55;
+}
+
+.tool-card.disabled a {
+    cursor: default;
+    pointer-events: none;
+    background: transparent;
+}
+
+#no-results {
+    display: none;
+    text-align: center;
+    grid-column: 1 / -1;
+    color: var(--text-muted);
+    padding: 60px 20px;
+    font-size: 14px;
+    font-family: var(--font-mono);
+}
 .copy-btn {
     flex: 0 0 auto;
     width: 38px;

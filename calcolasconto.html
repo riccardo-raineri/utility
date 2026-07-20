@@ -6,9 +6,9 @@
     <title>Calcola Sconto</title>
     <link rel="stylesheet" href="calcolasconto.css">
 </head>
-<body data-theme="dark">
+<body>
 
-    <!-- Link di ritorno alla dashboard, presente su tutti gli strumenti[cite: 9] -->
+    <!-- Link di ritorno alla dashboard -->
     <a class="back-link" href="dashboard.html">← Dashboard</a>
 
     <div class="card">
@@ -18,8 +18,9 @@
                 <h2>Calcola Sconto</h2>
                 <p>Prezzo, risparmio e totale.</p>
             </div>
-            <!-- Bottone tema: stessa struttura e icone SVG del convertitore -->
-            <!-- Bottone tema -->
+			
+             <!-- Bottone tema: contiene entrambe le icone SVG, il CSS mostra
+                 solo quella giusta in base al tema attivo (vedi convertitore.css) -->
             <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
                 <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -55,7 +56,7 @@
         </div>
 
         <button onclick="calculateDiscount()">Calcola risparmio</button>
-        <button class="btn-secondary" onclick="resetForm()">Nuovo calcolo[cite: 9]</button>
+        <button class="btn-secondary" onclick="resetForm()">Nuovo calcolo</button>
 
         <div class="result" id="result-box">
             <div class="result-row">
@@ -79,15 +80,14 @@
 
     <script>
         /**
-         * Alterna il tema chiaro/scuro impostando o rimuovendo l'attributo
-         * data-theme sul <body>, esattamente come nel Convertitore.
+         * Alterna il tema scuro (default) e quello chiaro (data-theme="light")
          */
         function toggleTheme() {
             const body = document.body;
-            if (body.getAttribute('data-theme') === 'dark') {
+            if (body.getAttribute('data-theme') === 'light') {
                 body.removeAttribute('data-theme');
             } else {
-                body.setAttribute('data-theme', 'dark');
+                body.setAttribute('data-theme', 'light');
             }
         }
 

@@ -1,27 +1,9 @@
 /* =====================================================================
    CALCOLASCONTO.CSS
-   Foglio di stile dello strumento "Calcola Sconto".
-   ===================================================================== */
+===================================================================== */
 
 :root {
-    --bg: #f6f4ef;
-    --surface: #ffffff;
-    --border: #e3ddd0;
-    --text: #24211c;
-    --text-muted: #6f6a60;
-    --accent: #1f7a5c;
-    --accent-soft: rgba(31, 122, 92, 0.08);
-    --accent-strong: #175f47;
-    --accent-border: rgba(31, 122, 92, 0.2);
-    --accent-track: rgba(31, 122, 92, 0.15);
-    --pattern-line: rgba(0, 0, 0, 0.025);
-    --radius: 10px;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
-}
-
-[data-theme="dark"] {
-    --bg: #17140f;
+--bg: #17140f;
     --surface: #201c16;
     --border: #332d22;
     --text: #f1ede4;
@@ -32,6 +14,23 @@
     --accent-border: rgba(53, 161, 121, 0.28);
     --accent-track: rgba(53, 161, 121, 0.2);
     --pattern-line: rgba(255, 255, 255, 0.03);
+    --radius: 10px;
+    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
+}
+
+[data-theme="light"] {
+	--bg: #f6f4ef;
+    --surface: #ffffff;
+    --border: #e3ddd0;
+    --text: #24211c;
+    --text-muted: #6f6a60;
+    --accent: #1f7a5c;
+    --accent-soft: rgba(31, 122, 92, 0.08);
+    --accent-strong: #175f47;
+    --accent-border: rgba(31, 122, 92, 0.2);
+    --accent-track: rgba(31, 122, 92, 0.15);
+    --pattern-line: rgba(0, 0, 0, 0.025);
 }
 
 * {
@@ -122,36 +121,41 @@ body {
 }
 
 /* =========================================================
-   BOTTONE TEMA & VISIBILITÀ ICONE (Struttura Convertitore)
+   BOTTONE CAMBIO TEMA (icona SVG sole/luna)
    ========================================================= */
 .theme-toggle {
-    background: transparent;
-    border: 1px solid var(--border-light);
-    border-radius: 8px;
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: var(--accent-soft);
+    border: 1px solid var(--border);
+    border-radius: 50%;
     cursor: pointer;
-    color: var(--text-main);
-    transition: background-color 0.2s ease, border-color 0.2s ease;
+    color: var(--text);
+    transition: border-color 0.2s ease;
 }
 
 .theme-toggle:hover {
-    background-color: var(--border-light);
+    border-color: var(--accent);
 }
 
 .theme-toggle svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
 }
 
-/* Regole di visualizzazione icone in base al tema attivo */
-body .theme-toggle .icon-sun { display: none; }
-body .theme-toggle .icon-moon { display: block; }
-body[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
-body[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+/* Di default è visibile solo l'icona "luna": cliccandola
+   si passa al tema scuro. */
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: block; }
+
+/* In tema scuro si inverte: resta visibile solo l'icona "sole", che
+   riporta al tema chiaro. */
+[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
 
 .input-group {
     margin-bottom: 18px;
