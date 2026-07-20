@@ -14,11 +14,7 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Librerie PDF.js, PDF-Lib, jsPDF e Tesseract -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
+    <!-- Librerie essenziali (Funzionano anche offline e da smartphone) -->
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
@@ -34,7 +30,7 @@
         <!-- Header Compatto Coerente -->
         <header class="app-header">
             <div class="header-left">
-                <a href="dashboard_2.html" class="back-btn">
+                <a href="dashboard.html" class="back-btn">
                     <i data-lucide="arrow-left"></i>
                     <span>Dashboard</span>
                 </a>
@@ -60,7 +56,7 @@
                 <div class="tool-card" onclick="selectAction('split', 'Dividi PDF', '.pdf')">
                     <div class="card-icon purple"><i data-lucide="scissors"></i></div>
                     <h3>Dividi PDF</h3>
-                    <p>Estrai pagine o suddividi il documento visivamente.</p>
+                    <p>Estrai pagine o suddividi il documento.</p>
                 </div>
 
                 <!-- Comprimi PDF -->
@@ -144,21 +140,21 @@
                 <div class="tool-card" onclick="selectAction('rotate', 'Ruota PDF', '.pdf')">
                     <div class="card-icon purple"><i data-lucide="rotate-cw"></i></div>
                     <h3>Ruota PDF</h3>
-                    <p>Ruota le singole pagine graficamente.</p>
+                    <p>Ruota le pagine specificando i numeri.</p>
                 </div>
 
                 <!-- Elimina Pagine -->
                 <div class="tool-card" onclick="selectAction('delete-pages', 'Elimina Pagine', '.pdf')">
                     <div class="card-icon purple"><i data-lucide="file-x"></i></div>
                     <h3>Elimina Pagine</h3>
-                    <p>Seleziona e rimuovi le pagine indesiderate.</p>
+                    <p>Rimuovi le pagine indesiderate.</p>
                 </div>
 
                 <!-- Estrai Pagine -->
                 <div class="tool-card" onclick="selectAction('extract-pages', 'Estrai Pagine', '.pdf')">
                     <div class="card-icon purple"><i data-lucide="file-output"></i></div>
                     <h3>Estrai Pagine</h3>
-                    <p>Crea un nuovo file dalle pagine selezionate.</p>
+                    <p>Isola e salva solo le pagine utili.</p>
                 </div>
 
             </div>
@@ -172,7 +168,7 @@
                 
                 <div class="upload-dropzone" id="dropZone">
                     <i data-lucide="cloud-upload" class="drop-icon"></i>
-                    <p>Trascina qui il file o <span>clicca per caricarlo</span></p>
+                    <p>Tocca qui per caricare il file</p>
                     <input type="file" id="fileInput" style="display: none;">
                 </div>
 
@@ -181,9 +177,8 @@
                     <span id="fileName">file.pdf</span>
                 </div>
 
-                <!-- Opzioni e Editor Grafico Miniature -->
+                <!-- Opzioni interattive testuali ottimizzate per mobile -->
                 <div id="toolSpecificOptions" class="tool-options"></div>
-                <div id="visualEditorContainer" style="display: none; margin-top: 16px;"></div>
 
                 <button id="processBtn" class="action-btn" disabled>
                     <span>Elabora File</span>

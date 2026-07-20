@@ -1,6 +1,5 @@
 let currentAction = null;
 let selectedFile = null;
-let pdfPageStates = {}; 
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) {
@@ -46,13 +45,33 @@ function selectAction(actionKey, actionTitle, acceptedTypes) {
     }
 
     selectedFile = null;
-    pdfPageStates = {};
     document.getElementById('fileInfo').style.display = 'none';
     document.getElementById('processBtn').disabled = true;
     document.getElementById('resultArea').innerHTML = '';
-    document.getElementById('toolSpecificOptions').innerHTML = '';
-    document.getElementById('visualEditorContainer').style.display = 'none';
-    document.getElementById('visualEditorContainer').innerHTML = '';
+    
+    const optionsContainer = document.getElementById('toolSpecificOptions');
+    optionsContainer.innerHTML = '';
+
+    // Configura i campi input in base all'azione scelta
+    if (['split', 'extract-pages', 'delete-pages'].includes(currentAction)) {
+        optionsContainer.innerHTML = `
+            <div style="margin-top: 8px;">
+                <label>Pagine (es: 1, 3 o intervallo 1-4):</label>
+                <input type="text" id="pageParamInput" value="1" placeholder="Es. 1-3">
+            </div>
+        `;
+    } else if (currentAction === 'rotate') {
+        optionsContainer.innerHTML = `
+            <div style="margin-top: 8px;">
+                <label>Angolo di rotazione:</label>
+                <select id="rotateAngle">
+                    <option value="90">90° Orario</option>
+                    <option value="180">180°</option>
+                    <option value="270">270° (Antiorario)</option>
+                </select>
+            </div>
+        `;
+    }
 
     document.getElementById('workspacePanel').scrollIntoView({ behavior: 'smooth' });
 }
@@ -63,79 +82,11 @@ function closeWorkspace() {
     currentAction = null;
 }
 
-async function handleFileSelected(file) {
+function handleFileSelected(file) {
     selectedFile = file;
     document.getElementById('fileName').textContent = file.name;
     document.getElementById('fileInfo').style.display = 'flex';
     document.getElementById('processBtn').disabled = false;
-    
-    const editorContainer = document.getElementById('visualEditorContainer');
-    editorContainer.innerHTML = '';
-
-    if (['rotate', 'split', 'delete-pages', 'extract-pages'].includes(currentAction)) {
-        editorContainer.style.display = 'block';
-        editorContainer.innerHTML = `<p style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Generazione anteprime pagine in corso...</p>`;
-        
-        try {
-            // Lettura tramite FileReader per massima compatibilità (Evita problemi di blocco locale su file://)
-            const arrayBuffer = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsArrayBuffer(file);
-            });
-
-            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-            const pdfDoc = await loadingTask.promise;
-            
-            let gridHtml = `<p style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Clicca sulle miniature per gestirle:</p><div class="pdf-thumbnails-grid" id="thumbnailsGrid">`;
-            
-            for (let i = 1; i <= pdfDoc.numPages; i++) {
-                pdfPageStates[i] = { rotation: 0, selected: true, deleted: false };
-                gridHtml += `
-                    <div class="pdf-thumb-card selected" id="thumb-${i}" onclick="togglePageSelection(${i})">
-                        <canvas id="canvas-thumb-${i}"></canvas>
-                        <span>Pag. ${i}</span>
-                    </div>
-                `;
-            }
-            gridHtml += `</div>`;
-            editorContainer.innerHTML = gridHtml;
-
-            for (let i = 1; i <= pdfDoc.numPages; i++) {
-                const page = await pdfDoc.getPage(i);
-                const viewport = page.getViewport({ scale: 0.25 });
-                const canvas = document.getElementById(`canvas-thumb-${i}`);
-                if (canvas) {
-                    const context = canvas.getContext('2d');
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    await page.render({ canvasContext: context, viewport: viewport }).promise;
-                }
-            }
-        } catch (err) {
-            console.error("Errore anteprima PDF.js:", err);
-            editorContainer.innerHTML = `<p style="color:#ef4444; font-size:12px;">Impossibile generare le anteprime. Assicurati di usare un server locale (es. Live Server).</p>`;
-        }
-    } else {
-        editorContainer.style.display = 'none';
-    }
-}
-
-function togglePageSelection(pageNum) {
-    const card = document.getElementById(`thumb-${pageNum}`);
-    if (!card) return;
-
-    if (currentAction === 'rotate') {
-        pdfPageStates[pageNum].rotation = (pdfPageStates[pageNum].rotation + 90) % 360;
-        card.style.transform = `rotate(${pdfPageStates[pageNum].rotation}deg)`;
-    } else if (currentAction === 'delete-pages') {
-        pdfPageStates[pageNum].deleted = !pdfPageStates[pageNum].deleted;
-        card.classList.toggle('marked-delete', pdfPageStates[pageNum].deleted);
-    } else {
-        pdfPageStates[pageNum].selected = !pdfPageStates[pageNum].selected;
-        card.classList.toggle('selected', pdfPageStates[pageNum].selected);
-    }
 }
 
 async function processFile() {
@@ -158,59 +109,40 @@ async function processFile() {
                 downloadBlob(pdfBytes, `ottimizzato_${selectedFile.name}`, 'application/pdf');
             } 
             else if (currentAction === 'rotate') {
-                const pages = pdfDoc.getPages();
-                pages.forEach((page, index) => {
-                    const pageNum = index + 1;
-                    if (pdfPageStates[pageNum] && pdfPageStates[pageNum].rotation > 0) {
-                        const currentRot = page.getRotation().angle;
-                        page.setRotation(PDFLib.degrees(currentRot + pdfPageStates[pageNum].rotation));
-                    }
+                const angle = parseInt(document.getElementById('rotateAngle').value);
+                pdfDoc.getPages().forEach(page => {
+                    const currentRot = page.getRotation().angle;
+                    page.setRotation(PDFLib.degrees(currentRot + angle));
                 });
                 const pdfBytes = await pdfDoc.save();
                 downloadBlob(pdfBytes, `ruotato_${selectedFile.name}`, 'application/pdf');
             }
             else if (currentAction === 'split' || currentAction === 'extract-pages') {
+                const inputVal = document.getElementById('pageParamInput').value.trim();
+                const pageIdx = parseInt(inputVal) - 1;
                 const newPdf = await PDFDocument.create();
-                const pagesToCopy = [];
-                for (let p = 1; p <= pdfDoc.getPageCount(); p++) {
-                    if (pdfPageStates[p] && pdfPageStates[p].selected) {
-                        pagesToCopy.push(p - 1);
-                    }
-                }
-                if (pagesToCopy.length === 0) {
-                    alert("Seleziona almeno una pagina dall'editor grafico!");
-                    processBtn.disabled = false;
-                    resultArea.innerHTML = "";
-                    return;
-                }
-                const copiedPages = await newPdf.copyPages(pdfDoc, pagesToCopy);
-                copiedPages.forEach(p => newPdf.addPage(p));
+                const [copiedPage] = await newPdf.copyPages(pdfDoc, [pageIdx]);
+                newPdf.addPage(copiedPage);
                 const pdfBytes = await newPdf.save();
                 downloadBlob(pdfBytes, `estratto_${selectedFile.name}`, 'application/pdf');
             }
             else if (currentAction === 'delete-pages') {
-                const newPdf = await PDFDocument.create();
-                const pagesToKeep = [];
-                for (let p = 1; p <= pdfDoc.getPageCount(); p++) {
-                    if (!pdfPageStates[p] || !pdfPageStates[p].deleted) {
-                        pagesToKeep.push(p - 1);
-                    }
-                }
-                const copiedPages = await newPdf.copyPages(pdfDoc, pagesToKeep);
-                copiedPages.forEach(p => newPdf.addPage(p));
-                const pdfBytes = await newPdf.save();
+                const inputVal = document.getElementById('pageParamInput').value.trim();
+                const pageIdx = parseInt(inputVal) - 1;
+                pdfDoc.removePage(pageIdx);
+                const pdfBytes = await pdfDoc.save();
                 downloadBlob(pdfBytes, `modificato_${selectedFile.name}`, 'application/pdf');
             }
         } 
         else if (currentAction === 'ocr') {
-            resultArea.innerHTML = `<p style="color: #3b82f6;">Analisi OCR con Tesseract.js...</p>`;
+            resultArea.innerHTML = `<p style="color: #3b82f6;">Analisi OCR in corso...</p>`;
             const worker = await Tesseract.createWorker('ita');
             const ret = await worker.recognize(selectedFile);
             await worker.terminate();
             
             resultArea.innerHTML = `
-                <p style="color: #10b981; margin-bottom: 6px;">Testo estratto con successo!</p>
-                <textarea style="width: 100%; height: 110px; background: rgba(10,13,20,0.9); color: white; border: 1px solid var(--border-color, rgba(255,255,255,0.1)); padding: 8px; border-radius: 8px; font-family: inherit; font-size: 12px;">${ret.data.text}</textarea>
+                <p style="color: #10b981; margin-bottom: 4px;">Testo estratto:</p>
+                <textarea style="width: 100%; height: 90px; background: rgba(10,13,20,0.9); color: white; border: 1px solid var(--border-color, rgba(255,255,255,0.1)); padding: 8px; border-radius: 6px; font-size: 12px;">${ret.data.text}</textarea>
             `;
             processBtn.disabled = false;
             return;
@@ -227,13 +159,13 @@ async function processFile() {
             setTimeout(() => {
                 const dummyData = new Uint8Array([1, 2, 3, 4]);
                 downloadBlob(dummyData, `convertito_${selectedFile.name.split('.')[0]}.pdf`, 'application/pdf');
-            }, 600);
+            }, 500);
         }
 
-        resultArea.innerHTML = `<p style="color: #10b981;">File elaborato e scaricato con successo!</p>`;
+        resultArea.innerHTML = `<p style="color: #10b981;">File elaborato e scaricato!</p>`;
     } catch (error) {
         console.error(error);
-        resultArea.innerHTML = `<p style="color: #ef4444;">Errore durante l'elaborazione del file.</p>`;
+        resultArea.innerHTML = `<p style="color: #ef4444;">Errore durante l'elaborazione.</p>`;
     } finally {
         processBtn.disabled = false;
     }
