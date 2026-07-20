@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==> IMPOSTA QUI IL TUO PIN SEGRETO <==
-const SECRET_PIN = "0712"; 
+const SECRET_PIN = "1234"; 
 
 function verifyPin() {
     const enteredPin = document.getElementById('input-pin').value;
@@ -35,8 +35,26 @@ function verifyPin() {
     }
 }
 
+// Funzione per mostrare/nascondere lo storico precedente
+function toggleOlderHistory() {
+    const olderHistoryContainer = document.getElementById('older-history');
+    const btn = document.getElementById('toggle-history-btn');
+
+    if (olderHistoryContainer.style.display === 'none' || olderHistoryContainer.style.display === '') {
+        olderHistoryContainer.style.display = 'flex';
+        btn.innerHTML = '<i data-lucide="eye-off" style="width: 14px; height: 14px;"></i> Nascondi precedenti';
+    } else {
+        olderHistoryContainer.style.display = 'none';
+        btn.innerHTML = '<i data-lucide="eye" style="width: 14px; height: 14px;"></i> Mostra tutti i precedenti';
+    }
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
 // ==> INSERISCI QUI L'URL DEL TUO APPS SCRIPT <==
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5YRkeEUhDkDMX85Oh7Gkw7T96x8QLwUAsRSt5XT510Go-bfdhgMnAImDVW0io9nkO/exec';
+const APPS_SCRIPT_URL = 'INSERISCI_QUI_IL_TUO_URL_APPS_SCRIPT';
 
 async function saveToGoogleSheets(event) {
     event.preventDefault();

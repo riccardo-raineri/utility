@@ -14,317 +14,8 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <style>
-        :root {
-            --bg-base: #0B0E17;
-            --card-bg: #131826;
-            --card-bg-hover: #161D2E;
-            --border-subtle: rgba(255, 255, 255, 0.07);
-            
-            --spotify-green: #1DB954;
-            --spotify-green-glow: rgba(29, 185, 84, 0.15);
-            --spotify-green-border: rgba(29, 185, 84, 0.35);
-
-            --text-primary: #FFFFFF;
-            --text-secondary: rgba(255, 255, 255, 0.65);
-            --text-tertiary: rgba(255, 255, 255, 0.4);
-
-            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            --font-mono: 'JetBrains Mono', monospace;
-
-            --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            scroll-behavior: smooth;
-            background-color: var(--bg-base);
-        }
-
-        body {
-            font-family: var(--font-sans);
-            background-color: var(--bg-base);
-            color: var(--text-primary);
-            min-height: 100vh;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* Sfondo Ambientale */
-        .bg-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .bg-gradient-mesh {
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 50% 0%, rgba(29, 185, 84, 0.06) 0%, transparent 70%),
-                        radial-gradient(circle at 80% 100%, rgba(0, 85, 255, 0.03) 0%, transparent 60%);
-        }
-
-        .app-container {
-            position: relative;
-            z-index: 1;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 32px 24px 60px;
-            display: flex;
-            flex-direction: column;
-            gap: 32px;
-        }
-
-        /* Navigazione superiore */
-        .top-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .back-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 8px 16px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-subtle);
-            border-radius: 999px;
-            transition: var(--transition-smooth);
-        }
-
-        .back-link:hover {
-            color: var(--spotify-green);
-            border-color: var(--spotify-green-border);
-            background: var(--card-bg-hover);
-        }
-
-        .back-link svg { width: 14px; height: 14px; }
-
-        .sync-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-family: var(--font-mono);
-            font-size: 11px;
-            color: var(--spotify-green);
-            background: var(--spotify-green-glow);
-            border: 1px solid var(--spotify-green-border);
-            padding: 6px 12px;
-            border-radius: 999px;
-        }
-
-        .sync-status svg { width: 12px; height: 12px; animation: pulse 2s infinite; }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-
-        /* Header Principale */
-        .header-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            gap: 8px;
-        }
-
-        .header-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
-            background: var(--spotify-green-glow);
-            border: 1px solid var(--spotify-green-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--spotify-green);
-            margin-bottom: 4px;
-        }
-
-        .header-icon svg { width: 24px; height: 24px; }
-
-        .title {
-            font-size: clamp(28px, 4vw, 40px);
-            font-weight: 800;
-            letter-spacing: -0.02em;
-        }
-
-        .subtitle {
-            font-size: 14px;
-            color: var(--text-secondary);
-        }
-
-        /* Griglia Storico Pagamenti */
-        .payments-list {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .payment-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            padding: 20px 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            transition: var(--transition-smooth);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .payment-card.current {
-            border-color: var(--spotify-green-border);
-            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(29, 185, 84, 0.04) 100%);
-            box-shadow: 0 10px 30px -10px rgba(29, 185, 84, 0.1);
-        }
-
-        .payment-card:hover {
-            border-color: rgba(255, 255, 255, 0.15);
-            background: var(--card-bg-hover);
-        }
-
-        .card-top-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .period-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .period-info svg {
-            width: 18px;
-            height: 18px;
-            color: var(--spotify-green);
-        }
-
-        .period-text {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .badge-current {
-            font-family: var(--font-mono);
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            background: var(--spotify-green-glow);
-            color: var(--spotify-green);
-            border: 1px solid var(--spotify-green-border);
-            padding: 3px 8px;
-            border-radius: 6px;
-        }
-
-        .card-details-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid var(--border-subtle);
-            padding-top: 14px;
-            font-size: 13px;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .price-tag {
-            font-family: var(--font-mono);
-            font-weight: 700;
-            color: var(--spotify-green);
-            font-size: 15px;
-            background: rgba(29, 185, 84, 0.08);
-            padding: 4px 10px;
-            border-radius: 8px;
-            border: 1px solid var(--spotify-green-border);
-        }
-
-        .users-status-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            flex-grow: 1;
-            max-width: 600px;
-        }
-
-        .user-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            align-items: center;
-        }
-
-        .user-badge {
-            font-size: 12px;
-            padding: 3px 10px;
-            border-radius: 6px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .user-badge.paid {
-            background: rgba(16, 185, 129, 0.12);
-            color: #34D399;
-            border: 1px solid rgba(16, 185, 129, 0.25);
-        }
-
-        .user-badge.pending {
-            background: rgba(239, 68, 68, 0.12);
-            color: #F87171;
-            border: 1px solid rgba(239, 68, 68, 0.25);
-        }
-
-        .label-status {
-            font-size: 11px;
-            font-family: var(--font-mono);
-            color: var(--text-tertiary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        /* Footer */
-        .app-footer {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-tertiary);
-            font-family: var(--font-mono);
-            border-top: 1px solid var(--border-subtle);
-            padding-top: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .card-details-row {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-    </style>
+    <!-- Foglio di Stile Esterno -->
+    <link rel="stylesheet" href="spotify.css">
 </head>
 <body>
 
@@ -339,9 +30,9 @@
                 <i data-lucide="arrow-left"></i>
                 Dashboard
             </a>
-            <div class="sync-status" title="Collegato a Google Fogli (CSV sincronizzato)">
-                <i data-lucide="refresh-cw"></i>
-                <span>Google Sheets Sync</span>
+            <div class="sync-status" onclick="window.open('https://docs.google.com/spreadsheets/d/1LEUAJ2FAcZxNC8bCBa2TUCJB3Az9AZ65euGPNrNZrLU/edit', '_blank')">
+                <i data-lucide="external-link"></i>
+                <span>Apri Google Sheets</span>
             </div>
         </nav>
 
@@ -351,13 +42,74 @@
                 <i data-lucide="music"></i>
             </div>
             <h1 class="title">Spotify Family</h1>
-            <p class="subtitle">Monitoraggio storico divisione quota (6 partecipanti)</p>
+            <p class="subtitle">Monitoraggio e aggiornamento quote trimestrali (6 partecipanti)</p>
         </header>
 
-        <!-- Storico Pagamenti (Estratto e formattato dai tuoi dati) -->
-        <main class="payments-list">
+        <!-- Modulo Interattivo Protetto da PIN -->
+        <div class="card interactive-form">
+            <div class="card-header-inner">
+                <div class="icon">
+                    <i data-lucide="lock" id="form-lock-icon"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 15px; font-weight: 700;">Aggiungi o Aggiorna Periodo</h3>
+                    <p style="font-size: 12px; color: var(--text-secondary);" id="form-subtitle">Inserisci il PIN per sbloccare la modifica</p>
+                </div>
+            </div>
+            
+            <!-- Barra di sblocco PIN -->
+            <div id="pin-prompt-container" style="display: flex; gap: 8px; margin-bottom: 14px;">
+                <input type="password" id="input-pin" placeholder="Inserisci PIN di sblocco">
+                <button type="button" onclick="verifyPin()">Sblocca</button>
+            </div>
 
-            <!-- Periodo Corrente (In corso) -->
+            <!-- Form (inizialmente disabilitato) -->
+            <form id="spotify-form" onsubmit="saveToGoogleSheets(event)">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>PERIODO</label>
+                        <input type="text" id="input-periodo" placeholder="Es. June 16, 2026 → September 16, 2026" required disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>DURATA</label>
+                        <input type="text" id="input-durata" value="3 mesi" required disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>QUOTA (€ P.P.)</label>
+                        <input type="text" id="input-prezzo" value="€10.50" required disabled>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>CHI HA PAGATO (Spunta i partecipanti)</label>
+                    <div class="checkboxes-group" id="users-checkboxes">
+                        <label><input type="checkbox" name="user" value="Chiara" checked disabled> Chiara</label>
+                        <label><input type="checkbox" name="user" value="Giulia" checked disabled> Giulia</label>
+                        <label><input type="checkbox" name="user" value="Riccardo" checked disabled> Riccardo</label>
+                        <label><input type="checkbox" name="user" value="Sergio" disabled> Sergio</label>
+                        <label><input type="checkbox" name="user" value="Sharon" disabled> Sharon</label>
+                        <label><input type="checkbox" name="user" value="Valentina" checked disabled> Valentina</label>
+                        <label><input type="checkbox" name="user" value="Alessandra" disabled> Alessandra</label>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn" class="btn-submit" disabled>
+                    <i data-lucide="send" style="width:14px;height:14px;"></i> Salva su Google Fogli
+                </button>
+            </form>
+        </div>
+
+        <!-- Storico Pagamenti -->
+        <main class="payments-list">
+            
+            <div class="section-title-row">
+                <h3 style="font-size: 16px; font-weight: 700;">Storico Pagamenti</h3>
+                <button type="button" id="toggle-history-btn" onclick="toggleOlderHistory()">
+                    <i data-lucide="eye" style="width: 14px; height: 14px;"></i> Mostra tutti i precedenti
+                </button>
+            </div>
+
+            <!-- 1. Periodo Corrente -->
             <div class="payment-card current">
                 <div class="card-top-row">
                     <div class="period-info">
@@ -385,7 +137,7 @@
                 </div>
             </div>
 
-            <!-- Marzo 2026 - Giugno 2026 -->
+            <!-- 2. Subito prima (March 2026 - June 2026) -->
             <div class="payment-card">
                 <div class="card-top-row">
                     <div class="period-info">
@@ -410,82 +162,92 @@
                 </div>
             </div>
 
-            <!-- Dicembre 2025 - Marzo 2026 -->
-            <div class="payment-card">
-                <div class="card-top-row">
-                    <div class="period-info">
-                        <i data-lucide="calendar"></i>
-                        <span class="period-text">December 16, 2025 → March 16, 2026</span>
-                    </div>
-                    <span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span>
+            <!-- CONTENITORE NASCOSTO DI DEFAULT PER I PRECEDENTI DAL 2022 -->
+            <div id="older-history" style="display: none; flex-direction: column; gap: 16px;">
+
+                <!-- 2026 & 2025 precedenti -->
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">December 16, 2025 → March 16, 2026</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
                 </div>
-                <div class="card-details-row">
-                    <div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div>
-                    <div class="users-status-group">
-                        <div class="user-list">
-                            <span class="label-status" style="margin-right: 4px;">Completato:</span>
-                            <span class="user-badge paid">Chiara</span>
-                            <span class="user-badge paid">Giulia</span>
-                            <span class="user-badge paid">Riccardo</span>
-                            <span class="user-badge paid">Sergio</span>
-                            <span class="user-badge paid">Sharon</span>
-                            <span class="user-badge paid">Valentina</span>
-                        </div>
-                    </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">September 16, 2025 → December 16, 2025</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
                 </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">June 16, 2025 → September 16, 2025</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">March 16, 2025 → June 16, 2025</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">December 16, 2024 → March 16, 2025</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">September 16, 2024 → December 16, 2024</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">June 16, 2024 → September 16, 2024</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">March 16, 2024 → June 16, 2024</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">December 16, 2023 → March 16, 2024</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">September 16, 2023 → December 16, 2023</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">June 16, 2023 → September 16, 2023</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">March 16, 2023 → June 16, 2023</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">December 16, 2022 → March 16, 2023</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">September 16, 2022 → December 16, 2022</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">June 16, 2022 → September 16, 2022</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
+                <div class="payment-card">
+                    <div class="card-top-row"><div class="period-info"><i data-lucide="calendar"></i><span class="period-text">March 16, 2022 → June 16, 2022</span></div><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span></div>
+                    <div class="card-details-row"><div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div><div class="users-status-group"><div class="user-list"><span class="label-status" style="margin-right: 4px;">Completato:</span><span class="user-badge paid">Chiara</span><span class="user-badge paid">Giulia</span><span class="user-badge paid">Riccardo</span><span class="user-badge paid">Sergio</span><span class="user-badge paid">Sharon</span><span class="user-badge paid">Valentina</span></div></div></div>
+                </div>
+
             </div>
 
-            <!-- Settembre 2025 - Dicembre 2025 -->
-            <div class="payment-card">
-                <div class="card-top-row">
-                    <div class="period-info">
-                        <i data-lucide="calendar"></i>
-                        <span class="period-text">September 16, 2025 → December 16, 2025</span>
-                    </div>
-                    <span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span>
-                </div>
-                <div class="card-details-row">
-                    <div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div>
-                    <div class="users-status-group">
-                        <div class="user-list">
-                            <span class="label-status" style="margin-right: 4px;">Completato:</span>
-                            <span class="user-badge paid">Chiara</span>
-                            <span class="user-badge paid">Giulia</span>
-                            <span class="user-badge paid">Riccardo</span>
-                            <span class="user-badge paid">Sergio</span>
-                            <span class="user-badge paid">Sharon</span>
-                            <span class="user-badge paid">Valentina</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Giugno 2025 - Settembre 2025 -->
-            <div class="payment-card">
-                <div class="card-top-row">
-                    <div class="period-info">
-                        <i data-lucide="calendar"></i>
-                        <span class="period-text">June 16, 2025 → September 16, 2025</span>
-                    </div>
-                    <span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span>
-                </div>
-                <div class="card-details-row">
-                    <div class="price-tag">€9.00 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div>
-                    <div class="users-status-group">
-                        <div class="user-list">
-                            <span class="label-status" style="margin-right: 4px;">Completato:</span>
-                            <span class="user-badge paid">Chiara</span>
-                            <span class="user-badge paid">Giulia</span>
-                            <span class="user-badge paid">Riccardo</span>
-                            <span class="user-badge paid">Sergio</span>
-                            <span class="user-badge paid">Sharon</span>
-                            <span class="user-badge paid">Valentina</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- (Nota: Lo storico completo precedente con le stesse modalità è consultabile nel file CSV) -->
         </main>
 
         <footer class="app-footer">
@@ -493,12 +255,7 @@
         </footer>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        });
-    </script>
+    <!-- Script Esterno -->
+    <script src="spotify.js"></script>
 </body>
 </html>

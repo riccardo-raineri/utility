@@ -228,11 +228,39 @@ body {
     transition: var(--transition-smooth);
 }
 
-/* Griglia Storico Pagamenti */
+/* Storico Pagamenti & Sezione Toggle */
 .payments-list {
     display: flex;
     flex-direction: column;
     gap: 16px;
+}
+
+.section-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+#toggle-history-btn {
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition-smooth);
+}
+
+#toggle-history-btn:hover {
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--card-bg-hover);
 }
 
 .payment-card {
