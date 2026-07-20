@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Family — Monitoraggio Pagamenti</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        :root {
+            --bg-base: #0B0E17;
+            --card-bg: #131826;
+            --card-bg-hover: #161D2E;
+            --border-subtle: rgba(255, 255, 255, 0.07);
+            
+            --spotify-green: #1DB954;
+            --spotify-green-glow: rgba(29, 185, 84, 0.15);
+            --spotify-green-border: rgba(29, 185, 84, 0.35);
+
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.65);
+            --text-tertiary: rgba(255, 255, 255, 0.4);
+
+            --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            background-color: var(--bg-base);
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Sfondo Ambientale */
+        .bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .bg-gradient-mesh {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 0%, rgba(29, 185, 84, 0.06) 0%, transparent 70%),
+                        radial-gradient(circle at 80% 100%, rgba(0, 85, 255, 0.03) 0%, transparent 60%);
+        }
+
+        .app-container {
+            position: relative;
+            z-index: 1;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 32px 24px 60px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* Navigazione superiore */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 999px;
+            transition: var(--transition-smooth);
+        }
+
+        .back-link:hover {
+            color: var(--spotify-green);
+            border-color: var(--spotify-green-border);
+            background: var(--card-bg-hover);
+        }
+
+        .back-link svg { width: 14px; height: 14px; }
+
+        .sync-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--spotify-green);
+            background: var(--spotify-green-glow);
+            border: 1px solid var(--spotify-green-border);
+            padding: 6px 12px;
+            border-radius: 999px;
+        }
+
+        .sync-status svg { width: 12px; height: 12px; animation: pulse 2s infinite; }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* Header Principale */
+        .header-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 8px;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: var(--spotify-green-glow);
+            border: 1px solid var(--spotify-green-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--spotify-green);
+            margin-bottom: 4px;
+        }
+
+        .header-icon svg { width: 24px; height: 24px; }
+
+        .title {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Griglia Storico Pagamenti */
+        .payments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .payment-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-card.current {
+            border-color: var(--spotify-green-border);
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(29, 185, 84, 0.04) 100%);
+            box-shadow: 0 10px 30px -10px rgba(29, 185, 84, 0.1);
+        }
+
+        .payment-card:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: var(--card-bg-hover);
+        }
+
+        .card-top-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .period-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .period-info svg {
+            width: 18px;
+            height: 18px;
+            color: var(--spotify-green);
+        }
+
+        .period-text {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .badge-current {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            background: var(--spotify-green-glow);
+            color: var(--spotify-green);
+            border: 1px solid var(--spotify-green-border);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .card-details-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 14px;
+            font-size: 13px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .price-tag {
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: var(--spotify-green);
+            font-size: 15px;
+            background: rgba(29, 185, 84, 0.08);
+            padding: 4px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--spotify-green-border);
+        }
+
+        .users-status-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+            max-width: 600px;
+        }
+
+        .user-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .user-badge {
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .user-badge.paid {
+            background: rgba(16, 185, 129, 0.12);
+            color: #34D399;
+            border: 1px solid rgba(16, 185, 129, 0.25);
+        }
+
+        .user-badge.pending {
+            background: rgba(239, 68, 68, 0.12);
+            color: #F87171;
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .label-status {
+            font-size: 11px;
+            font-family: var(--font-mono);
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Footer */
+        .app-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-tertiary);
+            font-family: var(--font-mono);
+            border-top: 1px solid var(--border-subtle);
+            padding-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .card-details-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-canvas">
+        <div class="bg-gradient-mesh"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Barra di Navigazione -->
+        <nav class="top-nav">
+            <a class="back-link" href="dashboard.html">
+                <i data-lucide="arrow-left"></i>
+                Dashboard
+            </a>
+            <div class="sync-status" title="Collegato a Google Fogli (CSV sincronizzato)">
+                <i data-lucide="refresh-cw"></i>
+                <span>Google Sheets Sync</span>
+            </div>
+        </nav>
+
+        <!-- Header -->
+        <header class="header-section">
+            <div class="header-icon">
+                <i data-lucide="music"></i>
+            </div>
+            <h1 class="title">Spotify Family</h1>
+            <p class="subtitle">Monitoraggio storico divisione quota (6 partecipanti)</p>
+        </header>
+
+        <!-- Storico Pagamenti (Estratto e formattato dai tuoi dati) -->
+        <main class="payments-list">
+
+            <!-- Periodo Corrente (In corso) -->
+            <div class="payment-card current">
+                <div class="card-top-row">
+                    <div class="period-info">
+                        <i data-lucide="calendar"></i>
+                        <span class="period-text">June 16, 2026 → September 16, 2026</span>
+                    </div>
+                    <span class="badge-current">In corso (3 mesi)</span>
+                </div>
+                <div class="card-details-row">
+                    <div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div>
+                    <div class="users-status-group">
+                        <div class="user-list">
+                            <span class="label-status" style="margin-right: 4px;">Hanno pagato:</span>
+                            <span class="user-badge paid"><i data-lucide="check" style="width:12px;height:12px"></i> Chiara</span>
+                            <span class="user-badge paid"><i data-lucide="check" style="width:12px;height:12px"></i> Giulia</span>
+                            <span class="user-badge paid"><i data-lucide="check" style="width:12px;height:12px"></i> Riccardo</span>
+                            <span class="user-badge paid"><i data-lucide="check" style="width:12px;height:12px"></i> Valentina</span>
+                        </div>
+                        <div class="user-list" style="margin-top: 4px;">
+                            <span class="label-status" style="margin-right: 4px; color: #F87171;">Mancano:</span>
+                            <span class="user-badge pending"><i data-lucide="clock" style="width:12px;height:12px"></i> Alessandra</span>
+                            <span class="user-badge pending"><i data-lucide="clock" style="width:12px;height:12px"></i> Sharon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Marzo 2026 - Giugno 2026 -->
+            <div class="payment-card">
+                <div class="card-top-row">
+                    <div class="period-info">
+                        <i data-lucide="calendar"></i>
+                        <span class="period-text">March 16, 2026 → June 16, 2026</span>
+                    </div>
+                    <span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span>
+                </div>
+                <div class="card-details-row">
+                    <div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div>
+                    <div class="users-status-group">
+                        <div class="user-list">
+                            <span class="label-status" style="margin-right: 4px;">Completato:</span>
+                            <span class="user-badge paid">Chiara</span>
+                            <span class="user-badge paid">Giulia</span>
+                            <span class="user-badge paid">Riccardo</span>
+                            <span class="user-badge paid">Sergio</span>
+                            <span class="user-badge paid">Sharon</span>
+                            <span class="user-badge paid">Valentina</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dicembre 2025 - Marzo 2026 -->
+            <div class="payment-card">
+                <div class="card-top-row">
+                    <div class="period-info">
+                        <i data-lucide="calendar"></i>
+                        <span class="period-text">December 16, 2025 → March 16, 2026</span>
+                    </div>
+                    <span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span>
+                </div>
+                <div class="card-details-row">
+                    <div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div>
+                    <div class="users-status-group">
+                        <div class="user-list">
+                            <span class="label-status" style="margin-right: 4px;">Completato:</span>
+                            <span class="user-badge paid">Chiara</span>
+                            <span class="user-badge paid">Giulia</span>
+                            <span class="user-badge paid">Riccardo</span>
+                            <span class="user-badge paid">Sergio</span>
+                            <span class="user-badge paid">Sharon</span>
+                            <span class="user-badge paid">Valentina</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settembre 2025 - Dicembre 2025 -->
+            <div class="payment-card">
+                <div class="card-top-row">
+                    <div class="period-info">
+                        <i data-lucide="calendar"></i>
+                        <span class="period-text">September 16, 2025 → December 16, 2025</span>
+                    </div>
+                    <span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span>
+                </div>
+                <div class="card-details-row">
+                    <div class="price-tag">€10.50 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div>
+                    <div class="users-status-group">
+                        <div class="user-list">
+                            <span class="label-status" style="margin-right: 4px;">Completato:</span>
+                            <span class="user-badge paid">Chiara</span>
+                            <span class="user-badge paid">Giulia</span>
+                            <span class="user-badge paid">Riccardo</span>
+                            <span class="user-badge paid">Sergio</span>
+                            <span class="user-badge paid">Sharon</span>
+                            <span class="user-badge paid">Valentina</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Giugno 2025 - Settembre 2025 -->
+            <div class="payment-card">
+                <div class="card-top-row">
+                    <div class="period-info">
+                        <i data-lucide="calendar"></i>
+                        <span class="period-text">June 16, 2025 → September 16, 2025</span>
+                    </div>
+                    <span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">3 mesi</span>
+                </div>
+                <div class="card-details-row">
+                    <div class="price-tag">€9.00 <span style="font-size:11px; font-weight:400; color:var(--text-secondary);">a persona</span></div>
+                    <div class="users-status-group">
+                        <div class="user-list">
+                            <span class="label-status" style="margin-right: 4px;">Completato:</span>
+                            <span class="user-badge paid">Chiara</span>
+                            <span class="user-badge paid">Giulia</span>
+                            <span class="user-badge paid">Riccardo</span>
+                            <span class="user-badge paid">Sergio</span>
+                            <span class="user-badge paid">Sharon</span>
+                            <span class="user-badge paid">Valentina</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- (Nota: Lo storico completo precedente con le stesse modalità è consultabile nel file CSV) -->
+        </main>
+
+        <footer class="app-footer">
+            <span>Spotify Family Tracker — Riccardo Raineri — 2026</span>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        });
+    </script>
+</body>
+</html>
