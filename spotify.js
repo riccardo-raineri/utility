@@ -1,5 +1,5 @@
 // ==> INSERISCI QUI L'URL DELLA TUA WEB APP GOOGLE APPS SCRIPT <==
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzqVR3qu_VWJm-RfCDrw4-0QxuzX9DTbUibPe0W24s/dev';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby5YRkeEUhDkDMX85Oh7Gkw7T96x8QLwUAsRSt5XT510Go-bfdhgMnAImDVW0io9nkO/exec';
 const SECRET_PIN = "0712"; 
 const ALL_USERS = ["Chiara", "Giulia", "Riccardo", "Sergio", "Sharon", "Valentina", "Alessandra"];
 
