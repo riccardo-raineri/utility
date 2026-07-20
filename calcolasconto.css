@@ -20,21 +20,29 @@
     --accent: #1f7a5c;          /* verde smeraldo desaturato */
     --accent-soft: rgba(31, 122, 92, 0.08);
     --accent-strong: #175f47;
+    --accent-border: rgba(31, 122, 92, 0.2);   /* bordo del riquadro risultato */
+    --accent-track: rgba(31, 122, 92, 0.15);   /* binario della barra risparmio */
+    --pattern-line: rgba(0, 0, 0, 0.025);      /* texture "carta" di sfondo */
     --radius: 10px;
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
 }
 
-/* --- Tema scuro: attivato aggiungendo data-theme="dark" al <body> ----- */
+/* --- Tema scuro: attivato aggiungendo data-theme="dark" al <body> -----
+   Stessa identità "carta", ma con toni caldi scuri (quasi carbone)
+   invece del bianco/crema, e verde più acceso per restare leggibile. */
 [data-theme="dark"] {
-    --bg: #1c1a17;
-    --surface: #2b2824;
-    --border: #403d38;
-    --text: #e8e6e1;
-    --text-muted: #9e9a92;
-    --accent: #2eb88a;
-    --accent-soft: rgba(46, 184, 138, 0.15);
-    --accent-strong: #45d9a8;
+    --bg: #17140f;
+    --surface: #201c16;
+    --border: #332d22;
+    --text: #f1ede4;
+    --text-muted: #a89f8f;
+    --accent: #35a179;
+    --accent-soft: rgba(53, 161, 121, 0.14);
+    --accent-strong: #4dbd8f;
+    --accent-border: rgba(53, 161, 121, 0.28);
+    --accent-track: rgba(53, 161, 121, 0.2);
+    --pattern-line: rgba(255, 255, 255, 0.03);
 }
 
 * {
@@ -49,11 +57,12 @@ body {
     color: var(--text);
 
     /* Pattern "carta": righe diagonali larghe 14px, quasi invisibili
-       (opacità 0.025) per dare texture senza sporcare la lettura. */
+       per dare texture senza sporcare la lettura. --pattern-line cambia
+       da sola con il tema, così il pattern resta coerente in entrambi. */
     background-image: repeating-linear-gradient(
         135deg,
-        rgba(0, 0, 0, 0.025) 0px,
-        rgba(0, 0, 0, 0.025) 1px,
+        var(--pattern-line) 0px,
+        var(--pattern-line) 1px,
         transparent 1px,
         transparent 14px
     );
@@ -101,14 +110,8 @@ body {
 .card-header {
     display: flex;
     align-items: center;
-    justify-content: space-between; /* Allinea il titolo a sinistra e il tasto a destra */
-    margin-bottom: 28px;
-}
-
-.header-group {
-    display: flex;
-    align-items: center;
     gap: 10px;
+    margin-bottom: 28px;
 }
 
 .card-header .icon {
@@ -134,17 +137,23 @@ body {
     color: var(--text-muted);
 }
 
-/* Bottone di cambio tema: cerchio con bordo */
+/* Il titolo occupa lo spazio restante, spingendo il bottone tema a destra */
+.card-header .title-group {
+    flex-grow: 1;
+}
+
+/* Bottone cambio tema: stessa icona SVG sole/luna usata nel convertitore,
+   per coerenza visiva tra gli strumenti che offrono il doppio tema. */
 .theme-toggle {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--accent-soft);
     border: 1px solid var(--border);
     border-radius: 50%;
-    font-size: 15px;
     cursor: pointer;
     color: var(--text);
     transition: border-color 0.2s ease;
@@ -153,6 +162,16 @@ body {
 .theme-toggle:hover {
     border-color: var(--accent);
 }
+
+.theme-toggle svg {
+    width: 15px;
+    height: 15px;
+}
+
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: block; }
+[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
 .input-group {
     margin-bottom: 18px;
@@ -177,7 +196,7 @@ input {
     border-radius: 8px;
     font-size: 16px;
     font-family: var(--font-mono);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.25s ease, color 0.25s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 input:focus {
@@ -241,7 +260,7 @@ button:hover {
     margin-top: 22px;
     padding: 18px;
     background: var(--accent-soft);
-    border: 1px solid rgba(31, 122, 92, 0.2);
+    border: 1px solid var(--accent-border);
     border-radius: 10px;
     display: none; /* rivelato via JS dopo il calcolo */
 }
@@ -275,7 +294,7 @@ button:hover {
 .savings-bar-track {
     margin-top: 14px;
     height: 6px;
-    background: rgba(31, 122, 92, 0.15);
+    background: var(--accent-track);
     border-radius: 999px;
     overflow: hidden;
 }

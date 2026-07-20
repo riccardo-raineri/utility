@@ -3,10 +3,16 @@
    Foglio di stile del "Convertitore Universale".
 
    DIREZIONE GRAFICA
-   Unico strumento con doppio tema (chiaro/scuro), mantenuto perché è
-   già una funzione utile dell'originale: qui viene solo raffinato,
-   con viola più desaturato (meno "brillante") e un pattern a puntini
-   leggerissimo che si adatta automaticamente al tema attivo.
+   Unico strumento con doppio tema (chiaro/scuro), viola desaturato e
+   pattern a puntini che si adatta al tema attivo tramite --pattern-dot.
+   Rispetto alla versione precedente:
+   - l'icona di cambio tema non è più un emoji/carattere unicode ma due
+     piccole icone SVG a tratto (sole/luna) disegnate con currentColor,
+     così seguono sempre il colore del testo e restano nitide a ogni
+     dimensione dello schermo;
+   - è comparsa una barra "Unità / Valuta" sopra la tendina delle
+     categorie: la valuta non è più una voce nel menu a tendina ma una
+     modalità a sé stante, sempre raggiungibile con un tap.
    ===================================================================== */
 
 :root {
@@ -97,7 +103,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
 
 .header h2 {
@@ -112,8 +118,13 @@ body {
     margin-top: 2px;
 }
 
-/* Bottone di cambio tema: cerchio con bordo invece dell'emoji isolata,
-   per restare nello stile minimale del resto del sito */
+/* =========================================================
+   BOTTONE CAMBIO TEMA (icona SVG sole/luna)
+   Le due icone sono entrambe nel markup: mostriamo/nascondiamo l'una
+   o l'altra in base all'attributo data-theme sul <body>, invece di
+   riscrivere un'emoji via JS. Così l'icona resta un tratto vettoriale
+   sempre nitido, coerente con il resto della grafica "a linee".
+   ========================================================= */
 .theme-toggle {
     width: 36px;
     height: 36px;
@@ -123,7 +134,6 @@ body {
     background: var(--accent-soft);
     border: 1px solid var(--border);
     border-radius: 50%;
-    font-size: 15px;
     cursor: pointer;
     color: var(--text);
     transition: border-color 0.2s ease;
@@ -131,6 +141,57 @@ body {
 
 .theme-toggle:hover {
     border-color: var(--accent);
+}
+
+.theme-toggle svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Di default (tema chiaro) è visibile solo l'icona "luna": cliccandola
+   si passa al tema scuro. */
+.theme-toggle .icon-sun { display: none; }
+.theme-toggle .icon-moon { display: block; }
+
+/* In tema scuro si inverte: resta visibile solo l'icona "sole", che
+   riporta al tema chiaro. */
+[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
+[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+/* =========================================================
+   TAB "UNITÀ / VALUTA"
+   Sostituisce la vecchia voce "Valuta" dentro il menu a tendina:
+   ora è una modalità sempre visibile e raggiungibile con un tap,
+   con lo stesso stile a pillola usato altrove nel sito.
+   ========================================================= */
+.mode-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+    margin-bottom: 18px;
+}
+
+.mode-tab {
+    flex: 1;
+    text-align: center;
+    padding: 9px 10px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.mode-tab.active {
+    background: var(--accent);
+    color: #ffffff;
 }
 
 select, input {
@@ -177,7 +238,7 @@ select.unit-select {
     font-size: 13.5px;
 }
 
-/* Bottone copia accanto a ciascun input (nuova funzione) */
+/* Bottone copia accanto a ciascun input */
 .copy-btn {
     flex: 0 0 auto;
     width: 38px;
@@ -199,7 +260,7 @@ select.unit-select {
     border-color: var(--accent);
 }
 
-/* Feedback momentaneo "Copiato!" mostrato sopra al bottone (nuova funzione) */
+/* Feedback momentaneo "Copiato!" mostrato sopra al bottone */
 .copy-feedback {
     position: relative;
 }

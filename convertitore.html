@@ -6,7 +6,7 @@
     <title>Convertitore Universale</title>
     <link rel="stylesheet" href="convertitore.css">
 </head>
-<body data-theme="dark">
+<body>
 
     <a class="back-link" href="dashboard.html">← Dashboard</a>
 
@@ -16,23 +16,51 @@
                 <h2>Convertitore</h2>
                 <div class="subtitle">Unità, valute e altro in tempo reale</div>
             </div>
-            <!-- Al clic esegue toggleTheme() -->
-            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">⏾</button>
+
+            <!-- Bottone tema: contiene entrambe le icone SVG, il CSS mostra
+                 solo quella giusta in base al tema attivo (vedi convertitore.css) -->
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"/>
+                    <line x1="12" y1="2" x2="12" y2="4"/>
+                    <line x1="12" y1="20" x2="12" y2="22"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="2" y1="12" x2="4" y2="12"/>
+                    <line x1="20" y1="12" x2="22" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
         </div>
 
-        <select class="category-select" id="category" onchange="changeCategory()">
+        <!-- Tab "Unità / Valuta": la valuta è ora una modalità a parte,
+             non più una voce dentro il menu a tendina delle categorie -->
+        <div class="mode-tabs">
+            <button type="button" class="mode-tab active" id="tab-unita" onclick="setMode('unita')">Unità</button>
+            <button type="button" class="mode-tab" id="tab-valuta" onclick="setMode('valuta')">Valuta</button>
+        </div>
+
+        <!-- Visibile solo in modalità "Unità": scelta della categoria -->
+        <select class="category-select" id="category" onchange="populateUnits(this.value)">
             <option value="lunghezza">Lunghezza</option>
             <option value="peso">Peso &amp; Massa</option>
             <option value="temperatura">Temperatura</option>
-            <option value="valuta">Valuta (live)</option>
             <option value="area">Area</option>
             <option value="volume">Volume</option>
             <option value="velocita">Velocità</option>
             <option value="tempo">Tempo</option>
             <option value="dati">Dati digitali</option>
+            <option value="pressione">Pressione</option>
+            <option value="energia">Energia</option>
+            <option value="potenza">Potenza</option>
+            <option value="angolo">Angoli</option>
         </select>
 
-        <!-- Primo blocco: valore in alto + pulsante copia (nuova funzione) -->
+        <!-- Primo blocco: valore in alto + pulsante copia -->
         <div class="input-row">
             <input type="number" id="input1" placeholder="0" oninput="calculate(1)">
             <select class="unit-select" id="unit1" onchange="calculate(1)"></select>
@@ -54,38 +82,121 @@
     <script>
         // ---------------------------------------------------------
         // 1. CAMBIO TEMA CHIARO/SCURO
+        // L'icona non viene più riscritta via JS: cambia da sola via CSS
+        // in base all'attributo data-theme, qui ci limitiamo a impostarlo.
         // ---------------------------------------------------------
         function toggleTheme() {
             const body = document.body;
-            const btn = document.getElementById('theme-btn');
-
             if (body.getAttribute('data-theme') === 'dark') {
                 body.removeAttribute('data-theme');
-                btn.innerText = '⏾';
             } else {
                 body.setAttribute('data-theme', 'dark');
-                btn.innerText = '☼';
             }
         }
 
         // ---------------------------------------------------------
-        // 2. DIZIONARIO DELLE CONVERSIONI
+        // 2. STATO DELLA MODALITÀ (Unità oppure Valuta)
+        // ---------------------------------------------------------
+        let mode = 'unita';
+
+        /**
+         * Passa dalla modalità "Unità" a "Valuta" e viceversa: aggiorna lo
+         * stile dei due tab, mostra/nasconde la tendina delle categorie
+         * (non serve in modalità Valuta) e ripopola le tendine di unità
+         * con l'elenco corretto.
+         */
+        function setMode(newMode) {
+            mode = newMode;
+            document.getElementById('tab-unita').classList.toggle('active', mode === 'unita');
+            document.getElementById('tab-valuta').classList.toggle('active', mode === 'valuta');
+            document.getElementById('category').style.display = mode === 'unita' ? 'block' : 'none';
+
+            if (mode === 'valuta') {
+                populateUnits('valuta');
+            } else {
+                populateUnits(document.getElementById('category').value);
+            }
+        }
+
+        /**
+         * Restituisce la categoria "attiva" in questo momento: se siamo in
+         * modalità Valuta è sempre "valuta", altrimenti è quella scelta
+         * nella tendina delle categorie. Usata da calculate() e dal resto
+         * dello script per non dover ripetere questo controllo ovunque.
+         */
+        function getActiveCategory() {
+            return mode === 'valuta' ? 'valuta' : document.getElementById('category').value;
+        }
+
+        // ---------------------------------------------------------
+        // 3. DIZIONARIO DELLE CONVERSIONI
         // Ogni unità ha un valore rispetto a un'unità base per categoria.
+        // Elenco ampliato rispetto alla versione precedente, con molte
+        // più unità per ciascuna categoria e tre categorie nuove
+        // (pressione, energia, potenza, angoli).
         // ---------------------------------------------------------
         let conversionData = {
-            lunghezza: { "Metri (m)": 1, "Millimetri (mm)": 0.001, "Centimetri (cm)": 0.01, "Chilometri (km)": 1000, "Pollici (in)": 0.0254, "Piedi (ft)": 0.3048, "Miglia (mi)": 1609.344 },
-            peso: { "Grammi (g)": 1, "Chilogrammi (kg)": 1000, "Once (oz)": 28.3495, "Libbre (lb)": 453.592 },
-            area: { "Metri quadri (m²)": 1, "Ettari (ha)": 10000, "Chilometri quadri (km²)": 1000000, "Acri (ac)": 4046.86 },
-            volume: { "Litri (l)": 1, "Millilitri (ml)": 0.001, "Metri cubi (m³)": 1000, "Galloni US (gal)": 3.78541 },
-            velocita: { "Km/h": 1, "Metri/sec (m/s)": 3.6, "Miglia/h (mph)": 1.60934, "Nodi (kn)": 1.852 },
-            tempo: { "Secondi (s)": 1, "Minuti (min)": 60, "Ore (h)": 3600, "Giorni (d)": 86400 },
-            dati: { "Byte (B)": 1, "Kilobyte (KB)": 1024, "Megabyte (MB)": 1048576, "Gigabyte (GB)": 1073741824 },
+            lunghezza: {
+                "Millimetri (mm)": 0.001, "Centimetri (cm)": 0.01, "Decimetri (dm)": 0.1,
+                "Metri (m)": 1, "Chilometri (km)": 1000,
+                "Pollici (in)": 0.0254, "Piedi (ft)": 0.3048, "Yard (yd)": 0.9144,
+                "Miglia (mi)": 1609.344, "Miglia nautiche (nmi)": 1852
+            },
+            peso: {
+                "Milligrammi (mg)": 0.001, "Grammi (g)": 1, "Chilogrammi (kg)": 1000,
+                "Quintali (q)": 100000, "Tonnellate (t)": 1000000,
+                "Once (oz)": 28.3495, "Libbre (lb)": 453.592, "Carati (ct)": 0.2
+            },
+            area: {
+                "Centimetri quadri (cm²)": 0.0001, "Metri quadri (m²)": 1,
+                "Ettari (ha)": 10000, "Chilometri quadri (km²)": 1000000,
+                "Piedi quadri (ft²)": 0.092903, "Yard quadre (yd²)": 0.836127, "Acri (ac)": 4046.86
+            },
+            volume: {
+                "Millilitri (ml)": 0.001, "Centilitri (cl)": 0.01, "Decilitri (dl)": 0.1,
+                "Litri (l)": 1, "Metri cubi (m³)": 1000,
+                "Cucchiaini (tsp)": 0.00492892, "Cucchiai (tbsp)": 0.0147868,
+                "Once fluide US (fl oz)": 0.0295735, "Tazze US (cup)": 0.236588,
+                "Pinte US (pt)": 0.473176, "Galloni US (gal)": 3.78541, "Galloni UK (gal UK)": 4.54609
+            },
+            velocita: {
+                "Metri/sec (m/s)": 3.6, "Km/h": 1, "Miglia/h (mph)": 1.60934,
+                "Nodi (kn)": 1.852, "Mach (aria)": 1234.8
+            },
+            tempo: {
+                "Millisecondi (ms)": 0.001, "Secondi (s)": 1, "Minuti (min)": 60,
+                "Ore (h)": 3600, "Giorni (d)": 86400, "Settimane (sett)": 604800,
+                "Mesi (~30gg)": 2629800, "Anni (365,25gg)": 31557600
+            },
+            dati: {
+                "Bit (b)": 0.125, "Byte (B)": 1, "Kilobyte (KB)": 1024,
+                "Megabyte (MB)": 1048576, "Gigabyte (GB)": 1073741824, "Terabyte (TB)": 1099511627776
+            },
+            pressione: {
+                "Pascal (Pa)": 1, "Ettopascal (hPa)": 100, "Kilopascal (kPa)": 1000,
+                "Bar": 100000, "Atmosfere (atm)": 101325, "mmHg (torr)": 133.322, "PSI": 6894.76
+            },
+            energia: {
+                "Joule (J)": 1, "Kilojoule (kJ)": 1000, "Calorie (cal)": 4.184,
+                "Kilocalorie (kcal)": 4184, "Wattora (Wh)": 3600, "Kilowattora (kWh)": 3600000, "BTU": 1055.06
+            },
+            potenza: {
+                "Watt (W)": 1, "Kilowatt (kW)": 1000, "Cavalli vapore (CV)": 735.499, "Horsepower (hp)": 745.7
+            },
+            angolo: {
+                "Gradi (°)": 0.0174533, "Radianti (rad)": 1, "Gradi centesimali (gon)": 0.015708
+            },
             temperatura: { "Celsius (°C)": "special", "Fahrenheit (°F)": "special", "Kelvin (K)": "special" },
+
+            // La valuta parte come "loading": viene sovrascritta da fetchCurrencies()
             valuta: { "EUR (€)": 1, "USD ($)": "loading", "GBP (£)": "loading", "JPY (¥)": "loading", "CHF (Fr)": "loading" }
         };
 
         // ---------------------------------------------------------
-        // 3. RECUPERO VALUTE IN TEMPO REALE TRAMITE API
+        // 4. RECUPERO VALUTE IN TEMPO REALE TRAMITE API
+        // Viene sempre lanciato all'avvio, indipendentemente dalla
+        // modalità attiva, così i tassi sono già pronti appena l'utente
+        // passa sul tab "Valuta".
         // ---------------------------------------------------------
         async function fetchCurrencies() {
             try {
@@ -103,7 +214,8 @@
                     "CNY (¥)": data.rates.CNY
                 };
 
-                if (document.getElementById('category').value === 'valuta') changeCategory();
+                // Se l'utente si trova già sul tab Valuta, ripopola con i tassi appena arrivati
+                if (mode === 'valuta') populateUnits('valuta');
 
                 document.getElementById('status-text').innerText = "Valute aggiornate: " + data.time_last_update_utc.split(' ')[0];
             } catch (e) {
@@ -112,10 +224,12 @@
         }
 
         // ---------------------------------------------------------
-        // 4. CAMBIO CATEGORIA (popola le tendine)
+        // 5. POPOLA LE TENDINE DI UNITÀ PER LA CATEGORIA INDICATA
+        // Sostituisce la vecchia changeCategory(): ora riceve la categoria
+        // come parametro, perché può essere chiamata sia dal cambio della
+        // tendina categorie sia dal cambio di modalità (Unità/Valuta).
         // ---------------------------------------------------------
-        function changeCategory() {
-            const cat = document.getElementById('category').value;
+        function populateUnits(cat) {
             const u1 = document.getElementById('unit1');
             const u2 = document.getElementById('unit2');
 
@@ -133,7 +247,7 @@
         }
 
         // ---------------------------------------------------------
-        // 5. FUNZIONE SPECIALE PER LA TEMPERATURA
+        // 6. FUNZIONE SPECIALE PER LA TEMPERATURA
         // ---------------------------------------------------------
         function calcTemp(val, from, to) {
             let celsius;
@@ -147,10 +261,10 @@
         }
 
         // ---------------------------------------------------------
-        // 6. MOTORE DI CALCOLO PRINCIPALE
+        // 7. MOTORE DI CALCOLO PRINCIPALE
         // ---------------------------------------------------------
         function calculate(source) {
-            const cat = document.getElementById('category').value;
+            const cat = getActiveCategory();
             const val1 = document.getElementById('input1').value;
             const val2 = document.getElementById('input2').value;
             const u1 = document.getElementById('unit1').value;
@@ -179,9 +293,7 @@
         }
 
         // ---------------------------------------------------------
-        // 7. COPIA NEGLI APPUNTI
-        // Copia il valore del campo indicato e mostra un piccolo
-        // feedback "Copiato!" per 1.2 secondi accanto al pulsante.
+        // 8. COPIA NEGLI APPUNTI
         // ---------------------------------------------------------
         function copyValue(inputNumber) {
             const input = document.getElementById('input' + inputNumber);
@@ -197,12 +309,11 @@
         }
 
         // ---------------------------------------------------------
-        // 8. INIZIALIZZAZIONE ALL'AVVIO
+        // 9. INIZIALIZZAZIONE ALL'AVVIO
         // ---------------------------------------------------------
         fetchCurrencies();
-        changeCategory();
+        populateUnits(document.getElementById('category').value);
     </script>
 
 </body>
-
 </html>

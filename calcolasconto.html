@@ -6,22 +6,36 @@
     <title>Calcola Sconto</title>
     <link rel="stylesheet" href="calcolasconto.css">
 </head>
-<body data-theme="dark">
+<body>
 
     <!-- Link di ritorno alla dashboard, presente su tutti gli strumenti -->
     <a class="back-link" href="dashboard.html">← Dashboard</a>
 
     <div class="card">
         <div class="card-header">
-            <div class="header-group">
-                <div class="icon">%</div>
-                <div>
-                    <h2>Calcola Sconto</h2>
-                    <p>Prezzo, risparmio e totale</p>
-                </div>
+            <div class="icon">%</div>
+            <div class="title-group">
+                <h2>Calcola Sconto</h2>
+                <p>Prezzo, risparmio e totale in un colpo d'occhio</p>
             </div>
-            <!-- Bottone di cambio tema -->
-            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">⏾</button>
+            <!-- Bottone tema: stessa coppia di icone SVG del convertitore,
+                 il CSS mostra solo quella giusta in base a data-theme -->
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"/>
+                    <line x1="12" y1="2" x2="12" y2="4"/>
+                    <line x1="12" y1="20" x2="12" y2="22"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="2" y1="12" x2="4" y2="12"/>
+                    <line x1="20" y1="12" x2="22" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
         </div>
 
         <div class="input-group">
@@ -69,18 +83,16 @@
 
     <script>
         /**
-         * Alterna il tema chiaro/scuro.
+         * Alterna il tema chiaro/scuro impostando (o rimuovendo) l'attributo
+         * data-theme sul <body>. L'icona sole/luna nel bottone cambia da
+         * sola via CSS in base a questo attributo (vedi calcolasconto.css).
          */
         function toggleTheme() {
             const body = document.body;
-            const btn = document.getElementById('theme-btn');
-
             if (body.getAttribute('data-theme') === 'dark') {
                 body.removeAttribute('data-theme');
-                btn.innerText = '⏾';
             } else {
                 body.setAttribute('data-theme', 'dark');
-                btn.innerText = '☼';
             }
         }
 
