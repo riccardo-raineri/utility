@@ -438,8 +438,8 @@
 
         <div class="form-group">
             <label for="num-players">Numero di giocatori (3 - 20)</label>
-            <input type="number" id="num-players" min="3" max="20" value="4">
-        </div>
+<input type="number" id="num-players" min="3" max="20" value="4" inputmode="numeric" pattern="[0-9]*">
+		</div>
 
         <button class="action-btn" onclick="generatePlayerInputs()">
             Avanti
@@ -462,8 +462,8 @@
 
         <div class="form-group">
             <label for="base-impostors">Spie fisse</label>
-            <input type="number" id="base-impostors" min="1" value="1">
-        </div>
+<input type="number" id="base-impostors" min="1" value="1" inputmode="numeric" pattern="[0-9]*">
+		</div>
 
         <!-- SEZIONE SPIE EXTRA -->
         <div class="sub-settings">
@@ -481,8 +481,8 @@
             <div id="extra-spies-settings" class="hidden" style="margin-top: 16px;">
                 <div class="form-group" style="margin-bottom: 12px;">
                     <label for="extra-threshold">Spie extra possibili</label>
-                    <input type="number" id="extra-threshold" min="1" value="1">
-                </div>
+<input type="number" id="extra-threshold" min="1" value="1" inputmode="numeric" pattern="[0-9]*">
+				</div>
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>Probabilità</label>
                     <div class="btn-group">
@@ -537,8 +537,7 @@
                         <button type="button" class="time-btn active" data-val="5">5</button>
                         <button type="button" class="time-btn" data-val="altro">Altro</button>
                     </div>
-                    <input type="number" id="custom-timer" class="hidden" min="1" value="10" style="margin-top: 12px;" placeholder="Inserisci minuti">
-                </div>
+<input type="number" id="custom-timer" class="hidden" min="1" value="10" style="margin-top: 12px;" placeholder="Inserisci minuti" inputmode="numeric" pattern="[0-9]*">                </div>
             </div>
         </div>
 
