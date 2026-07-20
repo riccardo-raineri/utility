@@ -4,159 +4,419 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Il Gioco della Spia</title>
+
+	<!-- FOGLIO DI STILE CSS -->
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --primary: #6366f1;
-            --primary-hover: #4f46e5;
-            --accent: #ec4899;
-            --text: #f8fafc;
-            --text-muted: #94a3b8;
-            --danger: #ef4444;
-            --success: #22c55e;
+            --bg: #09090b;
+            --surface: #121215;
+            --surface-hover: #1c1c21;
+            --border: #27272a;
+            --primary: #dc2626;
+            --primary-hover: #b91c1c;
+            --primary-light: rgba(220, 38, 38, 0.1);
+            --text: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --success: #10b981;
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            background-color: var(--bg);
             color: var(--text);
-            margin: 0;
-            padding: 20px;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
+            padding: 24px;
         }
 
         .container {
             width: 100%;
-            max-width: 500px;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
-            box-sizing: border-box;
+            max-width: 480px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 40px 32px;
+            border-radius: var(--radius);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .text-center {
+            text-align: center;
         }
 
         h1, h2, h3 {
             text-align: center;
-            color: var(--text);
-            margin-top: 0;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+            margin-bottom: 6px;
         }
 
-        h1 {
-            color: var(--primary);
-            margin-bottom: 5px;
-        }
+        h1 { font-size: 1.5rem; }
+        h2 { font-size: 1.25rem; }
+        h3 { font-size: 1.3rem; margin-bottom: 20px; }
 
         .subtitle {
             text-align: center;
             color: var(--text-muted);
             font-size: 0.9rem;
-            margin-bottom: 25px;
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+		
+		h6 { 
+            font-size: 0.85rem; 
+            font-weight: normal; 
+            color: var(--text-muted); 
+            margin-top: 4px;
+            line-height: 1.4;
+        }
+
+        .header-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            color: var(--primary);
+        }
+
+        .header-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .form-group {
             margin-bottom: 20px;
+            text-align: left;
         }
 
         label {
             display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-muted);
             margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        input[type="number"], input[type="text"], select {
+        input[type="number"], input[type="text"] {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #334155;
-            background: #0f172a;
+            padding: 12px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
             color: var(--text);
             border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 1rem;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        input:focus, select:focus {
+        input:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
 
         .player-inputs-container {
-            max-height: 200px;
+            max-height: 220px;
             overflow-y: auto;
             margin-bottom: 20px;
-            padding-right: 5px;
+            padding-right: 4px;
+        }
+
+        .player-inputs-container::-webkit-scrollbar {
+            width: 4px;
+        }
+        .player-inputs-container::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
         }
 
         .player-row {
-            display: flex;
-            gap: 10px;
             margin-bottom: 10px;
         }
 
-        button {
+        button.action-btn {
             width: 100%;
-            padding: 12px;
+            padding: 12px 16px;
             background: var(--primary);
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
+            font-size: 0.95rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        button:hover {
+        button.action-btn:hover {
             background: var(--primary-hover);
         }
 
+        button.action-btn:active {
+            transform: scale(0.98);
+        }
+
         .btn-secondary {
-            background: #334155;
+            background: transparent !important;
+            border: 1px solid var(--border) !important;
+            color: var(--text) !important;
             margin-top: 10px;
         }
 
         .btn-secondary:hover {
-            background: #475569;
+            background: var(--surface-hover) !important;
+            border-color: var(--text-muted) !important;
+        }
+
+        /* --- UI COMPONENTS: TOGGLES AND BUTTON GROUPS --- */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border);
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 0;
+        }
+        .toggle-text-container {
+            flex-grow: 1;
+            text-align: left;
+        }
+        .toggle-row label.toggle-label {
+            margin-bottom: 0;
+            font-size: 0.9rem;
+            color: var(--text);
+            text-transform: none;
+            letter-spacing: normal;
+        }
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+        .btn-group button {
+            flex: 1;
+            padding: 10px 0;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .btn-group button.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+
+        /* Custom Dropdown Checkbox Styles */
+        .dropdown-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-select-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .dropdown-select-btn:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .dropdown-list {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 10;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-size: 0.9rem;
+            color: var(--text);
+            user-select: none;
+        }
+
+        .dropdown-item:hover {
+            background: var(--surface-hover);
+        }
+
+        .dropdown-item input[type="checkbox"] {
+            accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
         }
 
         .card-reveal {
-            background: #0f172a;
-            border: 2px dashed var(--primary);
-            padding: 25px;
-            border-radius: 12px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 32px 20px;
+            border-radius: 10px;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
 
         .secret-word {
-            font-size: 1.8rem;
-            color: var(--accent);
-            font-weight: bold;
-            margin: 15px 0;
-            word-break: break-word;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 12px;
+            letter-spacing: -0.02em;
         }
 
         .role-title {
-            font-size: 1.4rem;
-            margin-bottom: 10px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .info-box {
+            background: var(--surface-hover);
+            border-left: 3px solid var(--primary);
+            padding: 12px 16px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            border-radius: 0 8px 8px 0;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .info-box strong {
+            color: var(--text);
         }
 
         .hidden {
             display: none !important;
         }
 
-        .info-box {
-            background: rgba(99, 102, 241, 0.1);
-            border-left: 4px solid var(--primary);
-            padding: 10px 15px;
-            font-size: 0.9rem;
-            color: var(--text-muted);
+        .sub-settings {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 12px;
             margin-bottom: 20px;
-            border-radius: 0 8px 8px 0;
+        }
+
+        /* Timer Styles */
+        .timer-container {
+            margin: 30px 0;
+            text-align: center;
+        }
+        
+        .timer-display {
+            font-size: 3.5rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: var(--text);
+            margin-bottom: 15px;
+            letter-spacing: -0.05em;
+        }
+
+        .timer-active {
+            color: var(--success);
+        }
+
+        .timer-ended {
+            color: var(--primary);
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); opacity: 1; }
+            to { transform: scale(1.05); opacity: 0.8; }
         }
     </style>
 </head>
@@ -164,104 +424,314 @@
 
 <div class="container">
 
-    <!-- SCHERMATA 1: CONFIGURAZIONE -->
+    <!-- SCHERMATA 1: SETUP NUMERO GIOCATORI -->
     <div id="setup-screen">
-        <h1>🕵️‍♂️ Gioco della Spia</h1>
-        <div class="subtitle">Trova l'impostore prima che sia troppo tardi</div>
+        <div class="header-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <h1>Il Gioco della Spia</h1>
+        <div class="subtitle"><strong>Benvenuto/a!</strong>
+			<br> <br>
+			Configura il numero dei giocatori per iniziare la sessione.</div>
 
         <div class="form-group">
-            <label for="num-players">Numero di partecipanti (3 - 20):</label>
+            <label for="num-players">Numero di giocatori (3 - 20)</label>
             <input type="number" id="num-players" min="3" max="20" value="4">
         </div>
 
-        <button onclick="generatePlayerInputs()">Avanti: Inserisci Nomi</button>
+        <button class="action-btn" onclick="generatePlayerInputs()">
+            Avanti
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
     </div>
 
-    <!-- SCHERMATA 2: INSERIMENTO NOMI E OPZIONI -->
+    <!-- SCHERMATA 2: NOMI E OPZIONI SPIA -->
     <div id="names-screen" class="hidden">
-        <h1>👥 Nomi e Impostori</h1>
-        <div class="subtitle">Personalizza i dettagli della partita</div>
+        <div class="header-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </div>
+        <h1>Personalizza il gioco</h1>
+        <div class="subtitle">Assegna i nomi, regola le spie e il timer.</div>
 
         <div class="form-group">
-            <label>Nomi dei Giocatori:</label>
+            <label>Nomi dei Giocatori</label>
             <div id="player-inputs-list" class="player-inputs-container"></div>
         </div>
 
         <div class="form-group">
-            <label for="impostors-mode">Gestione Spie:</label>
-            <select id="impostors-mode" onchange="toggleImpostorSettings()">
-                <option value="fixed">Numero fisso</option>
-                <option value="dynamic">Casuale (con % di probabilità)</option>
-            </select>
+            <label for="base-impostors">Spie fisse</label>
+            <input type="number" id="base-impostors" min="1" value="1">
         </div>
 
-        <div class="form-group" id="fixed-imp-group">
-            <label for="num-impostors">Numero di Spie:</label>
-            <input type="number" id="num-impostors" min="1" value="1">
+        <!-- SEZIONE SPIE EXTRA -->
+        <div class="sub-settings">
+            <div class="toggle-row">
+                <div class="toggle-text-container">
+                    <label>Spie extra?</label>
+                    <h6 id="extra-spies-description">Attiva per aggiungere delle spie extra in modo casuale. Scrivi il numero di spie extra e la percentuale che queste siano presenti nella partita.</h6>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="enable-extra-spies">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div id="extra-spies-settings" class="hidden" style="margin-top: 16px;">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label for="extra-threshold">NSpie extra possibili</label>
+                    <input type="number" id="extra-threshold" min="1" value="1">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Probabilità</label>
+                    <div class="btn-group">
+                        <button type="button" class="prob-btn" data-val="25">25%</button>
+                        <button type="button" class="prob-btn active" data-val="50">50%</button>
+                        <button type="button" class="prob-btn" data-val="75">75%</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group hidden" id="dynamic-imp-group">
-            <label for="imp-probability">Probabilità che ci sia una Spia (%):</label>
-            <input type="number" id="imp-probability" min="0" max="100" value="80">
-            <label style="margin-top:10px;" for="max-dynamic-imp">Spie massime possibili:</label>
-            <input type="number" id="max-dynamic-imp" min="1" value="2">
-        </div>
-
+        <!-- MENU A TENDINA CATEGORIE CON CHECKBOX -->
         <div class="form-group">
-            <label for="category-select">Categoria Segreta:</label>
-            <select id="category-select">
-                <option value="random">Casuale (Tutte le categorie)</option>
-                <option value="Luoghi">Luoghi & Edifici</option>
-                <option value="Cibo">Cibo & Bevande</option>
-                <option value="Oggetti">Oggetti quotidiani</option>
-                <option value="Animali">Animali</option>
-            </select>
+            <label>Categorie</label>
+            <div class="dropdown-container">
+                <button type="button" id="dropdown-toggle-btn" class="dropdown-select-btn" onclick="toggleCategoryDropdown(event)">
+                    <span id="dropdown-selected-text">Tutte attive (7)</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div id="dropdown-list-content" class="dropdown-list hidden">
+                    <label class="dropdown-item"><input type="checkbox" class="cat-checkbox" value="Luoghi" checked onchange="updateCategorySelection()"> Luoghi & Edifici</label>
+                    <label class="dropdown-item"><input type="checkbox" class="cat-checkbox" value="Cibo" checked onchange="updateCategorySelection()"> Cibo & Bevande</label>
+                    <label class="dropdown-item"><input type="checkbox" class="cat-checkbox" value="Oggetti" checked onchange="updateCategorySelection()"> Oggetti quotidiani</label>
+                    <label class="dropdown-item"><input type="checkbox" class="cat-checkbox" value="Animali" checked onchange="updateCategorySelection()"> Animali</label>
+                    <label class="dropdown-item"><input type="checkbox" class="cat-checkbox" value="Città" checked onchange="updateCategorySelection()"> Città</label>
+                    <label class="dropdown-item"><input type="checkbox" class="cat-checkbox" value="Marche" checked onchange="updateCategorySelection()"> Marche</label>
+                    <label class="dropdown-item"><input type="checkbox" class="cat-checkbox" value="Sport" checked onchange="updateCategorySelection()"> Sport</label>
+                </div>
+            </div>
         </div>
 
-        <button onclick="startGame()">Inizia la Partita</button>
-        <button class="btn-secondary" onclick="location.reload()">Indietro</button>
+        <!-- SEZIONE TIMER -->
+        <div class="sub-settings">
+            <div class="toggle-row">
+                <div class="toggle-text-container">
+                    <label>Timer</label>
+					<h6 id="timer-description">Imposta un timer per terminare la partita.</h6>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="enable-timer" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div id="timer-settings" style="margin-top: 16px;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Minuti</label>
+                    <div class="btn-group">
+                        <button type="button" class="time-btn" data-val="2">2</button>
+                        <button type="button" class="time-btn" data-val="3">3</button>
+                        <button type="button" class="time-btn" data-val="4">4</button>
+                        <button type="button" class="time-btn active" data-val="5">5</button>
+                        <button type="button" class="time-btn" data-val="altro">Altro</button>
+                    </div>
+                    <input type="number" id="custom-timer" class="hidden" min="1" value="10" style="margin-top: 12px;" placeholder="Inserisci minuti">
+                </div>
+            </div>
+        </div>
+
+        <button class="action-btn" onclick="startGame()">
+            Inizia Partita
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+        </button>
+        <button class="action-btn btn-secondary" onclick="location.reload()">Indietro</button>
     </div>
 
-    <!-- SCHERMATA 3: PASSAGGIO TELEFONO / VISUALIZZAZIONE RUOLO -->
+    <!-- SCHERMATA 3: PASSAGGIO TELEFONO -->
     <div id="pass-screen" class="hidden">
-        <h2 id="pass-title">Passa il telefono a...</h2>
-        <div class="info-box">Assicurati che gli altri non stiano guardando lo schermo!</div>
-        <button onclick="revealRole()">Mostra il mio ruolo</button>
+        <div class="header-icon">
+            <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+        </div>
+        <h2 id="pass-title">Passa il telefono</h2>
+        <div class="subtitle">Consegna il dispositivo al prossimo giocatore.</div>
+        <button class="action-btn" onclick="revealRole()">Visualizza Ruolo</button>
     </div>
 
     <!-- SCHERMATA 4: RIVELAZIONE RUOLO -->
     <div id="reveal-screen" class="hidden">
-        <h3 id="current-player-name" style="color: var(--primary);">Giocatore</h3>
+        <div class="text-center" style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Giocatore</div>
+        <h3 id="current-player-name">Nome</h3>
+        
         <div class="card-reveal">
             <div id="role-content"></div>
         </div>
-        <button onclick="nextPlayer()">Ho letto, passa al prossimo</button>
+
+        <button class="action-btn" onclick="nextPlayer()">
+            Ho letto, prosegui
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
     </div>
 
-    <!-- SCHERMATA 5: FINE GIOCO / SESSIONE PRONTA -->
+    <!-- SCHERMATA 5: FINE CONFIGURAZIONE / GIOCO PRONTO -->
     <div id="end-setup-screen" class="hidden">
-        <h1>🎲 Tutti hanno visto!</h1>
-        <div class="subtitle">La partita ha ufficialmente inizio. Discutete e trovate la spia!</div>
+        <div class="header-icon" style="color: var(--success); background: rgba(16, 185, 129, 0.1);">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <h1>Pronti a partire</h1>
+        <div class="subtitle">Tutti i ruoli sono stati distribuiti. Iniziate a indagare!</div>
         
-        <div class="info-box" id="game-summary" style="margin-top: 20px;"></div>
+        <div class="info-box" id="game-summary"></div>
 
-        <button onclick="location.reload()">Nuova Partita</button>
+        <div class="timer-container" id="final-timer-container">
+            <div id="timer-display" class="timer-display">05:00</div>
+            <button class="action-btn" id="timer-btn" onclick="toggleTimer()">Avvia Timer</button>
+        </div>
+
+        <button class="action-btn btn-secondary" onclick="location.reload()">Nuova Partita</button>
     </div>
 
 </div>
 
 <script>
-    // Database delle parole segrete suddivise per categoria
     const wordDatabase = {
-        "Luoghi": ["Spiaggia", "Ospedale", "Scuola", "Stazione Spaziale", "Cinema", "Supermercato", "Ristorante", "Prigione", "Aereo", "Castello", "Stadio", "Discoteca"],
-        "Cibo": ["Pizza", "Sushi", "Gelato", "Hamburger", "Lasagna", "Cioccolato", "Caffè", "Paella", "Tiramisù", "Popcorn"],
-        "Oggetti": ["Smartphone", "Spazzolino", "Ombrello", "Chitarra", "Orologio", "Chiavi", "Occhiali da sole", "Zaino", "Cuscino", "Televisore"],
-        "Animali": ["Pinguino", "Leone", "Delfino", "Kanguro", "Elefante", "Ghepardo", "Gufo", "Panda", "Squalo", "Giraffa"]
+        "Luoghi": [
+            "Spiaggia", "Ospedale", "Scuola", "Stazione Spaziale", "Cinema", 
+            "Supermercato", "Ristorante", "Prigione", "Aereo", "Castello", 
+            "Stadio", "Discoteca", "Biblioteca", "Museo", "Teatro", 
+            "Aeroporto", "Stazione", "Parco di divertimenti", "Piscina", "Banco"
+        ],
+        "Cibo": [
+            "Pizza", "Sushi", "Gelato", "Hamburger", "Lasagna", 
+            "Cioccolato", "Caffè", "Paella", "Tiramisù", "Popcorn", 
+            "Spaghetti", "Kebab", "Pancakes", "Croissant", "Risotto", 
+            "Tacos", "Insalata", "Bistecca", "Zuppa", "Donut"
+        ],
+        "Oggetti": [
+            "Smartphone", "Spazzolino", "Ombrello", "Chitarra", "Orologio", 
+            "Chiavi", "Occhiali da sole", "Zaino", "Cuscino", "Televisore", 
+            "Lampada", "Forbici", "Portafoglio", "Cinghia", "Martello", 
+            "Fotocamera", "Pc portatile", "Libro", "Bottiglia", "Pentola"
+        ],
+        "Animali": [
+            "Pinguino", "Leone", "Delfino", "Canguro", "Elefante", 
+            "Ghepardo", "Gufo", "Panda", "Squalo", "Giraffa", 
+            "Tigre", "Lupo", "Orso", "Zebra", "Koala", 
+            "Volpe", "Aquila", "Cavallo", "Scimmia", "Tartaruga"
+        ],
+        "Città": [
+            "Roma", "Parigi", "New York", "Tokyo", "Londra", 
+            "Barcellona", "Berlino", "Sydney", "Dubai", "Amsterdam", 
+            "Venezia", "Los Angeles", "Rio de Janeiro", "Pechino", "Il Cairo", 
+            "Toronto", "Firenze", "Bangkok", "Vienna", "Madrid"
+        ],
+        "Marche": [
+            "Nike", "Apple", "Adidas", "Coca-Cola", "Ferrari", 
+            "Samsung", "Amazon", "McDonald's", "PlayStation", "Gucci", 
+            "Tesla", "Microsoft", "Netflix", "Disney", "BMW", 
+            "LEGO", "IKEA", "Rolex", "Zara", "Barilla"
+        ],
+        "Sport": [
+            "Calcio", "Basket", "Tennis", "Nuoto", "Pallavolo", 
+            "Ciclismo", "Atletica", "Rugby", "Sci", "Boxe", 
+            "Formula 1", "Golf", "Skateboard", "Ginnastica", "Surf", 
+            "Baseball", "Badminton", "Arrampicata", "Pattinaggio", "Snowboard"
+        ]
     };
 
     let players = [];
     let secretWord = "";
     let currentPlayerIndex = 0;
+    
+    // Timer e Toggles variabili
+    let timerInterval = null;
+    let timeLeft = 0; 
+    let timerRunning = false;
+    let wakeLock = null;
+
+    let isExtraSpiesEnabled = false;
+    let extraSpiesProbValue = 50;
+    
+    let isTimerEnabled = true;
+    let timerMinutesValue = 5;
+
+    // --- EVENT LISTENERS PER I TOGGLES E BOTTONI ---
+    
+    document.getElementById('enable-extra-spies').addEventListener('change', function() {
+        isExtraSpiesEnabled = this.checked;
+        document.getElementById('extra-spies-settings').classList.toggle('hidden', !isExtraSpiesEnabled);
+        document.getElementById('extra-spies-description').classList.toggle('hidden', isExtraSpiesEnabled);
+    });
+
+    document.getElementById('enable-timer').addEventListener('change', function() {
+        isTimerEnabled = this.checked;
+        document.getElementById('timer-settings').classList.toggle('hidden', !isTimerEnabled);
+		 document.getElementById('timer-description').classList.toggle('hidden', isExtraSpiesEnabled);
+    });
+
+    document.querySelectorAll('.prob-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.prob-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            extraSpiesProbValue = parseInt(this.getAttribute('data-val'));
+        });
+    });
+
+    document.querySelectorAll('.time-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const val = this.getAttribute('data-val');
+            if (val === 'altro') {
+                document.getElementById('custom-timer').classList.remove('hidden');
+                timerMinutesValue = parseInt(document.getElementById('custom-timer').value) || 5;
+            } else {
+                document.getElementById('custom-timer').classList.add('hidden');
+                timerMinutesValue = parseInt(val);
+            }
+        });
+    });
+
+    document.getElementById('custom-timer').addEventListener('input', function() {
+        timerMinutesValue = parseInt(this.value) || 1;
+    });
+
+    // --- GESTIONE MENU A TENDINA CATEGORIE ---
+
+    function toggleCategoryDropdown(event) {
+        event.stopPropagation();
+        const list = document.getElementById('dropdown-list-content');
+        list.classList.toggle('hidden');
+    }
+
+    // Chiudi il menu a tendina se si clicca fuori
+    window.addEventListener('click', function(e) {
+        const container = document.querySelector('.dropdown-container');
+        if (!container.contains(e.target)) {
+            document.getElementById('dropdown-list-content').classList.add('hidden');
+        }
+    });
+
+    function updateCategorySelection() {
+        const checkboxes = document.querySelectorAll('.cat-checkbox');
+        const total = checkboxes.length;
+        let checkedCount = 0;
+        
+        checkboxes.forEach(cb => {
+            if (cb.checked) checkedCount++;
+        });
+
+        const selectedText = document.getElementById('dropdown-selected-text');
+        if (checkedCount === total) {
+            selectedText.innerText = `Tutte attive (${total})`;
+        } else if (checkedCount === 0) {
+            selectedText.innerText = "Nessuna selezionata!";
+        } else {
+            selectedText.innerText = `Selezionate: ${checkedCount}/${total}`;
+        }
+    }
+
+    // --- LOGICA GIOCO ---
 
     function generatePlayerInputs() {
         const num = parseInt(document.getElementById('num-players').value);
@@ -269,7 +739,7 @@
         container.innerHTML = '';
 
         if (num < 3 || num > 20) {
-            alert("Inserisci un numero di giocatori compreso tra 3 e 20.");
+            alert("Inserisci un numero di partecipanti compreso tra 3 e 20.");
             return;
         }
 
@@ -285,74 +755,73 @@
         document.getElementById('names-screen').classList.remove('hidden');
     }
 
-    function toggleImpostorSettings() {
-        const mode = document.getElementById('impostors-mode').value;
-        if (mode === 'fixed') {
-            document.getElementById('fixed-imp-group').classList.remove('hidden');
-            document.getElementById('dynamic-imp-group').classList.add('hidden');
-        } else {
-            document.getElementById('fixed-imp-group').classList.add('hidden');
-            document.getElementById('dynamic-imp-group').classList.remove('hidden');
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
         }
     }
 
     function startGame() {
-        // Raccogli i nomi
         const nameInputs = document.querySelectorAll('.player-name-input');
         players = [];
         nameInputs.forEach((input, index) => {
             let name = input.value.trim() !== "" ? input.value.trim() : `Giocatore ${index + 1}`;
-            players.push({ name: name, isImpostor: false, roleInfo: "" });
+            players.push({ name: name, isImpostor: false });
         });
 
-        // Determina il numero di impostori
-        let numImpostors = 1;
-        const mode = document.getElementById('impostors-mode').value;
         const totalPlayers = players.length;
+        let baseImp = parseInt(document.getElementById('base-impostors').value);
 
-        if (mode === 'fixed') {
-            numImpostors = parseInt(document.getElementById('num-impostors').value);
-            if (numImpostors >= totalPlayers) {
-                alert("Il numero di spie deve essere inferiore al numero totale dei giocatori!");
-                return;
-            }
-        } else {
-            const prob = parseInt(document.getElementById('imp-probability').value);
-            const maxImp = parseInt(document.getElementById('max-dynamic-imp').value);
-            const roll = Math.random() * 100;
-
-            if (roll <= prob) {
-                numImpostors = Math.floor(Math.random() * Math.min(maxImp, totalPlayers - 1)) + 1;
-            } else {
-                numImpostors = 0; // Nessuna spia in questa partita! (Evento raro ma possibile)
-            }
+        if (baseImp >= totalPlayers) {
+            alert("Il numero di spie di base non può essere superiore o uguale al totale dei giocatori.");
+            return;
         }
 
-        // Assegna casualmente le spie
-        let assignedImpostors = 0;
-        while (assignedImpostors < numImpostors) {
-            let randomIndex = Math.floor(Math.random() * totalPlayers);
-            if (!players[randomIndex].isImpostor) {
-                players[randomIndex].isImpostor = true;
-                assignedImpostors++;
+        let totalImpostors = baseImp;
+        
+        // Logica Spie Extra (se abilitata)
+        if (isExtraSpiesEnabled) {
+            let threshold = parseInt(document.getElementById('extra-threshold').value) || 1;
+            if (Math.random() * 100 <= extraSpiesProbValue) {
+                let extraPossible = Math.min(totalPlayers - baseImp - 1, 2); 
+                if (extraPossible > 0) {
+                    totalImpostors = threshold + Math.floor(Math.random() * extraPossible) + 1;
+                }
             }
         }
 
-        // Seleziona la parola segreta
-        const categoryChoice = document.getElementById('category-select').value;
-        let selectedCategoryWords = [];
+        if (totalImpostors >= totalPlayers) totalImpostors = totalPlayers - 1;
+        if (totalImpostors < 1) totalImpostors = 1;
 
-        if (categoryChoice === 'random') {
-            let allCategories = Object.keys(wordDatabase);
-            let randomCat = allCategories[Math.floor(Math.random() * allCategories.length)];
-            selectedCategoryWords = wordDatabase[randomCat];
-        } else {
-            selectedCategoryWords = wordDatabase[categoryChoice];
+        // Gestione Categorie Selezionate tramite Checkbox
+        const activeCategories = [];
+        document.querySelectorAll('.cat-checkbox:checked').forEach(cb => {
+            activeCategories.push(cb.value);
+        });
+
+        if (activeCategories.length === 0) {
+            alert("Seleziona almeno una categoria di parole!");
+            return;
         }
 
-        secretWord = selectedCategoryWords[Math.floor(Math.random() * selectedCategoryWords.length)];
+        // Estrazione casuale della parola tra le categorie spuntate
+        const randomCat = activeCategories[Math.floor(Math.random() * activeCategories.length)];
+        const words = wordDatabase[randomCat];
+        secretWord = words[Math.floor(Math.random() * words.length)];
 
-        // Inizia il giro di visualizzazione
+        // Impostazione Timer (se abilitato)
+        if (isTimerEnabled) {
+            timeLeft = timerMinutesValue * 60;
+            updateTimerDisplay();
+        }
+
+        shuffleArray(players);
+        for (let i = 0; i < totalImpostors; i++) {
+            players[i].isImpostor = true;
+        }
+        shuffleArray(players);
+
         currentPlayerIndex = 0;
         showPassScreen();
     }
@@ -362,7 +831,7 @@
         document.getElementById('reveal-screen').classList.add('hidden');
         document.getElementById('pass-screen').classList.remove('hidden');
         
-        document.getElementById('pass-title').innerText = `Passa il telefono a: ${players[currentPlayerIndex].name}`;
+        document.getElementById('pass-title').innerText = `Passa il dispositivo a ${players[currentPlayerIndex].name}`;
     }
 
     function revealRole() {
@@ -375,13 +844,13 @@
         const roleContent = document.getElementById('role-content');
         if (currentPlayer.isImpostor) {
             roleContent.innerHTML = `
-                <div class="role-title" style="color: var(--danger);">SEI LA SPIA! 🕵️‍♂️</div>
-                <div style="font-size: 0.95rem; color: var(--text-muted);">Non Conosci la parola segreta. Cerca di mimetizzarti ed indovinarla!</div>
+                <div class="role-title" style="color: var(--primary);">SEI LA SPIA</div>
+                <div style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.4;">Non conosci la parola segreta. Ascolta gli altri e cerca di non farti scoprire.</div>
             `;
         } else {
             roleContent.innerHTML = `
-                <div class="role-title" style="color: var(--success);">Sei un Cittadino 😇</div>
-                <div style="font-size: 0.9rem; color: var(--text-muted);">La parola segreta è:</div>
+                <div class="role-title" style="color: var(--success);">Sei un Cittadino</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Parola Segreta</div>
                 <div class="secret-word">${secretWord}</div>
             `;
         }
@@ -392,18 +861,123 @@
         if (currentPlayerIndex < players.length) {
             showPassScreen();
         } else {
-            // Fine del giro di visualizzazione
             document.getElementById('reveal-screen').classList.add('hidden');
             document.getElementById('end-setup-screen').classList.remove('hidden');
             
-            const impostorCount = players.filter(p => p.isImpostor).length;
+            const impCount = players.filter(p => p.isImpostor).length;
             document.getElementById('game-summary').innerHTML = `
-                <strong>Riepilogo Partita:</strong><br>
-                - Giocatori totali: ${players.length}<br>
-                - Spie in gioco: ${impostorCount} ${impostorCount === 0 ? '(Nessuna spia oggi! Sospetti infondati)' : ''}
+                <strong>Riepilogo Sessione:</strong><br>
+                Partecipanti: ${players.length} &bull; Spie in gioco: ${impCount}
             `;
+
+            // Nascondi il container del timer finale se l'opzione è disattivata
+            const finalTimerContainer = document.getElementById('final-timer-container');
+            if (isTimerEnabled) {
+                finalTimerContainer.style.display = 'block';
+            } else {
+                finalTimerContainer.style.display = 'none';
+            }
         }
     }
+
+    // --- GESTIONE TIMER E SCHERMO ATTIVO ---
+
+    async function requestScreenWakeLock() {
+        if ('wakeLock' in navigator) {
+            try {
+                wakeLock = await navigator.wakeLock.request('screen');
+                console.log('Screen Wake Lock attivato.');
+            } catch (err) {
+                console.error(`Errore Wake Lock: ${err.name}, ${err.message}`);
+            }
+        }
+    }
+
+    function releaseWakeLock() {
+        if (wakeLock !== null) {
+            wakeLock.release().then(() => {
+                wakeLock = null;
+                console.log('Screen Wake Lock rilasciato.');
+            });
+        }
+    }
+
+    function updateTimerDisplay() {
+        const mins = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+        const secs = (timeLeft % 60).toString().padStart(2, '0');
+        document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+    }
+
+    function playAlarmSound() {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        for (let i = 0; i < 4; i++) {
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime + i * 0.4); 
+            
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime + i * 0.4);
+            gainNode.gain.linearRampToValueAtTime(0.3, audioCtx.currentTime + i * 0.4 + 0.05);
+            gainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + i * 0.4 + 0.25);
+            
+            osc.start(audioCtx.currentTime + i * 0.4);
+            osc.stop(audioCtx.currentTime + i * 0.4 + 0.3);
+        }
+    }
+
+    function toggleTimer() {
+        if (!isTimerEnabled) return;
+
+        const btn = document.getElementById('timer-btn');
+        const display = document.getElementById('timer-display');
+
+        if (timerRunning) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            btn.innerText = 'Riprendi Timer';
+            btn.style.backgroundColor = 'var(--surface-hover)';
+            btn.style.color = 'var(--text)';
+            btn.style.border = '1px solid var(--border)';
+            display.classList.remove('timer-active');
+            releaseWakeLock();
+        } else {
+            if (timeLeft <= 0) return;
+            
+            timerRunning = true;
+            btn.innerText = 'Metti in Pausa';
+            btn.style.backgroundColor = 'var(--primary)';
+            btn.style.color = 'white';
+            btn.style.border = 'none';
+            display.classList.add('timer-active');
+            requestScreenWakeLock();
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timerRunning = false;
+                    releaseWakeLock();
+                    display.classList.remove('timer-active');
+                    display.classList.add('timer-ended');
+                    btn.classList.add('hidden'); 
+                    playAlarmSound();
+                }
+            }, 1000);
+        }
+    }
+
+    document.addEventListener('visibilitychange', async () => {
+        if (wakeLock !== null && document.visibilityState === 'visible' && timerRunning) {
+            await requestScreenWakeLock();
+        }
+    });
+
 </script>
 
 </body>
