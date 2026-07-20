@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Focus Timer</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Foglio di Stile -->
+    <link rel="stylesheet" href="pomodoro.css">
+</head>
+<body>
+
+    <!-- Canvas di Sfondo -->
+    <div class="bg-canvas">
+        <div class="bg-grid-pattern"></div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- Navigation Bar -->
+        <nav class="top-nav">
+            <a class="back-link" href="dashboard.html">
+                <i data-lucide="arrow-left"></i>
+                Dashboard
+            </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="timer"></i>
+                    Focus Pro
+                </span>
+            </div>
+        </nav>
+
+        <!-- Main Card Container -->
+        <main class="tool-layout">
+            <div class="card">
+                
+                <!-- Card Header -->
+                <div class="card-header">
+                    <div class="icon">
+                        <i data-lucide="timer"></i>
+                    </div>
+                    <div class="title-group">
+                        <h2>Pomodoro Focus Timer</h2>
+                        <p>25 minuti di lavoro e 5 di pausa per massimizzare la concentrazione</p>
+                    </div>
+                </div>
+
+                <!-- Selettore Modalità -->
+                <div class="mode-selector">
+                    <button class="mode-btn active" onclick="switchMode(25, 'work', this)">Lavoro (25m)</button>
+                    <button class="mode-btn" onclick="switchMode(5, 'shortBreak', this)">Pausa Breve (5m)</button>
+                    <button class="mode-btn" onclick="switchMode(15, 'longBreak', this)">Pausa Lunga (15m)</button>
+                </div>
+
+                <!-- Display Timer -->
+                <div class="timer-display-container">
+                    <div class="timer-ring">
+                        <span id="timer-display">25:00</span>
+                    </div>
+                    <span class="timer-status" id="timer-status">Pronto per iniziare</span>
+                </div>
+
+                <!-- Pulsanti di Controllo -->
+                <div class="timer-controls">
+                    <button class="btn-action btn-primary" id="start-btn" onclick="toggleTimer()">
+                        <i data-lucide="play" id="play-icon"></i>
+                        <span id="start-text">Avvia Timer</span>
+                    </button>
+                    <button class="btn-action btn-secondary" onclick="resetTimer()">
+                        <i data-lucide="rotate-ccw"></i>
+                        Reset
+                    </button>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Creative Utility Toolbox — Riccardo Raineri</span>
+        </footer>
+
+    </div>
+
+    <script>
+        let totalSeconds = 25 * 60;
+        let timeLeft = 25 * 60;
+        let timerInterval = null;
+        let isRunning = false;
+        let currentMode = 'work';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applyStoredTheme();
+            refreshIcons();
+            updateDisplay();
+        });
+
+        function refreshIcons() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        /* -----------------------------------------------------------------
+           GESTIONE TEMA (DEFAULT DARK / OPTIONAL LIGHT)
+           ----------------------------------------------------------------- */
+        function applyStoredTheme() {
+            const savedTheme = localStorage.getItem('toolbox_theme');
+            if (savedTheme === 'light') {
+                document.body.setAttribute('data-theme', 'light');
+            } else {
+                document.body.removeAttribute('data-theme');
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const goingLight = body.getAttribute('data-theme') !== 'light';
+            
+            if (goingLight) {
+                body.setAttribute('data-theme', 'light');
+            } else {
+                body.removeAttribute('data-theme');
+            }
+            
+            localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
+        }
+
+        /* -----------------------------------------------------------------
+           LOGICA POMODORO TIMER
+           ----------------------------------------------------------------- */
+        function switchMode(minutes, mode, btn) {
+            if (isRunning) {
+                if (!confirm("C'è un timer in corso. Vuoi davvero cambiare modalità?")) return;
+                stopTimer();
+            }
+
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            currentMode = mode;
+            totalSeconds = minutes * 60;
+            timeLeft = totalSeconds;
+            
+            const statusEl = document.getElementById('timer-status');
+            if (mode === 'work') {
+                statusEl.textContent = "Pronto per concentrarti";
+            } else {
+                statusEl.textContent = "Momento di ricarica";
+            }
+
+            updateDisplay();
+        }
+
+        function toggleTimer() {
+            if (isRunning) {
+                stopTimer();
+            } else {
+                startTimer();
+            }
+        }
+
+        function startTimer() {
+            isRunning = true;
+            document.getElementById('start-text').textContent = "Pausa";
+            const playIcon = document.getElementById('play-icon');
+            if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
+            document.getElementById('timer-status').textContent = currentMode === 'work' ? "Sessione di lavoro attiva" : "Pausa in corso";
+            refreshIcons();
+
+            timerInterval = setInterval(() => {
+                if (timeLeft > 0) {
+                    timeLeft--;
+                    updateDisplay();
+                } else {
+                    playAlarmSound();
+                    stopTimer();
+                    alert(currentMode === 'work' ? "Ottimo lavoro! Sessione completata. Prenditi una pausa." : "Pausa terminata! Pronto a riprendere?");
+                    resetTimer();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            isRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('start-text').textContent = "Riprendi";
+            const playIcon = document.getElementById('play-icon');
+            if (playIcon) playIcon.setAttribute('data-lucide', 'play');
+            document.getElementById('timer-status').textContent = "Timer in pausa";
+            refreshIcons();
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            timeLeft = totalSeconds;
+            document.getElementById('start-text').textContent = "Avvia Timer";
+            const playIcon = document.getElementById('play-icon');
+            if (playIcon) playIcon.setAttribute('data-lucide', 'play');
+            document.getElementById('timer-status').textContent = currentMode === 'work' ? "Pronto per concentrarti" : "Momento di ricarica";
+            updateDisplay();
+            refreshIcons();
+        }
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const formatted = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timer-display').textContent = formatted;
+            document.title = `(${formatted}) Pomodoro Focus Timer`;
+        }
+
+        // Generazione suono di allarme via Web Audio API (senza file esterni)
+        function playAlarmSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(587.33, audioCtx.currentTime); // Nota D5
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.6);
+            } catch (e) {
+                console.log("Audio non supportato o bloccato dal browser");
+            }
+        }
+    </script>
+</body>
+</html>
