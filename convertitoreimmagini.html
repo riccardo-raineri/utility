@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertitore Immagini</title>
+    <title>Convertitore Immagini Pro</title>
     <link rel="stylesheet" href="convertitoreimmagini.css">
 </head>
 <body>
@@ -17,7 +17,7 @@
             <div class="icon">🖼️</div>
             <div class="title-group">
                 <h2>Convertitore Immagini</h2>
-                <p>Cambia formato e qualità all'istante</p>
+                <p>Converti, confronta e ottimizza le tue immagini</p>
             </div>
             <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
                 <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -71,6 +71,10 @@
                     <option value="image/png">PNG (.png)</option>
                     <option value="image/jpeg">JPG / JPEG (.jpg)</option>
                     <option value="image/webp">WEBP (.webp)</option>
+                    <option value="image/avif">AVIF (.avif)</option>
+                    <option value="image/bmp">BMP (.bmp)</option>
+                    <option value="image/gif">GIF (.gif)</option>
+                    <option value="image/x-icon">ICO (.ico)</option>
                 </select>
             </div>
 
@@ -82,13 +86,59 @@
                 <input type="range" id="quality-range" min="10" max="100" value="90" oninput="updateQualityText(this.value)">
             </div>
 
-            <button class="btn-primary" onclick="convertAndDownload()">Converti e Scarica</button>
+            <!-- Pulsante 1: CONVERTI -->
+            <button class="btn-primary" id="btn-convert" onclick="processConversion()">⚡ Converti Immagine</button>
+        </div>
+
+        <!-- SEZIONE RISULTATI (Comparazione Prima/Dopo e Dati Utili) -->
+        <div class="result-section" id="result-section" style="display: none;">
+            <hr class="divider">
+            
+            <h3 class="section-title">Confronto & Risultato</h3>
+
+            <!-- Grid Comparazione Immagini -->
+            <div class="comparison-grid">
+                <div class="compare-card">
+                    <span class="badge badge-before">PRIMA</span>
+                    <div class="compare-thumb">
+                        <img id="compare-before-img" src="" alt="Originale">
+                    </div>
+                </div>
+                <div class="compare-card">
+                    <span class="badge badge-after">DOPO</span>
+                    <div class="compare-thumb">
+                        <img id="compare-after-img" src="" alt="Convertito">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schede Dati Utili -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-label">Peso Originale</span>
+                    <strong class="stat-value" id="stat-orig-size">0 KB</strong>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Nuovo Peso</span>
+                    <strong class="stat-value" id="stat-new-size">0 KB</strong>
+                </div>
+                <div class="stat-box highlight">
+                    <span class="stat-label">Differenza</span>
+                    <strong class="stat-value" id="stat-diff-perc">0%</strong>
+                </div>
+            </div>
+
+            <!-- Pulsante 2: SCARICA -->
+            <button class="btn-success" id="btn-download" onclick="downloadFile()">⬇️ Scarica Immagine</button>
         </div>
     </div>
 
     <script>
         let loadedImage = null;
+        let originalFile = null;
         let originalFileName = "";
+        let convertedBlob = null;
+        let convertedUrl = null;
 
         // Gestione Tema
         function toggleTheme() {
@@ -136,8 +186,9 @@
 
         // Elaborazione Immagine Caricata
         function processFile(file) {
+            originalFile = file;
             originalFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            const sizeFormatted = formatBytes(file.size);
             
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -146,13 +197,14 @@
                     loadedImage = img;
                     document.getElementById('preview-img').src = e.target.result;
                     document.getElementById('file-name').textContent = file.name;
-                    document.getElementById('file-meta').textContent = `${img.width}×${img.height} px • ${sizeMB} MB`;
+                    document.getElementById('file-meta').textContent = `${img.width}×${img.height} px • ${sizeFormatted}`;
 
                     document.getElementById('drop-zone').style.display = 'none';
                     document.getElementById('file-preview').style.display = 'flex';
                     document.getElementById('options-group').style.display = 'block';
 
                     toggleQualityControl();
+                    hideResults();
                 };
                 img.src = e.target.result;
             };
@@ -162,21 +214,22 @@
         function toggleQualityControl() {
             const format = document.getElementById('format-select').value;
             const qualityGroup = document.getElementById('quality-group');
-            // La qualità è supportata da JPEG e WEBP
-            if (format === 'image/jpeg' || format === 'image/webp') {
+            // La qualità è gestita per JPG, WEBP e AVIF
+            if (format === 'image/jpeg' || format === 'image/webp' || format === 'image/avif') {
                 qualityGroup.style.display = 'block';
             } else {
                 qualityGroup.style.display = 'none';
             }
+            hideResults();
         }
 
         function updateQualityText(val) {
             document.getElementById('quality-value').textContent = val + '%';
         }
 
-        // Conversione e Download tramite HTML5 Canvas
-        function convertAndDownload() {
-            if (!loadedImage) return;
+        // Esegue la conversione e mostra la comparazione e i dati
+        function processConversion() {
+            if (!loadedImage || !originalFile) return;
 
             const format = document.getElementById('format-select').value;
             const quality = parseFloat(document.getElementById('quality-range').value) / 100;
@@ -186,35 +239,101 @@
             canvas.height = loadedImage.height;
             const ctx = canvas.getContext('2d');
 
-            // Se convertiamo in JPG, riempiamo lo sfondo di bianco per gestire l'eventuale trasparenza del PNG/WEBP
-            if (format === 'image/jpeg') {
+            // Se convertiamo in JPG o BMP, aggiungiamo uno sfondo bianco per preservare le trasparenze
+            if (format === 'image/jpeg' || format === 'image/bmp') {
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
             ctx.drawImage(loadedImage, 0, 0);
 
-            // Estensione del file finale
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    alert("Il tuo browser potrebbe non supportare l'esportazione diretta in questo formato.");
+                    return;
+                }
+
+                // Revoca URL precedente se presente
+                if (convertedUrl) URL.revokeObjectURL(convertedUrl);
+
+                convertedBlob = blob;
+                convertedUrl = URL.createObjectURL(blob);
+
+                // Popola la sezione comparazione
+                document.getElementById('compare-before-img').src = document.getElementById('preview-img').src;
+                document.getElementById('compare-after-img').src = convertedUrl;
+
+                // Popola i dati statistici
+                const origBytes = originalFile.size;
+                const newBytes = blob.size;
+                const diffPerc = (((newBytes - origBytes) / origBytes) * 100).toFixed(1);
+
+                document.getElementById('stat-orig-size').textContent = formatBytes(origBytes);
+                document.getElementById('stat-new-size').textContent = formatBytes(newBytes);
+
+                const diffElem = document.getElementById('stat-diff-perc');
+                if (diffPerc < 0) {
+                    diffElem.textContent = `${diffPerc}%`;
+                    diffElem.style.color = 'var(--color-success)';
+                } else if (diffPerc > 0) {
+                    diffElem.textContent = `+${diffPerc}%`;
+                    diffElem.style.color = 'var(--color-danger)';
+                } else {
+                    diffElem.textContent = `0%`;
+                    diffElem.style.color = 'var(--text)';
+                }
+
+                // Mostra la sezione Risultato
+                document.getElementById('result-section').style.display = 'block';
+                document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+
+            }, format, quality);
+        }
+
+        // Effettua il download del file convertito
+        function downloadFile() {
+            if (!convertedUrl) return;
+
+            const format = document.getElementById('format-select').value;
             let ext = 'png';
             if (format === 'image/jpeg') ext = 'jpg';
-            if (format === 'image/webp') ext = 'webp';
+            else if (format === 'image/webp') ext = 'webp';
+            else if (format === 'image/avif') ext = 'avif';
+            else if (format === 'image/bmp') ext = 'bmp';
+            else if (format === 'image/gif') ext = 'gif';
+            else if (format === 'image/x-icon') ext = 'ico';
 
-            canvas.toBlob((blob) => {
-                const link = document.createElement('a');
-                link.download = `${originalFileName}_converted.${ext}`;
-                link.href = URL.createObjectURL(blob);
-                link.click();
-                URL.revokeObjectURL(link.href);
-            }, format, quality);
+            const link = document.createElement('a');
+            link.download = `${originalFileName}_converted.${ext}`;
+            link.href = convertedUrl;
+            link.click();
+        }
+
+        function hideResults() {
+            document.getElementById('result-section').style.display = 'none';
         }
 
         function resetFile() {
             loadedImage = null;
+            originalFile = null;
             originalFileName = "";
+            convertedBlob = null;
+            if (convertedUrl) URL.revokeObjectURL(convertedUrl);
+            convertedUrl = null;
+
             document.getElementById('file-input').value = "";
             document.getElementById('drop-zone').style.display = 'flex';
             document.getElementById('file-preview').style.display = 'none';
             document.getElementById('options-group').style.display = 'none';
+            hideResults();
+        }
+
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 Byte';
+            const k = 1024;
+            const sizes = ['Byte', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
     </script>
 </body>
