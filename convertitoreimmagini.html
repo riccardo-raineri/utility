@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertitore Immagini</title>
+    <link rel="stylesheet" href="convertitore-immagini.css">
+</head>
+<body>
+
+    <!-- Link di ritorno alla dashboard -->
+    <a class="back-link" href="dashboard.html">← Dashboard</a>
+
+    <div class="card">
+        <!-- Header -->
+        <div class="card-header">
+            <div class="icon">🖼️</div>
+            <div class="title-group">
+                <h2>Convertitore Immagini</h2>
+                <p>Cambia formato e qualità all'istante</p>
+            </div>
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"/>
+                    <line x1="12" y1="2" x2="12" y2="4"/>
+                    <line x1="12" y1="20" x2="12" y2="22"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="2" y1="12" x2="4" y2="12"/>
+                    <line x1="20" y1="12" x2="22" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Zona Drag and Drop -->
+        <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+            <div class="drop-zone-content">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <p class="drop-title">Trascina qui l'immagine</p>
+                <p class="drop-subtitle">oppure <span>sfoglia i file</span></p>
+            </div>
+            <input type="file" id="file-input" accept="image/*" hidden onchange="handleFileSelect(event)">
+        </div>
+
+        <!-- Anteprima Immagine Caricata -->
+        <div class="file-preview" id="file-preview" style="display: none;">
+            <div class="thumb-container">
+                <img id="preview-img" src="" alt="Anteprima">
+            </div>
+            <div class="file-info">
+                <span class="file-name" id="file-name">nome_file.jpg</span>
+                <span class="file-meta" id="file-meta">1920×1080 • 1.2 MB</span>
+            </div>
+            <button class="btn-remove" onclick="resetFile()" title="Rimuovi immagine">✕</button>
+        </div>
+
+        <!-- Opzioni e Conversione -->
+        <div class="options-group" id="options-group" style="display: none;">
+            <div class="input-group">
+                <label for="format-select">Formato di destinazione</label>
+                <select id="format-select" onchange="toggleQualityControl()">
+                    <option value="image/png">PNG (.png)</option>
+                    <option value="image/jpeg">JPG / JPEG (.jpg)</option>
+                    <option value="image/webp">WEBP (.webp)</option>
+                </select>
+            </div>
+
+            <div class="input-group" id="quality-group" style="display: none;">
+                <div class="label-row">
+                    <label for="quality-range">Qualità compressione</label>
+                    <span class="range-val" id="quality-value">90%</span>
+                </div>
+                <input type="range" id="quality-range" min="10" max="100" value="90" oninput="updateQualityText(this.value)">
+            </div>
+
+            <button class="btn-primary" onclick="convertAndDownload()">Converti e Scarica</button>
+        </div>
+    </div>
+
+    <script>
+        let loadedImage = null;
+        let originalFileName = "";
+
+        // Gestione Tema
+        function toggleTheme() {
+            const body = document.body;
+            if (body.getAttribute('data-theme') === 'light') {
+                body.removeAttribute('data-theme');
+            } else {
+                body.setAttribute('data-theme', 'light');
+            }
+        }
+
+        // Drag & Drop Handling
+        const dropZone = document.getElementById('drop-zone');
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add('drag-over');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove('drag-over');
+            }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                processFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                processFile(files[0]);
+            }
+        }
+
+        // Elaborazione Immagine Caricata
+        function processFile(file) {
+            originalFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+            const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    loadedImage = img;
+                    document.getElementById('preview-img').src = e.target.result;
+                    document.getElementById('file-name').textContent = file.name;
+                    document.getElementById('file-meta').textContent = `${img.width}×${img.height} px • ${sizeMB} MB`;
+
+                    document.getElementById('drop-zone').style.display = 'none';
+                    document.getElementById('file-preview').style.display = 'flex';
+                    document.getElementById('options-group').style.display = 'block';
+
+                    toggleQualityControl();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function toggleQualityControl() {
+            const format = document.getElementById('format-select').value;
+            const qualityGroup = document.getElementById('quality-group');
+            // La qualità è supportata da JPEG e WEBP
+            if (format === 'image/jpeg' || format === 'image/webp') {
+                qualityGroup.style.display = 'block';
+            } else {
+                qualityGroup.style.display = 'none';
+            }
+        }
+
+        function updateQualityText(val) {
+            document.getElementById('quality-value').textContent = val + '%';
+        }
+
+        // Conversione e Download tramite HTML5 Canvas
+        function convertAndDownload() {
+            if (!loadedImage) return;
+
+            const format = document.getElementById('format-select').value;
+            const quality = parseFloat(document.getElementById('quality-range').value) / 100;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = loadedImage.width;
+            canvas.height = loadedImage.height;
+            const ctx = canvas.getContext('2d');
+
+            // Se convertiamo in JPG, riempiamo lo sfondo di bianco per gestire l'eventuale trasparenza del PNG/WEBP
+            if (format === 'image/jpeg') {
+                ctx.fillStyle = '#FFFFFF';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+
+            ctx.drawImage(loadedImage, 0, 0);
+
+            // Estensione del file finale
+            let ext = 'png';
+            if (format === 'image/jpeg') ext = 'jpg';
+            if (format === 'image/webp') ext = 'webp';
+
+            canvas.toBlob((blob) => {
+                const link = document.createElement('a');
+                link.download = `${originalFileName}_converted.${ext}`;
+                link.href = URL.createObjectURL(blob);
+                link.click();
+                URL.revokeObjectURL(link.href);
+            }, format, quality);
+        }
+
+        function resetFile() {
+            loadedImage = null;
+            originalFileName = "";
+            document.getElementById('file-input').value = "";
+            document.getElementById('drop-zone').style.display = 'flex';
+            document.getElementById('file-preview').style.display = 'none';
+            document.getElementById('options-group').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
