@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Time Studio - Fusi Orari</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Foglio di Stile -->
+    <link rel="stylesheet" href="timezone.css">
+</head>
+<body>
+
+    <!-- Canvas di Sfondo -->
+    <div class="bg-canvas">
+        <div class="bg-grid-pattern"></div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- Navigation Bar -->
+        <nav class="top-nav">
+            <a class="back-link" href="dashboard.html">
+                <i data-lucide="arrow-left"></i>
+                Dashboard
+            </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="globe"></i>
+                    Time Studio
+                </span>
+            </div>
+        </nav>
+
+        <!-- Main Card Container -->
+        <main class="tool-layout">
+            <div class="card">
+                
+                <!-- Card Header -->
+                <div class="card-header">
+                    <div class="icon">
+                        <i data-lucide="globe"></i>
+                    </div>
+                    <div class="title-group">
+                        <h2>Fusi Orari Globali</h2>
+                        <p>Monitora l'orario simultaneo in tempo reale nelle principali città del mondo</p>
+                    </div>
+                </div>
+
+                <!-- Barra Aggiunta Città -->
+                <div class="add-city-bar">
+                    <select id="city-select">
+                        <option value="" disabled selected>Seleziona una città da aggiungere...</option>
+                        <option value="Europe/Rome">Roma / Milano (Italia)</option>
+                        <option value="Europe/London">Londra (Regno Unito)</option>
+                        <option value="America/New_York">New York (Stati Uniti)</option>
+                        <option value="America/Los_Angeles">Los Angeles (Stati Uniti)</option>
+                        <option value="America/Sao_Paulo">San Paolo (Brasile)</option>
+                        <option value="Asia/Tokyo">Tokyo (Giappone)</option>
+                        <option value="Asia/Dubai">Dubai (Emirati Arabi)</option>
+                        <option value="Asia/Singapore">Singapore</option>
+                        <option value="Australia/Sydney">Sydney (Australia)</option>
+                    </select>
+                    <button class="btn-action" onclick="addCity()">
+                        <i data-lucide="plus"></i>
+                        Aggiungi
+                    </button>
+                </div>
+
+                <!-- Lista Città Monitorate -->
+                <div class="cities-list" id="cities-list">
+                    <!-- Popolato via JavaScript -->
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>World Time Studio — Suite Tools</span>
+        </footer>
+
+    </div>
+
+    <script>
+        // Lista iniziale predefinita di città
+        let activeCities = [
+            { name: "Roma", country: "Italia", tz: "Europe/Rome" },
+            { name: "New York", country: "Stati Uniti", tz: "America/New_York" },
+            { name: "Tokyo", country: "Giappone", tz: "Asia/Tokyo" }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applyStoredTheme();
+            renderCities();
+            refreshIcons();
+            
+            // Aggiorna l'orologio ogni secondo
+            setInterval(updateClocks, 1000);
+        });
+
+        function refreshIcons() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        /* -----------------------------------------------------------------
+           GESTIONE TEMA (DEFAULT DARK / OPTIONAL LIGHT)
+           ----------------------------------------------------------------- */
+        function applyStoredTheme() {
+            const savedTheme = localStorage.getItem('toolbox_theme');
+            if (savedTheme === 'light') {
+                document.body.setAttribute('data-theme', 'light');
+            } else {
+                document.body.removeAttribute('data-theme');
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const goingLight = body.getAttribute('data-theme') !== 'light';
+            
+            if (goingLight) {
+                body.setAttribute('data-theme', 'light');
+            } else {
+                body.removeAttribute('data-theme');
+            }
+            
+            localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
+        }
+
+        /* -----------------------------------------------------------------
+           LOGICA FUSI ORARI
+           ----------------------------------------------------------------- */
+        function addCity() {
+            const select = document.getElementById('city-select');
+            const selectedTz = select.value;
+
+            if (!selectedTz) {
+                alert("Seleziona prima una città dal menu!");
+                return;
+            }
+
+            // Verifica se è già presente
+            if (activeCities.some(c => c.tz === selectedTz)) {
+                alert("Questa città è già presente nella lista.");
+                return;
+            }
+
+            const optionText = select.options[select.selectedIndex].text;
+            const parts = optionText.split(" (");
+            const cityName = parts[0];
+            const countryName = parts[1] ? parts[1].replace(")", "") : "";
+
+            activeCities.push({ name: cityName, country: countryName, tz: selectedTz });
+            renderCities();
+            select.selectedIndex = 0;
+        }
+
+        function removeCity(tz) {
+            if (activeCities.length <= 1) {
+                alert("Devi mantenere almeno una città nella lista.");
+                return;
+            }
+            activeCities = activeCities.filter(c => c.tz !== tz);
+            renderCities();
+        }
+
+        function renderCities() {
+            const container = document.getElementById('cities-list');
+            container.innerHTML = "";
+
+            activeCities.forEach(city => {
+                const item = document.createElement('div');
+                item.className = 'city-item';
+                item.setAttribute('data-tz', city.tz);
+
+                item.innerHTML = `
+                    <div class="city-info">
+                        <strong>${city.name}</strong>
+                        <span>${city.country}</span>
+                    </div>
+                    <div class="city-time-box">
+                        <span class="city-time" id="time-${city.tz.replace(/[\/\_]/g, '-')}">--:--:--</span>
+                        <span class="city-date" id="date-${city.tz.replace(/[\/\_]/g, '-')}">----</span>
+                    </div>
+                    <button class="btn-remove" onclick="removeCity('${city.tz}')" aria-label="Rimuovi città">
+                        <i data-lucide="trash-2"></i>
+                    </button>
+                `;
+                container.appendChild(item);
+            });
+
+            updateClocks();
+            refreshIcons();
+        }
+
+        function updateClocks() {
+            const now = new Date();
+
+            activeCities.forEach(city => {
+                const tzKey = city.tz.replace(/[\/\_]/g, '-');
+                const timeEl = document.getElementById(`time-${tzKey}`);
+                const dateEl = document.getElementById(`date-${tzKey}`);
+
+                if (timeEl && dateEl) {
+                    try {
+                        const timeFormatter = new Intl.DateTimeFormat('it-IT', {
+                            timeZone: city.tz,
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit',
+                            hour12: false
+                        });
+
+                        const dateFormatter = new Intl.DateTimeFormat('it-IT', {
+                            timeZone: city.tz,
+                            weekday: 'short',
+                            day: 'numeric',
+                            month: 'short'
+                        });
+
+                        timeEl.textContent = timeFormatter.format(now);
+                        dateEl.textContent = dateFormatter.format(now);
+                    } catch (e) {
+                        timeErr.textContent = "Errore fuso";
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
