@@ -1,0 +1,270 @@
+/* =====================================================================
+   QRCODE.CSS - Theme: Cyber-Scan / High-Tech Matrix
+   ===================================================================== */
+
+:root {
+    --bg-tech: #090d16;
+    --surface-tech: #111827;
+    --border-tech: #1f293d;
+    --text-tech: #f3f4f6;
+    --text-muted-tech: #9ca3af;
+    
+    --neon-green: #10b981;
+    --neon-green-glow: rgba(16, 185, 129, 0.25);
+    --cyber-purple: #8b5cf6;
+    --cyber-purple-glow: rgba(139, 92, 246, 0.25);
+    
+    --radius-tech: 16px;
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-code: "SF Mono", "Fira Code", monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-main);
+}
+
+body {
+    background-color: var(--bg-tech);
+    color: var(--text-tech);
+    background-image: 
+        radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+        linear-gradient(rgba(31, 41, 61, 0.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(31, 41, 61, 0.3) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+}
+
+.qr-card {
+    background: var(--surface-tech);
+    border: 1px solid var(--border-tech);
+    border-radius: var(--radius-tech);
+    padding: 28px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--cyber-purple-glow);
+}
+
+.qr-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+}
+
+.qr-header .tech-icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid var(--cyber-purple);
+    border-radius: 12px;
+    color: var(--cyber-purple);
+    box-shadow: 0 0 10px var(--cyber-purple-glow);
+}
+
+.qr-header .tech-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.qr-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--text-muted-tech) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.qr-header p {
+    font-size: 12.5px;
+    color: var(--text-muted-tech);
+}
+
+/* Form Controls */
+.input-field {
+    margin-bottom: 16px;
+}
+
+label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    color: var(--text-muted-tech);
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg-tech);
+    border: 1px solid var(--border-tech);
+    color: var(--text-tech);
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+input[type="text"]:focus, textarea:focus {
+    border-color: var(--neon-green);
+    box-shadow: 0 0 10px var(--neon-green-glow);
+}
+
+/* Grid Selettori Colore */
+.color-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.color-picker-box {
+    background: var(--bg-tech);
+    border: 1px solid var(--border-tech);
+    padding: 8px 12px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.color-picker-box input[type="color"] {
+    -webkit-appearance: none;
+    border: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+}
+
+.color-picker-box input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.color-picker-box input[type="color"]::-webkit-color-swatch {
+    border: 1px solid var(--border-tech);
+    border-radius: 6px;
+}
+
+/* Range Slider */
+.range-val {
+    color: var(--neon-green);
+    font-family: var(--font-code);
+}
+
+input[type="range"] {
+    width: 100%;
+    accent-color: var(--neon-green);
+}
+
+/* Anteprima QR Code */
+.qr-preview-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: var(--bg-tech);
+    border: 1px dashed var(--border-tech);
+    border-radius: 12px;
+    margin-top: 20px;
+    min-height: 220px;
+    position: relative;
+}
+
+.qr-preview-area.active {
+    border-style: solid;
+    border-color: var(--cyber-purple);
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+}
+
+#qrcode img, #qrcode canvas {
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.placeholder-text {
+    font-size: 13px;
+    color: var(--text-muted-tech);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.placeholder-text svg {
+    width: 36px;
+    height: 36px;
+    stroke: var(--text-muted-tech);
+    opacity: 0.5;
+}
+
+/* Action Buttons */
+.btn-action {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-generate {
+    background: linear-gradient(135deg, var(--cyber-purple) 0%, #6d28d9 100%);
+    color: #ffffff;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px var(--cyber-purple-glow);
+}
+
+.btn-generate:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btn-download {
+    background: linear-gradient(135deg, var(--neon-green) 0%, #059669 100%);
+    color: #ffffff;
+    margin-top: 14px;
+    box-shadow: 0 4px 15px var(--neon-green-glow);
+    display: none;
+}
+
+.btn-download:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+.btn-action svg {
+    width: 18px;
+    height: 18px;
+}
