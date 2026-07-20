@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore Distanza Fulmine</title>
+    <link rel="stylesheet" href="distanzafulmine.css">
+</head>
+<body>
+
+    <!-- Link alla Dashboard -->
+    <a class="back-link" href="dashboard.html">← Dashboard</a>
+
+    <div class="card">
+        <!-- Header con Icona e Cambio Tema -->
+        <div class="card-header">
+            <div class="icon">⚡</div>
+            <div class="title-group">
+                <h2>Distanza Fulmine</h2>
+                <p>Calcola quanto è vicino il temporale</p>
+            </div>
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"/>
+                    <line x1="12" y1="2" x2="12" y2="4"/>
+                    <line x1="12" y1="20" x2="12" y2="22"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="2" y1="12" x2="4" y2="12"/>
+                    <line x1="20" y1="12" x2="22" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Sezione Cronometro Live -->
+        <div class="timer-section">
+            <button id="timer-btn" class="btn-timer" onclick="toggleTimer()">
+                <span id="timer-label">⚡ Clicca al LAMPO</span>
+                <span id="timer-display">0.0s</span>
+            </button>
+        </div>
+
+        <div class="divider"><span>oppure inserisci i secondi</span></div>
+
+        <!-- Input Manuale -->
+        <div class="input-group">
+            <label for="secondi">Tempo trascorso (secondi)</label>
+            <input type="number" id="secondi" placeholder="es. 5" min="0" step="0.1" oninput="calcolaDistanza()">
+        </div>
+
+        <button class="btn-secondary" onclick="resetForm()">Azzera</button>
+
+        <!-- Box Risultati -->
+        <div class="result" id="result-box">
+            <div class="status-badge" id="status-badge">
+                <span class="status-dot"></span>
+                <span id="status-text">Sicuro</span>
+            </div>
+
+            <div class="result-main">
+                <span class="value-large" id="distanza-km">0.00</span>
+                <span class="unit">km di distanza</span>
+            </div>
+
+            <div class="result-details">
+                <div class="detail-row">
+                    <span>Distanza in metri:</span>
+                    <strong id="distanza-m">0 m</strong>
+                </div>
+                <div class="detail-row">
+                    <span>Stima velocità suono:</span>
+                    <strong>343 m/s (20°C)</strong>
+                </div>
+            </div>
+
+            <p class="safety-tip" id="safety-tip"></p>
+        </div>
+    </div>
+
+    <script>
+        // Gestione Tema
+        function toggleTheme() {
+            const body = document.body;
+            if (body.getAttribute('data-theme') === 'light') {
+                body.removeAttribute('data-theme');
+            } else {
+                body.setAttribute('data-theme', 'light');
+            }
+        }
+
+        // Timer in tempo reale
+        let timerInterval = null;
+        let startTime = 0;
+        let isTiming = false;
+
+        function toggleTimer() {
+            const timerBtn = document.getElementById('timer-btn');
+            const timerLabel = document.getElementById('timer-label');
+            const timerDisplay = document.getElementById('timer-display');
+            const inputSecondi = document.getElementById('secondi');
+
+            if (!isTiming) {
+                // Avvio timer al lampo
+                isTiming = true;
+                startTime = performance.now();
+                timerBtn.classList.add('active');
+                timerLabel.textContent = "🔊 Clicca al TUONO!";
+                
+                timerInterval = setInterval(() => {
+                    const elapsed = (performance.now() - startTime) / 1000;
+                    timerDisplay.textContent = elapsed.toFixed(1) + 's';
+                }, 100);
+            } else {
+                // Fermo timer al tuono
+                isTiming = false;
+                clearInterval(timerInterval);
+                const finalElapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+                
+                timerBtn.classList.remove('active');
+                timerLabel.textContent = "⚡ Clicca al LAMPO";
+                timerDisplay.textContent = finalElapsed + 's';
+                
+                inputSecondi.value = finalElapsed;
+                calcolaDistanza();
+            }
+        }
+
+        // Calcolo Distanza
+        function calcolaDistanza() {
+            const secondi = parseFloat(document.getElementById('secondi').value);
+            const resultBox = document.getElementById('result-box');
+
+            if (isNaN(secondi) || secondi <= 0) {
+                resultBox.style.display = 'none';
+                return;
+            }
+
+            const velocitaSuono = 343; // m/s
+            const metri = secondi * velocitaSuono;
+            const km = metri / 1000;
+
+            document.getElementById('distanza-km').textContent = km.toFixed(2);
+            document.getElementById('distanza-m').textContent = Math.round(metri).toLocaleString('it-IT') + ' m';
+
+            // Gestione Livelli di Pericolo
+            const badge = document.getElementById('status-badge');
+            const statusText = document.getElementById('status-text');
+            const safetyTip = document.getElementById('safety-tip');
+
+            badge.className = 'status-badge'; // reset classi
+
+            if (km < 3) {
+                badge.classList.add('danger');
+                statusText.textContent = 'PERICOLO IMMINENTE';
+                safetyTip.textContent = '⚠️ Il temporale è molto vicino! Cerca subito riparo all’interno di un edificio o di un’automobile.';
+            } else if (km <= 10) {
+                badge.classList.add('warning');
+                statusText.textContent = 'ATTENZIONE';
+                safetyTip.textContent = '⚡ Temporale nelle vicinanze. Evita spazi aperti, alberi isolati e strutture metalliche.';
+            } else {
+                badge.classList.add('safe');
+                statusText.textContent = 'DISTANZA DI SICUREZZA';
+                safetyTip.textContent = '🌧️ Il temporale è ancora lontano, ma resta vigile se si sta avvicinando.';
+            }
+
+            resultBox.style.display = 'block';
+        }
+
+        function resetForm() {
+            if (isTiming) toggleTimer();
+            document.getElementById('secondi').value = '';
+            document.getElementById('timer-display').textContent = '0.0s';
+            document.getElementById('result-box').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
