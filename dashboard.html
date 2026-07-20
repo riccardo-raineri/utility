@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toolbox Dashboard</title>
-    <!-- Stile separato in dashboard.css: questa pagina fa da "indice",
-         quindi ha senso tenerne il CSS a parte dagli strumenti veri e propri. -->
+    <!-- Google Fonts per il tocco cinematografico -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Foglio di stile principale -->
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
@@ -15,28 +18,29 @@
          ========================================================= -->
     <header>
         <div class="header-title">
-            <span class="eyebrow">Pannello strumenti</span>
+            <span class="eyebrow">Pannello Strumenti</span>
             <h1>My Toolbox</h1>
         </div>
 
         <div class="search-container">
-            <span class="search-icon">⌕</span>
-            <!-- onkeyup richiama filterTools() ad ogni tasto rilasciato -->
-            <input type="text" id="searchInput" placeholder="Cerca uno strumento…" onkeyup="filterTools()">
+			<span class="search-icon">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+</span>            <input type="text" id="searchInput" placeholder="Cerca uno strumento…" onkeyup="filterTools()">
             <span class="search-hint">/</span>
         </div>
     </header>
 
     <!-- =========================================================
-         FILTRI PER CATEGORIA (nuova funzione)
-         Ogni chip ha un data-filter che deve corrispondere al
-         data-category scritto sulle card qui sotto, oppure "tutti".
+         FILTRI PER CATEGORIA
          ========================================================= -->
     <div class="filters" id="filterBar">
         <button class="filter-chip active" data-filter="tutti">Tutti</button>
         <button class="filter-chip" data-filter="finanza">Finanza</button>
         <button class="filter-chip" data-filter="viaggi">Viaggi</button>
-		<button class="filter-chip" data-filter="svago">Svago</button>
+        <button class="filter-chip" data-filter="svago">Svago</button>
         <button class="filter-chip" data-filter="tempo">Tempo</button>
         <button class="filter-chip" data-filter="utilita">Utilità</button>
     </div>
@@ -79,8 +83,8 @@
                 <p>Calcola litri e spesa del viaggio, con opzione andata/ritorno e divisione del costo tra passeggeri.</p>
                 <a href="calcolaviaggio.html">Apri strumento →</a>
             </div>
-			
-			<!-- SCHEDA 4: Film al Cinema -->
+            
+            <!-- SCHEDA 4: Film al Cinema -->
             <div class="tool-card" data-category="svago">
                 <div class="card-top">
                     <div class="card-icon">🎬</div>
@@ -91,7 +95,7 @@
                 <a href="cinema.html">Apri strumento →</a>
             </div>
 
-            <!-- SCHEDA 4: Cronometro Pomodoro (non ancora sviluppato) -->
+            <!-- SCHEDA 5: Cronometro Pomodoro (Prossimamente) -->
             <div class="tool-card disabled" data-category="tempo">
                 <div class="card-top">
                     <div class="card-icon">◷</div>
@@ -102,7 +106,7 @@
                 <a href="#">Prossimamente</a>
             </div>
 
-            <!-- Messaggio mostrato solo se ricerca/filtro non trovano nulla -->
+            <!-- Messaggio nessun risultato -->
             <div id="no-results">Nessuno strumento trovato. Prova un'altra parola chiave o rimuovi il filtro.</div>
 
         </div>
@@ -114,18 +118,31 @@
 
     <script>
         // =====================================================================
-        // STATO CONDIVISO: quale filtro categoria è attivo in questo momento.
-        // Viene incrociato con il testo di ricerca in applyVisibility().
+        // EFFETTO INTERATTIVO MOUSE (Spotlight & Coordinate Card)
+        // =====================================================================
+        document.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth) * 100;
+            const y = (e.clientY / window.innerHeight) * 100;
+            document.body.style.setProperty('--mouse-x', `${x}%`);
+            document.body.style.setProperty('--mouse-y', `${y}%`);
+        });
+
+        // Gestione coordinate interne per il bagliore dinamico su ogni singola card
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                card.style.setProperty('--card-mouse-x', `${x}px`);
+                card.style.setProperty('--card-mouse-y', `${y}px`);
+            });
+        });
+
+        // =====================================================================
+        // FILTRI E RICERCA
         // =====================================================================
         let activeFilter = 'tutti';
 
-        /**
-         * Nasconde/mostra le card in base a:
-         * 1) il testo digitato nella barra di ricerca (titolo o descrizione)
-         * 2) la categoria attualmente selezionata nei filtri
-         * Le due condizioni si combinano con AND: una card deve rispettare
-         * entrambe per restare visibile.
-         */
         function applyVisibility() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             const cards = document.querySelectorAll('.tool-card');
@@ -147,19 +164,13 @@
                 }
             });
 
-            // Mostro il messaggio "nessun risultato" solo se non resta nulla di visibile
             document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
         }
 
-        // Alias mantenuto per compatibilità con l'attributo onkeyup nell'HTML
         function filterTools() {
             applyVisibility();
         }
 
-        // =====================================================================
-        // GESTIONE CLIC SUI FILTRI: aggiorna lo stato attivo, evidenzia la
-        // chip selezionata e ricalcola la visibilità delle card.
-        // =====================================================================
         document.querySelectorAll('.filter-chip').forEach(chip => {
             chip.addEventListener('click', () => {
                 document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
@@ -169,11 +180,7 @@
             });
         });
 
-        // =====================================================================
-        // SCORCIATOIA DA TASTIERA: premendo "/" da qualsiasi punto della pagina
-        // si porta il focus direttamente sulla barra di ricerca, comodo per chi
-        // usa solo la tastiera. Se si sta già scrivendo in un campo, non fa nulla.
-        // =====================================================================
+        // Scorciatoia da tastiera "/"
         document.addEventListener('keydown', (event) => {
             const isTypingElsewhere = document.activeElement.tagName === 'INPUT';
             if (event.key === '/' && !isTypingElsewhere) {

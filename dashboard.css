@@ -1,39 +1,40 @@
 /* =====================================================================
-   DASHBOARD.CSS
-   Foglio di stile della pagina principale (Toolbox).
-
-   DIREZIONE GRAFICA
-   Tema "grafite": sfondo blu-grigio molto scuro, quasi neutro, con un
-   pattern di puntini leggerissimo (griglia da 22px) che dà texture
-   senza distrarre. Nessuna immagine esterna: il pattern è generato
-   al 100% via CSS (radial-gradient ripetuto).
-   Le etichette piccole (eyebrow, meta) usano un font monospace per
-   dare un tocco "da pannello di controllo" senza appesantire il resto,
-   che rimane in un sans-serif di sistema pulito.
+   DASHBOARD.CSS - Tema "Cyber-Cinematic Glass"
    ===================================================================== */
 
 :root {
-    /* --- Palette neutra "grafite" ------------------------------------ */
-    --bg: #0b0f17;               /* sfondo pagina */
-    --surface: #121826;          /* sfondo header e card */
-    --surface-hover: #161d2e;    /* card in hover */
-    --border: #232b3d;           /* bordi sottili (1px) */
-    --border-strong: #2f3a52;    /* bordo in evidenza (hover/focus) */
-    --text: #e8ebf2;             /* testo principale */
-    --text-muted: #8992a6;       /* testo secondario */
-    --accent: #6f8cff;           /* blu indaco tenue, colore guida */
-    --accent-soft: rgba(111, 140, 255, 0.12);
-    --accent-strong: #a8b8ff;
+    /* --- Palette Cyber/Glass ------------------------------------------- */
+    --bg-deep: #030508;               
+    --surface-glass: rgba(18, 24, 38, 0.6); 
+    --surface-hover-glass: rgba(28, 38, 59, 0.75); 
 
-    /* --- Spaziature e forme ------------------------------------------ */
-    --radius-sm: 8px;
-    --radius-md: 12px;
+    /* Bordi e Luce */
+    --border: rgba(110, 130, 170, 0.15);
+    --border-strong: rgba(0, 243, 255, 0.5); 
+
+    /* Testo */
+    --text-main: #f0f3f9;             
+    --text-muted: #94a3b8;            
+
+    /* Accento (Ciano Neon Elettrico) */
+    --accent: #00f3ff;                
+    --accent-glow: rgba(0, 243, 255, 0.2); 
+    
+    /* Secondario (Magenta Cyber) */
+    --secondary: #ff007f;
+    --secondary-glow: rgba(255, 0, 127, 0.15);
+
+    /* --- Spaziature e Font ------------------------------------------ */
+    --radius-sm: 12px;
+    --radius-md: 18px;
+
+    --font-cinema: "Cinzel", "Georgia", serif; /* Tocco cinematografico */
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
+    --font-mono: "SF Mono", "Roboto Mono", Consolas, monospace;
 }
 
 /* =========================================================
-   1. RESET DI BASE
+   1. RESET DI BASE & SFONDO
    ========================================================= */
 * {
     box-sizing: border-box;
@@ -42,34 +43,57 @@
 }
 
 html {
-    /* Scroll più dolce quando si clicca sui filtri */
     scroll-behavior: smooth;
 }
 
 body {
     font-family: var(--font-sans);
-    background-color: var(--bg);
-    color: var(--text);
+    background-color: var(--bg-deep);
+    color: var(--text-main);
     min-height: 100vh;
+    overflow-x: hidden;
 
-    /* Pattern a puntini: un radial-gradient minuscolo ripetuto ogni 22px.
-       L'opacità è bassissima (0.05) per restare sullo sfondo. */
-    background-image: radial-gradient(circle, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-    background-size: 22px 22px;
+    /* Sfondo con sfumature stile nebulosa e griglia cyber finissima */
+    background-image:
+        radial-gradient(circle at 15% 20%, rgba(0, 243, 255, 0.07) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(255, 0, 127, 0.05) 0%, transparent 40%),
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    background-attachment: fixed;
+}
+
+/* Effetto Spotlight interattivo che segue il mouse */
+body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    background: radial-gradient(
+        800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(0, 243, 255, 0.04),
+        transparent 60%
+    );
+    z-index: 1;
 }
 
 /* =========================================================
-   2. HEADER: titolo, contatore strumenti, ricerca
+   2. HEADER: Glassmorphism Sticky
    ========================================================= */
 header {
-    background-color: var(--surface);
+    background: var(--surface-glass);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
     border-bottom: 1px solid var(--border);
-    padding: 28px 40px;
+    padding: 24px 50px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
 .header-title {
@@ -78,20 +102,20 @@ header {
     gap: 4px;
 }
 
-/* Piccola etichetta "eyebrow" sopra al titolo, in monospace maiuscolo:
-   è il dettaglio tipografico distintivo della pagina. */
 .eyebrow {
     font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 0.12em;
+    font-size: 11px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--accent-strong);
+    color: var(--accent);
 }
 
 header h1 {
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
+    font-family: var(--font-cinema);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-shadow: 0 0 20px rgba(0, 243, 255, 0.25);
 }
 
 /* Barra di ricerca */
@@ -103,14 +127,14 @@ header h1 {
 
 .search-container input {
     width: 100%;
-    padding: 11px 16px 11px 38px;
+    padding: 12px 16px 12px 42px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border);
-    background-color: var(--bg);
-    color: var(--text);
+    background: rgba(10, 15, 25, 0.6);
+    color: var(--text-main);
     font-family: var(--font-sans);
     font-size: 14px;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 .search-container input::placeholder {
@@ -120,20 +144,25 @@ header h1 {
 .search-container input:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-soft);
+    background: rgba(10, 15, 25, 0.9);
+    box-shadow: 0 0 20px var(--accent-glow);
 }
 
 .search-icon {
     position: absolute;
-    left: 13px;
+    left: 14px;
     top: 50%;
     transform: translateY(-50%);
-    font-size: 14px;
+    font-size: 15px;
     color: var(--text-muted);
-    pointer-events: none; /* così il click passa sempre all'input sottostante */
+    pointer-events: none;
+    transition: color 0.3s ease;
 }
 
-/* Piccolo suggerimento di scorciatoia da tastiera, mostrato accanto alla ricerca */
+.search-container input:focus + .search-icon {
+    color: var(--accent);
+}
+
 .search-hint {
     position: absolute;
     right: 12px;
@@ -143,15 +172,14 @@ header h1 {
     font-size: 11px;
     color: var(--text-muted);
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: 6px;
     padding: 2px 6px;
     pointer-events: none;
+    background: rgba(255, 255, 255, 0.03);
 }
 
 /* =========================================================
-   3. FILTRI PER CATEGORIA (funzione aggiuntiva)
-   Riga di "chip" cliccabili che filtrano la griglia in base
-   all'attributo data-category presente su ogni card.
+   3. FILTRI PER CATEGORIA
    ========================================================= */
 .filters {
     display: flex;
@@ -159,7 +187,9 @@ header h1 {
     gap: 10px;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 24px 40px 0;
+    padding: 30px 50px 0;
+    position: relative;
+    z-index: 2;
 }
 
 .filter-chip {
@@ -167,93 +197,118 @@ header h1 {
     font-size: 13px;
     font-weight: 500;
     color: var(--text-muted);
-    background: var(--surface);
+    background: var(--surface-glass);
+    backdrop-filter: blur(8px);
     border: 1px solid var(--border);
     border-radius: 999px;
-    padding: 7px 16px;
+    padding: 8px 18px;
     cursor: pointer;
-    transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    transition: all 0.25s ease;
 }
 
 .filter-chip:hover {
-    color: var(--text);
+    color: var(--text-main);
     border-color: var(--border-strong);
+    background: var(--surface-hover-glass);
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
 }
 
-/* Stato attivo del filtro selezionato */
 .filter-chip.active {
-    color: var(--bg);
+    color: var(--bg-deep);
     background-color: var(--accent);
     border-color: var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow);
+    font-weight: 600;
 }
 
 /* =========================================================
-   4. GRIGLIA DEGLI STRUMENTI
+   4. GRIGLIA & CARD INTERATTIVE
    ========================================================= */
 main {
-    padding: 28px 40px 60px;
+    padding: 30px 50px 70px;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative;
+    z-index: 2;
 }
 
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 20px;
 }
 
-/* =========================================================
-   5. CARD
-   ========================================================= */
 .tool-card {
-    background-color: var(--surface);
+    background: var(--surface-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 24px;
+    padding: 26px;
     display: flex;
     flex-direction: column;
-    transition: transform 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Bagliore al passaggio del mouse sulla card */
+.tool-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(600px circle at var(--card-mouse-x, 50%) var(--card-mouse-y, 50%), rgba(0, 243, 255, 0.08), transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.tool-card:hover::before {
+    opacity: 1;
 }
 
 .tool-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
     border-color: var(--border-strong);
-    background-color: var(--surface-hover);
+    box-shadow: 0 12px 30px -10px rgba(0, 0, 0, 0.5), 0 0 20px var(--accent-glow);
+    background: var(--surface-hover-glass);
 }
 
-/* Riga superiore della card: icona + etichetta categoria */
 .card-top {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
 }
 
 .card-icon {
-    font-size: 26px;
-    width: 44px;
-    height: 44px;
+    font-size: 24px;
+    width: 48px;
+    height: 48px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--accent-soft);
+    background: rgba(0, 243, 255, 0.08);
+    border: 1px solid rgba(0, 243, 255, 0.15);
     border-radius: var(--radius-sm);
+    color: var(--accent);
+    box-shadow: inset 0 0 10px rgba(0, 243, 255, 0.05);
 }
 
 .card-tag {
     font-family: var(--font-mono);
     font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     color: var(--text-muted);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 3px 7px;
-    white-space: nowrap;
+    border-radius: 6px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.02);
 }
 
 .tool-card h3 {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 600;
     margin-bottom: 8px;
     letter-spacing: -0.01em;
@@ -262,43 +317,47 @@ main {
 .tool-card p {
     color: var(--text-muted);
     font-size: 13.5px;
-    line-height: 1.55;
-    margin-bottom: 22px;
+    line-height: 1.6;
+    margin-bottom: 24px;
     flex-grow: 1;
 }
 
-/* Bottone "Apri strumento" */
+/* Bottone strumento */
 .tool-card a {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
     text-align: center;
-    background-color: transparent;
-    color: var(--text);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-main);
     text-decoration: none;
-    border: 1px solid var(--border-strong);
-    padding: 10px;
+    border: 1px solid var(--border);
+    padding: 11px;
     border-radius: var(--radius-sm);
     font-size: 13.5px;
     font-weight: 600;
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    transition: all 0.25s ease;
 }
 
 .tool-card a:hover {
     background-color: var(--accent);
     border-color: var(--accent);
-    color: #0b0f17;
+    color: var(--bg-deep);
+    box-shadow: 0 0 15px var(--accent-glow);
 }
 
-/* Card non ancora disponibile ("Prossimamente") */
+/* Card Disabilitata */
+.tool-card.disabled {
+    opacity: 0.55;
+}
+
 .tool-card.disabled a {
-    opacity: 0.5;
     cursor: default;
     pointer-events: none;
+    background: transparent;
 }
 
-/* Messaggio "nessun risultato" */
 #no-results {
     display: none;
     text-align: center;
@@ -306,19 +365,24 @@ main {
     color: var(--text-muted);
     padding: 60px 20px;
     font-size: 14px;
+    font-family: var(--font-mono);
 }
 
 /* =========================================================
-   6. FOOTER
+   5. FOOTER
    ========================================================= */
 footer {
     text-align: center;
-    padding: 24px 40px 40px;
+    padding: 30px 50px 50px;
     color: var(--text-muted);
     font-size: 12.5px;
+    border-top: 1px solid var(--border);
+    background: var(--surface-glass);
+    position: relative;
+    z-index: 2;
 }
 
 footer span {
     font-family: var(--font-mono);
-    color: var(--text);
+    color: var(--accent);
 }
