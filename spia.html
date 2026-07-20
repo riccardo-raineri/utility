@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Il Gioco della Spia</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #ec4899;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-sizing: border-box;
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: var(--text);
+            margin-top: 0;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: var(--text);
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .player-inputs-container {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding-right: 5px;
+        }
+
+        .player-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: #334155;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+        }
+
+        .card-reveal {
+            background: #0f172a;
+            border: 2px dashed var(--primary);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .secret-word {
+            font-size: 1.8rem;
+            color: var(--accent);
+            font-weight: bold;
+            margin: 15px 0;
+            word-break: break-word;
+        }
+
+        .role-title {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .info-box {
+            background: rgba(99, 102, 241, 0.1);
+            border-left: 4px solid var(--primary);
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- SCHERMATA 1: CONFIGURAZIONE -->
+    <div id="setup-screen">
+        <h1>🕵️‍♂️ Gioco della Spia</h1>
+        <div class="subtitle">Trova l'impostore prima che sia troppo tardi</div>
+
+        <div class="form-group">
+            <label for="num-players">Numero di partecipanti (3 - 20):</label>
+            <input type="number" id="num-players" min="3" max="20" value="4">
+        </div>
+
+        <button onclick="generatePlayerInputs()">Avanti: Inserisci Nomi</button>
+    </div>
+
+    <!-- SCHERMATA 2: INSERIMENTO NOMI E OPZIONI -->
+    <div id="names-screen" class="hidden">
+        <h1>👥 Nomi e Impostori</h1>
+        <div class="subtitle">Personalizza i dettagli della partita</div>
+
+        <div class="form-group">
+            <label>Nomi dei Giocatori:</label>
+            <div id="player-inputs-list" class="player-inputs-container"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="impostors-mode">Gestione Spie:</label>
+            <select id="impostors-mode" onchange="toggleImpostorSettings()">
+                <option value="fixed">Numero fisso</option>
+                <option value="dynamic">Casuale (con % di probabilità)</option>
+            </select>
+        </div>
+
+        <div class="form-group" id="fixed-imp-group">
+            <label for="num-impostors">Numero di Spie:</label>
+            <input type="number" id="num-impostors" min="1" value="1">
+        </div>
+
+        <div class="form-group hidden" id="dynamic-imp-group">
+            <label for="imp-probability">Probabilità che ci sia una Spia (%):</label>
+            <input type="number" id="imp-probability" min="0" max="100" value="80">
+            <label style="margin-top:10px;" for="max-dynamic-imp">Spie massime possibili:</label>
+            <input type="number" id="max-dynamic-imp" min="1" value="2">
+        </div>
+
+        <div class="form-group">
+            <label for="category-select">Categoria Segreta:</label>
+            <select id="category-select">
+                <option value="random">Casuale (Tutte le categorie)</option>
+                <option value="Luoghi">Luoghi & Edifici</option>
+                <option value="Cibo">Cibo & Bevande</option>
+                <option value="Oggetti">Oggetti quotidiani</option>
+                <option value="Animali">Animali</option>
+            </select>
+        </div>
+
+        <button onclick="startGame()">Inizia la Partita</button>
+        <button class="btn-secondary" onclick="location.reload()">Indietro</button>
+    </div>
+
+    <!-- SCHERMATA 3: PASSAGGIO TELEFONO / VISUALIZZAZIONE RUOLO -->
+    <div id="pass-screen" class="hidden">
+        <h2 id="pass-title">Passa il telefono a...</h2>
+        <div class="info-box">Assicurati che gli altri non stiano guardando lo schermo!</div>
+        <button onclick="revealRole()">Mostra il mio ruolo</button>
+    </div>
+
+    <!-- SCHERMATA 4: RIVELAZIONE RUOLO -->
+    <div id="reveal-screen" class="hidden">
+        <h3 id="current-player-name" style="color: var(--primary);">Giocatore</h3>
+        <div class="card-reveal">
+            <div id="role-content"></div>
+        </div>
+        <button onclick="nextPlayer()">Ho letto, passa al prossimo</button>
+    </div>
+
+    <!-- SCHERMATA 5: FINE GIOCO / SESSIONE PRONTA -->
+    <div id="end-setup-screen" class="hidden">
+        <h1>🎲 Tutti hanno visto!</h1>
+        <div class="subtitle">La partita ha ufficialmente inizio. Discutete e trovate la spia!</div>
+        
+        <div class="info-box" id="game-summary" style="margin-top: 20px;"></div>
+
+        <button onclick="location.reload()">Nuova Partita</button>
+    </div>
+
+</div>
+
+<script>
+    // Database delle parole segrete suddivise per categoria
+    const wordDatabase = {
+        "Luoghi": ["Spiaggia", "Ospedale", "Scuola", "Stazione Spaziale", "Cinema", "Supermercato", "Ristorante", "Prigione", "Aereo", "Castello", "Stadio", "Discoteca"],
+        "Cibo": ["Pizza", "Sushi", "Gelato", "Hamburger", "Lasagna", "Cioccolato", "Caffè", "Paella", "Tiramisù", "Popcorn"],
+        "Oggetti": ["Smartphone", "Spazzolino", "Ombrello", "Chitarra", "Orologio", "Chiavi", "Occhiali da sole", "Zaino", "Cuscino", "Televisore"],
+        "Animali": ["Pinguino", "Leone", "Delfino", "Kanguro", "Elefante", "Ghepardo", "Gufo", "Panda", "Squalo", "Giraffa"]
+    };
+
+    let players = [];
+    let secretWord = "";
+    let currentPlayerIndex = 0;
+
+    function generatePlayerInputs() {
+        const num = parseInt(document.getElementById('num-players').value);
+        const container = document.getElementById('player-inputs-list');
+        container.innerHTML = '';
+
+        if (num < 3 || num > 20) {
+            alert("Inserisci un numero di giocatori compreso tra 3 e 20.");
+            return;
+        }
+
+        for (let i = 0; i < num; i++) {
+            container.innerHTML += `
+                <div class="player-row">
+                    <input type="text" placeholder="Giocatore ${i + 1}" value="Giocatore ${i + 1}" class="player-name-input" required>
+                </div>
+            `;
+        }
+
+        document.getElementById('setup-screen').classList.add('hidden');
+        document.getElementById('names-screen').classList.remove('hidden');
+    }
+
+    function toggleImpostorSettings() {
+        const mode = document.getElementById('impostors-mode').value;
+        if (mode === 'fixed') {
+            document.getElementById('fixed-imp-group').classList.remove('hidden');
+            document.getElementById('dynamic-imp-group').classList.add('hidden');
+        } else {
+            document.getElementById('fixed-imp-group').classList.add('hidden');
+            document.getElementById('dynamic-imp-group').classList.remove('hidden');
+        }
+    }
+
+    function startGame() {
+        // Raccogli i nomi
+        const nameInputs = document.querySelectorAll('.player-name-input');
+        players = [];
+        nameInputs.forEach((input, index) => {
+            let name = input.value.trim() !== "" ? input.value.trim() : `Giocatore ${index + 1}`;
+            players.push({ name: name, isImpostor: false, roleInfo: "" });
+        });
+
+        // Determina il numero di impostori
+        let numImpostors = 1;
+        const mode = document.getElementById('impostors-mode').value;
+        const totalPlayers = players.length;
+
+        if (mode === 'fixed') {
+            numImpostors = parseInt(document.getElementById('num-impostors').value);
+            if (numImpostors >= totalPlayers) {
+                alert("Il numero di spie deve essere inferiore al numero totale dei giocatori!");
+                return;
+            }
+        } else {
+            const prob = parseInt(document.getElementById('imp-probability').value);
+            const maxImp = parseInt(document.getElementById('max-dynamic-imp').value);
+            const roll = Math.random() * 100;
+
+            if (roll <= prob) {
+                numImpostors = Math.floor(Math.random() * Math.min(maxImp, totalPlayers - 1)) + 1;
+            } else {
+                numImpostors = 0; // Nessuna spia in questa partita! (Evento raro ma possibile)
+            }
+        }
+
+        // Assegna casualmente le spie
+        let assignedImpostors = 0;
+        while (assignedImpostors < numImpostors) {
+            let randomIndex = Math.floor(Math.random() * totalPlayers);
+            if (!players[randomIndex].isImpostor) {
+                players[randomIndex].isImpostor = true;
+                assignedImpostors++;
+            }
+        }
+
+        // Seleziona la parola segreta
+        const categoryChoice = document.getElementById('category-select').value;
+        let selectedCategoryWords = [];
+
+        if (categoryChoice === 'random') {
+            let allCategories = Object.keys(wordDatabase);
+            let randomCat = allCategories[Math.floor(Math.random() * allCategories.length)];
+            selectedCategoryWords = wordDatabase[randomCat];
+        } else {
+            selectedCategoryWords = wordDatabase[categoryChoice];
+        }
+
+        secretWord = selectedCategoryWords[Math.floor(Math.random() * selectedCategoryWords.length)];
+
+        // Inizia il giro di visualizzazione
+        currentPlayerIndex = 0;
+        showPassScreen();
+    }
+
+    function showPassScreen() {
+        document.getElementById('names-screen').classList.add('hidden');
+        document.getElementById('reveal-screen').classList.add('hidden');
+        document.getElementById('pass-screen').classList.remove('hidden');
+        
+        document.getElementById('pass-title').innerText = `Passa il telefono a: ${players[currentPlayerIndex].name}`;
+    }
+
+    function revealRole() {
+        document.getElementById('pass-screen').classList.add('hidden');
+        document.getElementById('reveal-screen').classList.remove('hidden');
+
+        const currentPlayer = players[currentPlayerIndex];
+        document.getElementById('current-player-name').innerText = currentPlayer.name;
+
+        const roleContent = document.getElementById('role-content');
+        if (currentPlayer.isImpostor) {
+            roleContent.innerHTML = `
+                <div class="role-title" style="color: var(--danger);">SEI LA SPIA! 🕵️‍♂️</div>
+                <div style="font-size: 0.95rem; color: var(--text-muted);">Non Conosci la parola segreta. Cerca di mimetizzarti ed indovinarla!</div>
+            `;
+        } else {
+            roleContent.innerHTML = `
+                <div class="role-title" style="color: var(--success);">Sei un Cittadino 😇</div>
+                <div style="font-size: 0.9rem; color: var(--text-muted);">La parola segreta è:</div>
+                <div class="secret-word">${secretWord}</div>
+            `;
+        }
+    }
+
+    function nextPlayer() {
+        currentPlayerIndex++;
+        if (currentPlayerIndex < players.length) {
+            showPassScreen();
+        } else {
+            // Fine del giro di visualizzazione
+            document.getElementById('reveal-screen').classList.add('hidden');
+            document.getElementById('end-setup-screen').classList.remove('hidden');
+            
+            const impostorCount = players.filter(p => p.isImpostor).length;
+            document.getElementById('game-summary').innerHTML = `
+                <strong>Riepilogo Partita:</strong><br>
+                - Giocatori totali: ${players.length}<br>
+                - Spie in gioco: ${impostorCount} ${impostorCount === 0 ? '(Nessuna spia oggi! Sospetti infondati)' : ''}
+            `;
+        }
+    }
+</script>
+
+</body>
+</html>
