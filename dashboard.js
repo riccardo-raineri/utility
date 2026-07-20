@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSpotlight();
     initSoft3DTilt();
     initSearchAndFilters();
+    initFavorites(); // Inizializza i preferiti salvati
 });
 
 /* =========================================================
@@ -94,12 +95,81 @@ function initSoft3DTilt() {
 }
 
 /* =========================================================
-   4. RICERCA E FILTRI
+   4. GESTIONE PREFERITI (LOCALSTORAGE)
+   ========================================================= */
+function getFavorites() {
+    const favs = localStorage.getItem('toolbox_favorites');
+    return favs ? JSON.parse(favs) : [];
+}
+
+function toggleFavorite(toolId, event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    let favs = getFavorites();
+    if (favs.includes(toolId)) {
+        favs = favs.filter(id => id !== toolId);
+    } else {
+        favs.push(toolId);
+    }
+
+    localStorage.setItem('toolbox_favorites', JSON.stringify(favs));
+    initFavorites();
+}
+
+function initFavorites() {
+    const favs = getFavorites();
+    const favSection = document.getElementById('favoritesSection');
+    const favGrid = document.getElementById('favoritesGrid');
+
+    // Aggiorna lo stato visivo di tutte le stelle nella griglia principale
+    document.querySelectorAll('#toolsGrid .tool-card').forEach(card => {
+        const toolId = card.dataset.toolId;
+        const favBtn = card.querySelector('.fav-btn');
+        if (favBtn) {
+            if (favs.includes(toolId)) {
+                favBtn.classList.add('is-favorite');
+            } else {
+                favBtn.classList.remove('is-favorite');
+            }
+        }
+    });
+
+    // Costruisce la sezione dei preferiti in cima
+    if (favs.length > 0 && favSection && favGrid) {
+        favSection.style.display = 'flex';
+        favGrid.innerHTML = '';
+
+        favs.forEach(toolId => {
+            const originalCard = document.querySelector(`#toolsGrid .tool-card[data-tool-id="${toolId}"]`);
+            if (originalCard) {
+                const clone = originalCard.cloneNode(true);
+                const clonedBtn = clone.querySelector('.fav-btn');
+                if (clonedBtn) {
+                    clonedBtn.classList.add('is-favorite');
+                    clonedBtn.addEventListener('click', (e) => toggleFavorite(toolId, e));
+                }
+                favGrid.appendChild(clone);
+            }
+        });
+    } else if (favSection) {
+        favSection.style.display = 'none';
+    }
+
+    if (window.lucide) {
+        lucide.createIcons();
+    }
+}
+
+/* =========================================================
+   5. RICERCA E FILTRI
    ========================================================= */
 function initSearchAndFilters() {
     const searchInput = document.getElementById('searchInput');
     const filterPills = document.querySelectorAll('.filter-pill');
-    const cards = document.querySelectorAll('.tool-card');
+    const cards = document.querySelectorAll('#toolsGrid .tool-card');
     const noResults = document.getElementById('noResults');
 
     let activeCategory = 'tutti';

@@ -33,11 +33,10 @@
     <div class="app-container">
 
         <!-- =========================================================
-             HERO HEADER (Layout Pulito con Categorie Centrate)
+             HERO HEADER
              ========================================================= -->
         <header class="hero-header">
             <div class="hero-top">
-                <!-- BARRA DELLE CATEGORIE (Posizionata al Centro) -->
                 <nav class="filters-container" id="filterBar">
                     <button class="filter-pill active" data-filter="tutti">
                         <i data-lucide="layout-grid"></i>
@@ -75,7 +74,6 @@
                 <p class="hero-subtitle">Creative Utility Dashboard</p>
             </div>
 
-            <!-- Barra di Ricerca -->
             <div class="search-wrapper">
                 <div class="search-glass-card">
                     <i data-lucide="search" class="search-icon"></i>
@@ -89,10 +87,21 @@
              GRIGLIA STRUMENTI
              ========================================================= -->
         <main class="main-content">
+            
+            <!-- SEZIONE PREFERITI DINAMICA -->
+            <div id="favoritesSection" class="favorites-container" style="display: none;">
+                <h3 class="section-header-title">
+                    <i data-lucide="star"></i> I tuoi Preferiti
+                </h3>
+                <div class="tools-grid" id="favoritesGrid"></div>
+                <hr class="section-divider">
+            </div>
+
             <div class="tools-grid" id="toolsGrid">
 
                 <!-- Convertitore Universale -->
-                <div class="tool-card" data-category="utilita">
+                <div class="tool-card" data-category="utilita" data-tool-id="convertitore">
+                    <button class="fav-btn" onclick="toggleFavorite('convertitore', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -113,7 +122,8 @@
                 </div>
 
                 <!-- Calcola Sconto -->
-                <div class="tool-card" data-category="finanza">
+                <div class="tool-card" data-category="finanza" data-tool-id="calcolasconto">
+                    <button class="fav-btn" onclick="toggleFavorite('calcolasconto', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -134,7 +144,8 @@
                 </div>
 
                 <!-- Costo Carburante -->
-                <div class="tool-card" data-category="viaggi">
+                <div class="tool-card" data-category="viaggi" data-tool-id="calcolaviaggio">
+                    <button class="fav-btn" onclick="toggleFavorite('calcolaviaggio', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -155,7 +166,8 @@
                 </div>
 
                 <!-- Esposimetro -->
-                <div class="tool-card" data-category="cinema">
+                <div class="tool-card" data-category="cinema" data-tool-id="esposizione">
+                    <button class="fav-btn" onclick="toggleFavorite('esposizione', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -176,7 +188,8 @@
                 </div>
 
                 <!-- Distanza Fulmine -->
-                <div class="tool-card" data-category="utilita">
+                <div class="tool-card" data-category="utilita" data-tool-id="distanzafulmine">
+                    <button class="fav-btn" onclick="toggleFavorite('distanzafulmine', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -197,7 +210,8 @@
                 </div>
 
                 <!-- Convertitore Immagini -->
-                <div class="tool-card" data-category="utilita">
+                <div class="tool-card" data-category="utilita" data-tool-id="convertitoreimmagini">
+                    <button class="fav-btn" onclick="toggleFavorite('convertitoreimmagini', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -218,7 +232,8 @@
                 </div>
 
                 <!-- Data Sharing -->
-                <div class="tool-card" data-category="utilita">
+                <div class="tool-card" data-category="utilita" data-tool-id="datasharing">
+                    <button class="fav-btn" onclick="toggleFavorite('datasharing', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -239,7 +254,8 @@
                 </div>
 
                 <!-- Test Digitazione -->
-                <div class="tool-card" data-category="svago">
+                <div class="tool-card" data-category="svago" data-tool-id="testdigitazione">
+                    <button class="fav-btn" onclick="toggleFavorite('testdigitazione', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -260,7 +276,8 @@
                 </div>
 
                 <!-- QR-CODE Generator -->
-                <div class="tool-card" data-category="utilita">
+                <div class="tool-card" data-category="utilita" data-tool-id="qrcode">
+                    <button class="fav-btn" onclick="toggleFavorite('qrcode', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -280,8 +297,9 @@
                     </div>
                 </div>
 				
-				  <!-- Conteggio Parole -->
-                <div class="tool-card" data-category="svago">
+                <!-- Conteggio Parole -->
+                <div class="tool-card" data-category="svago" data-tool-id="contatoreparole">
+                    <button class="fav-btn" onclick="toggleFavorite('contatoreparole', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -301,8 +319,9 @@
                     </div>
                 </div>
 				
-				<!-- Convertitore Colori -->
-                <div class="tool-card" data-category="utilita">
+                <!-- Convertitore Colori -->
+                <div class="tool-card" data-category="utilita" data-tool-id="convertitorecolori">
+                    <button class="fav-btn" onclick="toggleFavorite('convertitorecolori', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -322,8 +341,9 @@
                     </div>
                 </div>
 				
-				<!-- Card Pomodoro Focus Timer -->
-				<div class="tool-card" data-category="tempo">
+                <!-- Card Pomodoro Focus Timer -->
+                <div class="tool-card" data-category="tempo" data-tool-id="pomodoro">
+                    <button class="fav-btn" onclick="toggleFavorite('pomodoro', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -343,9 +363,9 @@
                     </div>
                 </div>
 
-
-<!-- Card Fusi Orari Globali -->
-				<div class="tool-card" data-category="tempo">
+                <!-- Card Fusi Orari Globali -->
+                <div class="tool-card" data-category="tempo" data-tool-id="timezone">
+                    <button class="fav-btn" onclick="toggleFavorite('timezone', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -366,7 +386,8 @@
                 </div>
 		
                 <!-- Film al Cinema -->
-                <div class="tool-card" data-category="cinema">
+                <div class="tool-card" data-category="cinema" data-tool-id="cinema">
+                    <button class="fav-btn" onclick="toggleFavorite('cinema', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
@@ -387,7 +408,8 @@
                 </div>
 
                 <!-- Cronometro Pomodoro (In Arrivo) -->
-                <div class="tool-card disabled" data-category="tempo">
+                <div class="tool-card disabled" data-category="tempo" data-tool-id="cronometropomodoro">
+                    <button class="fav-btn" onclick="toggleFavorite('cronometropomodoro', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
                         <div class="card-header">
