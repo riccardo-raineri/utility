@@ -1,6 +1,6 @@
 /**
  * =====================================================================
- * DASHBOARD.JS — Interactive Engine
+ * DASHBOARD.JS — Interactive Engine (Minimal Adjustments)
  * =====================================================================
  */
 
@@ -23,7 +23,7 @@ function initParticles() {
     const container = document.getElementById('particlesContainer');
     if (!container) return;
 
-    const particleCount = 18;
+    const particleCount = 14;
     for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
@@ -44,7 +44,7 @@ function initParticles() {
 }
 
 /* =========================================================
-   2. AMBIENT SPOTLIGHT (CURSOR TRACKER)
+   2. AMBIENT SPOTLIGHT
    ========================================================= */
 function initSpotlight() {
     let ticking = false;
@@ -65,7 +65,7 @@ function initSpotlight() {
 }
 
 /* =========================================================
-   3. INCLINAZIONE 3D AMMORBIDITA
+   3. INCLINAZIONE 3D ULTRA-MIGLIORATA E LEGGERA
    ========================================================= */
 function initSoft3DTilt() {
     const cards = document.querySelectorAll('.tool-card:not(.disabled)');
@@ -82,8 +82,9 @@ function initSoft3DTilt() {
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
 
-            const rotateX = ((y - centerY) / centerY) * -2.5; 
-            const rotateY = ((x - centerX) / centerX) * 2.5;  
+            // Inclinazione piccolissima e impercettibile (max 1.5 deg)
+            const rotateX = ((y - centerY) / centerY) * -1.5; 
+            const rotateY = ((x - centerX) / centerX) * 1.5;  
 
             card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
         });
