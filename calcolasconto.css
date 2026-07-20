@@ -1,9 +1,9 @@
 /* =====================================================================
    CALCOLASCONTO.CSS
-===================================================================== */
+   ===================================================================== */
 
 :root {
---bg: #17140f;
+    --bg: #17140f;
     --surface: #201c16;
     --border: #332d22;
     --text: #f1ede4;
@@ -20,7 +20,7 @@
 }
 
 [data-theme="light"] {
-	--bg: #f6f4ef;
+    --bg: #f6f4ef;
     --surface: #ffffff;
     --border: #e3ddd0;
     --text: #24211c;
@@ -121,11 +121,11 @@ body {
 }
 
 /* =========================================================
-   BOTTONE CAMBIO TEMA (icona SVG sole/luna)
+   BOTTONE CAMBIO TEMA (icona SVG sole/luna).
    ========================================================= */
 .theme-toggle {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -146,15 +146,13 @@ body {
     height: 16px;
 }
 
-/* Di default è visibile solo l'icona "luna": cliccandola
-   si passa al tema scuro. */
-.theme-toggle .icon-sun { display: none; }
-.theme-toggle .icon-moon { display: block; }
+/* Di default (Tema Scuro) mostra il sole per passare al chiaro */
+.theme-toggle .icon-sun { display: block; }
+.theme-toggle .icon-moon { display: none; }
 
-/* In tema scuro si inverte: resta visibile solo l'icona "sole", che
-   riporta al tema chiaro. */
-[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
-[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+/* In Tema Chiaro ([data-theme="light"]) mostra la luna per passare allo scuro */
+[data-theme="light"] .theme-toggle .icon-sun { display: none; }
+[data-theme="light"] .theme-toggle .icon-moon { display: block; }
 
 
 .input-group {
