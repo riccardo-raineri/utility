@@ -1,6 +1,6 @@
 let currentAction = null;
 let selectedFile = null;
-let pdfPageStates = {}; // Memoria per rotazioni o stati delle pagine nell'editor grafico
+let pdfPageStates = {}; 
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) {
@@ -41,7 +41,9 @@ function selectAction(actionKey, actionTitle, acceptedTypes) {
     document.getElementById('workspacePanel').style.display = 'block';
     
     document.querySelectorAll('.tool-card').forEach(card => card.classList.remove('active'));
-    event.currentTarget.classList.add('active');
+    if (window.event && window.event.currentTarget) {
+        window.event.currentTarget.classList.add('active');
+    }
 
     selectedFile = null;
     pdfPageStates = {};
@@ -70,13 +72,19 @@ async function handleFileSelected(file) {
     const editorContainer = document.getElementById('visualEditorContainer');
     editorContainer.innerHTML = '';
 
-    // Se l'azione richiede l'editor grafico visivo delle pagine
     if (['rotate', 'split', 'delete-pages', 'extract-pages'].includes(currentAction)) {
         editorContainer.style.display = 'block';
-        editorContainer.innerHTML = `<p style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Caricamento anteprime pagine in corso...</p>`;
+        editorContainer.innerHTML = `<p style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Generazione anteprime pagine in corso...</p>`;
         
         try {
-            const arrayBuffer = await file.arrayBuffer();
+            // Lettura tramite FileReader per massima compatibilità (Evita problemi di blocco locale su file://)
+            const arrayBuffer = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsArrayBuffer(file);
+            });
+
             const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
             const pdfDoc = await loadingTask.promise;
             
@@ -94,7 +102,6 @@ async function handleFileSelected(file) {
             gridHtml += `</div>`;
             editorContainer.innerHTML = gridHtml;
 
-            // Renderizza le miniature in canvas in background
             for (let i = 1; i <= pdfDoc.numPages; i++) {
                 const page = await pdfDoc.getPage(i);
                 const viewport = page.getViewport({ scale: 0.25 });
@@ -107,28 +114,25 @@ async function handleFileSelected(file) {
                 }
             }
         } catch (err) {
-            console.error(err);
-            editorContainer.innerHTML = `<p style="color:#ef4444; font-size:12px;">Impossibile generare le anteprime delle pagine.</p>`;
+            console.error("Errore anteprima PDF.js:", err);
+            editorContainer.innerHTML = `<p style="color:#ef4444; font-size:12px;">Impossibile generare le anteprime. Assicurati di usare un server locale (es. Live Server).</p>`;
         }
     } else {
         editorContainer.style.display = 'none';
     }
 }
 
-// Interazione con l'editor grafico a miniature
 function togglePageSelection(pageNum) {
     const card = document.getElementById(`thumb-${pageNum}`);
     if (!card) return;
 
     if (currentAction === 'rotate') {
-        // Ruota di 90 gradi ogni click
         pdfPageStates[pageNum].rotation = (pdfPageStates[pageNum].rotation + 90) % 360;
         card.style.transform = `rotate(${pdfPageStates[pageNum].rotation}deg)`;
     } else if (currentAction === 'delete-pages') {
         pdfPageStates[pageNum].deleted = !pdfPageStates[pageNum].deleted;
         card.classList.toggle('marked-delete', pdfPageStates[pageNum].deleted);
     } else {
-        // Per split ed estrai pagine (selezione multipla o singola)
         pdfPageStates[pageNum].selected = !pdfPageStates[pageNum].selected;
         card.classList.toggle('selected', pdfPageStates[pageNum].selected);
     }
@@ -159,7 +163,7 @@ async function processFile() {
                     const pageNum = index + 1;
                     if (pdfPageStates[pageNum] && pdfPageStates[pageNum].rotation > 0) {
                         const currentRot = page.getRotation().angle;
-                        page.setRotation(pdfLib.degrees(currentRot + pdfPageStates[pageNum].rotation));
+                        page.setRotation(PDFLib.degrees(currentRot + pdfPageStates[pageNum].rotation));
                     }
                 });
                 const pdfBytes = await pdfDoc.save();
