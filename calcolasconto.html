@@ -18,9 +18,8 @@
                 <h2>Calcola Sconto</h2>
                 <p>Prezzo, risparmio e totale.</p>
             </div>
-			
-             <!-- Bottone tema: contiene entrambe le icone SVG, il CSS mostra
-                 solo quella giusta in base al tema attivo (vedi convertitore.css) -->
+
+            <!-- Bottone tema: contiene entrambe le icone SVG, il CSS mostra solo quella giusta in base al tema attivo -->
             <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
                 <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -80,22 +79,53 @@
 
     <script>
         /**
-         * Alterna il tema scuro (default) e quello chiaro (data-theme="light")
+         * Applica all'avvio il tema salvato in precedenza (in qualsiasi
+         * strumento del sito, la chiave è condivisa) oppure, se è la prima
+         * visita, quello preferito dal sistema operativo/browser. Così la
+         * scelta fatta una volta resta valida ovunque e anche ricaricando.
          */
-        function toggleTheme() {
-            const body = document.body;
-            if (body.getAttribute('data-theme') === 'light') {
-                body.removeAttribute('data-theme');
+        function applyStoredTheme() {
+            const stored = localStorage.getItem('toolbox_theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const wantsLight = stored ? stored === 'light' : !prefersDark;
+
+            if (wantsLight) {
+                document.body.setAttribute('data-theme', 'light');
             } else {
-                body.setAttribute('data-theme', 'light');
+                document.body.removeAttribute('data-theme'); // niente attributo = tema scuro, il default di questa pagina
             }
         }
 
+        /**
+         * Alterna il tema scuro (default di questa pagina) e quello chiaro
+         * (data-theme="light"), salvando la scelta in localStorage così
+         * resta la stessa anche negli altri strumenti del sito.
+         */
+        function toggleTheme() {
+            const body = document.body;
+            const goingLight = body.getAttribute('data-theme') !== 'light';
+
+            if (goingLight) {
+                body.setAttribute('data-theme', 'light');
+            } else {
+                body.removeAttribute('data-theme');
+            }
+
+            localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
+        }
+
+        /**
+         * Calcola risparmio unitario, risparmio totale (considerando la
+         * quantità) e prezzo finale, poi aggiorna il riquadro risultati
+         * e la barra visiva della percentuale di sconto.
+         */
         function calculateDiscount() {
             const price = parseFloat(document.getElementById('price').value);
             const discount = parseFloat(document.getElementById('discount').value);
+            // Se la quantità non è valorizzata, si assume 1 pezzo
             const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
+            // Controllo di sicurezza sui valori numerici
             if (isNaN(price) || isNaN(discount) || price < 0 || discount < 0) return;
 
             const savedPerUnit = price * (discount / 100);
@@ -107,12 +137,18 @@
             document.getElementById('saved-total').innerText = savedTotal.toFixed(2);
             document.getElementById('final-price').innerText = finalTotal.toFixed(2);
 
+            // La barra si riempie in proporzione diretta alla percentuale di sconto
+            // (bloccata tra 0 e 100 per evitare valori fuori scala con input anomali)
             const clampedDiscount = Math.min(Math.max(discount, 0), 100);
             document.getElementById('savings-bar').style.width = clampedDiscount + '%';
 
             document.getElementById('result-box').style.display = 'block';
         }
 
+        /**
+         * Riporta il form allo stato iniziale: svuota i campi, nasconde
+         * il riquadro risultati e azzera la barra visiva.
+         */
         function resetForm() {
             document.getElementById('price').value = '';
             document.getElementById('discount').value = '';
@@ -120,6 +156,9 @@
             document.getElementById('result-box').style.display = 'none';
             document.getElementById('savings-bar').style.width = '0%';
         }
+
+        // Applica subito il tema corretto all'apertura della pagina
+        applyStoredTheme();
     </script>
 
 </body>

@@ -14,7 +14,7 @@
     --bg: #0c0d10;              /* sfondo quasi nero */
     --surface: #15161b;         /* sfondo del pannello */
     --border: #24262d;          /* bordo sottile */
-    --text: #eceeF2;            /* testo principale */
+    --text: #eceef2;            /* testo principale */
     --text-muted: #82858f;      /* etichette / testo secondario */
     --accent: #c98a3f;          /* ambra desaturata (era arancione acceso) */
     --accent-soft: rgba(201, 138, 63, 0.1);

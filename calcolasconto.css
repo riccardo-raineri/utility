@@ -1,24 +1,36 @@
 /* =====================================================================
    CALCOLASCONTO.CSS
+   Foglio di stile dello strumento "Calcola Sconto".
+
+   DIREZIONE GRAFICA
+   Tema "carta" con doppio schema colore: qui lo scuro è il tema di
+   default (--bg/--surface scuri nel :root) e il chiaro si attiva
+   aggiungendo data-theme="light" al <body> — l'opposto delle altre
+   pagine con doppio tema, dove il chiaro è il default. È una scelta
+   voluta per questo strumento, quindi le due varianti restano separate
+   così come sono: [data-theme="light"] sovrascrive le variabili scure.
    ===================================================================== */
 
 :root {
+    /* Tema scuro (default): "carta" ma con toni caldi quasi carbone */
     --bg: #17140f;
     --surface: #201c16;
     --border: #332d22;
     --text: #f1ede4;
     --text-muted: #a89f8f;
-    --accent: #35a179;
+    --accent: #35a179;          /* verde acceso, leggibile sullo scuro */
     --accent-soft: rgba(53, 161, 121, 0.14);
     --accent-strong: #4dbd8f;
-    --accent-border: rgba(53, 161, 121, 0.28);
-    --accent-track: rgba(53, 161, 121, 0.2);
-    --pattern-line: rgba(255, 255, 255, 0.03);
+    --accent-border: rgba(53, 161, 121, 0.28);  /* bordo riquadro risultato */
+    --accent-track: rgba(53, 161, 121, 0.2);    /* binario barra risparmio */
+    --pattern-line: rgba(255, 255, 255, 0.03);  /* texture "carta" di sfondo */
     --radius: 10px;
     --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
 }
 
+/* Tema chiaro: attivato aggiungendo data-theme="light" al <body>.
+   Sfondo crema da scontrino, verde smeraldo desaturato. */
 [data-theme="light"] {
     --bg: #f6f4ef;
     --surface: #ffffff;
@@ -43,6 +55,9 @@
 body {
     background-color: var(--bg);
     color: var(--text);
+    /* Pattern "carta": righe diagonali larghe 14px, quasi invisibili.
+       --pattern-line cambia da sola con il tema, quindi il pattern
+       resta coerente in entrambe le varianti senza doppie regole. */
     background-image: repeating-linear-gradient(
         135deg,
         var(--pattern-line) 0px,
@@ -58,6 +73,7 @@ body {
     transition: background-color 0.25s ease, color 0.25s ease;
 }
 
+/* Link "torna alla dashboard", uguale su tutti gli strumenti */
 .back-link {
     position: fixed;
     top: 20px;
@@ -75,6 +91,9 @@ body {
     color: var(--text);
 }
 
+/* =========================================================
+   CARD PRINCIPALE
+   ========================================================= */
 .card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -187,6 +206,7 @@ input:focus {
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+/* Riga con due campi affiancati: sconto % e quantità pezzi */
 .input-row {
     display: flex;
     gap: 12px;
@@ -214,6 +234,7 @@ button:hover {
     background-color: var(--accent-strong);
 }
 
+/* Bottone secondario "Nuovo calcolo": resetta il form */
 .btn-secondary {
     width: 100%;
     padding: 11px;
@@ -233,6 +254,9 @@ button:hover {
     color: var(--text);
 }
 
+/* =========================================================
+   RIQUADRO RISULTATO
+   ========================================================= */
 .result {
     margin-top: 22px;
     padding: 18px;
@@ -267,6 +291,7 @@ button:hover {
     color: var(--accent-strong);
 }
 
+/* Barra che visualizza in modo grafico la percentuale risparmiata */
 .savings-bar-track {
     margin-top: 14px;
     height: 6px;
