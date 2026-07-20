@@ -3,12 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertitore Immagini Pro</title>
+    <title>Convertitore Immagini</title>
     <link rel="stylesheet" href="convertitoreimmagini.css">
+    <style>
+        .resize-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .checkbox-row input { cursor: pointer; }
+    </style>
 </head>
 <body>
 
-<!-- Link alla Dashboard -->
     <a class="back-link" href="dashboard.html">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
@@ -18,7 +33,6 @@
     </a>
 
     <div class="card">
-        <!-- Header -->
         <div class="card-header">
             <div class="icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -29,27 +43,14 @@
             </div>
             <div class="title-group">
                 <h2>Convertitore Immagini</h2>
-                <p>Converti, confronta e ottimizza le tue immagini</p>
+                <p>Converti, ridimensiona e ottimizza le tue immagini</p>
             </div>
             <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
-                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4"/>
-                    <line x1="12" y1="2" x2="12" y2="4"/>
-                    <line x1="12" y1="20" x2="12" y2="22"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="2" y1="12" x2="4" y2="12"/>
-                    <line x1="20" y1="12" x2="22" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
             </button>
         </div>
 
-        <!-- Zona Drag and Drop -->
         <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
             <div class="drop-zone-content">
                 <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -63,7 +64,6 @@
             <input type="file" id="file-input" accept="image/*" hidden onchange="handleFileSelect(event)">
         </div>
 
-        <!-- Anteprima Immagine Caricata -->
         <div class="file-preview" id="file-preview" style="display: none;">
             <div class="thumb-container">
                 <img id="preview-img" src="" alt="Anteprima">
@@ -80,7 +80,6 @@
             </button>
         </div>
 
-        <!-- Opzioni e Conversione -->
         <div class="options-group" id="options-group" style="display: none;">
             <div class="input-group">
                 <label for="format-select">Formato di destinazione</label>
@@ -89,10 +88,24 @@
                     <option value="image/jpeg">JPG / JPEG (.jpg)</option>
                     <option value="image/webp">WEBP (.webp)</option>
                     <option value="image/avif">AVIF (.avif)</option>
-                    <option value="image/bmp">BMP (.bmp)</option>
-                    <option value="image/gif">GIF (.gif)</option>
-                    <option value="image/x-icon">ICO (.ico)</option>
                 </select>
+            </div>
+
+            <!-- NUOVE OPZIONI DI RIDIMENSIONAMENTO -->
+            <div class="input-group">
+                <label>Ridimensiona Dimensioni (PX)</label>
+                <div class="resize-grid">
+                    <div>
+                        <input type="number" id="resize-width" placeholder="Larghezza" oninput="handleDimensionChange('width')">
+                    </div>
+                    <div>
+                        <input type="number" id="resize-height" placeholder="Altezza" oninput="handleDimensionChange('height')">
+                    </div>
+                </div>
+                <div class="checkbox-row">
+                    <input type="checkbox" id="keep-aspect" checked>
+                    <label for="keep-aspect" style="margin:0; text-transform:none;">Mantieni proporzioni</label>
+                </div>
             </div>
 
             <div class="input-group" id="quality-group" style="display: none;">
@@ -103,35 +116,23 @@
                 <input type="range" id="quality-range" min="10" max="100" value="90" oninput="updateQualityText(this.value)">
             </div>
 
-            <!-- Pulsante 1: CONVERTI -->
             <button class="btn-primary" id="btn-convert" onclick="processConversion()">
-                <svg class="btn-icon" viewBox="0 0 24 24">
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                </svg>
-                Converti Immagine
+                <svg class="btn-icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                Elabora Immagine
             </button>
         </div>
 
-        <!-- SEZIONE RISULTATI (Comparazione Prima/Dopo con Slider e Dati Utili) -->
         <div class="result-section" id="result-section" style="display: none;">
             <hr class="divider">
-            
             <h3 class="section-title">Confronto & Risultato</h3>
 
-            <!-- Interactive Image Comparison Slider -->
             <div class="image-slider-container" id="slider-container">
                 <span class="badge-overlay badge-before">PRIMA</span>
                 <span class="badge-overlay badge-after">DOPO</span>
-
-                <!-- Immagine DOPO (Sfondo completo) -->
                 <img id="compare-after-img" class="slider-img" src="" alt="Convertito">
-
-                <!-- Immagine PRIMA (Ritaglio) -->
                 <div class="slider-before-wrapper" id="slider-before-wrapper">
                     <img id="compare-before-img" class="slider-img" src="" alt="Originale">
                 </div>
-
-                <!-- Splitter/Handle trascinabile -->
                 <div class="slider-handle" id="slider-handle">
                     <div class="slider-button">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -140,12 +141,9 @@
                         </svg>
                     </div>
                 </div>
-
-                <!-- Input nativo sovrapposto per il controllo dello slider -->
                 <input type="range" class="range-slider-input" min="0" max="100" value="50" id="comparison-range" oninput="updateSliderPosition(this.value)">
             </div>
 
-            <!-- Schede Dati Utili -->
             <div class="stats-grid">
                 <div class="stat-box">
                     <span class="stat-label">Peso Originale</span>
@@ -155,19 +153,14 @@
                     <span class="stat-label">Nuovo Peso</span>
                     <strong class="stat-value" id="stat-new-size">0 KB</strong>
                 </div>
-                <div class="stat-box highlight">
+                <div class="stat-box">
                     <span class="stat-label">Differenza</span>
                     <strong class="stat-value" id="stat-diff-perc">0%</strong>
                 </div>
             </div>
 
-            <!-- Pulsante 2: SCARICA -->
             <button class="btn-success" id="btn-download" onclick="downloadFile()">
-                <svg class="btn-icon" viewBox="0 0 24 24">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
+                <svg class="btn-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                 Scarica Immagine
             </button>
         </div>
@@ -179,68 +172,44 @@
         let originalFileName = "";
         let convertedBlob = null;
         let convertedUrl = null;
+        let aspectRatio = 1;
 
-        // Gestione Tema
-        function toggleTheme() {
+ function toggleTheme() {
             const body = document.body;
-            if (body.getAttribute('data-theme') === 'light') {
-                body.removeAttribute('data-theme');
-            } else {
+            const goingLight = body.getAttribute('data-theme') !== 'light';
+
+            if (goingLight) {
                 body.setAttribute('data-theme', 'light');
+            } else {
+                body.removeAttribute('data-theme');
             }
-			
-			    localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
 
+            localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
         }
 
-        // Drag & Drop Handling
         const dropZone = document.getElementById('drop-zone');
+        ['dragenter', 'dragover'].forEach(name => dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); }));
+        ['dragleave', 'drop'].forEach(name => dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); }));
+        dropZone.addEventListener('drop', (e) => { if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]); });
 
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.classList.add('drag-over');
-            }, false);
-        });
+        function handleFileSelect(e) { if (e.target.files.length) processFile(e.target.files[0]); }
 
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dropZone.classList.remove('drag-over');
-            }, false);
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files.length > 0 && files[0].type.startsWith('image/')) {
-                processFile(files[0]);
-            }
-        });
-
-        function handleFileSelect(e) {
-            const files = e.target.files;
-            if (files.length > 0) {
-                processFile(files[0]);
-            }
-        }
-
-        // Elaborazione Immagine Caricata
         function processFile(file) {
             originalFile = file;
             originalFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-            const sizeFormatted = formatBytes(file.size);
-            
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
                     loadedImage = img;
+                    aspectRatio = img.width / img.height;
+                    
                     document.getElementById('preview-img').src = e.target.result;
                     document.getElementById('file-name').textContent = file.name;
-                    document.getElementById('file-meta').textContent = `${img.width}×${img.height} px • ${sizeFormatted}`;
+                    document.getElementById('file-meta').textContent = `${img.width}×${img.height} px • ${formatBytes(file.size)}`;
+
+                    document.getElementById('resize-width').value = img.width;
+                    document.getElementById('resize-height').value = img.height;
 
                     document.getElementById('drop-zone').style.display = 'none';
                     document.getElementById('file-preview').style.display = 'flex';
@@ -254,80 +223,66 @@
             reader.readAsDataURL(file);
         }
 
+        function handleDimensionChange(type) {
+            if (!document.getElementById('keep-aspect').checked || !aspectRatio) return;
+            const wInput = document.getElementById('resize-width');
+            const hInput = document.getElementById('resize-height');
+
+            if (type === 'width' && wInput.value) {
+                hInput.value = Math.round(wInput.value / aspectRatio);
+            } else if (type === 'height' && hInput.value) {
+                wInput.value = Math.round(hInput.value * aspectRatio);
+            }
+        }
+
         function toggleQualityControl() {
             const format = document.getElementById('format-select').value;
-            const qualityGroup = document.getElementById('quality-group');
-            // La qualità è gestita per JPG, WEBP e AVIF
-            if (format === 'image/jpeg' || format === 'image/webp' || format === 'image/avif') {
-                qualityGroup.style.display = 'block';
-            } else {
-                qualityGroup.style.display = 'none';
-            }
+            document.getElementById('quality-group').style.display = (format === 'image/jpeg' || format === 'image/webp' || format === 'image/avif') ? 'block' : 'none';
             hideResults();
         }
 
-        function updateQualityText(val) {
-            document.getElementById('quality-value').textContent = val + '%';
-        }
+        function updateQualityText(val) { document.getElementById('quality-value').textContent = val + '%'; }
 
-        // Aggiorna lo Slider di comparazione Prima/Dopo
         function updateSliderPosition(value) {
             const wrapper = document.getElementById('slider-before-wrapper');
             const handle = document.getElementById('slider-handle');
             const container = document.getElementById('slider-container');
             const beforeImg = document.getElementById('compare-before-img');
-            
             wrapper.style.width = value + '%';
             handle.style.left = value + '%';
-            
-            // Garantisce la corretta larghezza dell'immagine sovrapposta per evitare distorsioni
-            if (container) {
-                beforeImg.style.width = container.offsetWidth + 'px';
-            }
+            if (container) beforeImg.style.width = container.offsetWidth + 'px';
         }
 
-        window.addEventListener('resize', () => {
-            const sliderVal = document.getElementById('comparison-range').value;
-            updateSliderPosition(sliderVal);
-        });
-
-        // Esegue la conversione e mostra la comparazione e i dati
         function processConversion() {
-            if (!loadedImage || !originalFile) return;
+            if (!loadedImage) return;
 
             const format = document.getElementById('format-select').value;
             const quality = parseFloat(document.getElementById('quality-range').value) / 100;
-            
+            const targetWidth = parseInt(document.getElementById('resize-width').value) || loadedImage.width;
+            const targetHeight = parseInt(document.getElementById('resize-height').value) || loadedImage.height;
+
             const canvas = document.createElement('canvas');
-            canvas.width = loadedImage.width;
-            canvas.height = loadedImage.height;
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
             const ctx = canvas.getContext('2d');
 
-            // Se convertiamo in JPG o BMP, aggiungiamo uno sfondo bianco per preservare le trasparenze
-            if (format === 'image/jpeg' || format === 'image/bmp') {
+            if (format === 'image/jpeg') {
                 ctx.fillStyle = '#FFFFFF';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
 
-            ctx.drawImage(loadedImage, 0, 0);
+            ctx.drawImage(loadedImage, 0, 0, targetWidth, targetHeight);
 
             canvas.toBlob((blob) => {
-                if (!blob) {
-                    alert("Il tuo browser potrebbe non supportare l'esportazione diretta in questo formato.");
-                    return;
-                }
+                if (!blob) return alert("Formato non supportato dal tuo browser.");
 
-                // Revoca URL precedente se presente
                 if (convertedUrl) URL.revokeObjectURL(convertedUrl);
-
                 convertedBlob = blob;
                 convertedUrl = URL.createObjectURL(blob);
 
-                // Popola la sezione comparazione slider
                 document.getElementById('compare-before-img').src = document.getElementById('preview-img').src;
                 document.getElementById('compare-after-img').src = convertedUrl;
 
-                // Popola i dati statistici
                 const origBytes = originalFile.size;
                 const newBytes = blob.size;
                 const diffPerc = (((newBytes - origBytes) / origBytes) * 100).toFixed(1);
@@ -336,58 +291,29 @@
                 document.getElementById('stat-new-size').textContent = formatBytes(newBytes);
 
                 const diffElem = document.getElementById('stat-diff-perc');
-                if (diffPerc < 0) {
-                    diffElem.textContent = `${diffPerc}%`;
-                    diffElem.style.color = 'var(--color-success)';
-                } else if (diffPerc > 0) {
-                    diffElem.textContent = `+${diffPerc}%`;
-                    diffElem.style.color = 'var(--color-danger)';
-                } else {
-                    diffElem.textContent = `0%`;
-                    diffElem.style.color = 'var(--text)';
-                }
+                diffElem.textContent = (diffPerc > 0 ? '+' : '') + diffPerc + '%';
+                diffElem.style.color = diffPerc <= 0 ? 'var(--color-success)' : 'var(--color-danger)';
 
-                // Mostra la sezione Risultato
                 document.getElementById('result-section').style.display = 'block';
-                
-                // Resetta e sincronizza la dimensione iniziale dello slider
-                document.getElementById('comparison-range').value = 50;
-                setTimeout(() => {
-                    updateSliderPosition(50);
-                    document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
-                }, 50);
-
+                setTimeout(() => updateSliderPosition(50), 50);
             }, format, quality);
         }
 
-        // Effettua il download del file convertito
         function downloadFile() {
             if (!convertedUrl) return;
-
             const format = document.getElementById('format-select').value;
-            let ext = 'png';
-            if (format === 'image/jpeg') ext = 'jpg';
-            else if (format === 'image/webp') ext = 'webp';
-            else if (format === 'image/avif') ext = 'avif';
-            else if (format === 'image/bmp') ext = 'bmp';
-            else if (format === 'image/gif') ext = 'gif';
-            else if (format === 'image/x-icon') ext = 'ico';
-
+            const extMap = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/avif': 'avif' };
             const link = document.createElement('a');
-            link.download = `${originalFileName}_converted.${ext}`;
+            link.download = `${originalFileName}_resizing.${extMap[format] || 'png'}`;
             link.href = convertedUrl;
             link.click();
         }
 
-        function hideResults() {
-            document.getElementById('result-section').style.display = 'none';
-        }
+        function hideResults() { document.getElementById('result-section').style.display = 'none'; }
 
         function resetFile() {
             loadedImage = null;
             originalFile = null;
-            originalFileName = "";
-            convertedBlob = null;
             if (convertedUrl) URL.revokeObjectURL(convertedUrl);
             convertedUrl = null;
 
@@ -400,13 +326,11 @@
 
         function formatBytes(bytes) {
             if (bytes === 0) return '0 Byte';
-            const k = 1024;
-            const sizes = ['Byte', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            const k = 1024, sizes = ['Byte', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(bytes) / Math.log(k));
             return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
 		
-				        // Applica subito il tema corretto all'apertura della pagina
+		// Applica subito il tema corretto all'apertura della pagina
         applyStoredTheme();
     </script>
 </body>
