@@ -23,12 +23,13 @@
         </div>
 
         <div class="search-container">
-			<span class="search-icon">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-</span>            <input type="text" id="searchInput" placeholder="Cerca uno strumento…" onkeyup="filterTools()">
+            <span class="search-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </span>
+            <input type="text" id="searchInput" placeholder="Cerca uno strumento…" onkeyup="filterTools()">
             <span class="search-hint">/</span>
         </div>
     </header>
@@ -51,10 +52,14 @@
     <main>
         <div class="grid" id="toolsGrid">
 
-            <!-- SCHEDA 1: Convertitore -->
+            <!-- SCHEDA 1: Convertitore (Sistemata) -->
             <div class="tool-card" data-category="utilita">
                 <div class="card-top">
-                    <div class="card-icon">⇄</div>
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+                            <path d="m320-160-56-57 103-103H80v-80h287L264-503l56-57 200 200-200 200Zm320-240L440-600l200-200 56 57-103 103h287v80H593l103 103-56 57Z"/>
+                        </svg>
+                    </div>
                     <span class="card-tag">Utilità</span>
                 </div>
                 <h3>Convertitore Universale</h3>
@@ -65,7 +70,11 @@
             <!-- SCHEDA 2: Calcolatore Sconto -->
             <div class="tool-card" data-category="finanza">
                 <div class="card-top">
-                    <div class="card-icon">%</div>
+                    <div class="card-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+							<path d="M300-520q-58 0-99-41t-41-99q0-58 41-99t99-41q58 0 99 41t41 99q0 58-41 99t-99 41Zm0-80q25 0 42.5-17.5T360-660q0-25-17.5-42.5T300-720q-25 0-42.5 17.5T240-660q0 25 17.5 42.5T300-600Zm360 440q-58 0-99-41t-41-99q0-58 41-99t99-41q58 0 99 41t41 99q0 58-41 99t-99 41Zm42.5-97.5Q720-275 720-300t-17.5-42.5Q685-360 660-360t-42.5 17.5Q600-325 600-300t17.5 42.5Q635-240 660-240t42.5-17.5ZM216-160l-56-56 584-584 56 56-584 584Z"/>
+                        </svg>
+                    </div>
                     <span class="card-tag">Finanza</span>
                 </div>
                 <h3>Calcola Sconto</h3>
@@ -117,9 +126,7 @@
     </footer>
 
     <script>
-        // =====================================================================
-        // EFFETTO INTERATTIVO MOUSE (Spotlight & Coordinate Card)
-        // =====================================================================
+        // EFFETTO INTERATTIVO MOUSE
         document.addEventListener('mousemove', (e) => {
             const x = (e.clientX / window.innerWidth) * 100;
             const y = (e.clientY / window.innerHeight) * 100;
@@ -127,7 +134,6 @@
             document.body.style.setProperty('--mouse-y', `${y}%`);
         });
 
-        // Gestione coordinate interne per il bagliore dinamico su ogni singola card
         document.querySelectorAll('.tool-card').forEach(card => {
             card.addEventListener('mousemove', (e) => {
                 const rect = card.getBoundingClientRect();
@@ -138,9 +144,7 @@
             });
         });
 
-        // =====================================================================
         // FILTRI E RICERCA
-        // =====================================================================
         let activeFilter = 'tutti';
 
         function applyVisibility() {
@@ -180,7 +184,7 @@
             });
         });
 
-        // Scorciatoia da tastiera "/"
+        // Scorciatoia "/"
         document.addEventListener('keydown', (event) => {
             const isTypingElsewhere = document.activeElement.tagName === 'INPUT';
             if (event.key === '/' && !isTypingElsewhere) {
