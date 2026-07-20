@@ -1,6 +1,6 @@
 /**
  * =====================================================================
- * DASHBOARD.JS — Interactive Engine (Effetto 3D Ridotto)
+ * DASHBOARD.JS — Interactive Engine
  * =====================================================================
  */
 
@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initSpotlight();
     initSoft3DTilt();
     initSearchAndFilters();
-    updateHeaderStats();
 });
 
 /* =========================================================
@@ -66,7 +65,7 @@ function initSpotlight() {
 }
 
 /* =========================================================
-   3. INCLINAZIONE 3D AMMORBIDITA & DELICATA (Sottile)
+   3. INCLINAZIONE 3D AMMORBIDITA
    ========================================================= */
 function initSoft3DTilt() {
     const cards = document.querySelectorAll('.tool-card:not(.disabled)');
@@ -83,7 +82,6 @@ function initSoft3DTilt() {
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
 
-            // Inclinazione attenuata a max +/- 2.5 gradi per un movimento molto sobrio
             const rotateX = ((y - centerY) / centerY) * -2.5; 
             const rotateY = ((x - centerX) / centerX) * 2.5;  
 
@@ -157,27 +155,4 @@ function initSearchAndFilters() {
             if (searchInput) searchInput.focus();
         }
     });
-}
-
-/* =========================================================
-   5. AGGIORNAMENTO STATISTICHE HEADER
-   ========================================================= */
-function updateHeaderStats() {
-    const cards = document.querySelectorAll('.tool-card');
-    const statTools = document.getElementById('statTools');
-    const statCategories = document.getElementById('statCategories');
-
-    if (statTools) {
-        statTools.textContent = cards.length;
-    }
-
-    if (statCategories) {
-        const categories = new Set();
-        cards.forEach(card => {
-            if (card.dataset.category) {
-                categories.add(card.dataset.category);
-            }
-        });
-        statCategories.textContent = categories.size;
-    }
 }

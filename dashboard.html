@@ -3,294 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toolbox Dashboard</title>
-    <!-- Google Fonts per il tocco cinematografico -->
+    <title>MY TOOLBOX — Creative Utility Dashboard</title>
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
-    <!-- Foglio di stile principale -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Style Sheet -->
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
 
-    <!-- =========================================================
-         HEADER: titolo + barra di ricerca
-         ========================================================= -->
-    <header>
-        <div class="header-title">
-            <span class="eyebrow">Pannello Strumenti</span>
-            <h1>My Toolbox</h1>
-        </div>
-
-        <div class="search-container">
-            <span class="search-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-            </span>
-            <input type="text" id="searchInput" placeholder="Cerca uno strumento…" onkeyup="filterTools()">
-            <span class="search-hint">/</span>
-        </div>
-    </header>
-
-    <!-- =========================================================
-         FILTRI PER CATEGORIA
-         ========================================================= -->
-    <div class="filters" id="filterBar">
-        <button class="filter-chip active" data-filter="tutti">Tutti</button>
-        <button class="filter-chip" data-filter="finanza">Finanza</button>
-        <button class="filter-chip" data-filter="viaggi">Viaggi</button>
-        <button class="filter-chip" data-filter="svago">Svago</button>
-        <button class="filter-chip" data-filter="tempo">Tempo</button>
-        <button class="filter-chip" data-filter="utilita">Utility</button>
+    <!-- Sfondo Animato & Ambient Spotlight -->
+    <div class="bg-canvas">
+        <div class="bg-gradient-mesh"></div>
+        <div class="bg-blob blob-1"></div>
+        <div class="bg-blob blob-2"></div>
+        <div class="bg-perspective-grid"></div>
+        <div class="bg-particles" id="particlesContainer"></div>
+        <div class="bg-noise"></div>
+        <div class="ambient-spotlight" id="ambientSpotlight"></div>
     </div>
 
-    <!-- =========================================================
-         GRIGLIA STRUMENTI
-         ========================================================= -->
-    <main>
-        <div class="grid" id="toolsGrid">
+    <div class="app-container">
 
-            <!-- Convertitore -->
-            <div class="tool-card" data-category="utilita">
-                <div class="card-top">
-                    <div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-                            <path d="m320-160-56-57 103-103H80v-80h287L264-503l56-57 200 200-200 200Zm320-240L440-600l200-200 56 57-103 103h287v80H593l103 103-56 57Z"/>
-                        </svg>
+        <!-- =========================================================
+             HERO HEADER (Layout Pulito con Categorie Centrate)
+             ========================================================= -->
+        <header class="hero-header">
+            <div class="hero-top">
+                <!-- BARRA DELLE CATEGORIE (Posizionata al Centro) -->
+                <nav class="filters-container" id="filterBar">
+                    <button class="filter-pill active" data-filter="tutti">
+                        <i data-lucide="layout-grid"></i>
+                        <span>Tutti</span>
+                    </button>
+                    <button class="filter-pill" data-filter="utilita">
+                        <i data-lucide="wrench"></i>
+                        <span>Utilità</span>
+                    </button>
+                    <button class="filter-pill" data-filter="finanza">
+                        <i data-lucide="coins"></i>
+                        <span>Finanza</span>
+                    </button>
+                    <button class="filter-pill" data-filter="cinema">
+                        <i data-lucide="clapperboard"></i>
+                        <span>Cinema</span>
+                    </button>
+                    <button class="filter-pill" data-filter="viaggi">
+                        <i data-lucide="compass"></i>
+                        <span>Viaggi</span>
+                    </button>
+                    <button class="filter-pill" data-filter="tempo">
+                        <i data-lucide="timer"></i>
+                        <span>Tempo</span>
+                    </button>
+                    <button class="filter-pill" data-filter="svago">
+                        <i data-lucide="gamepad-2"></i>
+                        <span>Svago</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="hero-center">
+                <h1 class="hero-title">MY TOOLBOX</h1>
+                <p class="hero-subtitle">Creative Utility Dashboard</p>
+            </div>
+
+            <!-- Barra di Ricerca -->
+            <div class="search-wrapper">
+                <div class="search-glass-card">
+                    <i data-lucide="search" class="search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Cerca uno strumento o funzione..." autocomplete="off">
+                    <kbd class="search-shortcut">/</kbd>
+                </div>
+            </div>
+        </header>
+
+        <!-- =========================================================
+             GRIGLIA STRUMENTI
+             ========================================================= -->
+        <main class="main-content">
+            <div class="tools-grid" id="toolsGrid">
+
+                <!-- Convertitore Universale -->
+                <div class="tool-card" data-category="utilita">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="arrow-left-right"></i>
+                            </div>
+                            <span class="category-badge">Utilità</span>
+                        </div>
+                        <h3 class="card-title">Convertitore Universale</h3>
+                        <p class="card-desc">Converti lunghezze, pesi, temperature, valute e altro in tempo reale con calcolo immediato.</p>
+                        <div class="card-footer">
+                            <a href="convertitore.html" class="btn-action">
+                                <span>Apri strumento</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-                    <span class="card-tag">Utility</span>
                 </div>
-                <h3>Convertitore Universale</h3>
-                <p>Converti lunghezze, pesi, temperature, valute e altro in tempo reale.</p>
-                <a href="convertitore.html">Apri strumento →</a>
-            </div>
 
-            <!-- Calcolatore Sconto -->
-            <div class="tool-card" data-category="finanza">
-                <div class="card-top">
-                    <div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="M300-520q-58 0-99-41t-41-99q0-58 41-99t99-41q58 0 99 41t41 99q0 58-41 99t-99 41Zm0-80q25 0 42.5-17.5T360-660q0-25-17.5-42.5T300-720q-25 0-42.5 17.5T240-660q0 25 17.5 42.5T300-600Zm360 440q-58 0-99-41t-41-99q0-58 41-99t99-41q58 0 99 41t41 99q0 58-41 99t-99 41Zm42.5-97.5Q720-275 720-300t-17.5-42.5Q685-360 660-360t-42.5 17.5Q600-325 600-300t17.5 42.5Q635-240 660-240t42.5-17.5ZM216-160l-56-56 584-584 56 56-584 584Z"/>
-                        </svg>
+                <!-- Calcola Sconto -->
+                <div class="tool-card" data-category="finanza">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="percent"></i>
+                            </div>
+                            <span class="category-badge">Finanza</span>
+                        </div>
+                        <h3 class="card-title">Calcola Sconto</h3>
+                        <p class="card-desc">Inserisci prezzo, sconto e quantità: scopri subito quanto risparmi e il totale netto.</p>
+                        <div class="card-footer">
+                            <a href="calcolasconto.html" class="btn-action">
+                                <span>Apri strumento</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-                    <span class="card-tag">Finanza</span>
                 </div>
-                <h3>Calcola Sconto</h3>
-                <p>Inserisci prezzo, sconto e quantità: scopri subito quanto risparmi e quanto paghi in totale.</p>
-                <a href="calcolasconto.html">Apri strumento →</a>
-            </div>
 
-            <!-- Trip Computer (Carburante) -->
-            <div class="tool-card" data-category="viaggi">
-                <div class="card-top">
-                    <div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="M160-120v-640q0-33 23.5-56.5T240-840h240q33 0 56.5 23.5T560-760v280h40q33 0 56.5 23.5T680-400v180q0 17 11.5 28.5T720-180q17 0 28.5-11.5T760-220v-288q-9 5-19 6.5t-21 1.5q-42 0-71-29t-29-71q0-32 17.5-57.5T684-694l-84-84 42-42 148 144q15 15 22.5 35t7.5 41v380q0 42-29 71t-71 29q-42 0-71-29t-29-71v-200h-60v300H160Zm80-440h240v-200H240v200Zm480 0q17 0 28.5-11.5T760-600q0-17-11.5-28.5T720-640q-17 0-28.5 11.5T680-600q0 17 11.5 28.5T720-560ZM240-200h240v-280H240v280Zm240 0H240h240Z"/>
-                        </svg>
+                <!-- Costo Carburante -->
+                <div class="tool-card" data-category="viaggi">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="fuel"></i>
+                            </div>
+                            <span class="category-badge">Viaggi</span>
+                        </div>
+                        <h3 class="card-title">Costo Carburante</h3>
+                        <p class="card-desc">Calcola litri e spesa di viaggio, con opzione andata/ritorno e divisione costi tra passeggeri.</p>
+                        <div class="card-footer">
+                            <a href="calcolaviaggio.html" class="btn-action">
+                                <span>Apri strumento</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-					<span class="card-tag">Viaggi</span>
                 </div>
-                <h3>Costo Carburante</h3>
-                <p>Calcola litri e spesa del viaggio, con opzione andata/ritorno e divisione del costo tra passeggeri.</p>
-                <a href="calcolaviaggio.html">Apri strumento →</a>
-            </div>
-			
-			 <!-- Esposimetro -->
-            <div class="tool-card" data-category="utility">
-                <div class="card-top">
-					<div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="M456-600h320q-27-69-82.5-118.5T566-788L456-600Zm-92 80 160-276q-11-2-22-3t-22-1q-66 0-123 25t-101 67l108 188ZM170-400h218L228-676q-32 41-50 90.5T160-480q0 21 2.5 40.5T170-400Zm224 228 108-188H184q27 69 82.5 118.5T394-172Zm86 12q66 0 123-25t101-67L596-440 436-164q11 2 21.5 3t22.5 1Zm252-124q32-41 50-90.5T800-480q0-21-2.5-40.5T790-560H572l160 276ZM480-480Zm0 400q-82 0-155-31.5t-127.5-86Q143-252 111.5-325T80-480q0-83 31.5-155.5t86-127Q252-817 325-848.5T480-880q83 0 155.5 31.5t127 86q54.5 54.5 86 127T880-480q0 82-31.5 155t-86 127.5q-54.5 54.5-127 86T480-80Z"/>
-                        </svg>
+
+                <!-- Esposimetro -->
+                <div class="tool-card" data-category="cinema">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="camera"></i>
+                            </div>
+                            <span class="category-badge">Cinema</span>
+                        </div>
+                        <h3 class="card-title">Esposimetro</h3>
+                        <p class="card-desc">Calcola il tempo di esposizione fotografica ottimale compensando filtri ND e astrofotografia.</p>
+                        <div class="card-footer">
+                            <a href="esposizione.html" class="btn-action">
+                                <span>Apri strumento</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-                    <span class="card-tag">Utility</span>
                 </div>
-                <h3>Esposimetro</h3>
-                <p>Calcola il tempo di esposizione fotografica ottimale compensando filtri ND o impostando parametri per l'astrofotografia.</p>
-                <a href="esposizione.html">Apri strumento →</a>
-            </div>
-			
-			 <!-- Distanza fulmine -->
-            <div class="tool-card" data-category="utility">
-                <div class="card-top">
-					<div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="m300-40 36-100h-76l50-140h100l-43 100h83L340-40h-40Zm270-40 28-80h-78l43-120h100l-35 80h82L610-80h-40ZM300-320q-91 0-155.5-64.5T80-540q0-83 55-145t136-73q32-57 87.5-89.5T480-880q90 0 156.5 57.5T717-679q69 6 116 57t47 122q0 75-52.5 127.5T700-320H300Zm0-80h400q42 0 71-29t29-71q0-42-29-71t-71-29h-60v-40q0-66-47-113t-113-47q-48 0-87.5 26T333-704l-10 24h-25q-57 2-97.5 42.5T160-540q0 58 41 99t99 41Zm180-200Z"/>
-                        </svg>
+
+                <!-- Distanza Fulmine -->
+                <div class="tool-card" data-category="utilita">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="zap"></i>
+                            </div>
+                            <span class="category-badge">Utilità</span>
+                        </div>
+                        <h3 class="card-title">Distanza Fulmine</h3>
+                        <p class="card-desc">Stima la distanza esatta da un temporale misurando l'intervallo tra il lampo e il tuono.</p>
+                        <div class="card-footer">
+                            <a href="distanzafulmine.html" class="btn-action">
+                                <span>Apri strumento</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-                    <span class="card-tag">Utility</span>
                 </div>
-                <h3>Distanza Fulmine</h3>
-                <p>Stima la tua distanza da un fulmine misurando il tempo tra il lampo e il tuono.</p>
-                <a href="distanzafulmine.html">Apri strumento →</a>
-            </div>
-            
-			 <!-- Convertitore immagini -->
-            <div class="tool-card" data-category="utility">
-                <div class="card-top">
-					<div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="M160-400v-80h640v80H160Zm0-120v-80h640v80H160ZM440-80v-128l-64 64-56-56 160-160 160 160-56 56-64-62v126h-80Zm40-560L320-800l56-56 64 64v-128h80v128l64-64 56 56-160 160Z"/>
-                        </svg>
+
+                <!-- Convertitore Immagini -->
+                <div class="tool-card" data-category="utilita">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="image"></i>
+                            </div>
+                            <span class="category-badge">Utilità</span>
+                        </div>
+                        <h3 class="card-title">Convertitore Immagini</h3>
+                        <p class="card-desc">Converti rapidamente formati grafici JPG, PNG, WebP e GIF con ottimizzazione visiva.</p>
+                        <div class="card-footer">
+                            <a href="convertitoreimmagini.html" class="btn-action">
+                                <span>Apri strumento</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-                    <span class="card-tag">Utility</span>
                 </div>
-                <h3>Convertitore Immagini</h3>
-                <p>Converti immagini JPG, PNG, GIF e altro</p>
-                <a href="convertitoreimmagini.html">Apri strumento →</a>
-            </div>
-			
-			 <!-- Scambio dati -->
-            <div class="tool-card" data-category="utility">
-                <div class="card-top">
-					<div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="M485-440h163q26 0 44-18t18-44q0-26-18-44.5T648-565h-2q-5-32-29-53.5T560-640q-26 0-47 13.5T481-590q-30 2-50.5 23.5T410-515q0 30 21.5 52.5T485-440ZM120-120q-33 0-56.5-23.5T40-200v-520h80v520h680v80H120Zm160-160q-33 0-56.5-23.5T200-360v-440q0-33 23.5-56.5T280-880h200l80 80h280q33 0 56.5 23.5T920-720v360q0 33-23.5 56.5T840-280H280Zm0-80h560v-360H527l-80-80H280v440Zm0 0v-440 440Z"/>
-                        </svg>
+
+                <!-- Data Sharing -->
+                <div class="tool-card" data-category="utilita">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="share-2"></i>
+                            </div>
+                            <span class="category-badge">Utilità</span>
+                        </div>
+                        <h3 class="card-title">Data Sharing P2P</h3>
+                        <p class="card-desc">Scambia messaggi, file e dati direttamente dal browser in modo locale, rapido e sicuro.</p>
+                        <div class="card-footer">
+                            <a href="datasharing.html" class="btn-action">
+                                <span>Apri strumento</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-                    <span class="card-tag">Utility</span>
                 </div>
-                <h3>Data Sharing</h3>
-                <p>Scambia messaggi e dati localmente e in modo sicuro </p>
-                <a href="datasharing.html">Apri strumento →</a>
-            </div>
-			
-			 <!-- Test Digitazione -->
-            <div class="tool-card" data-category="svago">
-                <div class="card-top">
-					<div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="M160-200q-33 0-56.5-23.5T80-280v-400q0-33 23.5-56.5T160-760h640q33 0 56.5 23.5T880-680v400q0 33-23.5 56.5T800-200H160Zm0-80h640v-400H160v400Zm160-40h320v-80H320v80ZM200-440h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM200-560h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80Zm120 0h80v-80h-80v80ZM160-280v-400 400Z"/>
-                        </svg>
+
+                <!-- Test Digitazione -->
+                <div class="tool-card" data-category="svago">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="keyboard"></i>
+                            </div>
+                            <span class="category-badge">Svago</span>
+                        </div>
+                        <h3 class="card-title">Test Digitazione</h3>
+                        <p class="card-desc">Metti alla prova velocità e accuratezza di digitazione con parole italiane generate casualmente.</p>
+                        <div class="card-footer">
+                            <a href="testdigitazione.html" class="btn-action">
+                                <span>Apri strumento</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-                    <span class="card-tag">Svago</span>
                 </div>
-                <h3>Test Digitazione</h3>
-                <p>Mettiti alla prova in questo test di velocità di digitazione di parole casuali</p>
-                <a href="testdigitazione.html">Apri strumento →</a>
-            </div>
-			
-			 <!-- QR-CODE Generator -->
-            <div class="tool-card" data-category="utility">
-                <div class="card-top">
-					<div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="M120-520v-320h320v320H120Zm80-80h160v-160H200v160Zm-80 480v-320h320v320H120Zm80-80h160v-160H200v160Zm320-320v-320h320v320H520Zm80-80h160v-160H600v160Zm160 480v-80h80v80h-80ZM520-360v-80h80v80h-80Zm80 80v-80h80v80h-80Zm-80 80v-80h80v80h-80Zm80 80v-80h80v80h-80Zm80-80v-80h80v80h-80Zm0-160v-80h80v80h-80Zm80 80v-80h80v80h-80Z"/>
-                        </svg>
+
+                <!-- QR-CODE Generator -->
+                <div class="tool-card" data-category="utilita">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="qr-code"></i>
+                            </div>
+                            <span class="category-badge">Utilità</span>
+                        </div>
+                        <h3 class="card-title">QR-Code Generator</h3>
+                        <p class="card-desc">Genera codici QR personalizzati per link, testi, password Wi-Fi e biglietti da visita digitali.</p>
+                        <div class="card-footer">
+                            <a href="qrcode.html" class="btn-action">
+                                <span>Apri strumento</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-                    <span class="card-tag">Utility</span>
                 </div>
-                <h3>QR-CODE Generator</h3>
-                <p>Generatore di codice QR</p>
-                <a href="qrcode.html">Apri strumento →</a>
-            </div>
-			
-            <!-- Film al Cinema -->
-            <div class="tool-card" data-category="svago">
-                <div class="card-top">
-					<div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="M160-120v-720h80v80h80v-80h320v80h80v-80h80v720h-80v-80h-80v80H320v-80h-80v80h-80Zm80-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80Zm400 320h80v-80h-80v80Zm0-160h80v-80h-80v80Zm0-160h80v-80h-80v80ZM400-200h160v-560H400v560Zm0-560h160-160Z"/>
-                        </svg>
+
+                <!-- Film al Cinema -->
+                <div class="tool-card" data-category="cinema">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="film"></i>
+                            </div>
+                            <span class="category-badge">Cinema</span>
+                        </div>
+                        <h3 class="card-title">Film al Cinema</h3>
+                        <p class="card-desc">Sfoglia le pellicole in programmazione, guarda i trailer e individua le sale cinematografiche vicine.</p>
+                        <div class="card-footer">
+                            <a href="cinema.html" class="btn-action">
+                                <span>Apri strumento</span>
+                                <i data-lucide="arrow-up-right"></i>
+                            </a>
+                        </div>
                     </div>
-                    <span class="card-tag">Svago</span>
                 </div>
-                <h3>Film al Cinema</h3>
-                <p>Sfoglia i film ora al cinema o in arrivo, e trova le sale vicino a te per ciascun titolo.</p>
-                <a href="cinema.html">Apri strumento →</a>
+
+                <!-- Cronometro Pomodoro (In Arrivo) -->
+                <div class="tool-card disabled" data-category="tempo">
+                    <div class="card-glass-glow"></div>
+                    <div class="card-inner">
+                        <div class="card-header">
+                            <div class="card-icon-box">
+                                <i data-lucide="clock"></i>
+                            </div>
+                            <span class="category-badge">Tempo</span>
+                        </div>
+                        <h3 class="card-title">Cronometro Pomodoro</h3>
+                        <p class="card-desc">Ottimizza i cicli di studio e produttività creativa con la tecnica time-blocking Pomodoro.</p>
+                        <div class="card-footer">
+                            <span class="btn-action">
+                                <span>Prossimamente</span>
+                                <i data-lucide="lock"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- Cronometro Pomodoro (Prossimamente) -->
-            <div class="tool-card disabled" data-category="tempo">
-                <div class="card-top">
-                    <div class="card-icon">◷</div>
-                    <span class="card-tag">Tempo</span>
-                </div>
-                <h3>Cronometro Pomodoro</h3>
-                <p>Gestisci il tempo di studio e lavoro con la tecnica del pomodoro.</p>
-                <a href="#">Prossimamente</a>
+            <!-- Empty State per nessuna corrispondenza -->
+            <div id="noResults" class="no-results-box">
+                <i data-lucide="search-x" class="no-results-icon"></i>
+                <h3>Nessun risultato trovato</h3>
+                <p>Nessuno strumento corrisponde ai parametri cercati. Prova a cambiare filtro o parola chiave.</p>
             </div>
+        </main>
 
-            <!-- Messaggio nessun risultato -->
-            <div id="no-results">Nessuno strumento trovato. Prova un'altra parola chiave o rimuovi il filtro.</div>
+        <!-- =========================================================
+             FOOTER
+             ========================================================= -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <span class="footer-brand">Creative Utility Toolbox</span>
+                </div>
+                <div class="footer-right">
+                    <span class="footer-build">RICCARDO RAINERI — 2026</span>
+                </div>
+            </div>
+        </footer>
 
-        </div>
-    </main>
+    </div>
 
-    <footer>
-        Aggiornato a luglio 2026 · <span>Riccardo Raineri Toolbox</span>
-    </footer>
-
-    <script>
-        // EFFETTO INTERATTIVO MOUSE
-        document.addEventListener('mousemove', (e) => {
-            const x = (e.clientX / window.innerWidth) * 100;
-            const y = (e.clientY / window.innerHeight) * 100;
-            document.body.style.setProperty('--mouse-x', `${x}%`);
-            document.body.style.setProperty('--mouse-y', `${y}%`);
-        });
-
-        document.querySelectorAll('.tool-card').forEach(card => {
-            card.addEventListener('mousemove', (e) => {
-                const rect = card.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                card.style.setProperty('--card-mouse-x', `${x}px`);
-                card.style.setProperty('--card-mouse-y', `${y}px`);
-            });
-        });
-
-        // FILTRI E RICERCA
-        let activeFilter = 'tutti';
-
-        function applyVisibility() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            const cards = document.querySelectorAll('.tool-card');
-            let visibleCount = 0;
-
-            cards.forEach(card => {
-                const title = card.querySelector('h3').innerText.toLowerCase();
-                const description = card.querySelector('p').innerText.toLowerCase();
-                const category = card.dataset.category;
-
-                const matchesSearch = title.includes(query) || description.includes(query);
-                const matchesFilter = activeFilter === 'tutti' || category === activeFilter;
-
-                if (matchesSearch && matchesFilter) {
-                    card.style.display = 'flex';
-                    visibleCount++;
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-
-            document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
-        }
-
-        function filterTools() {
-            applyVisibility();
-        }
-
-        document.querySelectorAll('.filter-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                activeFilter = chip.dataset.filter;
-                applyVisibility();
-            });
-        });
-
-        // Scorciatoia "/"
-        document.addEventListener('keydown', (event) => {
-            const isTypingElsewhere = document.activeElement.tagName === 'INPUT';
-            if (event.key === '/' && !isTypingElsewhere) {
-                event.preventDefault();
-                document.getElementById('searchInput').focus();
-            }
-        });
-    </script>
-
+    <!-- Script principale Javascript -->
+    <script src="dashboard.js"></script>
 </body>
 </html>
