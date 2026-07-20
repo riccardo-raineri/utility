@@ -1,5 +1,5 @@
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwr_4sIb6epqzllKNHktoKDFb4ao3BTrhGMRwWO1Mg2BToiWR7NOpwFdVuxVWWYlIrV/exec';
-const SECRET_PIN = "1234"; 
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3EKRlvWN3V2sk50fto3G08hgMyHTUqTivq9IKmIT671FsgY7jxFB74FFcV9IIurIv/exec';
+const SECRET_PIN = "0712"; 
 const ALL_USERS = ["Chiara", "Giulia", "Riccardo", "Sergio", "Sharon", "Valentina", "Alessandra"];
 
 let globalPaymentsData = [];
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchDataFromGoogleSheets();
 });
 
-// SCARICA I DATI DA GOOGLE FOGLI
+// 1. CARICAMENTO DATI
 async function fetchDataFromGoogleSheets() {
     const container = document.getElementById('payments-container');
     container.innerHTML = `
@@ -32,14 +32,14 @@ async function fetchDataFromGoogleSheets() {
         container.innerHTML = `
             <div style="text-align:center; padding: 30px; color: #F87171;">
                 <p style="font-weight:600; margin-bottom:8px;">Impossibile connettersi a Google Fogli</p>
-                <p style="font-size:12px; color:var(--text-secondary);">Verifica che l'URL Apps Script sia corretto e che il deployment sia pubblico.</p>
+                <p style="font-size:12px; color:var(--text-secondary);">Verifica che l'URL Apps Script sia corretto e pubblicato come 'Chiunque'.</p>
             </div>
         `;
         if (window.lucide) lucide.createIcons();
     }
 }
 
-// RENDERIZZA LA GRAFICA DELLE CARD
+// 2. RENDERING INTERFACCIA
 function renderPaymentsUI(payments) {
     const container = document.getElementById('payments-container');
     if (!payments || payments.length === 0) {
@@ -105,7 +105,7 @@ function renderPaymentsUI(payments) {
     if (window.lucide) lucide.createIcons();
 }
 
-// POPOLA IL MENU A TENDINA PER LE MODIFICHE RAPIDE
+// 3. POPOLA TENDINA DI SELEZIONE
 function populateQuickSelect(payments) {
     const select = document.getElementById('quick-select-period');
     if (!select) return;
@@ -139,7 +139,7 @@ function loadPeriodIntoForm() {
     document.getElementById('date-end').value = "";
 }
 
-// SBLOCCO PIN MODIFICHE
+// 4. VERIFICA PIN
 function verifyPin() {
     const enteredPin = document.getElementById('input-pin').value;
     if (enteredPin === SECRET_PIN) {
@@ -194,7 +194,7 @@ function toggleOlderHistory() {
     if (window.lucide) lucide.createIcons();
 }
 
-// SALVATAGGIO CONFERMATO DA GOOGLE FOGLI
+// 5. SALVATAGGIO AFFIDABILE TRAMITE GET
 async function savePaymentData(event) {
     event.preventDefault();
     
@@ -221,24 +221,23 @@ async function savePaymentData(event) {
         nonPagati: nonPagati
     };
 
-    try {
-        const response = await fetch(APPS_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
+    // Costruiamo l'URL di salvataggio sicuro
+    const saveUrl = `${APPS_SCRIPT_URL}?action=save&data=${encodeURIComponent(JSON.stringify(payload))}`;
 
+    try {
+        const response = await fetch(saveUrl);
         const result = await response.json();
         
         if (result.status === 'success') {
-            alert('Modifiche salvate e verificate con successo su Google Fogli!');
-            location.reload(); // Ricarica per mostrare i dati freschi da qualsiasi dispositivo
+            alert('Modifiche salvate con successo su Google Fogli!');
+            location.reload(); 
         } else {
-            throw new Error(result.message || "Errore dal server");
+            throw new Error(result.message || "Errore sconosciuto dal server");
         }
 
     } catch (error) {
         console.error('Errore durante il salvataggio:', error);
-        alert("Errore: la modifica NON è stata salvata sul foglio. Riprova.");
+        alert("Impossibile salvare la modifica su Google Fogli. Assicurati che l'URL sia corretto e il deployment aggiornato.");
         btn.innerHTML = originalBtnHTML;
         btn.disabled = false;
         if (window.lucide) lucide.createIcons();
