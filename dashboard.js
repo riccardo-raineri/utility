@@ -1,11 +1,10 @@
 /**
  * =====================================================================
- * DASHBOARD.JS — Interactive Engine (Minimal Adjustments)
+ * DASHBOARD.JS — Interactive Engine
  * =====================================================================
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Inizializza Icone Lucide
     if (window.lucide) {
         lucide.createIcons();
     }
@@ -65,7 +64,7 @@ function initSpotlight() {
 }
 
 /* =========================================================
-   3. INCLINAZIONE 3D ULTRA-MIGLIORATA E LEGGERA
+   3. INCLINAZIONE 3D SOFFICE
    ========================================================= */
 function initSoft3DTilt() {
     const cards = document.querySelectorAll('.tool-card:not(.disabled)');
@@ -82,7 +81,6 @@ function initSoft3DTilt() {
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
 
-            // Inclinazione piccolissima e impercettibile (max 1.5 deg)
             const rotateX = ((y - centerY) / centerY) * -1.5; 
             const rotateY = ((x - centerX) / centerX) * 1.5;  
 
