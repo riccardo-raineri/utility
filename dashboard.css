@@ -167,7 +167,7 @@ body {
 .app-container {
     position: relative;
     z-index: 1;
-    max-width: 1300px; /* Larghezza ottimizzata per 4 colonne */
+    max-width: 1300px;
     margin: 0 auto;
     padding: 32px 24px 60px;
     display: flex;
@@ -318,7 +318,6 @@ body {
     width: 100%;
 }
 
-/* Griglia forzata esattamente a 4 colonne su desktop */
 .tools-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -326,6 +325,7 @@ body {
     perspective: 1000px;
 }
 
+/* La card è ora un tag <a> nativo cliccabile */
 .tool-card {
     position: relative;
     background: var(--card-bg);
@@ -335,6 +335,11 @@ body {
     transform-style: preserve-3d;
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, background-color 0.25s ease, box-shadow 0.3s ease;
     will-change: transform;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
 }
 
 .card-glass-glow {
@@ -365,13 +370,6 @@ body {
     flex-direction: column;
     height: 100%;
     gap: 8px;
-}
-
-.card-link-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    text-decoration: none;
 }
 
 .card-header-top-row {
@@ -446,9 +444,10 @@ body {
     margin-bottom: 2px;
 }
 
+/* Pulsante preferiti con z-index alto per intercettare il click senza aprire la card */
 .fav-btn {
     position: relative;
-    z-index: 3;
+    z-index: 10;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-subtle);
     color: var(--text-tertiary);
@@ -483,6 +482,8 @@ body {
 
 .tool-card.disabled {
     opacity: 0.35;
+    cursor: default;
+    pointer-events: none;
     --cat-color: var(--text-tertiary) !important;
 }
 
@@ -679,7 +680,6 @@ body {
     opacity: 0.4;
 }
 
-/* Media Queries per adattamento responsivo graduale */
 @media (max-width: 1200px) {
     .tools-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
