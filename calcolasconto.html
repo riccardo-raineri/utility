@@ -6,9 +6,9 @@
     <title>Calcola Sconto</title>
     <link rel="stylesheet" href="calcolasconto.css">
 </head>
-<body>data-theme
+<body data-theme="dark">
 
-    <!-- Link di ritorno alla dashboard, presente su tutti gli strumenti -->
+    <!-- Link di ritorno alla dashboard, presente su tutti gli strumenti[cite: 9] -->
     <a class="back-link" href="dashboard.html">← Dashboard</a>
 
     <div class="card">
@@ -16,10 +16,10 @@
             <div class="icon">%</div>
             <div class="title-group">
                 <h2>Calcola Sconto</h2>
-                <p>Prezzo, risparmio e totale in un colpo d'occhio</p>
+                <p>Prezzo, risparmio e totale.</p>
             </div>
-            <!-- Bottone tema: stessa coppia di icone SVG del convertitore,
-                 il CSS mostra solo quella giusta in base a data-theme -->
+            <!-- Bottone tema: stessa struttura e icone SVG del convertitore -->
+            <!-- Bottone tema -->
             <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
                 <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
@@ -43,8 +43,6 @@
             <input type="number" id="price" placeholder="0.00" min="0" step="0.01">
         </div>
 
-        <!-- Sconto e quantità affiancati: la quantità è la nuova funzione
-             che permette di calcolare il risparmio su più pezzi uguali -->
         <div class="input-row">
             <div class="input-group">
                 <label for="discount">Sconto (%)</label>
@@ -57,9 +55,8 @@
         </div>
 
         <button onclick="calculateDiscount()">Calcola risparmio</button>
-        <button class="btn-secondary" onclick="resetForm()">Nuovo calcolo</button>
+        <button class="btn-secondary" onclick="resetForm()">Nuovo calcolo[cite: 9]</button>
 
-        <!-- Riquadro risultati, nascosto finché non si calcola -->
         <div class="result" id="result-box">
             <div class="result-row">
                 <span class="label">Risparmio per pezzo</span>
@@ -74,7 +71,6 @@
                 <span class="value"><span id="final-price">0.00</span> €</span>
             </div>
 
-            <!-- Barra visiva che mostra a colpo d'occhio la percentuale di sconto -->
             <div class="savings-bar-track">
                 <div class="savings-bar-fill" id="savings-bar"></div>
             </div>
@@ -83,9 +79,8 @@
 
     <script>
         /**
-         * Alterna il tema chiaro/scuro impostando (o rimuovendo) l'attributo
-         * data-theme sul <body>. L'icona sole/luna nel bottone cambia da
-         * sola via CSS in base a questo attributo (vedi calcolasconto.css).
+         * Alterna il tema chiaro/scuro impostando o rimuovendo l'attributo
+         * data-theme sul <body>, esattamente come nel Convertitore.
          */
         function toggleTheme() {
             const body = document.body;
@@ -96,18 +91,11 @@
             }
         }
 
-        /**
-         * Calcola risparmio unitario, risparmio totale (considerando la
-         * quantità) e prezzo finale, poi aggiorna il riquadro risultati
-         * e la barra visiva della percentuale di sconto.
-         */
         function calculateDiscount() {
             const price = parseFloat(document.getElementById('price').value);
             const discount = parseFloat(document.getElementById('discount').value);
-            // Se la quantità non è valorizzata, si assume 1 pezzo
             const quantity = parseInt(document.getElementById('quantity').value) || 1;
 
-            // Controllo di sicurezza sui valori numerici
             if (isNaN(price) || isNaN(discount) || price < 0 || discount < 0) return;
 
             const savedPerUnit = price * (discount / 100);
@@ -119,18 +107,12 @@
             document.getElementById('saved-total').innerText = savedTotal.toFixed(2);
             document.getElementById('final-price').innerText = finalTotal.toFixed(2);
 
-            // La barra si riempie in proporzione diretta alla percentuale di sconto
-            // (bloccata tra 0 e 100 per evitare valori fuori scala con input anomali)
             const clampedDiscount = Math.min(Math.max(discount, 0), 100);
             document.getElementById('savings-bar').style.width = clampedDiscount + '%';
 
             document.getElementById('result-box').style.display = 'block';
         }
 
-        /**
-         * Riporta il form allo stato iniziale: svuota i campi, nasconde
-         * il riquadro risultati e azzera la barra visiva.
-         */
         function resetForm() {
             document.getElementById('price').value = '';
             document.getElementById('discount').value = '';

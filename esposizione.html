@@ -3,100 +3,176 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exposure Meter - Analog Pro</title>
-	    <link rel="stylesheet" href="esposizione.css">
-
+    <title>Exposure Meter - Camera Body Pro</title>
+    <link rel="stylesheet" href="esposizione.css">
 </head>
-<body>
+<body data-theme="dark">
 
-<div class="card">
-    <div class="card-header">
-        <h2>Exposure Meter</h2>
+    <a class="back-link" href="dashboard.html">← Dashboard</a>
+
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2>Exposure Meter</h2>
+                <div class="subtitle">Calcoli analoghi e digitali</div>
+            </div>
+
+            <!-- Bottone tema -->
+            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="4"/>
+                    <line x1="12" y1="2" x2="12" y2="4"/>
+                    <line x1="12" y1="20" x2="12" y2="22"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="2" y1="12" x2="4" y2="12"/>
+                    <line x1="20" y1="12" x2="22" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Tabs / Ghiere di selezione -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('eq', event)">Equivalenza</button>
+            <button class="tab-btn" onclick="showTab('nd', event)">Filtri ND</button>
+            <button class="tab-btn" onclick="showTab('astro', event)">Astrofoto</button>
+        </div>
+
+        <!-- Sezione Equivalenza -->
+        <div id="eq" class="form-section active">
+            <div class="input-row">
+                <label>Tempo base (es. 1/50 o 2)</label>
+                <input type="text" id="eq-shutter" value="1/50">
+            </div>
+            <div class="input-row">
+                <label>Apertura attuale (f/)</label>
+                <input type="number" step="0.1" id="eq-aperture-old" value="5.6">
+            </div>
+            <div class="input-row">
+                <label>Nuova Apertura (f/)</label>
+                <input type="number" step="0.1" id="eq-aperture-new" value="8.0">
+            </div>
+        </div>
+
+        <!-- Sezione Filtri ND -->
+        <div id="nd" class="form-section">
+            <div class="input-row">
+                <label>Tempo base (es. 1/100 o 2)</label>
+                <input type="text" id="nd-shutter" value="1/100">
+            </div>
+            <div class="input-row">
+                <label>Stop Filtro ND</label>
+                <input type="number" id="nd-stops" value="6" placeholder="es. 6 (es. ND64)">
+            </div>
+        </div>
+
+        <!-- Sezione Astro -->
+        <div id="astro" class="form-section">
+            <div class="input-row">
+                <label>Lunghezza focale (mm)</label>
+                <input type="number" id="astro-focal" value="24">
+            </div>
+            <div class="hint-text">
+                * Calcolato con la Regola del 500 (tempo massimo senza mosso stellare).
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculate()">Scatta / Calcola</button>
+
+        <div class="result-box">
+            <label>TEMPO STIMATO</label>
+            <div class="result-value" id="result">---</div>
+        </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('eq')">Equivalenza</button>
-        <button class="tab-btn" onclick="showTab('nd')">Filtri ND</button>
-        <button class="tab-btn" onclick="showTab('astro')">Astro</button>
-    </div>
-
-    <!-- Sezione Equivalenza -->
-    <div id="eq" class="form-section active">
-        <div class="input-row">
-            <label>Tempo (es. 1/50)</label>
-            <input type="text" id="eq-shutter" value="1/50">
-        </div>
-        <div class="input-row">
-            <label>Apertura (f/)</label>
-            <input type="number" id="eq-aperture" value="5.6">
-        </div>
-    </div>
-
-    <!-- Sezione Filtri ND -->
-    <div id="nd" class="form-section">
-        <div class="input-row">
-            <label>Tempo base (sec)</label>
-            <input type="text" id="nd-shutter" value="1/100">
-        </div>
-        <div class="input-row">
-            <label>Stop Filtro ND</label>
-            <input type="number" id="nd-stops" value="6" placeholder="es. 6 (ND64)">
-        </div>
-    </div>
-
-    <!-- Sezione Astro -->
-    <div id="astro" class="form-section">
-        <div class="input-row">
-            <label>Lunghezza focale (mm)</label>
-            <input type="number" id="astro-focal" value="24">
-        </div>
-        <div style="font-size: 11px; font-family: var(--font-mono); margin-bottom: 10px;">
-            * Regola del 500 (tempo max senza mosso)
-        </div>
-    </div>
-
-    <button class="calculate-btn" onclick="calculate()">Calcola Risultato</button>
-
-    <div class="result-box">
-        <label>Tempo Stimato</label>
-        <div class="result-value" id="result">---</div>
-    </div>
-</div>
-
-<script>
-    function showTab(tabId) {
-        document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        event.currentTarget.classList.add('active');
-    }
-
-    function calculate() {
-        let result = "---";
-        const activeTab = document.querySelector('.form-section.active').id;
-
-        if (activeTab === 'eq') {
-            // Logica semplificata esposizione
-            result = "Compensazione Calcolata"; 
-        } 
-        else if (activeTab === 'nd') {
-            const shutterStr = document.getElementById('nd-shutter').value;
-            const stops = parseInt(document.getElementById('nd-stops').value) || 0;
-            // Valutazione frazione
-            const val = eval(shutterStr);
-            const newTime = val * Math.pow(2, stops);
-            result = newTime >= 1 ? newTime.toFixed(1) + "s" : "1/" + Math.round(1/newTime);
+    <script>
+        // ---------------------------------------------------------
+        // CAMBIO TEMA CHIARO/SCURO (Struttura Convertitore)
+        // ---------------------------------------------------------
+        function toggleTheme() {
+            const body = document.body;
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+            }
         }
-        else if (activeTab === 'astro') {
-            const focal = parseInt(document.getElementById('astro-focal').value);
-            const time = 500 / focal;
-            result = Math.floor(time) + "s";
+
+        function showTab(tabId, evt) {
+            document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            document.getElementById('result').innerText = "---";
         }
 
-        document.getElementById('result').innerText = result;
-    }
-</script>
+        function parseShutter(str) {
+            str = str.toString().trim();
+            if (str.includes('/')) {
+                const parts = str.split('/');
+                return parseFloat(parts[0]) / parseFloat(parts[1]);
+            }
+            return parseFloat(str) || 0;
+        }
+
+        function formatShutter(seconds) {
+            if (isNaN(seconds) || seconds <= 0) return "Valore non valido";
+            if (seconds >= 1) {
+                return seconds.toFixed(1) + "s";
+            } else {
+                const denominator = Math.round(1 / seconds);
+                return "1/" + denominator;
+            }
+        }
+
+        function calculate() {
+            let resultStr = "---";
+            const activeTab = document.querySelector('.form-section.active').id;
+
+            if (activeTab === 'eq') {
+                const shutterStr = document.getElementById('eq-shutter').value;
+                const fOld = parseFloat(document.getElementById('eq-aperture-old').value);
+                const fNew = parseFloat(document.getElementById('eq-aperture-new').value);
+                
+                const baseSeconds = parseShutter(shutterStr);
+                if (baseSeconds > 0 && fOld > 0 && fNew > 0) {
+                    const factor = Math.pow(fNew / fOld, 2);
+                    const newSeconds = baseSeconds * factor;
+                    resultStr = formatShutter(newSeconds);
+                } else {
+                    resultStr = "Errore input";
+                }
+            } 
+            else if (activeTab === 'nd') {
+                const shutterStr = document.getElementById('nd-shutter').value;
+                const stops = parseInt(document.getElementById('nd-stops').value) || 0;
+                
+                const baseSeconds = parseShutter(shutterStr);
+                if (baseSeconds > 0) {
+                    const newSeconds = baseSeconds * Math.pow(2, stops);
+                    resultStr = formatShutter(newSeconds);
+                } else {
+                    resultStr = "Errore input";
+                }
+            }
+            else if (activeTab === 'astro') {
+                const focal = parseInt(document.getElementById('astro-focal').value);
+                if (focal > 0) {
+                    const time = 500 / focal;
+                    resultStr = Math.floor(time) + "s";
+                } else {
+                    resultStr = "Errore focale";
+                }
+            }
+
+            document.getElementById('result').innerText = resultStr;
+        }
+    </script>
 
 </body>
 </html>
