@@ -389,7 +389,13 @@ body {
     letter-spacing: 0.05em;
 }
 
-/* Form Controls */
+/* Form Controls & Grids */
+.form-grid-dates {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
 .form-grid {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
@@ -416,6 +422,11 @@ body {
     font-family: var(--font-sans);
     outline: none;
     transition: var(--transition-smooth);
+}
+
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
 }
 
 .form-group input:focus {
@@ -481,6 +492,7 @@ body {
 }
 
 @media (max-width: 768px) {
+    .form-grid-dates { grid-template-columns: 1fr; }
     .form-grid { grid-template-columns: 1fr; }
     .card-details-row { flex-direction: column; align-items: flex-start; }
 }

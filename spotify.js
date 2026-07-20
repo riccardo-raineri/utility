@@ -16,8 +16,8 @@ function verifyPin() {
         form.style.opacity = '1';
         form.style.pointerEvents = 'auto';
 
-        // Abilita tutti gli input e checkbox all'interno del form
-        const inputs = form.querySelectorAll('input');
+        // Abilita tutti gli input e checkbox all'interno del form (tranne quello read-only del periodo)
+        const inputs = form.querySelectorAll('input:not(#input-periodo)');
         inputs.forEach(input => input.disabled = false);
 
         // Nascondi la barra di richiesta PIN e cambia l'icona del lucchetto
@@ -32,6 +32,31 @@ function verifyPin() {
     } else {
         alert('PIN errato! Riprova.');
         document.getElementById('input-pin').value = '';
+    }
+}
+
+// Funzione per formattare la data nel formato italiano richiesto (es. "20 luglio 2026")
+function formatDateItalian(dateString) {
+    if (!dateString) return "";
+    const [year, month, day] = dateString.split('-');
+    const months = [
+        "gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno",
+        "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"
+    ];
+    const monthName = months[parseInt(month, 10) - 1];
+    const dayNumber = parseInt(day, 10);
+    return `${dayNumber} ${monthName} ${year}`;
+}
+
+// Aggiorna dinamicamente la stringa del periodo combinando le due date del calendario
+function updatePeriodString() {
+    const startDateVal = document.getElementById('date-start').value;
+    const endDateVal = document.getElementById('date-end').value;
+
+    if (startDateVal && endDateVal) {
+        const formattedStart = formatDateItalian(startDateVal);
+        const formattedEnd = formatDateItalian(endDateVal);
+        document.getElementById('input-periodo').value = `${formattedStart} → ${formattedEnd}`;
     }
 }
 
