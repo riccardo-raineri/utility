@@ -1,6 +1,7 @@
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjMQN8oDMi93_SlXP0NTOee2nesSNJAQZmFuERp9WMkmbvJ5I6T4Std8ohI1hli7CT/exec';
 const SECRET_PIN = "1234"; 
 const ALL_USERS = ["Alessandra", "Chiara", "Giulia", "Riccardo", "Sergio", "Sharon", "Valentina"];
+const MONTHS_IT = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
 
 let globalPaymentsData = [];
 
@@ -9,7 +10,75 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchDataFromGoogleSheets();
 });
 
-// 1. CARICAMENTO DATI
+// 1. SBLOCCO FORME MEDIANTE PIN
+function verifyPin() {
+    const pinInput = document.getElementById('input-pin');
+    if (!pinInput) return;
+
+    if (pinInput.value.trim() === SECRET_PIN) {
+        document.getElementById('spotify-form').classList.add('unlocked');
+        document.getElementById('form-subtitle').innerText = '✅ Modulo sbloccato! Puoi modificare o inserire un nuovo periodo.';
+        document.getElementById('form-subtitle').style.color = 'var(--spotify-green)';
+        
+        // Abilita tutti gli elementi del form
+        const formElements = document.querySelectorAll('#spotify-form input, #spotify-form select, #spotify-form button');
+        formElements.forEach(el => el.disabled = false);
+
+        // Cambia icona se Lucide è disponibile
+        const lockIcon = document.getElementById('form-lock-icon');
+        if (lockIcon) {
+            lockIcon.setAttribute('data-lucide', 'lock-keyhole-open');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // Nasconde il prompt del PIN
+        document.getElementById('pin-prompt-container').style.display = 'none';
+    } else {
+        alert('PIN errato! Riprova.');
+        pinInput.value = '';
+    }
+}
+
+// 2. CONVERSIONE DATE (DA CALENDARIO A TESTO ITALIANO E VICEVERSA)
+function formatDateItalian(isoString) {
+    if (!isoString) return "";
+    const parts = isoString.split('-');
+    if (parts.length !== 3) return isoString;
+    const day = parseInt(parts[2], 10);
+    const monthIdx = parseInt(parts[1], 10) - 1;
+    const year = parts[0];
+    return `${day} ${MONTHS_IT[monthIdx]} ${year}`;
+}
+
+function parseItalianToIso(itString) {
+    if (!itString) return "";
+    const parts = itString.trim().split(' ');
+    if (parts.length === 3) {
+        const day = parts[0].padStart(2, '0');
+        const monthName = parts[1].toLowerCase();
+        const monthIdx = MONTHS_IT.indexOf(monthName);
+        const year = parts[2];
+        if (monthIdx !== -1) {
+            const month = String(monthIdx + 1).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+    }
+    return "";
+}
+
+function updateDatesFromCalendar() {
+    const startVal = document.getElementById('date-start').value;
+    const endVal = document.getElementById('date-end').value;
+
+    if (startVal) {
+        document.getElementById('input-inizio').value = formatDateItalian(startVal);
+    }
+    if (endVal) {
+        document.getElementById('input-fine').value = formatDateItalian(endVal);
+    }
+}
+
+// 3. CARICAMENTO DATI DA GOOGLE SHEETS
 async function fetchDataFromGoogleSheets() {
     const container = document.getElementById('payments-container');
     container.innerHTML = `
@@ -39,7 +108,7 @@ async function fetchDataFromGoogleSheets() {
     }
 }
 
-// 2. MOSTRA LE CARD CON LE DATE CORRETTE
+// 4. RENDERING INTERFACCIA STORICO
 function renderPaymentsUI(payments) {
     const container = document.getElementById('payments-container');
     if (!payments || payments.length === 0) {
@@ -105,7 +174,22 @@ function renderPaymentsUI(payments) {
     if (window.lucide) lucide.createIcons();
 }
 
-// 3. SELEZIONE RAPIDA PERIODO DA MODIFICARE
+function toggleOlderHistory() {
+    const historyDiv = document.getElementById('older-history');
+    const btn = document.getElementById('toggle-history-btn');
+    if (!historyDiv || !btn) return;
+
+    if (historyDiv.style.display === 'none') {
+        historyDiv.style.display = 'flex';
+        btn.innerHTML = '<i data-lucide="eye-off" style="width: 14px; height: 14px;"></i> Nascondi precedenti';
+    } else {
+        historyDiv.style.display = 'none';
+        btn.innerHTML = '<i data-lucide="eye" style="width: 14px; height: 14px;"></i> Mostra tutti i precedenti';
+    }
+    if (window.lucide) lucide.createIcons();
+}
+
+// 5. SELEZIONE RAPIDA E CARICAMENTO NEL FORM
 function populateQuickSelect(payments) {
     const select = document.getElementById('quick-select-period');
     if (!select) return;
@@ -125,19 +209,27 @@ function loadPeriodIntoForm() {
     if (idx === "") return;
 
     const selected = globalPaymentsData[idx];
-    const checkboxes = document.querySelectorAll('input[name="user"]');
-    
-    checkboxes.forEach(cb => {
-        cb.checked = selected.pagati.includes(cb.value);
-    });
+    if (!selected) return;
 
-    if (document.getElementById('input-inizio')) document.getElementById('input-inizio').value = selected.inizio;
-    if (document.getElementById('input-fine')) document.getElementById('input-fine').value = selected.fine;
-    if (document.getElementById('input-durata')) document.getElementById('input-durata').value = selected.durata;
-    if (document.getElementById('input-prezzo')) document.getElementById('input-prezzo').value = selected.prezzo;
+    document.getElementById('input-inizio').value = selected.inizio || "";
+    document.getElementById('input-fine').value = selected.fine || "";
+    document.getElementById('input-durata').value = selected.durata || "3 mesi";
+    document.getElementById('input-prezzo').value = selected.prezzo || "€10.50";
+
+    // Tenta di impostare anche i selettori di data calendario
+    const isoStart = parseItalianToIso(selected.inizio);
+    const isoEnd = parseItalianToIso(selected.fine);
+    if (isoStart) document.getElementById('date-start').value = isoStart;
+    if (isoEnd) document.getElementById('date-end').value = isoEnd;
+
+    // Spunta i partecipanti
+    const checkboxes = document.querySelectorAll('input[name="user"]');
+    checkboxes.forEach(cb => {
+        cb.checked = selected.pagati ? selected.pagati.includes(cb.value) : false;
+    });
 }
 
-// 4. SALVATAGGIO GARANTITO E SENZA BLOCCHI
+// 6. SALVATAGGIO GARANTITO SU GOOGLE SHEETS
 async function savePaymentData(event) {
     event.preventDefault();
     
@@ -166,7 +258,6 @@ async function savePaymentData(event) {
         nonPagati: nonPagati
     };
 
-    // Costruzione della richiesta GET per superare il blocco CORS del browser
     const saveUrl = `${APPS_SCRIPT_URL}?action=save&data=${encodeURIComponent(JSON.stringify(payload))}`;
 
     try {

@@ -42,7 +42,7 @@
                 <i data-lucide="music"></i>
             </div>
             <h1 class="title">Spotify Family</h1>
-            <p class="subtitle">Monitoraggio e aggiornamento quote trimestrali (6 partecipanti)</p>
+            <p class="subtitle">Monitoraggio e aggiornamento quote trimestrali (7 partecipanti)</p>
         </header>
 
         <!-- Modulo Interattivo Protetto da PIN -->
@@ -63,7 +63,7 @@
                 <button type="button" onclick="verifyPin()">Sblocca</button>
             </div>
 
-            <!-- Form (inizialmente disabilitato) -->
+            <!-- Form -->
             <form id="spotify-form" onsubmit="savePaymentData(event)">
                 
                 <!-- SELETTORE RAPIDO PER AGGIORNARE UN PERIODO ESISTENTE -->
@@ -77,40 +77,45 @@
                 <!-- Selezione Date tramite Calendario -->
                 <div class="form-grid-dates">
                     <div class="form-group">
-                        <label>DATA INIZIO</label>
-                        <input type="date" id="date-start" required disabled onchange="updatePeriodString()">
+                        <label>SELEZIONA DATA INIZIO</label>
+                        <input type="date" id="date-start" disabled onchange="updateDatesFromCalendar()">
                     </div>
                     <div class="form-group">
-                        <label>DATA FINE</label>
-                        <input type="date" id="date-end" required disabled onchange="updatePeriodString()">
+                        <label>SELEZIONA DATA FINE</label>
+                        <input type="date" id="date-end" disabled onchange="updateDatesFromCalendar()">
                     </div>
                 </div>
 
                 <div class="form-grid" style="margin-top: 12px;">
                     <div class="form-group">
-                        <label>PERIODO GENERATO (Formato Google Fogli)</label>
-                        <input type="text" id="input-periodo" placeholder="Es. 16 giugno 2026 → 16 settembre 2026" required readonly style="background: rgba(255,255,255,0.03); color: var(--spotify-green);">
+                        <label>PERIODO INIZIO (Testo)</label>
+                        <input type="text" id="input-inizio" placeholder="Es. 16 giugno 2026" required disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>PERIODO FINE (Testo)</label>
+                        <input type="text" id="input-fine" placeholder="Es. 16 settembre 2026" required disabled>
                     </div>
                     <div class="form-group">
                         <label>DURATA</label>
                         <input type="text" id="input-durata" value="3 mesi" required disabled>
                     </div>
-                    <div class="form-group">
-                        <label>QUOTA (€ P.P.)</label>
-                        <input type="text" id="input-prezzo" value="€10.50" required disabled>
-                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>QUOTA (€ P.P.)</label>
+                    <input type="text" id="input-prezzo" value="€10.50" required disabled style="margin-bottom: 12px;">
                 </div>
 
                 <div class="form-group">
                     <label>CHI HA PAGATO (Spunta i partecipanti man mano che pagano)</label>
                     <div class="checkboxes-group" id="users-checkboxes">
+                        <label><input type="checkbox" name="user" value="Alessandra" disabled> Alessandra</label>
                         <label><input type="checkbox" name="user" value="Chiara" disabled> Chiara</label>
                         <label><input type="checkbox" name="user" value="Giulia" disabled> Giulia</label>
                         <label><input type="checkbox" name="user" value="Riccardo" disabled> Riccardo</label>
                         <label><input type="checkbox" name="user" value="Sergio" disabled> Sergio</label>
                         <label><input type="checkbox" name="user" value="Sharon" disabled> Sharon</label>
                         <label><input type="checkbox" name="user" value="Valentina" disabled> Valentina</label>
-                        <label><input type="checkbox" name="user" value="Alessandra" disabled> Alessandra</label>
                     </div>
                 </div>
 
@@ -122,7 +127,7 @@
 
         <!-- Storico Pagamenti Dinamico -->
         <main class="payments-list" id="payments-container">
-            <!-- Verrà popolato dinamicamente dallo script -->
+            <!-- Popolato dinamicamente dallo script -->
         </main>
 
         <footer class="app-footer">

@@ -38,6 +38,11 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 /* Sfondo Ambientale */
 .bg-canvas {
     position: fixed;
@@ -228,6 +233,11 @@ body {
     transition: var(--transition-smooth);
 }
 
+#spotify-form.unlocked {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 /* Storico Pagamenti & Sezione Toggle */
 .payments-list {
     display: flex;
@@ -411,7 +421,7 @@ body {
     margin-bottom: 4px;
 }
 
-.form-group input {
+.form-group input, .form-group select {
     width: 100%;
     padding: 10px 14px;
     background: var(--bg-base);
@@ -429,7 +439,7 @@ body {
     cursor: pointer;
 }
 
-.form-group input:focus {
+.form-group input:focus, .form-group select:focus {
     border-color: var(--spotify-green);
 }
 
@@ -474,11 +484,17 @@ body {
     gap: 8px;
     font-size: 13px;
     transition: var(--transition-smooth);
+    width: 100%;
 }
 
-.btn-submit:hover {
+.btn-submit:hover:not(:disabled) {
     opacity: 0.9;
     transform: translateY(-1px);
+}
+
+.btn-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .app-footer {
