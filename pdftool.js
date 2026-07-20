@@ -1,5 +1,6 @@
 let currentAction = null;
 let selectedFile = null;
+let pdfPageStates = {}; // Memoria per rotazioni o stati delle pagine nell'editor grafico
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) {
@@ -39,15 +40,17 @@ function selectAction(actionKey, actionTitle, acceptedTypes) {
     document.getElementById('fileInput').accept = acceptedTypes;
     document.getElementById('workspacePanel').style.display = 'block';
     
-    // Gestione classe attiva sulle card
     document.querySelectorAll('.tool-card').forEach(card => card.classList.remove('active'));
     event.currentTarget.classList.add('active');
 
     selectedFile = null;
+    pdfPageStates = {};
     document.getElementById('fileInfo').style.display = 'none';
     document.getElementById('processBtn').disabled = true;
     document.getElementById('resultArea').innerHTML = '';
     document.getElementById('toolSpecificOptions').innerHTML = '';
+    document.getElementById('visualEditorContainer').style.display = 'none';
+    document.getElementById('visualEditorContainer').innerHTML = '';
 
     document.getElementById('workspacePanel').scrollIntoView({ behavior: 'smooth' });
 }
@@ -58,33 +61,76 @@ function closeWorkspace() {
     currentAction = null;
 }
 
-function handleFileSelected(file) {
+async function handleFileSelected(file) {
     selectedFile = file;
     document.getElementById('fileName').textContent = file.name;
     document.getElementById('fileInfo').style.display = 'flex';
     document.getElementById('processBtn').disabled = false;
     
-    const optionsContainer = document.getElementById('toolSpecificOptions');
-    optionsContainer.innerHTML = '';
-    
-    if (currentAction === 'split' || currentAction === 'extract-pages' || currentAction === 'delete-pages') {
-        optionsContainer.innerHTML = `
-            <div style="margin-top: 12px;">
-                <label>Numero pagina o intervallo (es: 1 o 1-3):</label>
-                <input type="text" id="pageParamInput" value="1" placeholder="Es. 1">
-            </div>
-        `;
-    } else if (currentAction === 'rotate') {
-        optionsContainer.innerHTML = `
-            <div style="margin-top: 12px;">
-                <label>Angolo di rotazione:</label>
-                <select id="rotateAngle">
-                    <option value="90">90° Orario</option>
-                    <option value="180">180°</option>
-                    <option value="270">270° (90° Antiorario)</option>
-                </select>
-            </div>
-        `;
+    const editorContainer = document.getElementById('visualEditorContainer');
+    editorContainer.innerHTML = '';
+
+    // Se l'azione richiede l'editor grafico visivo delle pagine
+    if (['rotate', 'split', 'delete-pages', 'extract-pages'].includes(currentAction)) {
+        editorContainer.style.display = 'block';
+        editorContainer.innerHTML = `<p style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Caricamento anteprime pagine in corso...</p>`;
+        
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+            const pdfDoc = await loadingTask.promise;
+            
+            let gridHtml = `<p style="font-size:12px; color:var(--text-secondary); margin-bottom:8px;">Clicca sulle miniature per gestirle:</p><div class="pdf-thumbnails-grid" id="thumbnailsGrid">`;
+            
+            for (let i = 1; i <= pdfDoc.numPages; i++) {
+                pdfPageStates[i] = { rotation: 0, selected: true, deleted: false };
+                gridHtml += `
+                    <div class="pdf-thumb-card selected" id="thumb-${i}" onclick="togglePageSelection(${i})">
+                        <canvas id="canvas-thumb-${i}"></canvas>
+                        <span>Pag. ${i}</span>
+                    </div>
+                `;
+            }
+            gridHtml += `</div>`;
+            editorContainer.innerHTML = gridHtml;
+
+            // Renderizza le miniature in canvas in background
+            for (let i = 1; i <= pdfDoc.numPages; i++) {
+                const page = await pdfDoc.getPage(i);
+                const viewport = page.getViewport({ scale: 0.25 });
+                const canvas = document.getElementById(`canvas-thumb-${i}`);
+                if (canvas) {
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    await page.render({ canvasContext: context, viewport: viewport }).promise;
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            editorContainer.innerHTML = `<p style="color:#ef4444; font-size:12px;">Impossibile generare le anteprime delle pagine.</p>`;
+        }
+    } else {
+        editorContainer.style.display = 'none';
+    }
+}
+
+// Interazione con l'editor grafico a miniature
+function togglePageSelection(pageNum) {
+    const card = document.getElementById(`thumb-${pageNum}`);
+    if (!card) return;
+
+    if (currentAction === 'rotate') {
+        // Ruota di 90 gradi ogni click
+        pdfPageStates[pageNum].rotation = (pdfPageStates[pageNum].rotation + 90) % 360;
+        card.style.transform = `rotate(${pdfPageStates[pageNum].rotation}deg)`;
+    } else if (currentAction === 'delete-pages') {
+        pdfPageStates[pageNum].deleted = !pdfPageStates[pageNum].deleted;
+        card.classList.toggle('marked-delete', pdfPageStates[pageNum].deleted);
+    } else {
+        // Per split ed estrai pagine (selezione multipla o singola)
+        pdfPageStates[pageNum].selected = !pdfPageStates[pageNum].selected;
+        card.classList.toggle('selected', pdfPageStates[pageNum].selected);
     }
 }
 
@@ -108,23 +154,47 @@ async function processFile() {
                 downloadBlob(pdfBytes, `ottimizzato_${selectedFile.name}`, 'application/pdf');
             } 
             else if (currentAction === 'rotate') {
-                const angle = parseInt(document.getElementById('rotateAngle').value);
-                pdfDoc.getPages().forEach(page => page.setRotation(pdfLib.degrees(page.getRotation().angle + angle)));
+                const pages = pdfDoc.getPages();
+                pages.forEach((page, index) => {
+                    const pageNum = index + 1;
+                    if (pdfPageStates[pageNum] && pdfPageStates[pageNum].rotation > 0) {
+                        const currentRot = page.getRotation().angle;
+                        page.setRotation(pdfLib.degrees(currentRot + pdfPageStates[pageNum].rotation));
+                    }
+                });
                 const pdfBytes = await pdfDoc.save();
                 downloadBlob(pdfBytes, `ruotato_${selectedFile.name}`, 'application/pdf');
             }
             else if (currentAction === 'split' || currentAction === 'extract-pages') {
-                const pageIdx = parseInt(document.getElementById('pageParamInput').value) - 1;
                 const newPdf = await PDFDocument.create();
-                const [copiedPage] = await newPdf.copyPages(pdfDoc, [pageIdx]);
-                newPdf.addPage(copiedPage);
+                const pagesToCopy = [];
+                for (let p = 1; p <= pdfDoc.getPageCount(); p++) {
+                    if (pdfPageStates[p] && pdfPageStates[p].selected) {
+                        pagesToCopy.push(p - 1);
+                    }
+                }
+                if (pagesToCopy.length === 0) {
+                    alert("Seleziona almeno una pagina dall'editor grafico!");
+                    processBtn.disabled = false;
+                    resultArea.innerHTML = "";
+                    return;
+                }
+                const copiedPages = await newPdf.copyPages(pdfDoc, pagesToCopy);
+                copiedPages.forEach(p => newPdf.addPage(p));
                 const pdfBytes = await newPdf.save();
                 downloadBlob(pdfBytes, `estratto_${selectedFile.name}`, 'application/pdf');
             }
             else if (currentAction === 'delete-pages') {
-                const pageIdx = parseInt(document.getElementById('pageParamInput').value) - 1;
-                pdfDoc.removePage(pageIdx);
-                const pdfBytes = await pdfDoc.save();
+                const newPdf = await PDFDocument.create();
+                const pagesToKeep = [];
+                for (let p = 1; p <= pdfDoc.getPageCount(); p++) {
+                    if (!pdfPageStates[p] || !pdfPageStates[p].deleted) {
+                        pagesToKeep.push(p - 1);
+                    }
+                }
+                const copiedPages = await newPdf.copyPages(pdfDoc, pagesToKeep);
+                copiedPages.forEach(p => newPdf.addPage(p));
+                const pdfBytes = await newPdf.save();
                 downloadBlob(pdfBytes, `modificato_${selectedFile.name}`, 'application/pdf');
             }
         } 

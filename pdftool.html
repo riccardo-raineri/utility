@@ -14,7 +14,11 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Librerie esterne PDF e OCR -->
+    <!-- Librerie PDF.js, PDF-Lib, jsPDF e Tesseract -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://unpkg.com/tesseract.js@v4.1.1/dist/tesseract.min.js"></script>
@@ -47,114 +51,114 @@
 
                 <!-- Unire PDF -->
                 <div class="tool-card" onclick="selectAction('merge', 'Unisci PDF', '.pdf')">
-                    <div class="card-icon"><i data-lucide="copy-plus"></i></div>
+                    <div class="card-icon blue"><i data-lucide="copy-plus"></i></div>
                     <h3>Unisci PDF</h3>
                     <p>Combina più file PDF in un unico documento.</p>
                 </div>
 
                 <!-- Dividi PDF -->
                 <div class="tool-card" onclick="selectAction('split', 'Dividi PDF', '.pdf')">
-                    <div class="card-icon"><i data-lucide="scissors"></i></div>
+                    <div class="card-icon purple"><i data-lucide="scissors"></i></div>
                     <h3>Dividi PDF</h3>
-                    <p>Estrai pagine o suddividi il documento.</p>
+                    <p>Estrai pagine o suddividi il documento visivamente.</p>
                 </div>
 
                 <!-- Comprimi PDF -->
                 <div class="tool-card" onclick="selectAction('compress', 'Comprimi PDF', '.pdf')">
-                    <div class="card-icon"><i data-lucide="minimize-2"></i></div>
+                    <div class="card-icon green"><i data-lucide="minimize-2"></i></div>
                     <h3>Comprimi PDF</h3>
                     <p>Riduci le dimensioni ottimizzando il file.</p>
                 </div>
 
                 <!-- OCR Testo -->
                 <div class="tool-card" onclick="selectAction('ocr', 'OCR Testo', '.pdf,image/*')">
-                    <div class="card-icon"><i data-lucide="scan-text"></i></div>
+                    <div class="card-icon orange"><i data-lucide="scan-text"></i></div>
                     <h3>OCR Testo</h3>
                     <p>Estrai testo modificabile da scansioni o foto.</p>
                 </div>
 
                 <!-- PDF a Word -->
                 <div class="tool-card" onclick="selectAction('to-word', 'PDF a Word', '.pdf')">
-                    <div class="card-icon"><i data-lucide="file-text"></i></div>
+                    <div class="card-icon blue"><i data-lucide="file-text"></i></div>
                     <h3>PDF a Word</h3>
                     <p>Esporta i contenuti in formato Word editabile.</p>
                 </div>
 
                 <!-- PDF a Excel -->
                 <div class="tool-card" onclick="selectAction('to-excel', 'PDF a Excel', '.pdf')">
-                    <div class="card-icon"><i data-lucide="sheet"></i></div>
+                    <div class="card-icon blue"><i data-lucide="sheet"></i></div>
                     <h3>PDF a Excel</h3>
                     <p>Estrai tabelle e dati in un foglio di calcolo.</p>
                 </div>
 
                 <!-- PDF a PPT -->
                 <div class="tool-card" onclick="selectAction('to-ppt', 'PDF a PowerPoint', '.pdf')">
-                    <div class="card-icon"><i data-lucide="presentation"></i></div>
+                    <div class="card-icon blue"><i data-lucide="presentation"></i></div>
                     <h3>PDF a PowerPoint</h3>
                     <p>Trasforma le pagine in diapositive.</p>
                 </div>
 
                 <!-- PDF a Immagini -->
                 <div class="tool-card" onclick="selectAction('to-images', 'PDF a Immagini', '.pdf')">
-                    <div class="card-icon"><i data-lucide="image"></i></div>
+                    <div class="card-icon blue"><i data-lucide="image"></i></div>
                     <h3>PDF a Immagini</h3>
                     <p>Salva ogni pagina come JPG o PNG.</p>
                 </div>
 
                 <!-- Word a PDF -->
                 <div class="tool-card" onclick="selectAction('word-to-pdf', 'Word a PDF', '.doc,.docx')">
-                    <div class="card-icon"><i data-lucide="file-up"></i></div>
+                    <div class="card-icon green"><i data-lucide="file-up"></i></div>
                     <h3>Word a PDF</h3>
                     <p>Converti documenti Word in formato PDF.</p>
                 </div>
 
                 <!-- Excel a PDF -->
                 <div class="tool-card" onclick="selectAction('excel-to-pdf', 'Excel a PDF', '.xls,.xlsx')">
-                    <div class="card-icon"><i data-lucide="sheet"></i></div>
+                    <div class="card-icon green"><i data-lucide="sheet"></i></div>
                     <h3>Excel a PDF</h3>
                     <p>Trasforma fogli Excel in PDF stampabili.</p>
                 </div>
 
                 <!-- PPT a PDF -->
                 <div class="tool-card" onclick="selectAction('ppt-to-pdf', 'PowerPoint a PDF', '.ppt,.pptx')">
-                    <div class="card-icon"><i data-lucide="presentation"></i></div>
+                    <div class="card-icon green"><i data-lucide="presentation"></i></div>
                     <h3>PPT a PDF</h3>
                     <p>Esporta presentazioni PowerPoint in PDF.</p>
                 </div>
 
                 <!-- Immagini a PDF -->
                 <div class="tool-card" onclick="selectAction('img-to-pdf', 'Immagini a PDF', 'image/*')">
-                    <div class="card-icon"><i data-lucide="images"></i></div>
+                    <div class="card-icon green"><i data-lucide="images"></i></div>
                     <h3>Immagini a PDF</h3>
                     <p>Unisci foto e immagini in un unico PDF.</p>
                 </div>
 
                 <!-- HTML a PDF -->
                 <div class="tool-card" onclick="selectAction('html-to-pdf', 'HTML a PDF', '.html,.htm')">
-                    <div class="card-icon"><i data-lucide="globe"></i></div>
+                    <div class="card-icon green"><i data-lucide="globe"></i></div>
                     <h3>HTML a PDF</h3>
                     <p>Converti pagine HTML direttamente in PDF.</p>
                 </div>
 
                 <!-- Ruota PDF -->
                 <div class="tool-card" onclick="selectAction('rotate', 'Ruota PDF', '.pdf')">
-                    <div class="card-icon"><i data-lucide="rotate-cw"></i></div>
+                    <div class="card-icon purple"><i data-lucide="rotate-cw"></i></div>
                     <h3>Ruota PDF</h3>
-                    <p>Modifica l'orientamento delle pagine.</p>
+                    <p>Ruota le singole pagine graficamente.</p>
                 </div>
 
                 <!-- Elimina Pagine -->
                 <div class="tool-card" onclick="selectAction('delete-pages', 'Elimina Pagine', '.pdf')">
-                    <div class="card-icon"><i data-lucide="file-x"></i></div>
+                    <div class="card-icon purple"><i data-lucide="file-x"></i></div>
                     <h3>Elimina Pagine</h3>
-                    <p>Rimuovi le pagine indesiderate.</p>
+                    <p>Seleziona e rimuovi le pagine indesiderate.</p>
                 </div>
 
                 <!-- Estrai Pagine -->
                 <div class="tool-card" onclick="selectAction('extract-pages', 'Estrai Pagine', '.pdf')">
-                    <div class="card-icon"><i data-lucide="file-output"></i></div>
+                    <div class="card-icon purple"><i data-lucide="file-output"></i></div>
                     <h3>Estrai Pagine</h3>
-                    <p>Isola e salva solo le pagine utili.</p>
+                    <p>Crea un nuovo file dalle pagine selezionate.</p>
                 </div>
 
             </div>
@@ -177,7 +181,9 @@
                     <span id="fileName">file.pdf</span>
                 </div>
 
+                <!-- Opzioni e Editor Grafico Miniature -->
                 <div id="toolSpecificOptions" class="tool-options"></div>
+                <div id="visualEditorContainer" style="display: none; margin-top: 16px;"></div>
 
                 <button id="processBtn" class="action-btn" disabled>
                     <span>Elabora File</span>
