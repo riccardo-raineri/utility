@@ -1,230 +1,535 @@
 /* =====================================================================
-   CALCOLAVIAGGIO.CSS
-   Foglio di stile dello strumento "Costo Carburante" (Trip Computer).
-
-   DIREZIONE GRAFICA
-   Tema "pannello strumenti": sfondo grigio-antracite quasi nero, font
-   monospace per tutta la pagina (coerente con l'idea originale di
-   display digitale), ma senza la foto di cruscotto e senza il bagliore
-   acceso: un pattern a griglia sottilissima sostituisce la fotografia,
-   e l'ambra è desaturata per restare professionale invece che "neon".
+   CALCOLAVIAGGIO.CSS — Theme: Trip Computer (Default Dark)
    ===================================================================== */
 
 :root {
-    --bg: #0c0d10;              /* sfondo quasi nero */
-    --surface: #15161b;         /* sfondo del pannello */
-    --border: #24262d;          /* bordo sottile */
-    --text: #eceef2;            /* testo principale */
-    --text-muted: #82858f;      /* etichette / testo secondario */
-    --accent: #c98a3f;          /* ambra desaturata (era arancione acceso) */
-    --accent-soft: rgba(201, 138, 63, 0.1);
-    --accent-strong: #e0a25a;
-    --radius: 10px;
-    --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
+    /* 🌙 TEMA SCURO (DEFAULT) */
+    --bg-base: #090d16;
+    --card-bg: #131a29;
+    --card-hover: #192236;
+    --toolbar-bg: #0f1522;
+    --border-subtle: #212c42;
+    --border-highlight: #334155;
+
+    /* Accento Trip Computer (Amber / Carburante) */
+    --accent: #f59e0b;
+    --accent-soft: rgba(245, 158, 11, 0.12);
+    --accent-strong: #fbbf24;
+    --accent-border: rgba(245, 158, 11, 0.25);
+
+    /* Testi */
+    --text-primary: #f0f4f8;
+    --text-secondary: #94a3b8;
+    --text-tertiary: #64748b;
+
+    /* Tipografia */
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* Ombre e Dettagli */
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --grid-pattern: rgba(255, 255, 255, 0.025);
+
+    --radius: 16px;
+    --transition-smooth: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-* {
+/* ☀️ TEMA CHIARO ([data-theme="light"]) */
+[data-theme="light"] {
+    --bg-base: #f4f7fa;
+    --card-bg: #ffffff;
+    --card-hover: #f8fafc;
+    --toolbar-bg: #fafcff;
+    --border-subtle: #cbd5e1;
+    --border-highlight: #94a3b8;
+
+    --accent: #d97706;
+    --accent-soft: rgba(217, 119, 6, 0.08);
+    --accent-strong: #b45309;
+    --accent-border: rgba(217, 119, 6, 0.2);
+
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-tertiary: #94a3b8;
+
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.06);
+    --grid-pattern: rgba(0, 0, 0, 0.03);
+}
+
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: var(--font-mono);
 }
 
 body {
-    background-color: var(--bg);
-    color: var(--text);
-
-    /* Pattern a griglia (orizzontale + verticale) che richiama un display
-       digitale, generato con due linear-gradient molto tenui invece
-       di una fotografia di cruscotto. */
-    background-image:
-        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-    background-size: 26px 26px;
-
+    font-family: var(--font-sans);
+    background-color: var(--bg-base);
+    color: var(--text-primary);
     min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Texture di fondo */
+.bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bg-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(var(--grid-pattern) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-pattern) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+/* Layout App */
+.app-container {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 32px 20px;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    gap: 28px;
+    min-height: 100vh;
+}
+
+/* Navigazione Superiore */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    padding: 24px;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .back-link {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    font-size: 12.5px;
-    color: var(--text-muted);
-    text-decoration: none;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
-    transition: color 0.2s ease;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
 }
 
 .back-link:hover {
-    color: var(--text);
-}
-
-/* =========================================================
-   PANNELLO PRINCIPALE
-   ========================================================= */
-.dashboard {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 32px;
-    width: 100%;
-    max-width: 400px;
-}
-
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 26px;
-    padding-bottom: 16px;
-    border-bottom: 1px dashed var(--border);
-}
-
-.panel-header h2 {
-    font-size: 14px;
     color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    font-weight: 600;
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
 }
 
-/* Indicatore "online" puramente decorativo, dà un tocco da strumentazione */
+.back-link svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Toggle Tema */
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+    color: var(--text-secondary);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
+}
+
+.theme-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.theme-toggle svg { width: 16px; height: 16px; }
+
+.icon-sun { display: block; }
+.icon-moon { display: none; }
+
+[data-theme="light"] .icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: block; }
+
+/* Badge Strumento */
+.tool-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--accent-border);
+}
+
+.tool-badge svg { width: 13px; height: 13px; }
+
+/* Contenitore Principale */
+.tool-layout {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card */
+.card {
+    width: 100%;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 28px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    transition: var(--transition-smooth);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    position: relative;
+}
+
+.card-header .icon {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent-border);
+    border-radius: 12px;
+}
+
+.card-header .icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.card-header h2 {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+}
+
+.card-header p {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
 .status-dot {
-    width: 7px;
-    height: 7px;
+    position: absolute;
+    top: 4px;
+    right: 0;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 6px var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+}
+
+/* Form Body */
+.form-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .input-group {
-    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
 }
 
 label {
-    display: block;
-    margin-bottom: 7px;
-    color: var(--text-muted);
-    font-size: 11.5px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-input {
-    width: 100%;
-    padding: 11px 12px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--accent);
-    font-size: 17px;
     font-family: var(--font-mono);
-    border-radius: 6px;
-    text-align: right;
-    transition: border-color 0.2s ease;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
 }
 
-input:focus {
-    outline: none;
-    border-color: var(--accent);
-}
-
-input::placeholder {
-    color: #45403a;
-}
-
-/* =========================================================
-   OPZIONI: andata/ritorno e numero passeggeri (nuove funzioni)
-   ========================================================= */
-.options-row {
+.input-wrapper {
+    position: relative;
     display: flex;
-    gap: 12px;
-    margin-bottom: 22px;
+    align-items: center;
 }
 
-/* Interruttore "andata/ritorno": bottone a due stati invece di una
-   checkbox, per restare coerente con lo stile "pannello" della pagina */
+.input-prefix {
+    position: absolute;
+    left: 14px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    width: 16px;
+    height: 16px;
+    color: var(--text-tertiary);
+    pointer-events: none;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    outline: none;
+    transition: var(--transition-smooth);
+}
+
+.input-wrapper .input-prefix + input,
+.input-wrapper .input-icon + input {
+    padding-left: 38px;
+}
+
+input[type="number"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Rimuove freccette input numerici */
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+/* Contenitore Switch Toggle Segmentato */
+.toggle-container {
+    display: flex;
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 4px;
+}
+
 .toggle-btn {
     flex: 1;
-    padding: 10px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text-muted);
-    font-family: var(--font-mono);
-    font-size: 11.5px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    border-radius: 6px;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 12px;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition-smooth);
 }
 
 .toggle-btn.active {
-    color: var(--bg);
-    background: var(--accent);
-    border-color: var(--accent);
-}
-
-button.calculate {
-    width: 100%;
-    padding: 13px;
-    background-color: transparent;
+    background: var(--card-bg);
     color: var(--accent);
-    border: 1px solid var(--accent);
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    border-radius: 6px;
-    transition: background-color 0.2s ease, color 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--accent-border);
 }
 
-button.calculate:hover {
+/* Pulsanti */
+.action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+button.btn-primary {
+    width: 100%;
+    padding: 12px 16px;
     background-color: var(--accent);
-    color: var(--bg);
+    color: #0f172a;
+    border: none;
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition-smooth);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
 }
 
-/* =========================================================
-   OUTPUT
-   ========================================================= */
-.output {
-    margin-top: 26px;
-    padding-top: 20px;
-    border-top: 1px dashed var(--border);
+button.btn-primary:hover {
+    background-color: var(--accent-strong);
+    transform: translateY(-1px);
 }
 
-.output-row {
+button.btn-primary svg {
+    width: 16px;
+    height: 16px;
+}
+
+button.btn-secondary {
+    width: 100%;
+    padding: 10px 14px;
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: var(--transition-smooth);
+}
+
+button.btn-secondary:hover {
+    background: var(--toolbar-bg);
+    border-color: var(--border-highlight);
+    color: var(--text-primary);
+}
+
+button.btn-secondary svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Riquadro Risultato */
+.result {
+    padding: 20px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
+    border-radius: 12px;
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.result-row {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    margin: 10px 0;
+    align-items: center;
 }
 
-.output-row .label {
-    font-size: 11.5px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+.result-row .label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
-.output-row .value {
+.result-row .value {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.result-row.total {
+    border-top: 1px dashed var(--accent-border);
+    padding-top: 10px;
+    margin-top: 2px;
+}
+
+.result-row.total .label {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.result-row.total .value.highlight {
     font-size: 22px;
+    color: var(--accent);
+}
+
+/* Scheda Quota a Persona */
+.per-person-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 4px;
+}
+
+.per-person-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.per-person-label svg {
+    width: 14px;
+    height: 14px;
+    color: var(--accent);
+}
+
+.per-person-value {
+    font-family: var(--font-mono);
+    font-size: 15px;
     font-weight: 700;
     color: var(--accent-strong);
 }
 
-/* Riga aggiuntiva: costo per persona, visibile solo se i passeggeri sono > 1 */
-.per-person {
-    display: none;
-    margin-top: 4px;
-    text-align: right;
-    font-size: 12px;
-    color: var(--text-muted);
+/* Footer */
+.app-footer {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 18px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
 }

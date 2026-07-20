@@ -3,118 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trip Computer</title>
+    <title>Trip Computer — Calcolo Viaggio &amp; Carburante</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Foglio di Stile -->
     <link rel="stylesheet" href="calcolaviaggio.css">
 </head>
 <body>
 
-<!-- Link alla Dashboard -->
-    <a class="back-link" href="dashboard.html">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Dashboard
-    </a>
-    <div class="dashboard">
-        <div class="panel-header">
-            <h2>Trip Computer</h2>
-            <div class="status-dot"></div>
-        </div>
-
-        <div class="input-group">
-            <label for="distance">Distanza (km)</label>
-            <input type="number" id="distance" placeholder="000">
-        </div>
-        <div class="input-group">
-            <label for="consumption">Consumo (km/l)</label>
-            <input type="number" id="consumption" placeholder="00.0">
-        </div>
-        <div class="input-group">
-            <label for="price">Prezzo alla pompa (€/l)</label>
-            <input type="number" id="price" placeholder="1.85" step="0.01">
-        </div>
-
-        <!-- OPZIONI AGGIUNTIVE: andata/ritorno raddoppia la distanza,
-             il numero di passeggeri divide il costo totale -->
-        <div class="options-row">
-            <button type="button" class="toggle-btn active" id="btn-solo-andata" onclick="setTripType(false)">Solo andata</button>
-            <button type="button" class="toggle-btn" id="btn-andata-ritorno" onclick="setTripType(true)">Andata/ritorno</button>
-        </div>
-
-        <div class="input-group">
-            <label for="passengers">Numero passeggeri (per dividere la spesa)</label>
-            <input type="number" id="passengers" placeholder="1" min="1" step="1" value="1">
-        </div>
-
-        <button class="calculate" onclick="calculateTrip()">Calcola</button>
-
-        <div class="output" id="output" style="display:none;">
-            <div class="output-row">
-                <span class="label">Litri richiesti</span>
-                <span class="value" id="liters">0.0 L</span>
-            </div>
-            <div class="output-row">
-                <span class="label">Costo stimato</span>
-                <span class="value" id="cost">0.00 €</span>
-            </div>
-            <!-- Mostrata solo se passengers > 1 -->
-            <div class="per-person" id="per-person">
-                Quota a persona: <span id="cost-per-person">0.00 €</span>
-            </div>
-        </div>
+    <!-- Canvas di Sfondo -->
+    <div class="bg-canvas">
+        <div class="bg-grid-pattern"></div>
     </div>
 
+    <div class="app-container">
+
+        <!-- Navigation Bar -->
+        <nav class="top-nav">
+            <!-- Link alla Dashboard -->
+            <a class="back-link" href="dashboard.html">
+                <i data-lucide="arrow-left"></i>
+                Dashboard
+            </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="fuel"></i>
+                    Trip Computer
+                </span>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="tool-layout">
+            <div class="card">
+                
+                <!-- Card Header -->
+                <div class="card-header">
+                    <div class="icon">
+                        <i data-lucide="gauge"></i>
+                    </div>
+                    <div class="title-group">
+                        <h2>Costo Carburante</h2>
+                        <p>Distanza, consumi e ripartizione spesa.</p>
+                    </div>
+                    <div class="status-dot" title="Sistema pronto"></div>
+                </div>
+
+                <!-- Form Inputs -->
+                <div class="form-body">
+                    
+                    <!-- Distanza -->
+                    <div class="input-group">
+                        <label for="distance">Distanza (km)</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="navigation" class="input-icon"></i>
+                            <input type="number" id="distance" placeholder="es. 150" min="0" step="0.1" autofocus>
+                        </div>
+                    </div>
+
+                    <!-- Row Consumo e Prezzo -->
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="consumption">Consumo (km/l)</label>
+                            <div class="input-wrapper">
+                                <input type="number" id="consumption" placeholder="18.5" min="0.1" step="0.1">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="price">Prezzo (€/l)</label>
+                            <div class="input-wrapper">
+                                <span class="input-prefix">€</span>
+                                <input type="number" id="price" placeholder="1.85" min="0" step="0.001">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tipo Viaggio (Toggle Segmentato) -->
+                    <div class="input-group">
+                        <label>Tipologia Viaggio</label>
+                        <div class="toggle-container">
+                            <button type="button" class="toggle-btn active" id="btn-solo-andata" onclick="setTripType(false)">
+                                Solo andata
+                            </button>
+                            <button type="button" class="toggle-btn" id="btn-andata-ritorno" onclick="setTripType(true)">
+                                Andata / Ritorno
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Numero Passeggeri -->
+                    <div class="input-group">
+                        <label for="passengers">Passeggeri (per dividere la spesa)</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="users" class="input-icon"></i>
+                            <input type="number" id="passengers" placeholder="1" min="1" step="1" value="1">
+                        </div>
+                    </div>
+
+                    <!-- Azioni -->
+                    <div class="action-group">
+                        <button class="btn-primary" onclick="calculateTrip()">
+                            <i data-lucide="calculator"></i>
+                            Calcola Spesa
+                        </button>
+                        <button class="btn-secondary" onclick="resetForm()">
+                            <i data-lucide="rotate-ccw"></i>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Output Risultati -->
+                <div class="result" id="output">
+                    <div class="result-row">
+                        <span class="label">Litri necessari</span>
+                        <span class="value"><span id="liters">0.0</span> L</span>
+                    </div>
+                    <div class="result-row total">
+                        <span class="label">Costo totale stimato</span>
+                        <span class="value highlight"><span id="cost">0.00</span> €</span>
+                    </div>
+
+                    <!-- Quota a Persona (Visibile se passeggeri > 1) -->
+                    <div class="per-person-card" id="per-person" style="display: none;">
+                        <span class="per-person-label">
+                            <i data-lucide="user-check"></i> Quota a persona
+                        </span>
+                        <span class="per-person-value"><span id="cost-per-person">0.00</span> €</span>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Creative Utility Toolbox — Riccardo Raineri</span>
+        </footer>
+
+    </div>
+
+    <!-- Script Logico del Tool e Tema -->
     <script>
-        // Stato: se il viaggio è di sola andata (false) o andata/ritorno (true).
-        // Viene aggiornato dai due bottoni toggle e usato nel calcolo finale.
         let isRoundTrip = false;
 
-        /**
-         * Aggiorna lo stato andata/ritorno e lo stile dei due bottoni toggle,
-         * in modo che sia sempre visibile quale modalità è selezionata.
-         */
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+            applyStoredTheme();
+        });
+
+        /* -----------------------------------------------------------------
+           GESTIONE TEMA (DEFAULT SCURO / OPTIONAL LIGHT)
+           ----------------------------------------------------------------- */
+        function applyStoredTheme() {
+            const stored = localStorage.getItem('toolbox_theme');
+            if (stored === 'light') {
+                document.body.setAttribute('data-theme', 'light');
+            } else {
+                document.body.removeAttribute('data-theme');
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const isLight = body.getAttribute('data-theme') === 'light';
+
+            if (isLight) {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('toolbox_theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                localStorage.setItem('toolbox_theme', 'light');
+            }
+        }
+
+        /* -----------------------------------------------------------------
+           LOGICA DEL TRIP COMPUTER
+           ----------------------------------------------------------------- */
         function setTripType(roundTrip) {
             isRoundTrip = roundTrip;
             document.getElementById('btn-solo-andata').classList.toggle('active', !roundTrip);
             document.getElementById('btn-andata-ritorno').classList.toggle('active', roundTrip);
         }
 
-        /**
-         * Calcola litri necessari e costo totale del viaggio, raddoppiando
-         * la distanza se è stato selezionato "andata/ritorno", e mostra
-         * anche la quota a persona se i passeggeri sono più di uno.
-         */
         function calculateTrip() {
             const distanceInput = parseFloat(document.getElementById('distance').value);
             const consumption = parseFloat(document.getElementById('consumption').value);
             const price = parseFloat(document.getElementById('price').value);
             const passengers = parseInt(document.getElementById('passengers').value) || 1;
 
-            if (!distanceInput || !consumption || !price) return;
+            if (isNaN(distanceInput) || isNaN(consumption) || isNaN(price) || distanceInput <= 0 || consumption <= 0 || price <= 0) return;
 
-            // Se è andata/ritorno, la distanza reale percorsa è doppia
             const distance = isRoundTrip ? distanceInput * 2 : distanceInput;
-
             const litersNeeded = distance / consumption;
             const totalCost = litersNeeded * price;
 
-            document.getElementById('liters').innerText = litersNeeded.toFixed(1) + ' L';
-            document.getElementById('cost').innerText = totalCost.toFixed(2) + ' €';
+            document.getElementById('liters').innerText = litersNeeded.toFixed(1);
+            document.getElementById('cost').innerText = totalCost.toFixed(2);
 
-            // Riga "quota a persona": visibile solo se ha senso dividerla (> 1 persona)
-            const perPersonRow = document.getElementById('per-person');
+            const perPersonCard = document.getElementById('per-person');
             if (passengers > 1) {
                 const perPerson = totalCost / passengers;
-                document.getElementById('cost-per-person').innerText = perPerson.toFixed(2) + ' €';
-                perPersonRow.style.display = 'block';
+                document.getElementById('cost-per-person').innerText = perPerson.toFixed(2);
+                perPersonCard.style.display = 'flex';
             } else {
-                perPersonRow.style.display = 'none';
+                perPersonCard.style.display = 'none';
             }
 
-            document.getElementById('output').style.display = 'block';
+            document.getElementById('output').style.display = 'flex';
+        }
+
+        function resetForm() {
+            document.getElementById('distance').value = '';
+            document.getElementById('consumption').value = '';
+            document.getElementById('price').value = '';
+            document.getElementById('passengers').value = 1;
+            setTripType(false);
+            document.getElementById('output').style.display = 'none';
         }
     </script>
-
 </body>
 </html>
