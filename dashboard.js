@@ -130,7 +130,6 @@ function updateFavoritesUI() {
         countBadge.textContent = favs.length;
     }
 
-    // Sincronizza lo stato delle stelle nella griglia principale
     document.querySelectorAll('#toolsGrid .tool-card').forEach(card => {
         const toolId = card.dataset.toolId;
         const favBtn = card.querySelector('.fav-btn');
@@ -143,7 +142,6 @@ function updateFavoritesUI() {
         }
     });
 
-    // Popola il Drawer dei preferiti
     if (drawerContent) {
         if (favs.length === 0) {
             drawerContent.innerHTML = `

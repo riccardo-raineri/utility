@@ -3,13 +3,11 @@
    ===================================================================== */
 
 :root {
-    /* Palette Principale Scura */
     --bg-base: #0B0E17;
     --card-bg: #131826;
     --card-bg-hover: #161D2E;
     --border-subtle: rgba(255, 255, 255, 0.07);
 
-    /* Testo */
     --text-primary: #FFFFFF;
     --text-secondary: rgba(255, 255, 255, 0.65);
     --text-tertiary: rgba(255, 255, 255, 0.4);
@@ -20,7 +18,6 @@
     --transition-smooth: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Definitione Colori per Categoria (Tonalità Solida + Bagliore Soft) */
 .tool-card[data-category="utilita"] {
     --cat-color: #00E5FF;
     --cat-glow: rgba(0, 229, 255, 0.15);
@@ -52,7 +49,6 @@
     --cat-border: rgba(255, 196, 0, 0.35);
 }
 
-/* Reset Base */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -74,9 +70,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* =========================================================
-   BACKGROUND ANIMATO E SPOTLIGHT
-   ========================================================= */
 .bg-canvas {
     position: fixed;
     top: 0;
@@ -171,11 +164,10 @@ body {
     will-change: background;
 }
 
-/* App Container */
 .app-container {
     position: relative;
     z-index: 1;
-    max-width: 1320px;
+    max-width: 1440px; /* Leggermente ampliato per ospitare comodamente 4 colonne */
     margin: 0 auto;
     padding: 32px 24px 60px;
     display: flex;
@@ -183,9 +175,6 @@ body {
     gap: 36px;
 }
 
-/* =========================================================
-   HERO HEADER
-   ========================================================= */
 .hero-header {
     display: flex;
     flex-direction: column;
@@ -201,7 +190,6 @@ body {
     align-items: center;
 }
 
-/* FILTRI CATEGORIA CENTRATI */
 .filters-container {
     display: flex;
     align-items: center;
@@ -267,7 +255,6 @@ body {
     font-weight: 400;
 }
 
-/* Search Bar */
 .search-wrapper {
     width: 100%;
     max-width: 540px;
@@ -327,17 +314,15 @@ body {
     pointer-events: none;
 }
 
-/* =========================================================
-   GRIGLIA & CARDS (Icone & Bordi Categoria)
-   ========================================================= */
 .main-content {
     width: 100%;
 }
 
+/* Modificato minmax a 240px per permettere 4 colonne stabili su desktop */
 .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
     perspective: 1000px;
 }
 
@@ -352,7 +337,6 @@ body {
     will-change: transform;
 }
 
-/* Sfondo del bagliore mouse basato sul colore categoria */
 .card-glass-glow {
     position: absolute;
     inset: 0;
@@ -367,7 +351,6 @@ body {
     opacity: 0.6;
 }
 
-/* HOVER CARD: Cambia il bordo con il colore della categoria */
 .tool-card:hover {
     background: var(--card-bg-hover);
     border-color: var(--cat-border, rgba(255, 255, 255, 0.2));
@@ -377,36 +360,44 @@ body {
 .card-inner {
     position: relative;
     z-index: 2;
-    padding: 24px;
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
     height: 100%;
-    gap: 14px;
+    gap: 8px;
 }
 
-.card-header {
+.card-link-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    text-decoration: none;
+}
+
+.card-header-top-row {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2px;
+    width: 100%;
 }
 
-/* ICON BOX: Icona con il colore della categoria */
 .card-icon-box {
-    width: 42px;
-    height: 42px;
-    border-radius: 11px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-subtle);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--cat-color, var(--text-secondary)); /* Colore Icona predefinito Categoria */
+    color: var(--cat-color, var(--text-secondary));
     transition: var(--transition-smooth);
 }
 
 .card-icon-box svg {
-    width: 19px;
-    height: 19px;
+    width: 16px;
+    height: 16px;
 }
 
 .tool-card:hover .card-icon-box {
@@ -415,14 +406,20 @@ body {
     box-shadow: 0 0 12px var(--cat-glow, transparent);
 }
 
+.card-header-right-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .category-badge {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    padding: 4px 9px;
-    border-radius: 6px;
+    padding: 3px 7px;
+    border-radius: 5px;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-subtle);
     color: var(--text-tertiary);
@@ -435,67 +432,58 @@ body {
 }
 
 .card-title {
-    font-size: 16.5px;
+    font-size: 14px;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.01em;
 }
 
 .card-desc {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-secondary);
-    line-height: 1.55;
+    line-height: 1.4;
     flex-grow: 1;
+    margin-bottom: 2px;
 }
 
-.card-footer {
-    padding-top: 6px;
-}
-
-/* Bottone Azione */
-.btn-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 9px 15px;
-    border-radius: 9px;
+.fav-btn {
+    position: relative;
+    z-index: 3;
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-subtle);
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 12.5px;
-    font-weight: 600;
+    color: var(--text-tertiary);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     transition: var(--transition-smooth);
+    flex-shrink: 0;
 }
 
-.btn-action svg {
-    width: 14px;
-    height: 14px;
-    transition: transform 0.2s ease;
+.fav-btn:hover {
+    color: #EAB308;
+    border-color: rgba(234, 179, 8, 0.4);
+    transform: scale(1.08);
 }
 
-.btn-action:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-primary);
-    border-color: rgba(255, 255, 255, 0.25);
+.fav-btn.is-favorite {
+    color: #EAB308;
+    background: rgba(234, 179, 8, 0.12);
+    border-color: rgba(234, 179, 8, 0.35);
 }
 
-.btn-action:hover svg {
-    transform: translate(2px, -2px);
+.fav-btn svg {
+    width: 12px;
+    height: 12px;
+    fill: currentColor;
 }
 
-/* Card Disabilitata */
 .tool-card.disabled {
     opacity: 0.35;
     --cat-color: var(--text-tertiary) !important;
-}
-
-.tool-card.disabled .btn-action {
-    cursor: not-allowed;
-    background: transparent;
-    border-color: transparent;
-    color: var(--text-tertiary);
 }
 
 .tool-card.disabled:hover {
@@ -505,7 +493,6 @@ body {
     background: var(--card-bg);
 }
 
-/* Empty State */
 .no-results-box {
     display: none;
     grid-column: 1 / -1;
@@ -534,9 +521,6 @@ body {
     font-size: 13px;
 }
 
-/* =========================================================
-   FOOTER
-   ========================================================= */
 .app-footer {
     margin-top: 10px;
     padding-top: 20px;
@@ -556,31 +540,6 @@ body {
     color: var(--text-secondary);
 }
 
-/* =========================================================
-   RESPONSIVE DESIGN
-   ========================================================= */
-@media (max-width: 768px) {
-    .app-container {
-        padding: 20px 16px 40px;
-        gap: 24px;
-    }
-
-    .tools-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .footer-content {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-}
-
-/* =========================================================
-   BOTTONE STELLA & DRAWER PREFERITI
-   ========================================================= */
-
-/* Pulsante Header Top per aprire i Preferiti */
 .favorites-toggle-btn {
     display: inline-flex;
     align-items: center;
@@ -618,66 +577,6 @@ body {
     font-weight: 700;
 }
 
-/* =========================================================
-   HEADER DELLA CARD: ICONA A SX, STELLA E CATEGORIA A DX
-   ========================================================= */
-.card-header-top-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    width: 100%;
-}
-
-/* Icona del tool sulla sinistra */
-.card-header-top-row .card-icon-box {
-    margin-bottom: 0;
-    width: 36px;
-    height: 36px;
-    font-size: 16px;
-}
-
-/* Gruppo a destra contenente stella preferiti e categoria */
-.card-header-right-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.fav-btn {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-tertiary);
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    flex-shrink: 0;
-}
-
-.fav-btn:hover {
-    color: #EAB308;
-    border-color: rgba(234, 179, 8, 0.4);
-    transform: scale(1.08);
-}
-
-.fav-btn.is-favorite {
-    color: #EAB308;
-    background: rgba(234, 179, 8, 0.12);
-    border-color: rgba(234, 179, 8, 0.35);
-}
-
-.fav-btn svg {
-    width: 13px;
-    height: 13px;
-    fill: currentColor;
-}
-
-/* Overlay e Pannello Laterale (Drawer) Preferiti */
 .favorites-overlay {
     position: fixed;
     inset: 0;
@@ -778,4 +677,27 @@ body {
     height: 48px;
     margin-bottom: 12px;
     opacity: 0.4;
+}
+
+@media (max-width: 1024px) {
+    .tools-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        padding: 20px 16px 40px;
+        gap: 24px;
+    }
+
+    .tools-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+    }
 }
