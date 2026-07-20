@@ -13,48 +13,39 @@ document.addEventListener('DOMContentLoaded', () => {
     initSpotlight();
     initSoft3DTilt();
     initSearchAndFilters();
-    initFavorites(); // Inizializza i preferiti salvati
+    initFavoritesDrawer();
 });
 
 /* =========================================================
-   1. PARTICELLE DI SFONDO DINAMICHE
+   PARTICELLE, SPOTLIGHT E 3D (Invariati)
    ========================================================= */
 function initParticles() {
     const container = document.getElementById('particlesContainer');
     if (!container) return;
-
     const particleCount = 14;
     for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
-
         const size = Math.random() * 2 + 1;
         const left = Math.random() * 100;
         const duration = Math.random() * 10 + 10;
         const delay = Math.random() * 5;
-
         particle.style.width = `${size}px`;
         particle.style.height = `${size}px`;
         particle.style.left = `${left}%`;
         particle.style.animationDuration = `${duration}s`;
         particle.style.animationDelay = `${delay}s`;
-
         container.appendChild(particle);
     }
 }
 
-/* =========================================================
-   2. AMBIENT SPOTLIGHT
-   ========================================================= */
 function initSpotlight() {
     let ticking = false;
-
     window.addEventListener('mousemove', (e) => {
         if (!ticking) {
             window.requestAnimationFrame(() => {
                 const x = (e.clientX / window.innerWidth) * 100;
                 const y = (e.clientY / window.innerHeight) * 100;
-
                 document.documentElement.style.setProperty('--mouse-x', `${x}%`);
                 document.documentElement.style.setProperty('--mouse-y', `${y}%`);
                 ticking = false;
@@ -64,30 +55,21 @@ function initSpotlight() {
     });
 }
 
-/* =========================================================
-   3. INCLINAZIONE 3D SOFFICE
-   ========================================================= */
 function initSoft3DTilt() {
     const cards = document.querySelectorAll('.tool-card:not(.disabled)');
-
     cards.forEach(card => {
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-
             card.style.setProperty('--card-mouse-x', `${x}px`);
             card.style.setProperty('--card-mouse-y', `${y}px`);
-
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
-
             const rotateX = ((y - centerY) / centerY) * -1.5; 
             const rotateY = ((x - centerX) / centerX) * 1.5;  
-
             card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
         });
-
         card.addEventListener('mouseleave', () => {
             card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
         });
@@ -95,7 +77,7 @@ function initSoft3DTilt() {
 }
 
 /* =========================================================
-   4. GESTIONE PREFERITI (LOCALSTORAGE)
+   GESTIONE PREFERITI & DRAWER LATERALE
    ========================================================= */
 function getFavorites() {
     const favs = localStorage.getItem('toolbox_favorites');
@@ -116,15 +98,39 @@ function toggleFavorite(toolId, event) {
     }
 
     localStorage.setItem('toolbox_favorites', JSON.stringify(favs));
-    initFavorites();
+    updateFavoritesUI();
 }
 
-function initFavorites() {
-    const favs = getFavorites();
-    const favSection = document.getElementById('favoritesSection');
-    const favGrid = document.getElementById('favoritesGrid');
+function initFavoritesDrawer() {
+    const overlay = document.getElementById('favoritesOverlay');
+    const openBtn = document.getElementById('openFavoritesDrawer');
+    const closeBtn = document.getElementById('closeFavoritesDrawer');
 
-    // Aggiorna lo stato visivo di tutte le stelle nella griglia principale
+    if (openBtn && overlay) {
+        openBtn.addEventListener('click', () => overlay.classList.add('is-open'));
+    }
+    if (closeBtn && overlay) {
+        closeBtn.addEventListener('click', () => overlay.classList.remove('is-open'));
+    }
+    if (overlay) {
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.classList.remove('is-open');
+        });
+    }
+
+    updateFavoritesUI();
+}
+
+function updateFavoritesUI() {
+    const favs = getFavorites();
+    const countBadge = document.getElementById('favCountBadge');
+    const drawerContent = document.getElementById('favoritesDrawerContent');
+
+    if (countBadge) {
+        countBadge.textContent = favs.length;
+    }
+
+    // Sincronizza lo stato delle stelle nella griglia principale
     document.querySelectorAll('#toolsGrid .tool-card').forEach(card => {
         const toolId = card.dataset.toolId;
         const favBtn = card.querySelector('.fav-btn');
@@ -137,25 +143,30 @@ function initFavorites() {
         }
     });
 
-    // Costruisce la sezione dei preferiti in cima
-    if (favs.length > 0 && favSection && favGrid) {
-        favSection.style.display = 'flex';
-        favGrid.innerHTML = '';
-
-        favs.forEach(toolId => {
-            const originalCard = document.querySelector(`#toolsGrid .tool-card[data-tool-id="${toolId}"]`);
-            if (originalCard) {
-                const clone = originalCard.cloneNode(true);
-                const clonedBtn = clone.querySelector('.fav-btn');
-                if (clonedBtn) {
-                    clonedBtn.classList.add('is-favorite');
-                    clonedBtn.addEventListener('click', (e) => toggleFavorite(toolId, e));
+    // Popola il Drawer dei preferiti
+    if (drawerContent) {
+        if (favs.length === 0) {
+            drawerContent.innerHTML = `
+                <div class="drawer-empty">
+                    <i data-lucide="star"></i>
+                    <p>Non hai ancora aggiunto nessun preferito.<br>Clicca sulla stella delle card per salvarle qui.</p>
+                </div>
+            `;
+        } else {
+            drawerContent.innerHTML = '';
+            favs.forEach(toolId => {
+                const originalCard = document.querySelector(`#toolsGrid .tool-card[data-tool-id="${toolId}"]`);
+                if (originalCard) {
+                    const clone = originalCard.cloneNode(true);
+                    const clonedBtn = clone.querySelector('.fav-btn');
+                    if (clonedBtn) {
+                        clonedBtn.classList.add('is-favorite');
+                        clonedBtn.addEventListener('click', (e) => toggleFavorite(toolId, e));
+                    }
+                    drawerContent.appendChild(clone);
                 }
-                favGrid.appendChild(clone);
-            }
-        });
-    } else if (favSection) {
-        favSection.style.display = 'none';
+            });
+        }
     }
 
     if (window.lucide) {
@@ -164,7 +175,7 @@ function initFavorites() {
 }
 
 /* =========================================================
-   5. RICERCA E FILTRI
+   RICERCA E FILTRI
    ========================================================= */
 function initSearchAndFilters() {
     const searchInput = document.getElementById('searchInput');

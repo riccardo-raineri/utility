@@ -67,6 +67,13 @@
                         <span>Svago</span>
                     </button>
                 </nav>
+
+                <!-- Pulsante per aprire il pannello laterale preferiti -->
+                <button class="favorites-toggle-btn" id="openFavoritesDrawer">
+                    <i data-lucide="star"></i>
+                    <span>Preferiti</span>
+                    <span class="favorites-badge-count" id="favCountBadge">0</span>
+                </button>
             </div>
 
             <div class="hero-center">
@@ -87,28 +94,20 @@
              GRIGLIA STRUMENTI
              ========================================================= -->
         <main class="main-content">
-            
-            <!-- SEZIONE PREFERITI DINAMICA -->
-            <div id="favoritesSection" class="favorites-container" style="display: none;">
-                <h3 class="section-header-title">
-                    <i data-lucide="star"></i> I tuoi Preferiti
-                </h3>
-                <div class="tools-grid" id="favoritesGrid"></div>
-                <hr class="section-divider">
-            </div>
-
             <div class="tools-grid" id="toolsGrid">
 
                 <!-- Convertitore Universale -->
                 <div class="tool-card" data-category="utilita" data-tool-id="convertitore">
-                    <button class="fav-btn" onclick="toggleFavorite('convertitore', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Utilità</span>
+                            <button class="fav-btn" onclick="toggleFavorite('convertitore', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="arrow-left-right"></i>
                             </div>
-                            <span class="category-badge">Utilità</span>
                         </div>
                         <h3 class="card-title">Convertitore Universale</h3>
                         <p class="card-desc">Converti lunghezze, pesi, temperature, valute e altro in tempo reale con calcolo immediato.</p>
@@ -123,14 +122,16 @@
 
                 <!-- Calcola Sconto -->
                 <div class="tool-card" data-category="finanza" data-tool-id="calcolasconto">
-                    <button class="fav-btn" onclick="toggleFavorite('calcolasconto', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Finanza</span>
+                            <button class="fav-btn" onclick="toggleFavorite('calcolasconto', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="percent"></i>
                             </div>
-                            <span class="category-badge">Finanza</span>
                         </div>
                         <h3 class="card-title">Calcola Sconto</h3>
                         <p class="card-desc">Inserisci prezzo, sconto e quantità: scopri subito quanto risparmi e il totale netto.</p>
@@ -145,14 +146,16 @@
 
                 <!-- Costo Carburante -->
                 <div class="tool-card" data-category="viaggi" data-tool-id="calcolaviaggio">
-                    <button class="fav-btn" onclick="toggleFavorite('calcolaviaggio', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Viaggi</span>
+                            <button class="fav-btn" onclick="toggleFavorite('calcolaviaggio', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="fuel"></i>
                             </div>
-                            <span class="category-badge">Viaggi</span>
                         </div>
                         <h3 class="card-title">Costo Carburante</h3>
                         <p class="card-desc">Calcola litri e spesa di viaggio, con opzione andata/ritorno e divisione costi tra passeggeri.</p>
@@ -167,14 +170,16 @@
 
                 <!-- Esposimetro -->
                 <div class="tool-card" data-category="cinema" data-tool-id="esposizione">
-                    <button class="fav-btn" onclick="toggleFavorite('esposizione', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Cinema</span>
+                            <button class="fav-btn" onclick="toggleFavorite('esposizione', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="camera"></i>
                             </div>
-                            <span class="category-badge">Cinema</span>
                         </div>
                         <h3 class="card-title">Esposimetro</h3>
                         <p class="card-desc">Calcola il tempo di esposizione fotografica ottimale compensando filtri ND e astrofotografia.</p>
@@ -189,14 +194,16 @@
 
                 <!-- Distanza Fulmine -->
                 <div class="tool-card" data-category="utilita" data-tool-id="distanzafulmine">
-                    <button class="fav-btn" onclick="toggleFavorite('distanzafulmine', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Utilità</span>
+                            <button class="fav-btn" onclick="toggleFavorite('distanzafulmine', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="zap"></i>
                             </div>
-                            <span class="category-badge">Utilità</span>
                         </div>
                         <h3 class="card-title">Distanza Fulmine</h3>
                         <p class="card-desc">Stima la distanza esatta da un temporale misurando l'intervallo tra il lampo e il tuono.</p>
@@ -211,14 +218,16 @@
 
                 <!-- Convertitore Immagini -->
                 <div class="tool-card" data-category="utilita" data-tool-id="convertitoreimmagini">
-                    <button class="fav-btn" onclick="toggleFavorite('convertitoreimmagini', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Utilità</span>
+                            <button class="fav-btn" onclick="toggleFavorite('convertitoreimmagini', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="image"></i>
                             </div>
-                            <span class="category-badge">Utilità</span>
                         </div>
                         <h3 class="card-title">Convertitore Immagini</h3>
                         <p class="card-desc">Converti rapidamente formati grafici JPG, PNG, WebP e GIF con ottimizzazione visiva.</p>
@@ -233,14 +242,16 @@
 
                 <!-- Data Sharing -->
                 <div class="tool-card" data-category="utilita" data-tool-id="datasharing">
-                    <button class="fav-btn" onclick="toggleFavorite('datasharing', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Utilità</span>
+                            <button class="fav-btn" onclick="toggleFavorite('datasharing', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="share-2"></i>
                             </div>
-                            <span class="category-badge">Utilità</span>
                         </div>
                         <h3 class="card-title">Data Sharing P2P</h3>
                         <p class="card-desc">Scambia messaggi, file e dati direttamente dal browser in modo locale, rapido e sicuro.</p>
@@ -255,14 +266,16 @@
 
                 <!-- Test Digitazione -->
                 <div class="tool-card" data-category="svago" data-tool-id="testdigitazione">
-                    <button class="fav-btn" onclick="toggleFavorite('testdigitazione', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Svago</span>
+                            <button class="fav-btn" onclick="toggleFavorite('testdigitazione', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="keyboard"></i>
                             </div>
-                            <span class="category-badge">Svago</span>
                         </div>
                         <h3 class="card-title">Test Digitazione</h3>
                         <p class="card-desc">Metti alla prova velocità e accuratezza di digitazione con parole italiane generate casualmente.</p>
@@ -277,14 +290,16 @@
 
                 <!-- QR-CODE Generator -->
                 <div class="tool-card" data-category="utilita" data-tool-id="qrcode">
-                    <button class="fav-btn" onclick="toggleFavorite('qrcode', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Utilità</span>
+                            <button class="fav-btn" onclick="toggleFavorite('qrcode', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="qr-code"></i>
                             </div>
-                            <span class="category-badge">Utilità</span>
                         </div>
                         <h3 class="card-title">QR-Code Generator</h3>
                         <p class="card-desc">Genera codici QR personalizzati per link, testi, password Wi-Fi e biglietti da visita digitali.</p>
@@ -299,14 +314,16 @@
 				
                 <!-- Conteggio Parole -->
                 <div class="tool-card" data-category="svago" data-tool-id="contatoreparole">
-                    <button class="fav-btn" onclick="toggleFavorite('contatoreparole', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Svago</span>
+                            <button class="fav-btn" onclick="toggleFavorite('contatoreparole', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="file-text"></i>
                             </div>
-                            <span class="category-badge">Svago</span>
                         </div>
                         <h3 class="card-title">Conteggio Parole</h3>
                         <p class="card-desc">Non solo parole e caratteri, ma anche una stima del tempo di lettura, numero di sillabe e densità delle parole chiave.</p>
@@ -321,14 +338,16 @@
 				
                 <!-- Convertitore Colori -->
                 <div class="tool-card" data-category="utilita" data-tool-id="convertitorecolori">
-                    <button class="fav-btn" onclick="toggleFavorite('convertitorecolori', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Utilità</span>
+                            <button class="fav-btn" onclick="toggleFavorite('convertitorecolori', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="palette"></i>
                             </div>
-                            <span class="category-badge">Utilità</span>
                         </div>
                         <h3 class="card-title">Convertitore Colori</h3>
                         <p class="card-desc">Conversione istantanea da codice HEX nei formati RGB, HSL e CMYK per grafica e sviluppo web.</p>
@@ -341,16 +360,18 @@
                     </div>
                 </div>
 				
-                <!-- Card Pomodoro Focus Timer -->
+                <!-- Pomodoro Focus Timer -->
                 <div class="tool-card" data-category="tempo" data-tool-id="pomodoro">
-                    <button class="fav-btn" onclick="toggleFavorite('pomodoro', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Tempo</span>
+                            <button class="fav-btn" onclick="toggleFavorite('pomodoro', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="timer"></i>
                             </div>
-                            <span class="category-badge">Tempo</span>
                         </div>
                         <h3 class="card-title">Pomodoro Timer</h3>
                         <p class="card-desc">25 minuti di lavoro e 5 di pausa con allarme audio per massimizzare la concentrazione.</p>
@@ -363,16 +384,18 @@
                     </div>
                 </div>
 
-                <!-- Card Fusi Orari Globali -->
+                <!-- Fusi Orari Globali -->
                 <div class="tool-card" data-category="tempo" data-tool-id="timezone">
-                    <button class="fav-btn" onclick="toggleFavorite('timezone', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Tempo</span>
+                            <button class="fav-btn" onclick="toggleFavorite('timezone', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="globe"></i>
                             </div>
-                            <span class="category-badge">Tempo</span>
                         </div>
                         <h3 class="card-title">Timezone - Fusi Orari</h3>
                         <p class="card-desc">Convertitore visivo per monitorare l'orario simultaneo in tempo reale nelle città del mondo.</p>
@@ -387,14 +410,16 @@
 		
                 <!-- Film al Cinema -->
                 <div class="tool-card" data-category="cinema" data-tool-id="cinema">
-                    <button class="fav-btn" onclick="toggleFavorite('cinema', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Cinema</span>
+                            <button class="fav-btn" onclick="toggleFavorite('cinema', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="film"></i>
                             </div>
-                            <span class="category-badge">Cinema</span>
                         </div>
                         <h3 class="card-title">Film al Cinema</h3>
                         <p class="card-desc">Sfoglia le pellicole in programmazione, guarda i trailer e individua le sale cinematografiche vicine.</p>
@@ -409,14 +434,16 @@
 
                 <!-- Cronometro Pomodoro (In Arrivo) -->
                 <div class="tool-card disabled" data-category="tempo" data-tool-id="cronometropomodoro">
-                    <button class="fav-btn" onclick="toggleFavorite('cronometropomodoro', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
                     <div class="card-glass-glow"></div>
                     <div class="card-inner">
-                        <div class="card-header">
+                        <div class="card-header-top">
+                            <span class="category-badge">Tempo</span>
+                            <button class="fav-btn" onclick="toggleFavorite('cronometropomodoro', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                        </div>
+                        <div class="card-header" style="margin-bottom: 0;">
                             <div class="card-icon-box">
                                 <i data-lucide="clock"></i>
                             </div>
-                            <span class="category-badge">Tempo</span>
                         </div>
                         <h3 class="card-title">Cronometro Pomodoro</h3>
                         <p class="card-desc">Ottimizza i cicli di studio e produttività creativa con la tecnica time-blocking Pomodoro.</p>
@@ -453,6 +480,23 @@
             </div>
         </footer>
 
+    </div>
+
+    <!-- Drawer Laterale dei Preferiti -->
+    <div class="favorites-overlay" id="favoritesOverlay">
+        <aside class="favorites-drawer">
+            <div class="drawer-header">
+                <h3 class="drawer-title">
+                    <i data-lucide="star"></i> I tuoi Preferiti
+                </h3>
+                <button class="drawer-close-btn" id="closeFavoritesDrawer">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="drawer-body" id="favoritesDrawerContent">
+                <!-- Verrà popolato dinamicamente da JS -->
+            </div>
+        </aside>
     </div>
 
     <!-- Script principale Javascript -->
