@@ -160,15 +160,53 @@
     </div>
 
     <script>
-        // Gestione Tema
-        function toggleTheme() {
-            const body = document.body;
-            if (body.getAttribute('data-theme') === 'light') {
-                body.removeAttribute('data-theme');
+        // --- GESTIONE TEMA CON PERSISTENZA LOCALSTORAGE ---
+        function applyStoredTheme() {
+            const savedTheme = localStorage.getItem('toolbox_theme');
+            if (savedTheme === 'light') {
+                document.body.setAttribute('data-theme', 'light');
             } else {
-                body.setAttribute('data-theme', 'light');
+                document.body.removeAttribute('data-theme');
             }
         }
+
+        function toggleTheme() {
+            const body = document.body;
+            const goingLight = body.getAttribute('data-theme') !== 'light';
+            
+            if (goingLight) {
+                body.setAttribute('data-theme', 'light');
+            } else {
+                body.removeAttribute('data-theme');
+            }
+            
+            localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
+        }
+
+        // --- GENERATORE DI NOMI PREDEFINITI (DINAMICI) ---
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateDefaultNames() {
+            const adjectives = ['Cyber', 'Shadow', 'Neon', 'Pixel', 'Astro', 'Quantum', 'Hyper', 'Sonic'];
+            const nouns = ['Panda', 'Wolf', 'Falcon', 'Fox', 'Hawk', 'Tiger', 'Viper', 'Phoenix'];
+            const roomPrefixes = ['Stanza', 'Area', 'Hub', 'Zone', 'Node', 'Nexus'];
+            const roomSuffixes = ['Alpha', 'Beta', 'Nova', 'Secret', 'Core', 'Prime'];
+
+            const nickCreate = getRandomItem(adjectives) + getRandomItem(nouns);
+            const nickJoin = getRandomItem(adjectives) + getRandomItem(nouns);
+            const roomName = getRandomItem(roomPrefixes) + '-' + getRandomItem(roomSuffixes);
+
+            document.getElementById('create-nick').value = nickCreate;
+            document.getElementById('join-nick').value = nickJoin;
+            document.getElementById('create-room').value = roomName;
+            document.getElementById('join-room').value = roomName;
+        }
+
+        // Inizializzazione all'avvio della pagina
+        applyStoredTheme();
+        generateDefaultNames();
 
         // Tab Lobby (Crea / Entra)
         function switchTab(type) {
@@ -384,6 +422,7 @@
             document.getElementById('chat-messages').innerHTML = '<div class="msg system">Benvenuto nella stanza protetta!</div>';
             document.getElementById('files-container').innerHTML = '<p class="empty-hint" id="no-files-hint">Nessun file scambiato finora.</p>';
             document.getElementById('lobby-status').textContent = "";
+            generateDefaultNames(); // Rigenera nuovi nomi per la prossima sessione
         }
 
         // --- GESTIONE CHAT ---
