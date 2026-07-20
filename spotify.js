@@ -1,6 +1,6 @@
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw3EKRlvWN3V2sk50fto3G08hgMyHTUqTivq9IKmIT671FsgY7jxFB74FFcV9IIurIv/exec';
-const SECRET_PIN = "0712"; 
-const ALL_USERS = ["Chiara", "Giulia", "Riccardo", "Sergio", "Sharon", "Valentina", "Alessandra"];
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxODP97AvFCgCT6OxmnGM6PKOycgRkXKVe9yjCyNpRon_JZNgdYu7ai-HZ63o6qduGw/exec';
+const SECRET_PIN = "1234"; 
+const ALL_USERS = ["Alessandra", "Chiara", "Giulia", "Riccardo", "Sergio", "Sharon", "Valentina"];
 
 let globalPaymentsData = [];
 
@@ -28,18 +28,18 @@ async function fetchDataFromGoogleSheets() {
         renderPaymentsUI(globalPaymentsData);
         populateQuickSelect(globalPaymentsData);
     } catch (error) {
-        console.error('Errore nel recupero dati:', error);
+        console.error('Errore recupero dati:', error);
         container.innerHTML = `
             <div style="text-align:center; padding: 30px; color: #F87171;">
                 <p style="font-weight:600; margin-bottom:8px;">Impossibile connettersi a Google Fogli</p>
-                <p style="font-size:12px; color:var(--text-secondary);">Verifica che l'URL Apps Script sia corretto e pubblicato come 'Chiunque'.</p>
+                <p style="font-size:12px; color:var(--text-secondary);">Verifica che l'URL Apps Script sia corretto e il deployment impostato su 'Chiunque'.</p>
             </div>
         `;
         if (window.lucide) lucide.createIcons();
     }
 }
 
-// 2. RENDERING INTERFACCIA
+// 2. MOSTRA LE CARD CON LE DATE CORRETTE
 function renderPaymentsUI(payments) {
     const container = document.getElementById('payments-container');
     if (!payments || payments.length === 0) {
@@ -49,7 +49,7 @@ function renderPaymentsUI(payments) {
 
     let html = `
         <div class="section-title-row">
-            <h3 style="font-size: 16px; font-weight: 700;">Storico Pagamenti</h3>
+            <h3 style="font-size: 16px; font-weight: 700;">Storico Pagamenti Spotify</h3>
             <button type="button" id="toggle-history-btn" onclick="toggleOlderHistory()" style="display: ${payments.length > 1 ? 'flex' : 'none'};">
                 <i data-lucide="eye" style="width: 14px; height: 14px;"></i> Mostra tutti i precedenti
             </button>
@@ -76,7 +76,7 @@ function renderPaymentsUI(payments) {
                 <div class="card-top-row">
                     <div class="period-info">
                         <i data-lucide="calendar"></i>
-                        <span class="period-text">${item.periodo}</span>
+                        <span class="period-text">${item.inizio} → ${item.fine}</span>
                     </div>
                     ${isCurrent ? '<span class="badge-current">In corso ('+item.durata+')</span>' : '<span style="font-family:var(--font-mono); font-size:12px; color:var(--text-tertiary);">'+item.durata+'</span>'}
                 </div>
@@ -105,17 +105,17 @@ function renderPaymentsUI(payments) {
     if (window.lucide) lucide.createIcons();
 }
 
-// 3. POPOLA TENDINA DI SELEZIONE
+// 3. SELEZIONE RAPIDA PERIODO DA MODIFICARE
 function populateQuickSelect(payments) {
     const select = document.getElementById('quick-select-period');
     if (!select) return;
     
-    select.innerHTML = '<option value="">-- Seleziona un periodo esistente da aggiornare --</option>';
+    select.innerHTML = '<option value="">-- Seleziona un periodo da aggiornare --</option>';
     
     payments.forEach((p, idx) => {
         let opt = document.createElement('option');
         opt.value = idx;
-        opt.textContent = `${p.periodo} ${p.isCurrent ? '(IN CORSO)' : ''}`;
+        opt.textContent = `${p.inizio} → ${p.fine} ${p.isCurrent ? '(IN CORSO)' : ''}`;
         select.appendChild(opt);
     });
 }
@@ -131,70 +131,13 @@ function loadPeriodIntoForm() {
         cb.checked = selected.pagati.includes(cb.value);
     });
 
-    document.getElementById('input-periodo').value = selected.periodo;
-    document.getElementById('input-durata').value = selected.durata;
-    document.getElementById('input-prezzo').value = selected.prezzo;
-    
-    document.getElementById('date-start').value = "";
-    document.getElementById('date-end').value = "";
+    if (document.getElementById('input-inizio')) document.getElementById('input-inizio').value = selected.inizio;
+    if (document.getElementById('input-fine')) document.getElementById('input-fine').value = selected.fine;
+    if (document.getElementById('input-durata')) document.getElementById('input-durata').value = selected.durata;
+    if (document.getElementById('input-prezzo')) document.getElementById('input-prezzo').value = selected.prezzo;
 }
 
-// 4. VERIFICA PIN
-function verifyPin() {
-    const enteredPin = document.getElementById('input-pin').value;
-    if (enteredPin === SECRET_PIN) {
-        const form = document.getElementById('spotify-form');
-        form.style.opacity = '1';
-        form.style.pointerEvents = 'auto';
-
-        const inputs = form.querySelectorAll('input, select');
-        inputs.forEach(input => { if(input.id !== 'input-periodo') input.disabled = false; });
-
-        document.getElementById('pin-prompt-container').style.display = 'none';
-        document.getElementById('form-subtitle').textContent = 'Modalità di modifica sbloccata';
-        document.getElementById('form-subtitle').style.color = 'var(--spotify-green)';
-        
-        document.getElementById('form-lock-icon').setAttribute('data-lucide', 'unlock');
-        if (window.lucide) lucide.createIcons();
-    } else {
-        alert('PIN errato! Riprova.');
-        document.getElementById('input-pin').value = '';
-    }
-}
-
-function formatDateItalian(dateString) {
-    if (!dateString) return "";
-    const [year, month, day] = dateString.split('-');
-    const months = ["gennaio", "febbraio", "marzo", "aprile", "maggio", "giugno", "luglio", "agosto", "settembre", "ottobre", "novembre", "dicembre"];
-    return `${parseInt(day, 10)} ${months[parseInt(month, 10) - 1]} ${year}`;
-}
-
-function updatePeriodString() {
-    const startDateVal = document.getElementById('date-start').value;
-    const endDateVal = document.getElementById('date-end').value;
-
-    if (startDateVal && endDateVal) {
-        document.getElementById('input-periodo').value = `${formatDateItalian(startDateVal)} → ${formatDateItalian(endDateVal)}`;
-        document.getElementById('quick-select-period').value = "";
-    }
-}
-
-function toggleOlderHistory() {
-    const olderHistoryContainer = document.getElementById('older-history');
-    const btn = document.getElementById('toggle-history-btn');
-    if (!olderHistoryContainer) return;
-
-    if (olderHistoryContainer.style.display === 'none' || olderHistoryContainer.style.display === '') {
-        olderHistoryContainer.style.display = 'flex';
-        btn.innerHTML = '<i data-lucide="eye-off" style="width: 14px; height: 14px;"></i> Nascondi precedenti';
-    } else {
-        olderHistoryContainer.style.display = 'none';
-        btn.innerHTML = '<i data-lucide="eye" style="width: 14px; height: 14px;"></i> Mostra tutti i precedenti';
-    }
-    if (window.lucide) lucide.createIcons();
-}
-
-// 5. SALVATAGGIO AFFIDABILE TRAMITE GET
+// 4. SALVATAGGIO GARANTITO E SENZA BLOCCHI
 async function savePaymentData(event) {
     event.preventDefault();
     
@@ -205,7 +148,8 @@ async function savePaymentData(event) {
     btn.disabled = true;
     if (window.lucide) lucide.createIcons();
 
-    const periodo = document.getElementById('input-periodo').value;
+    const inizio = document.getElementById('input-inizio').value;
+    const fine = document.getElementById('input-fine').value;
     const durata = document.getElementById('input-durata').value;
     const prezzo = document.getElementById('input-prezzo').value;
 
@@ -214,14 +158,15 @@ async function savePaymentData(event) {
     const nonPagati = ALL_USERS.filter(user => !pagati.includes(user));
 
     const payload = {
-        periodo: periodo,
+        inizio: inizio,
+        fine: fine,
         durata: durata,
         prezzo: prezzo,
         pagati: pagati,
         nonPagati: nonPagati
     };
 
-    // Costruiamo l'URL di salvataggio sicuro
+    // Costruzione della richiesta GET per superare il blocco CORS del browser
     const saveUrl = `${APPS_SCRIPT_URL}?action=save&data=${encodeURIComponent(JSON.stringify(payload))}`;
 
     try {
@@ -229,15 +174,15 @@ async function savePaymentData(event) {
         const result = await response.json();
         
         if (result.status === 'success') {
-            alert('Modifiche salvate con successo su Google Fogli!');
+            alert('Dati salvati e aggiornati con successo su Google Fogli!');
             location.reload(); 
         } else {
-            throw new Error(result.message || "Errore sconosciuto dal server");
+            throw new Error(result.message || "Errore durante il salvataggio");
         }
 
     } catch (error) {
-        console.error('Errore durante il salvataggio:', error);
-        alert("Impossibile salvare la modifica su Google Fogli. Assicurati che l'URL sia corretto e il deployment aggiornato.");
+        console.error('Errore salvataggio:', error);
+        alert("Si è verificato un errore durante il salvataggio. Verifica che il deployment su Apps Script sia impostato su 'Chiunque'.");
         btn.innerHTML = originalBtnHTML;
         btn.disabled = false;
         if (window.lucide) lucide.createIcons();
