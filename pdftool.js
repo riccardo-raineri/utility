@@ -1,14 +1,5 @@
 let currentAction = null;
 let selectedFile = null;
-let subMode = ''; 
-
-// Stato delle direzioni per ciascuna card di conversione ('forward' o 'backward')
-const conversionState = {
-    'word-tab': 'forward',
-    'ppt-tab': 'forward',
-    'excel-tab': 'forward',
-    'image-tab': 'forward'
-};
 
 document.addEventListener('DOMContentLoaded', () => {
     if (window.lucide) {
@@ -42,60 +33,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Funzioni di supporto per leggere lo stato corrente della card prima di aprirla
-function getActiveCardTitle(cardKey) {
-    const isForward = conversionState[cardKey] === 'forward';
-    return getTitleString(cardKey, isForward);
-}
-
-function getTitleString(cardKey, isForward) {
-    if (cardKey === 'word-tab') return isForward ? 'PDF a Word' : 'Word a PDF';
-    if (cardKey === 'ppt-tab') return isForward ? 'PDF a PowerPoint' : 'PowerPoint a PDF';
-    if (cardKey === 'excel-tab') return isForward ? 'PDF a Excel' : 'Excel a PDF';
-    if (cardKey === 'image-tab') return isForward ? 'PDF a Immagini' : 'Immagini a PDF';
-    return '';
-}
-
-function getActiveCardAccept(cardKey) {
-    const isForward = conversionState[cardKey] === 'forward';
-    if (cardKey === 'word-tab') return isForward ? '.pdf' : '.doc,.docx';
-    if (cardKey === 'ppt-tab') return isForward ? '.pdf' : '.ppt,.pptx';
-    if (cardKey === 'excel-tab') return isForward ? '.pdf' : '.xls,.xlsx';
-    if (cardKey === 'image-tab') return isForward ? '.pdf' : 'image/*';
-    return '.pdf';
-}
-
-// Inverte lo stato dello switch direttamente sulla card senza aprirla
-function toggleCardDirection(cardKey) {
-    conversionState[cardKey] = conversionState[cardKey] === 'forward' ? 'backward' : 'forward';
-    const isForward = conversionState[cardKey] === 'forward';
-
-    // Aggiorna testi ed elementi visivi nella card specifica
-    const titleEl = document.getElementById(`card-title-${cardKey}`);
-    const descEl = document.getElementById(`card-desc-${cardKey}`);
-
-    if (cardKey === 'word-tab') {
-        titleEl.textContent = isForward ? 'PDF a Word' : 'Word a PDF';
-        descEl.textContent = isForward ? 'Converti da PDF a documento Word.' : 'Converti da Word a file PDF.';
-    } else if (cardKey === 'ppt-tab') {
-        titleEl.textContent = isForward ? 'PDF a PowerPoint' : 'PowerPoint a PDF';
-        descEl.textContent = isForward ? 'Converti da PDF a presentazioni PPT.' : 'Converti da PPT a file PDF.';
-    } else if (cardKey === 'excel-tab') {
-        titleEl.textContent = isForward ? 'PDF a Excel' : 'Excel a PDF';
-        descEl.textContent = isForward ? 'Converti da PDF a fogli Excel.' : 'Converti da Excel a file PDF.';
-    } else if (cardKey === 'image-tab') {
-        titleEl.textContent = isForward ? 'PDF a Immagini' : 'Immagini a PDF';
-        descEl.textContent = isForward ? 'Estrai immagini o crea PDF da foto.' : 'Unisci immagini in un unico PDF.';
-    }
-}
-
 function selectAction(actionKey, actionTitle, acceptedTypes) {
     currentAction = actionKey;
     document.getElementById('workspaceTitle').textContent = actionTitle;
     document.getElementById('workspacePanel').style.display = 'block';
     
     document.querySelectorAll('.tool-card').forEach(card => card.classList.remove('active'));
-    const activeCardEl = document.getElementById(`card-${actionKey}`) || (window.event && window.event.currentTarget.closest('.tool-card'));
+    const activeCardEl = document.getElementById(`card-${actionKey}`);
     if (activeCardEl) activeCardEl.classList.add('active');
 
     selectedFile = null;
@@ -106,18 +50,15 @@ function selectAction(actionKey, actionTitle, acceptedTypes) {
     const optionsContainer = document.getElementById('toolSpecificOptions');
     optionsContainer.innerHTML = '';
 
-    // Imposta la subMode corretta in base allo stato attuale della card
-    if (['word-tab', 'ppt-tab', 'excel-tab', 'image-tab'].includes(actionKey)) {
-        subMode = conversionState[actionKey] === 'forward' ? 'from-pdf' : 'to-pdf';
-        document.getElementById('fileInput').accept = getActiveCardAccept(actionKey);
-    } else if (actionKey === 'split') {
+    document.getElementById('fileInput').accept = acceptedTypes;
+
+    if (actionKey === 'split') {
         optionsContainer.innerHTML = `
             <div style="margin-top: 8px;">
                 <label>Numero pagina da estrarre/dividere:</label>
                 <input type="text" id="pageParamInput" value="1" placeholder="Es. 1">
             </div>
         `;
-        document.getElementById('fileInput').accept = acceptedTypes;
     } else if (actionKey === 'organize') {
         optionsContainer.innerHTML = `
             <div style="margin-top: 8px;">
@@ -133,9 +74,6 @@ function selectAction(actionKey, actionTitle, acceptedTypes) {
                 <input type="text" id="orgPageInput" value="1" placeholder="Es. 1">
             </div>
         `;
-        document.getElementById('fileInput').accept = acceptedTypes;
-    } else {
-        document.getElementById('fileInput').accept = acceptedTypes;
     }
 
     if (window.lucide) {
@@ -249,21 +187,23 @@ async function processFile() {
             processBtn.disabled = false;
             return;
         }
-        else if (['word-tab', 'ppt-tab', 'excel-tab', 'image-tab'].includes(currentAction)) {
-            if (subMode === 'to-pdf' && currentAction === 'image-tab') {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                const imgData = await readFileAsDataURL(selectedFile);
-                doc.addImage(imgData, 'JPEG', 10, 10, 190, 0);
-                const pdfOutput = doc.output('blob');
-                downloadBlob(pdfOutput, 'immagine_convertita.pdf', 'application/pdf');
-            } else {
-                setTimeout(() => {
-                    const dummyData = new Uint8Array([1, 2, 3, 4]);
-                    const outName = subMode === 'to-pdf' ? `convertito.pdf` : `convertito_documento.docx`;
-                    downloadBlob(dummyData, outName, 'application/octet-stream');
-                }, 500);
-            }
+        else if (['word-tab', 'ppt-tab', 'excel-tab'].includes(currentAction)) {
+            setTimeout(() => {
+                const dummyData = new Uint8Array([1, 2, 3, 4]);
+                downloadBlob(dummyData, `convertito_documento.dat`, 'application/octet-stream');
+            }, 500);
+        }
+        else if (currentAction === 'image-tab') {
+            setTimeout(() => {
+                const dummyData = new Uint8Array([1, 2, 3, 4]);
+                downloadBlob(dummyData, `immagini_jpg.zip`, 'application/zip');
+            }, 500);
+        }
+        else if (currentAction === 'png-tab') {
+            setTimeout(() => {
+                const dummyData = new Uint8Array([1, 2, 3, 4]);
+                downloadBlob(dummyData, `immagini_png.zip`, 'application/zip');
+            }, 500);
         }
         else if (currentAction === 'html-to-pdf') {
             setTimeout(() => {
@@ -291,13 +231,4 @@ function downloadBlob(data, filename, mimeType) {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-}
-
-function readFileAsDataURL(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
 }

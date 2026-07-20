@@ -325,7 +325,7 @@
 
             peer.on('open', () => {
                 openRoomUI(roomName);
-                addSystemMessage(`Stanza "${roomName}" creata. Benvenuto, ${myNickname}! In attesa di partecipanti...`);
+                addSystemMessage(`Stanza "${roomName}" creata. Benvenuto/a, ${myNickname}! In attesa di partecipanti...`);
                 updateUsersCount();
             });
 
@@ -337,7 +337,7 @@
                             conn.send({ type: 'AUTH_OK' });
                             connections.push(conn);
                             setupConnectionListeners(conn);
-                            addSystemMessage(`${conn.nickname} si è connesso alla stanza.`);
+                            addSystemMessage(`${conn.nickname} si è connesso/a alla stanza.`);
                             updateUsersCount();
                         } else {
                             conn.send({ type: 'AUTH_FAIL', msg: 'PIN Errato!' });
@@ -390,7 +390,7 @@
                         connections.push(conn);
                         setupConnectionListeners(conn);
                         openRoomUI(roomName);
-                        addSystemMessage(`Sei entrato nella stanza "${roomName}" come ${myNickname}.`);
+                        addSystemMessage(`Sei entrato/a nella stanza "${roomName}" come ${myNickname}.`);
                         updateUsersCount();
                     } else if (data.type === 'AUTH_FAIL') {
                         status.textContent = "PIN Errato o Accesso Negato!";
@@ -456,7 +456,7 @@
             connections = [];
             document.getElementById('lobby-screen').style.display = 'block';
             document.getElementById('room-screen').style.display = 'none';
-            document.getElementById('chat-messages').innerHTML = '<div class="msg system">Benvenuto nella stanza protetta!</div>';
+            document.getElementById('chat-messages').innerHTML = '<div class="msg system">Benvenuto/a nella stanza protetta!</div>';
             document.getElementById('files-container').innerHTML = '<p class="empty-hint" id="no-files-hint">Nessun file scambiato finora.</p>';
             document.getElementById('lobby-status').textContent = "";
             generateDefaultNames();
@@ -529,7 +529,7 @@
                 };
 
                 broadcastAll(payload);
-                renderFileCard(file.name, file.size, e.target.result, true, 'Tu');
+                renderFileCard(file.name, file.size, e.target.result, true, '${myNickname}');
             };
             reader.readAsArrayBuffer(file);
         }
