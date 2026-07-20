@@ -3,94 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speed Typing Test</title>
+    <title>Speed Typing Test Pro</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Foglio di Stile -->
     <link rel="stylesheet" href="testdigitazione.css">
 </head>
 <body>
 
-    <a class="back-link" href="dashboard.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Dashboard
-    </a>
+    <!-- Canvas di Sfondo -->
+    <div class="bg-canvas">
+        <div class="bg-grid-pattern"></div>
+    </div>
 
-    <div class="card">
-        <div class="card-header">
-            <div class="icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
-                    <line x1="6" y1="8" x2="6.01" y2="8"></line>
-                    <line x1="10" y1="8" x2="10.01" y2="8"></line>
-                    <line x1="14" y1="8" x2="14.01" y2="8"></line>
-                    <line x1="18" y1="8" x2="18.01" y2="8"></line>
-                    <line x1="8" y1="12" x2="8.01" y2="12"></line>
-                    <line x1="12" y1="12" x2="12.01" y2="12"></line>
-                    <line x1="16" y1="12" x2="16.01" y2="12"></line>
-                    <line x1="7" y1="16" x2="17" y2="16"></line>
-                </svg>
-            </div>
-            <div class="title-group">
-                <h2>Test Speed Digitazione</h2>
-                <p>Misura la tua velocità e precisione di scrittura</p>
-            </div>
-            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Cambia tema">
-                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4"/>
-                    <line x1="12" y1="2" x2="12" y2="4"/>
-                    <line x1="12" y1="20" x2="12" y2="22"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="2" y1="12" x2="4" y2="12"/>
-                    <line x1="20" y1="12" x2="22" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-            </button>
-        </div>
+    <div class="app-container">
 
-        <div class="controls-bar">
-            <div class="timer-select-group">
-                <span>Tempo:</span>
-                <button class="time-btn active" onclick="setTimerLimit(15, this)">15s</button>
-                <button class="time-btn" onclick="setTimerLimit(30, this)">30s</button>
-                <button class="time-btn" onclick="setTimerLimit(60, this)">60s</button>
-            </div>
-            <div class="timer-display" id="timer-display">15s</div>
-        </div>
+        <!-- Navigation Bar -->
+        <nav class="top-nav">
+            <a class="back-link" href="dashboard.html">
+                <i data-lucide="arrow-left"></i>
+                Dashboard
+            </a>
 
-        <div class="word-box" id="word-box"></div>
-
-        <div class="input-area">
-            <input type="text" id="type-input" placeholder="Inizia a digitare qui..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" oninput="handleInput()">
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-box">
-                <span class="stat-label">WPM</span>
-                <strong class="stat-value" id="stat-wpm">0</strong>
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="keyboard"></i>
+                    Typing Pro
+                </span>
             </div>
-            <div class="stat-box">
-                <span class="stat-label">Precisione</span>
-                <strong class="stat-value" id="stat-accuracy">100%</strong>
-            </div>
-            <div class="stat-box">
-                <span class="stat-label">Caratteri</span>
-                <strong class="stat-value" id="stat-chars">0</strong>
-            </div>
-        </div>
+        </nav>
 
-        <button class="btn-primary" onclick="resetTest()">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="23 4 23 10 17 10"></polyline>
-                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
-            </svg>
-            Ricomincia
-        </button>
+        <!-- Main Card Container -->
+        <main class="tool-layout">
+            <div class="card">
+                
+                <!-- Card Header -->
+                <div class="card-header">
+                    <div class="icon">
+                        <i data-lucide="keyboard"></i>
+                    </div>
+                    <div class="title-group">
+                        <h2>Speed Typing Test</h2>
+                        <p>Misura la tua velocità e precisione di scrittura</p>
+                    </div>
+                </div>
+
+                <!-- Timer Controls -->
+                <div class="controls-bar">
+                    <div class="timer-select-group">
+                        <span>Tempo:</span>
+                        <button class="time-btn active" onclick="setTimerLimit(15, this)">15s</button>
+                        <button class="time-btn" onclick="setTimerLimit(30, this)">30s</button>
+                        <button class="time-btn" onclick="setTimerLimit(60, this)">60s</button>
+                    </div>
+                    <div class="timer-display" id="timer-display">15s</div>
+                </div>
+
+                <!-- Box Parole -->
+                <div class="word-box" id="word-box"></div>
+
+                <!-- Input Digitazione -->
+                <div class="input-area">
+                    <input type="text" id="type-input" placeholder="Inizia a digitare qui..." autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" oninput="handleInput()">
+                </div>
+
+                <!-- Griglia Statistiche -->
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-label">WPM</span>
+                        <strong class="stat-value" id="stat-wpm">0</strong>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Precisione</span>
+                        <strong class="stat-value" id="stat-accuracy">100%</strong>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-label">Caratteri</span>
+                        <strong class="stat-value" id="stat-chars">0</strong>
+                    </div>
+                </div>
+
+                <!-- Pulsante Reset -->
+                <button class="btn-primary" onclick="resetTest()">
+                    <i data-lucide="rotate-ccw"></i>
+                    Ricomincia
+                </button>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Creative Utility Toolbox — Riccardo Raineri</span>
+        </footer>
+
     </div>
 
     <script>
@@ -99,12 +116,12 @@
             "design", "sistema", "utente", "dati", "rete", "prestazioni", "progetto", "pagina", 
             "algoritmo", "schermo", "memoria", "stilo", "connessione", "sicurezza", "applicazione", 
             "ottimizzazione", "reattivo", "tecnologia", "piattaforma", "sito", "server", "elementi",
-			"casa", "tempo", "mondo", "strada", "giorno", "acqua", "sempre", "libro", "vita", "lavoro",
-			"storia", "terra", "amico", "scuola", "sistema", "persone", "futuro", "insieme", "veloce",
-			"tastiera", "scrittura", "schermo", "finestra", "digitale", "algoritmo", "memoria", "programma",
-			"velocità", "precisione", "sviluppare", "tecnologia", "innovazione", "esercizio", "conoscenza",
-			"connessione", "applicazione", "informazione", "conversazione", "esperienza", "soluzione", "obiettivo",
-			"attenzione", "importante", "necessario", "opportunità", "creatività", "momento", "riflessione", "successo", "cambiamento"
+            "casa", "tempo", "mondo", "strada", "giorno", "acqua", "sempre", "libro", "vita", "lavoro",
+            "storia", "terra", "amico", "scuola", "sistema", "persone", "futuro", "insieme", "veloce",
+            "tastiera", "scrittura", "schermo", "finestra", "digitale", "algoritmo", "memoria", "programma",
+            "velocità", "precisione", "sviluppare", "tecnologia", "innovazione", "esercizio", "conoscenza",
+            "connessione", "applicazione", "informazione", "conversazione", "esperienza", "soluzione", "obiettivo",
+            "attenzione", "importante", "necessario", "opportunità", "creatività", "momento", "riflessione", "successo", "cambiamento"
         ];
 
         let selectedDuration = 15;
@@ -116,6 +133,21 @@
         let totalTyped = 0;
         let correctTyped = 0;
 
+        document.addEventListener('DOMContentLoaded', () => {
+            applyStoredTheme();
+            refreshIcons();
+            resetTest();
+        });
+
+        function refreshIcons() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        /* -----------------------------------------------------------------
+           GESTIONE TEMA (DEFAULT DARK / OPTIONAL LIGHT)
+           ----------------------------------------------------------------- */
         function applyStoredTheme() {
             const savedTheme = localStorage.getItem('toolbox_theme');
             if (savedTheme === 'light') {
@@ -126,16 +158,21 @@
         }
 
         function toggleTheme() {
-            const isLight = document.body.getAttribute('data-theme') === 'light';
-            if (isLight) {
-                document.body.removeAttribute('data-theme');
-                localStorage.setItem('toolbox_theme', 'dark');
+            const body = document.body;
+            const goingLight = body.getAttribute('data-theme') !== 'light';
+            
+            if (goingLight) {
+                body.setAttribute('data-theme', 'light');
             } else {
-                document.body.setAttribute('data-theme', 'light');
-                localStorage.setItem('toolbox_theme', 'light');
+                body.removeAttribute('data-theme');
             }
+            
+            localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
         }
 
+        /* -----------------------------------------------------------------
+           LOGICA TYPING TEST
+           ----------------------------------------------------------------- */
         function setTimerLimit(seconds, btn) {
             if (isStarted) return;
             document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
@@ -244,9 +281,6 @@
 
             generateText();
         }
-
-        applyStoredTheme();
-        resetTest();
     </script>
 </body>
 </html>
