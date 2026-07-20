@@ -1,55 +1,216 @@
 /* =====================================================================
-   QRCODE.CSS - Theme: Cyber-Scan / High-Tech Matrix
+   QRCODE.CSS - Theme: Cyber Studio (Default Dark)
    ===================================================================== */
 
 :root {
-    --bg-tech: #090d16;
-    --surface-tech: #111827;
-    --border-tech: #1f293d;
-    --text-tech: #f3f4f6;
-    --text-muted-tech: #9ca3af;
+    /* 🌙 TEMA SCURO (DEFAULT) */
+    --bg-base: #090d16;
+    --card-bg: #111827;
+    --card-hover: #1f293d;
+    --border-subtle: #1f293d;
+    --border-highlight: #374151;
+
+    /* Accenti Cyber Purple / Neon */
+    --accent: #8b5cf6;
+    --accent-soft: rgba(139, 92, 246, 0.12);
+    --accent-strong: #7c3aed;
+    --accent-border: rgba(139, 92, 246, 0.25);
     
     --neon-green: #10b981;
-    --neon-green-glow: rgba(16, 185, 129, 0.25);
-    --cyber-purple: #8b5cf6;
-    --cyber-purple-glow: rgba(139, 92, 246, 0.25);
-    
-    --radius-tech: 16px;
-    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    --font-code: "SF Mono", "Fira Code", monospace;
+    --neon-green-strong: #059669;
+    --neon-green-soft: rgba(16, 185, 129, 0.15);
+
+    /* Testi */
+    --text-primary: #f3f4f6;
+    --text-secondary: #9ca3af;
+    --text-tertiary: #6b7280;
+
+    /* Tipografia */
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* Layout & Ombre */
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --grid-pattern: rgba(255, 255, 255, 0.03);
+
+    --radius: 16px;
+    --transition-smooth: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-* {
+/* ☀️ TEMA CHIARO ([data-theme="light"]) */
+[data-theme="light"] {
+    --bg-base: #f1f5f9;
+    --card-bg: #ffffff;
+    --card-hover: #f8fafc;
+    --border-subtle: #cbd5e1;
+    --border-highlight: #94a3b8;
+
+    --accent: #7c3aed;
+    --accent-soft: rgba(124, 58, 237, 0.08);
+    --accent-strong: #6d28d9;
+    --accent-border: rgba(124, 58, 237, 0.2);
+
+    --neon-green: #059669;
+    --neon-green-strong: #047857;
+    --neon-green-soft: rgba(5, 150, 105, 0.1);
+
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --text-tertiary: #94a3b8;
+
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.06);
+    --grid-pattern: rgba(0, 0, 0, 0.03);
+}
+
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: var(--font-main);
 }
 
 body {
-    background-color: var(--bg-tech);
-    color: var(--text-tech);
-    background-image: 
-        radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 90%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
-        linear-gradient(rgba(31, 41, 61, 0.3) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(31, 41, 61, 0.3) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+    font-family: var(--font-sans);
+    background-color: var(--bg-base);
+    color: var(--text-primary);
     min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Sfondo & Griglia Geometrica */
+.bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bg-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        radial-gradient(circle at 10% 10%, var(--accent-soft) 0%, transparent 40%),
+        radial-gradient(circle at 90% 90%, var(--neon-green-soft) 0%, transparent 40%),
+        linear-gradient(var(--grid-pattern) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-pattern) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+}
+
+/* Layout App Container */
+.app-container {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    min-height: 100vh;
+}
+
+/* Navigazione Superiore */
+.top-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
+}
+
+.back-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.back-link svg { width: 14px; height: 14px; }
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 50%;
+    color: var(--text-secondary);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
+}
+
+.theme-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.theme-toggle svg { width: 16px; height: 16px; }
+
+.icon-sun { display: block; }
+.icon-moon { display: none; }
+
+[data-theme="light"] .icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: block; }
+
+.tool-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--accent-border);
+}
+
+.tool-badge svg { width: 13px; height: 13px; }
+
+/* Main Tool Layout & Card */
+.tool-layout {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 24px;
+    flex-grow: 1;
 }
 
 .qr-card {
-    background: var(--surface-tech);
-    border: 1px solid var(--border-tech);
-    border-radius: var(--radius-tech);
-    padding: 28px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 32px;
     width: 100%;
-    max-width: 480px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--cyber-purple-glow);
+    max-width: 520px;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition-smooth);
 }
 
 .qr-header {
@@ -65,87 +226,91 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(139, 92, 246, 0.15);
-    border: 1px solid var(--cyber-purple);
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-border);
     border-radius: 12px;
-    color: var(--cyber-purple);
-    box-shadow: 0 0 10px var(--cyber-purple-glow);
+    color: var(--accent);
+    flex-shrink: 0;
 }
 
 .qr-header .tech-icon svg {
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
 }
 
 .qr-header h2 {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 700;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #ffffff 0%, var(--text-muted-tech) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
 }
 
 .qr-header p {
-    font-size: 12.5px;
-    color: var(--text-muted-tech);
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-top: 2px;
 }
 
-/* Form Controls */
+/* Controls & Inputs */
 .input-field {
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 8px;
-    color: var(--text-muted-tech);
-    font-size: 11.5px;
+    margin-bottom: 6px;
+    color: var(--text-secondary);
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
 }
 
 input[type="text"], textarea {
     width: 100%;
     padding: 12px 14px;
-    background: var(--bg-tech);
-    border: 1px solid var(--border-tech);
-    color: var(--text-tech);
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
     border-radius: 10px;
     font-size: 14px;
+    font-family: var(--font-sans);
     outline: none;
-    transition: all 0.2s ease;
+    transition: var(--transition-smooth);
 }
 
 textarea {
     resize: vertical;
-    min-height: 80px;
+    min-height: 85px;
 }
 
 input[type="text"]:focus, textarea:focus {
-    border-color: var(--neon-green);
-    box-shadow: 0 0 10px var(--neon-green-glow);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
-/* Grid Selettori Colore */
+/* Griglia Selettori Colore */
 .color-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
 }
 
 .color-picker-box {
-    background: var(--bg-tech);
-    border: 1px solid var(--border-tech);
-    padding: 8px 12px;
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    padding: 10px 14px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+}
+
+.color-picker-box label {
+    margin: 0;
 }
 
 .color-picker-box input[type="color"] {
@@ -163,50 +328,51 @@ input[type="text"]:focus, textarea:focus {
 }
 
 .color-picker-box input[type="color"]::-webkit-color-swatch {
-    border: 1px solid var(--border-tech);
+    border: 1px solid var(--border-highlight);
     border-radius: 6px;
 }
 
 /* Range Slider */
 .range-val {
-    color: var(--neon-green);
-    font-family: var(--font-code);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 12px;
 }
 
 input[type="range"] {
     width: 100%;
-    accent-color: var(--neon-green);
+    accent-color: var(--accent);
+    cursor: pointer;
 }
 
-/* Anteprima QR Code */
+/* Area Anteprima */
 .qr-preview-area {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 24px;
-    background: var(--bg-tech);
-    border: 1px dashed var(--border-tech);
+    background: var(--bg-base);
+    border: 1px dashed var(--border-subtle);
     border-radius: 12px;
     margin-top: 20px;
     min-height: 220px;
-    position: relative;
+    transition: var(--transition-smooth);
 }
 
 .qr-preview-area.active {
     border-style: solid;
-    border-color: var(--cyber-purple);
-    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
+    border-color: var(--accent);
 }
 
 #qrcode img, #qrcode canvas {
     border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    box-shadow: var(--shadow-md);
 }
 
 .placeholder-text {
-    font-size: 13px;
-    color: var(--text-muted-tech);
+    font-size: 12px;
+    color: var(--text-tertiary);
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -215,56 +381,68 @@ input[type="range"] {
 }
 
 .placeholder-text svg {
-    width: 36px;
-    height: 36px;
-    stroke: var(--text-muted-tech);
-    opacity: 0.5;
+    width: 32px;
+    height: 32px;
+    stroke: var(--text-tertiary);
+    opacity: 0.6;
 }
 
-/* Action Buttons */
+/* Pulsanti Azione */
 .btn-action {
     width: 100%;
     padding: 14px;
     border: none;
     border-radius: 10px;
+    font-family: var(--font-sans);
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    transition: all 0.2s ease;
+    transition: var(--transition-smooth);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
+    box-shadow: var(--shadow-sm);
 }
 
 .btn-generate {
-    background: linear-gradient(135deg, var(--cyber-purple) 0%, #6d28d9 100%);
+    background: var(--accent);
     color: #ffffff;
-    margin-top: 10px;
-    box-shadow: 0 4px 15px var(--cyber-purple-glow);
+    margin-top: 8px;
 }
 
 .btn-generate:hover {
-    filter: brightness(1.1);
+    background: var(--accent-strong);
     transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-download {
-    background: linear-gradient(135deg, var(--neon-green) 0%, #059669 100%);
+    background: var(--neon-green);
     color: #ffffff;
     margin-top: 14px;
-    box-shadow: 0 4px 15px var(--neon-green-glow);
     display: none;
 }
 
 .btn-download:hover {
-    filter: brightness(1.1);
+    background: var(--neon-green-strong);
     transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
 }
 
 .btn-action svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
+}
+
+/* Footer Page */
+.app-footer {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 18px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
 }
