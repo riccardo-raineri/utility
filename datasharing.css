@@ -683,3 +683,70 @@ input[type="text"]:focus, input[type="password"]:focus {
     font-size: 11px;
     color: var(--text-tertiary);
 }
+
+/* Stile pulsante "Come funziona?" */
+.help-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
+}
+
+.help-toggle:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+}
+
+.help-toggle svg { width: 14px; height: 14px; }
+
+/* Box di Aiuto / Guida */
+.help-box {
+    display: none;
+    background: var(--bg-base);
+    border: 1px solid var(--border-highlight);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-changes: 1.5;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.help-box.active {
+    display: block;
+}
+
+.help-box h4 {
+    color: var(--text-primary);
+    font-size: 14px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.help-box ul {
+    margin-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}

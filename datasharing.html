@@ -41,6 +41,12 @@
                     <i data-lucide="sun" class="icon-sun"></i>
                     <i data-lucide="moon" class="icon-moon"></i>
                 </button>
+				
+                <!-- NUOVO PULSANTE GUIDA -->
+                <button class="help-toggle" onclick="toggleHelpBox()">
+                    <i data-lucide="help-circle"></i>
+                    Come funziona?
+                </button>
                 <span class="tool-badge">
                     <i data-lucide="share-2"></i>
                     P2P Sharing
@@ -62,6 +68,18 @@
                         <p>Stanza privata protetta da PIN e crittografia P2P</p>
                     </div>
                 </div>
+
+                <!-- BOX GUIDA / AIUTO (INIZIALMENTE NASCOSTO) -->
+                <div id="help-box" class="help-box">
+                    <h4><i data-lucide="info"></i> Guida Rapida P2P</h4>
+                    <p>Questo strumento ti permette di comunicare e scambiare file direttamente con un'altra persona senza passare da server esterni (Peer-to-Peer).</p>
+                    <ul>
+                        <li><strong>Crea Stanza:</strong> Scegli un nome, imposta un PIN segreto e condividili con il tuo interlocutore. Tu farai da host.</li>
+                        <li><strong>Entra in Stanza:</strong> Inserisci esattamente lo stesso nome stanza e lo stesso PIN creati dall'altra persona per connetterti.</li>
+                        <li><strong>Condivisione:</strong> Una volta dentro, potrete chattare in tempo reale e trascinare file per inviarli istantaneamente.</li>
+                    </ul>
+                </div>
+
 
                 <!-- SCHERMATA 1: CREA O ENTRA NELLA STANZA -->
                 <div id="lobby-screen">
@@ -579,6 +597,15 @@
                     sendFile(e.dataTransfer.files[0]);
                 }
             });
+        }
+		
+		/* -----------------------------------------------------------------
+           GESTIONE BOX GUIDA / AIUTO
+           ----------------------------------------------------------------- */
+        function toggleHelpBox() {
+            const box = document.getElementById('help-box');
+            box.classList.toggle('active');
+            refreshIcons();
         }
     </script>
 </body>
