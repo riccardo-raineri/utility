@@ -618,11 +618,13 @@ body {
     font-weight: 700;
 }
 
-/* Posizionamento del tasto stella nella Card (accanto al badge categoria) */
+/* =========================================================
+   HEADER DELLA CARD: STELLA A SINISTRA DELLA CATEGORIA
+   ========================================================= */
 .card-header-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 8px; /* Spazio tra la stella e la categoria */
     margin-bottom: 16px;
 }
 
@@ -634,14 +636,15 @@ body {
     background: var(--bg-surface-hover);
     border: 1px solid var(--border-subtle);
     color: var(--text-tertiary);
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: var(--transition-smooth);
+    flex-shrink: 0;
 }
 
 .fav-btn:hover {
@@ -657,9 +660,10 @@ body {
 }
 
 .fav-btn svg {
-    width: 14px;
-    height: 14px;
+    width: 13px;
+    height: 13px;
     fill: currentColor;
+}
 }
 
 /* Overlay e Pannello Laterale (Drawer) Preferiti */
