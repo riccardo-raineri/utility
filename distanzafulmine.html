@@ -9,12 +9,22 @@
 <body>
 
     <!-- Link alla Dashboard -->
-    <a class="back-link" href="dashboard.html">← Dashboard</a>
+    <a class="back-link" href="dashboard.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Dashboard
+    </a>
 
     <div class="card">
         <!-- Header con Icona e Cambio Tema -->
         <div class="card-header">
-            <div class="icon">⚡</div>
+            <div class="icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+            </div>
             <div class="title-group">
                 <h2>Distanza Fulmine</h2>
                 <p>Calcola quanto è vicino il temporale</p>
@@ -40,7 +50,12 @@
         <!-- Sezione Cronometro Live -->
         <div class="timer-section">
             <button id="timer-btn" class="btn-timer" onclick="toggleTimer()">
-                <span id="timer-label">⚡ Clicca al LAMPO</span>
+                <span id="timer-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    Clicca al LAMPO
+                </span>
                 <span id="timer-display">0.0s</span>
             </button>
         </div>
@@ -51,6 +66,17 @@
         <div class="input-group">
             <label for="secondi">Tempo trascorso (secondi)</label>
             <input type="number" id="secondi" placeholder="es. 5" min="0" step="0.1" oninput="calcolaDistanza()">
+        </div>
+
+        <!-- Opzione Aggiuntiva: Temperatura per il calcolo preciso della velocità del suono -->
+        <div class="input-group">
+            <label for="temperatura">Temperatura Aria Stimata</label>
+            <select id="temperatura" onchange="calcolaDistanza()">
+                <option value="0">0°C (331 m/s - Freddo)</option>
+                <option value="10">10°C (337 m/s - Mite)</option>
+                <option value="20" selected>20°C (343 m/s - Standard)</option>
+                <option value="30">30°C (349 m/s - Caldo estivo)</option>
+            </select>
         </div>
 
         <button class="btn-secondary" onclick="resetForm()">Azzera</button>
@@ -73,12 +99,19 @@
                     <strong id="distanza-m">0 m</strong>
                 </div>
                 <div class="detail-row">
-                    <span>Stima velocità suono:</span>
-                    <strong>343 m/s (20°C)</strong>
+                    <span>Velocità suono applicata:</span>
+                    <strong id="speed-applied">343 m/s</strong>
                 </div>
             </div>
 
-            <p class="safety-tip" id="safety-tip"></p>
+            <div class="safety-tip-box" id="safety-tip-box">
+                <svg id="safety-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span id="safety-tip"></span>
+            </div>
         </div>
     </div>
 
@@ -91,6 +124,9 @@
             } else {
                 body.setAttribute('data-theme', 'light');
             }
+			
+			    localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
+
         }
 
         // Timer in tempo reale
@@ -109,7 +145,14 @@
                 isTiming = true;
                 startTime = performance.now();
                 timerBtn.classList.add('active');
-                timerLabel.textContent = "🔊 Clicca al TUONO!";
+                
+                timerLabel.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    Clicca al TUONO!
+                `;
                 
                 timerInterval = setInterval(() => {
                     const elapsed = (performance.now() - startTime) / 1000;
@@ -122,7 +165,14 @@
                 const finalElapsed = ((performance.now() - startTime) / 1000).toFixed(1);
                 
                 timerBtn.classList.remove('active');
-                timerLabel.textContent = "⚡ Clicca al LAMPO";
+                
+                timerLabel.innerHTML = `
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                    Clicca al LAMPO
+                `;
+                
                 timerDisplay.textContent = finalElapsed + 's';
                 
                 inputSecondi.value = finalElapsed;
@@ -130,9 +180,10 @@
             }
         }
 
-        // Calcolo Distanza
+        // Calcolo Distanza con compensazione temperatura
         function calcolaDistanza() {
             const secondi = parseFloat(document.getElementById('secondi').value);
+            const tempC = parseFloat(document.getElementById('temperatura').value) || 20;
             const resultBox = document.getElementById('result-box');
 
             if (isNaN(secondi) || secondi <= 0) {
@@ -140,32 +191,38 @@
                 return;
             }
 
-            const velocitaSuono = 343; // m/s
+            // Formula fisica velocità del suono nell'aria: v = 331.3 + (0.606 * TempC)
+            const velocitaSuono = Math.round(331.3 + (0.606 * tempC)); 
             const metri = secondi * velocitaSuono;
             const km = metri / 1000;
 
             document.getElementById('distanza-km').textContent = km.toFixed(2);
             document.getElementById('distanza-m').textContent = Math.round(metri).toLocaleString('it-IT') + ' m';
+            document.getElementById('speed-applied').textContent = `${velocitaSuono} m/s (${tempC}°C)`;
 
             // Gestione Livelli di Pericolo
             const badge = document.getElementById('status-badge');
             const statusText = document.getElementById('status-text');
             const safetyTip = document.getElementById('safety-tip');
+            const safetyTipBox = document.getElementById('safety-tip-box');
 
             badge.className = 'status-badge'; // reset classi
 
             if (km < 3) {
                 badge.classList.add('danger');
                 statusText.textContent = 'PERICOLO IMMINENTE';
-                safetyTip.textContent = '⚠️ Il temporale è molto vicino! Cerca subito riparo all’interno di un edificio o di un’automobile.';
+                safetyTip.textContent = 'Il temporale è molto vicino! Cerca subito riparo all’interno di un edificio o di un’automobile con finestrini chiusi.';
+                safetyTipBox.style.borderColor = 'var(--color-danger)';
             } else if (km <= 10) {
                 badge.classList.add('warning');
                 statusText.textContent = 'ATTENZIONE';
-                safetyTip.textContent = '⚡ Temporale nelle vicinanze. Evita spazi aperti, alberi isolati e strutture metalliche.';
+                safetyTip.textContent = 'Temporale nelle vicinanze. Evita spazi aperti, alberi isolati e strutture metalliche.';
+                safetyTipBox.style.borderColor = 'var(--color-warning)';
             } else {
                 badge.classList.add('safe');
                 statusText.textContent = 'DISTANZA DI SICUREZZA';
-                safetyTip.textContent = '🌧️ Il temporale è ancora lontano, ma resta vigile se si sta avvicinando.';
+                safetyTip.textContent = 'Il temporale è ancora lontano, ma resta vigile se si sta avvicinando.';
+                safetyTipBox.style.borderColor = 'var(--color-safe)';
             }
 
             resultBox.style.display = 'block';
@@ -177,6 +234,9 @@
             document.getElementById('timer-display').textContent = '0.0s';
             document.getElementById('result-box').style.display = 'none';
         }
+		
+				        // Applica subito il tema corretto all'apertura della pagina
+        applyStoredTheme();
     </script>
 </body>
 </html>

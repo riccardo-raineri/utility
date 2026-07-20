@@ -104,6 +104,8 @@
             } else {
                 body.setAttribute('data-theme', 'light');
             }
+			
+            localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
         }
 
         // ---------------------------------------------------------
@@ -325,6 +327,9 @@
         // ---------------------------------------------------------
         fetchCurrencies();
         populateUnits(document.getElementById('category').value);
+		
+		        // Applica subito il tema corretto all'apertura della pagina
+        applyStoredTheme();
     </script>
 
 </body>

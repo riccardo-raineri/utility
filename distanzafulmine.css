@@ -87,7 +87,7 @@ body {
     border-radius: var(--radius);
     padding: 32px;
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     transition: background-color 0.25s ease, border-color 0.25s ease;
 }
@@ -108,8 +108,12 @@ body {
     background: var(--accent-soft);
     color: var(--accent);
     border-radius: 10px;
-    font-size: 20px;
     box-shadow: 0 0 12px var(--accent-glow);
+}
+
+.card-header .icon svg {
+    width: 22px;
+    height: 22px;
 }
 
 .card-header h2 {
@@ -202,6 +206,14 @@ body {
     color: var(--accent);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#timer-label svg {
+    width: 16px;
+    height: 16px;
 }
 
 #timer-display {
@@ -253,21 +265,24 @@ label {
     letter-spacing: 0.04em;
 }
 
-input {
+input, select {
     width: 100%;
     padding: 12px 14px;
     background: var(--bg);
     border: 1px solid var(--border);
     color: var(--text);
     border-radius: 8px;
-    font-size: 16px;
-    font-family: var(--font-mono);
+    font-size: 15px;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    outline: none;
 }
 
-input:focus {
+input {
+    font-family: var(--font-mono);
+}
+
+input:focus, select:focus {
     border-color: var(--accent);
-    outline: none;
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
@@ -378,7 +393,7 @@ input:focus {
     font-family: var(--font-mono);
 }
 
-.safety-tip {
+.safety-tip-box {
     font-size: 12px;
     line-height: 1.5;
     color: var(--text-muted);
@@ -386,4 +401,14 @@ input:focus {
     padding: 10px;
     border-radius: 6px;
     border-left: 3px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.safety-tip-box svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
 }
