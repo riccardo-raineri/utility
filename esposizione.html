@@ -4,237 +4,274 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exposure Meter - Camera Body Pro</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Foglio di Stile -->
     <link rel="stylesheet" href="esposizione.css">
 </head>
-<body data-theme="dark">
+<body>
 
-    <a class="back-link" href="dashboard.html">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Dashboard
-    </a>
+    <!-- Canvas di Sfondo -->
+    <div class="bg-canvas">
+        <div class="bg-grid-pattern"></div>
+    </div>
 
-    <div class="card">
-        <div class="card-header">
-            <div>
-                <h2>Exposure Meter</h2>
-                <div class="subtitle">Calcoli analoghi e digitali</div>
+    <div class="app-container">
+
+        <!-- Navigation Bar -->
+        <nav class="top-nav">
+            <a class="back-link" href="dashboard.html">
+                <i data-lucide="arrow-left"></i>
+                Dashboard
+            </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="camera"></i>
+                    Camera Pro
+                </span>
             </div>
+        </nav>
 
-            <!-- Bottone tema -->
-            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
-                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4"/>
-                    <line x1="12" y1="2" x2="12" y2="4"/>
-                    <line x1="12" y1="20" x2="12" y2="22"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="2" y1="12" x2="4" y2="12"/>
-                    <line x1="20" y1="12" x2="22" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-            </button>
-        </div>
-
-        <!-- Tabs / Ghiere di selezione -->
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('eq', event)">Equivalenza</button>
-            <button class="tab-btn" onclick="showTab('nd', event)">Filtri ND</button>
-            <button class="tab-btn" onclick="showTab('astro', event)">Astrofoto</button>
-        </div>
-
-        <!-- Sezione Equivalenza -->
-        <div id="eq" class="form-section active">
-            <div class="input-row">
-                <label for="eq-shutter">Tempo base (es. 1/50 o 2)</label>
-                <input type="text" id="eq-shutter" value="1/50" oninput="calculate()">
-            </div>
-            <div class="input-row">
-                <label for="eq-aperture-old">Apertura attuale (f/)</label>
-                <input type="number" step="0.1" id="eq-aperture-old" value="5.6" oninput="calculate()">
-            </div>
-            <div class="input-row">
-                <label for="eq-aperture-new">Nuova Apertura (f/)</label>
-                <input type="number" step="0.1" id="eq-aperture-new" value="8.0" oninput="calculate()">
-            </div>
-        </div>
-
-        <!-- Sezione Filtri ND -->
-        <div id="nd" class="form-section">
-            <div class="input-row">
-                <label for="nd-shutter">Tempo base (es. 1/100 o 2)</label>
-                <input type="text" id="nd-shutter" value="1/100" oninput="calculate()">
-            </div>
-            <div class="input-row">
-                <label for="nd-stops">Stop Filtro ND</label>
-                <input type="number" id="nd-stops" value="6" placeholder="es. 6 (ND64)" oninput="calculate()">
-            </div>
-        </div>
-
-        <!-- Sezione Astro -->
-        <div id="astro" class="form-section">
-            <div class="input-row">
-                <label for="astro-focal">Lunghezza focale (mm)</label>
-                <input type="number" id="astro-focal" value="24" oninput="calculate()">
-            </div>
-            <div class="input-row">
-                <label for="astro-sensor">Tipo di Sensore</label>
-                <select id="astro-sensor" onchange="calculate()">
-                    <option value="1.0" selected>Full Frame (Crop 1.0x)</option>
-                    <option value="1.5">APS-C Nikon/Sony/Fuji (1.5x)</option>
-                    <option value="1.6">APS-C Canon (1.6x)</option>
-                    <option value="2.0">Micro 4/3 (2.0x)</option>
-                </select>
-            </div>
-            <div class="hint-text">
-                Calcolo basato sulla Regola del 500 per evitare il mosso stellare.
-            </div>
-        </div>
-
-        <button class="calculate-btn" id="calc-btn" onclick="calculate()">Scatta / Calcola</button>
-
-        <div class="result-box" id="result-container">
-            <label>TEMPO STIMATO</label>
-            <div class="result-value" id="result">---</div>
-        </div>
-
-        <!-- =========================================================
-             INFOGRAFICA GRAPHIC F-STOPS
-             ========================================================= -->
-        <div class="fstop-infographic">
-            <div class="fstop-header">
-                <span class="fstop-badge">F-STOPS</span>
-            </div>
-
-            <!-- Visual Apertura Diaframmi SVG -->
-            <div class="aperture-visual">
-                <!-- Diaframma Aperto -->
-                <svg class="aperture-icon" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="5"/>
-                    <path d="M 50 10 L 80 40 L 65 85 L 20 75 Z" fill="none" stroke="currentColor" stroke-width="3"/>
-                    <path d="M 15 35 L 60 15 L 85 55 L 40 85 Z" fill="none" stroke="currentColor" stroke-width="3"/>
-                </svg>
-
-                <div class="aperture-arrow">
-                    <div class="aperture-arrow-line"></div>
-                </div>
-
-                <!-- Diaframma Chiuso -->
-                <svg class="aperture-icon" viewBox="0 0 100 100">
-                    <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="5"/>
-                    <polygon points="50,20 75,35 75,65 50,80 25,65 25,35" fill="currentColor"/>
-                </svg>
-            </div>
-
-            <!-- 1. FULL STOPS -->
-            <div class="scale-group">
-                <div class="scale-title">Full Stops</div>
-                <div class="scale-container">
-                    <div class="scale-ruler">
-                        <div class="scale-item"><span class="scale-val bold">1</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">1.4</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">2</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">2.8</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">4</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">5.6</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">8</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">11</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">16</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">22</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">32</span><div class="scale-tick tall"></div></div>
+        <!-- Tool Layout Container -->
+        <main class="tool-layout">
+            <div class="card">
+                
+                <!-- Card Header -->
+                <div class="card-header">
+                    <div class="icon">
+                        <i data-lucide="sliders"></i>
+                    </div>
+                    <div class="title-group">
+                        <h2>Exposure Meter</h2>
+                        <p class="subtitle">Calcoli di esposizione analogici e digitali</p>
                     </div>
                 </div>
-            </div>
 
-            <!-- 2. 1/2 STOPS -->
-            <div class="scale-group">
-                <div class="scale-title">1/2 Stops</div>
-                <div class="scale-container">
-                    <div class="scale-ruler">
-                        <div class="scale-item"><span class="scale-val bold">1</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">1.2</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">1.4</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">1.7</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">2</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">2.4</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">2.8</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">3.3</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">4</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">4.8</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">5.6</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">6.7</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">8</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">9.5</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">11</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">13</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">16</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">19</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">22</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">27</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">32</span><div class="scale-tick tall"></div></div>
+                <!-- Tabs / Ghiere di selezione -->
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="showTab('eq', event)">Equivalenza</button>
+                    <button class="tab-btn" onclick="showTab('nd', event)">Filtri ND</button>
+                    <button class="tab-btn" onclick="showTab('astro', event)">Astrofoto</button>
+                </div>
+
+                <!-- Sezione Equivalenza -->
+                <div id="eq" class="form-section active">
+                    <div class="input-row">
+                        <label for="eq-shutter">Tempo base (es. 1/50 o 2)</label>
+                        <input type="text" id="eq-shutter" value="1/50" oninput="calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label for="eq-aperture-old">Apertura attuale (f/)</label>
+                        <input type="number" step="0.1" id="eq-aperture-old" value="5.6" oninput="calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label for="eq-aperture-new">Nuova Apertura (f/)</label>
+                        <input type="number" step="0.1" id="eq-aperture-new" value="8.0" oninput="calculate()">
                     </div>
                 </div>
-            </div>
 
-            <!-- 3. 1/3 STOPS -->
-            <div class="scale-group">
-                <div class="scale-title">1/3 Stops</div>
-                <div class="scale-container">
-                    <div class="scale-ruler">
-                        <div class="scale-item"><span class="scale-val bold">1</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">1.1</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val">1.3</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">1.4</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">1.6</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val">1.8</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">2</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">2.2</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val">2.5</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">2.8</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">3.2</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val">3.5</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">4</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">4.5</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val">5</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">5.6</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">6.3</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val">7.1</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">8</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">9</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val">10</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">11</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">13</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val">14</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">16</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">18</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val">20</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">22</span><div class="scale-tick tall"></div></div>
-                        <div class="scale-item"><span class="scale-val">25</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val">29</span><div class="scale-tick"></div></div>
-                        <div class="scale-item"><span class="scale-val bold">32</span><div class="scale-tick tall"></div></div>
+                <!-- Sezione Filtri ND -->
+                <div id="nd" class="form-section">
+                    <div class="input-row">
+                        <label for="nd-shutter">Tempo base (es. 1/100 o 2)</label>
+                        <input type="text" id="nd-shutter" value="1/100" oninput="calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label for="nd-stops">Stop Filtro ND</label>
+                        <input type="number" id="nd-stops" value="6" placeholder="es. 6 (ND64)" oninput="calculate()">
                     </div>
                 </div>
+
+                <!-- Sezione Astro -->
+                <div id="astro" class="form-section">
+                    <div class="input-row">
+                        <label for="astro-focal">Lunghezza focale (mm)</label>
+                        <input type="number" id="astro-focal" value="24" oninput="calculate()">
+                    </div>
+                    <div class="input-row">
+                        <label for="astro-sensor">Tipo di Sensore</label>
+                        <select id="astro-sensor" onchange="calculate()">
+                            <option value="1.0" selected>Full Frame (Crop 1.0x)</option>
+                            <option value="1.5">APS-C Nikon/Sony/Fuji (1.5x)</option>
+                            <option value="1.6">APS-C Canon (1.6x)</option>
+                            <option value="2.0">Micro 4/3 (2.0x)</option>
+                        </select>
+                    </div>
+                    <div class="hint-text">
+                        Calcolo basato sulla Regola del 500 per evitare il mosso stellare.
+                    </div>
+                </div>
+
+                <button class="calculate-btn" id="calc-btn" onclick="calculate()">Scatta / Calcola</button>
+
+                <div class="result-box" id="result-container">
+                    <label>TEMPO STIMATO</label>
+                    <div class="result-value" id="result">---</div>
+                </div>
+
+                <!-- =========================================================
+                     INFOGRAFICA GRAPHIC F-STOPS
+                     ========================================================= -->
+                <div class="fstop-infographic">
+                    <div class="fstop-header">
+                        <span class="fstop-badge">F-STOPS SCALE</span>
+                    </div>
+                    </div>
+
+                    <!-- 1. FULL STOPS -->
+                    <div class="scale-group">
+                        <div class="scale-title">Full Stops</div>
+                        <div class="scale-container">
+                            <div class="scale-ruler">
+                                <div class="scale-item"><span class="scale-val bold">1</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">1.4</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">2</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">2.8</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">4</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">5.6</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">8</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">11</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">16</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">22</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">32</span><div class="scale-tick tall"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 1/2 STOPS -->
+                    <div class="scale-group">
+                        <div class="scale-title">1/2 Stops</div>
+                        <div class="scale-container">
+                            <div class="scale-ruler">
+                                <div class="scale-item"><span class="scale-val bold">1</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">1.2</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">1.4</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">1.7</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">2</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">2.4</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">2.8</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">3.3</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">4</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">4.8</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">5.6</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">6.7</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">8</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">9.5</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">11</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">13</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">16</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">19</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">22</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">27</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">32</span><div class="scale-tick tall"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. 1/3 STOPS -->
+                    <div class="scale-group">
+                        <div class="scale-title">1/3 Stops</div>
+                        <div class="scale-container">
+                            <div class="scale-ruler">
+                                <div class="scale-item"><span class="scale-val bold">1</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">1.1</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val">1.3</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">1.4</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">1.6</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val">1.8</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">2</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">2.2</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val">2.5</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">2.8</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">3.2</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val">3.5</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">4</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">4.5</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val">5</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">5.6</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">6.3</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val">7.1</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">8</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">9</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val">10</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">11</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">13</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val">14</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">16</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">18</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val">20</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">22</span><div class="scale-tick tall"></div></div>
+                                <div class="scale-item"><span class="scale-val">25</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val">29</span><div class="scale-tick"></div></div>
+                                <div class="scale-item"><span class="scale-val bold">32</span><div class="scale-tick tall"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-        </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Creative Utility Toolbox — Riccardo Raineri</span>
+        </footer>
+
     </div>
 
     <script>
-        function toggleTheme() {
-            const body = document.body;
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme');
-            } else {
-                body.setAttribute('data-theme', 'dark');
-				}
-				localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
+        document.addEventListener('DOMContentLoaded', () => {
+            applyStoredTheme();
+            refreshIcons();
+            calculate();
+        });
+
+        function refreshIcons() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         }
 
+        /* -----------------------------------------------------------------
+           GESTIONE TEMA (DEFAULT DARK / OPTIONAL LIGHT)
+           ----------------------------------------------------------------- */
+        function applyStoredTheme() {
+            const savedTheme = localStorage.getItem('toolbox_theme');
+            if (savedTheme === 'light') {
+                document.body.setAttribute('data-theme', 'light');
+            } else {
+                document.body.removeAttribute('data-theme');
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const goingLight = body.getAttribute('data-theme') !== 'light';
+            
+            if (goingLight) {
+                body.setAttribute('data-theme', 'light');
+            } else {
+                body.removeAttribute('data-theme');
+            }
+            
+            localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
+        }
+
+        /* -----------------------------------------------------------------
+           LOGICA DI CALCOLO ESPOSIZIONE
+           ----------------------------------------------------------------- */
         function showTab(tabId, evt) {
             document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -307,12 +344,6 @@
 
             document.getElementById('result').innerText = resultStr;
         }
-
-        document.addEventListener('DOMContentLoaded', calculate);
-		
-		// Applica subito il tema corretto all'apertura della pagina
-        applyStoredTheme();
     </script>
-
 </body>
 </html>
