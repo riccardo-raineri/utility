@@ -1,195 +1,277 @@
 /* =====================================================================
-   CONVERTITORE.CSS
-   Foglio di stile del "Convertitore Universale".
-
-   DIREZIONE GRAFICA
-   Unico strumento con doppio tema (chiaro/scuro), viola desaturato e
-   pattern a puntini che si adatta al tema attivo tramite --pattern-dot.
+   CONVERTITORE.CSS — Theme: Universal Converter (Default Dark)
    ===================================================================== */
 
 :root {
-    /* --- Tema scuro (default) ---------------------------------------- */
-     --bg: #0f1117;
-    --surface: #171922;
-    --text: #f2f1f8;
-    --text-muted: #92909e;
-    --border: #272a35;
-    --accent: #9d93f5;
-    --accent-soft: rgba(157, 147, 245, 0.12);
-    --accent-strong: #b4abf7;
-    --pattern-dot: rgba(255, 255, 255, 0.045);
-    --radius: 14px;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: "SF Mono", "Roboto Mono", "Cascadia Code", Consolas, monospace;
+    /* 🌙 TEMA SCURO (DEFAULT) */
+    --bg-base: #0f1117;
+    --card-bg: #171922;
+    --card-hover: #1f222e;
+    --toolbar-bg: #13151f;
+    --border-subtle: #272a35;
+    --border-highlight: #3b3f50;
+
+    /* Accento Viola / Purple */
+    --accent: #8b5cf6;
+    --accent-soft: rgba(139, 92, 246, 0.12);
+    --accent-strong: #a78bfa;
+    --accent-border: rgba(139, 92, 246, 0.25);
+
+    /* Testi */
+    --text-primary: #f2f1f8;
+    --text-secondary: #92909e;
+    --text-tertiary: #636674;
+
+    /* Tipografia */
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* Ombre e Dettagli */
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --grid-pattern: rgba(255, 255, 255, 0.03);
+
+    --radius: 16px;
+    --transition-smooth: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* --- Tema chiaro: attivato aggiungendo data-theme="light" al <body> ----- */
+/* ☀️ TEMA CHIARO ([data-theme="light"]) */
 [data-theme="light"] {
-	--bg: #f7f6fb;
-    --surface: #ffffff;
-    --text: #1c1a2b;
-    --text-muted: #6d6b7c;
-    --border: #e6e4ee;
-    --accent: #7c6fe0;
-    --accent-soft: rgba(124, 111, 224, 0.1);
-    --accent-strong: #6357c9;
-    --pattern-dot: rgba(28, 26, 43, 0.045);
+    --bg-base: #f7f6fb;
+    --card-bg: #ffffff;
+    --card-hover: #faf9fe;
+    --toolbar-bg: #ffffff;
+    --border-subtle: #e6e4ee;
+    --border-highlight: #cbd5e1;
+
+    --accent: #7c3aed;
+    --accent-soft: rgba(124, 58, 237, 0.08);
+    --accent-strong: #6d28d9;
+    --accent-border: rgba(124, 58, 237, 0.2);
+
+    --text-primary: #1c1a2b;
+    --text-secondary: #6d6b7c;
+    --text-tertiary: #94a3b8;
+
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.03);
+    --shadow-md: 0 10px 30px -5px rgba(0, 0, 0, 0.06);
+    --grid-pattern: rgba(0, 0, 0, 0.03);
 }
 
-* {
+*, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: var(--font-sans);
 }
 
 body {
-    background-color: var(--bg);
-    color: var(--text);
-
-    /* Pattern a puntini: la variabile --pattern-dot cambia colore da sola
-       quando si passa al tema chiaro, quindi il pattern resta coerente
-       senza bisogno di due regole separate. */
-    background-image: radial-gradient(circle, var(--pattern-dot) 1px, transparent 1px);
-    background-size: 20px 20px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    font-family: var(--font-sans);
+    background-color: var(--bg-base);
+    color: var(--text-primary);
     min-height: 100vh;
-    padding: 24px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
     transition: background-color 0.25s ease, color 0.25s ease;
 }
 
-.back-link {
+/* Sfondo e Griglia */
+.bg-canvas {
     position: fixed;
-    top: 20px;
-    left: 20px;
-    font-size: 13px;
-    color: var(--text-muted);
-    text-decoration: none;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.bg-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(var(--grid-pattern) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-pattern) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
+
+/* Layout App */
+.app-container {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 32px 20px;
     display: flex;
-    align-items: center;
-    gap: 6px;
-    transition: color 0.2s ease;
+    flex-direction: column;
+    gap: 32px;
+    min-height: 100vh;
 }
 
-.back-link:hover {
-    color: var(--text);
-}
-
-/* =========================================================
-   CARD PRINCIPALE
-   ========================================================= */
-.converter-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 32px;
-    width: 100%;
-    max-width: 420px;
-    transition: background-color 0.25s ease, border-color 0.25s ease;
-}
-
-.header {
+/* Navigazione Superiore */
+.top-nav {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
 }
 
-.header h2 {
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-}
-
-.header .subtitle {
-    font-size: 12px;
-    color: var(--text-muted);
-    margin-top: 2px;
-}
-
-/* =========================================================
-   BOTTONE CAMBIO TEMA (icona SVG sole/luna).
-   ========================================================= */
-.theme-toggle {
-    width: 36px;
-    height: 36px;
+.nav-actions {
     display: flex;
     align-items: center;
+    gap: 12px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
+}
+
+.back-link:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.back-link svg { width: 14px; height: 14px; }
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
-    background: var(--accent-soft);
-    border: 1px solid var(--border);
+    width: 36px;
+    height: 36px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
     border-radius: 50%;
+    color: var(--text-secondary);
     cursor: pointer;
-    color: var(--text);
-    transition: border-color 0.2s ease;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-smooth);
 }
 
 .theme-toggle:hover {
+    color: var(--accent);
     border-color: var(--accent);
 }
 
-.theme-toggle svg {
-    width: 16px;
-    height: 16px;
+.theme-toggle svg { width: 16px; height: 16px; }
+
+.icon-sun { display: block; }
+.icon-moon { display: none; }
+
+[data-theme="light"] .icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: block; }
+
+.tool-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--accent-border);
 }
 
-/* Di default è visibile solo l'icona "luna": cliccandola
-   si passa al tema scuro. */
-.theme-toggle .icon-sun { display: none; }
-.theme-toggle .icon-moon { display: block; }
+.tool-badge svg { width: 13px; height: 13px; }
 
-/* In tema scuro si inverte: resta visibile solo l'icona "sole", che
-   riporta al tema chiaro. */
-[data-theme="light"] .theme-toggle .icon-sun { display: block; }
-[data-theme="light"] .theme-toggle .icon-moon { display: none; }
+/* Main Layout & Card */
+.tool-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+}
 
-/* =========================================================
-   TAB "UNITÀ / VALUTA"
-   ========================================================= */
+.converter-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 32px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    transition: var(--transition-smooth);
+}
+
+.card-header {
+    text-align: center;
+}
+
+.card-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+}
+
+.card-header .subtitle {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* Tab Unità / Valuta */
 .mode-tabs {
     display: flex;
     gap: 4px;
-    background: var(--bg);
-    border: 1px solid var(--border);
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
     border-radius: 999px;
     padding: 4px;
-    margin-bottom: 18px;
 }
 
 .mode-tab {
     flex: 1;
-    text-align: center;
-    padding: 9px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 12px;
     border-radius: 999px;
     border: none;
     background: transparent;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     font-family: var(--font-sans);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: color 0.2s ease, background-color 0.2s ease;
+    transition: var(--transition-smooth);
 }
+
+.mode-tab svg { width: 14px; height: 14px; }
 
 .mode-tab.active {
     background: var(--accent);
     color: #ffffff;
 }
 
+/* Selettori e Form Inputs */
 select, input {
     width: 100%;
-    padding: 13px 14px;
+    padding: 12px 14px;
     border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg);
-    color: var(--text);
-    font-size: 15px;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-size: 14px;
     font-family: var(--font-sans);
     outline: none;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: var(--transition-smooth);
 }
 
 select:focus, input:focus {
@@ -198,7 +280,6 @@ select:focus, input:focus {
 }
 
 .category-select {
-    margin-bottom: 22px;
     font-weight: 600;
     cursor: pointer;
 }
@@ -206,123 +287,45 @@ select:focus, input:focus {
 .input-row {
     display: flex;
     gap: 10px;
-    margin-bottom: 14px;
     align-items: center;
 }
 
 input[type="number"] {
     flex: 2;
     font-size: 18px;
-    font-weight: 600;
+    font-weight: 700;
     font-family: var(--font-mono);
 }
 
 select.unit-select {
     flex: 1.6;
     cursor: pointer;
-    font-size: 13.5px;
+    font-size: 13px;
 }
 
-/* Bottone copia accanto a ciascun input */
-
-.card-icon svg {
-    width: 18px;
-    height: 18px;
-    fill: currentColor;
-}
-
-.card-tag {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 4px 8px;
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.tool-card h3 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    letter-spacing: -0.01em;
-}
-
-.tool-card p {
-    color: var(--text-muted);
-    font-size: 13.5px;
-    line-height: 1.6;
-    margin-bottom: 24px;
-    flex-grow: 1;
-}
-
-.tool-card a {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.03);
-    color: var(--text-main);
-    text-decoration: none;
-    border: 1px solid var(--border);
-    padding: 11px;
-    border-radius: var(--radius-sm);
-    font-size: 13.5px;
-    font-weight: 600;
-    transition: all 0.25s ease;
-}
-
-.tool-card a:hover {
-    background-color: var(--accent);
-    border-color: var(--accent);
-    color: var(--bg-deep);
-    box-shadow: 0 0 15px var(--accent-glow);
-}
-
-.tool-card.disabled {
-    opacity: 0.55;
-}
-
-.tool-card.disabled a {
-    cursor: default;
-    pointer-events: none;
-    background: transparent;
-}
-
-#no-results {
-    display: none;
-    text-align: center;
-    grid-column: 1 / -1;
-    color: var(--text-muted);
-    padding: 60px 20px;
-    font-size: 14px;
-    font-family: var(--font-mono);
-}
+/* Bottone Copia e Tooltip */
 .copy-btn {
     flex: 0 0 auto;
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-muted);
+    background: var(--bg-base);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    color: var(--text-secondary);
     cursor: pointer;
-    font-size: 14px;
-    transition: color 0.2s ease, border-color 0.2s ease;
+    transition: var(--transition-smooth);
 }
+
+.copy-btn svg { width: 16px; height: 16px; }
 
 .copy-btn:hover {
     color: var(--accent);
     border-color: var(--accent);
 }
 
-/* Feedback momentaneo "Copiato!" mostrato sopra al bottone */
 .copy-feedback {
     position: relative;
 }
@@ -330,37 +333,56 @@ select.unit-select {
 .copy-feedback::after {
     content: attr(data-feedback);
     position: absolute;
-    top: -28px;
-    right: 0;
-    background: var(--text);
-    color: var(--surface);
+    top: -30px;
+    right: 50%;
+    transform: translateX(50%) translateY(4px);
+    background: var(--text-primary);
+    color: var(--bg-base);
     font-size: 11px;
-    padding: 3px 8px;
+    font-weight: 600;
+    padding: 4px 8px;
     border-radius: 6px;
     opacity: 0;
-    transform: translateY(4px);
     transition: opacity 0.15s ease, transform 0.15s ease;
     pointer-events: none;
     white-space: nowrap;
+    box-shadow: var(--shadow-sm);
 }
 
 .copy-feedback.show::after {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(50%) translateY(0);
 }
 
+/* Icona Scambio */
 .swap-icon {
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: var(--accent);
-    font-size: 18px;
-    margin: 6px 0;
-    opacity: 0.6;
+    margin: -6px 0;
 }
 
+.swap-icon svg {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+}
+
+/* Stato Testo Footer Card */
 .status {
     text-align: center;
     font-size: 11.5px;
-    color: var(--text-muted);
-    margin-top: 20px;
+    color: var(--text-tertiary);
     font-family: var(--font-mono);
+}
+
+/* Footer Page */
+.app-footer {
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 18px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-tertiary);
 }

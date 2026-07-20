@@ -4,127 +4,162 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Convertitore Universale</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Foglio di Stile -->
     <link rel="stylesheet" href="convertitore.css">
 </head>
 <body>
 
-<!-- Link alla Dashboard -->
-    <a class="back-link" href="dashboard.html">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Dashboard
-    </a>
-    <div class="converter-card">
-        <div class="header">
-            <div>
-                <h2>Convertitore</h2>
-                <div class="subtitle">Unità, valute e altro in tempo reale</div>
-            </div>
-
-            <!-- Bottone tema: contiene entrambe le icone SVG, il CSS mostra
-                 solo quella giusta in base al tema attivo (vedi convertitore.css) -->
-            <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
-                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                </svg>
-                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="4"/>
-                    <line x1="12" y1="2" x2="12" y2="4"/>
-                    <line x1="12" y1="20" x2="12" y2="22"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                    <line x1="2" y1="12" x2="4" y2="12"/>
-                    <line x1="20" y1="12" x2="22" y2="12"/>
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                </svg>
-            </button>
-        </div>
-
-        <!-- Tab "Unità / Valuta": la valuta è ora una modalità a parte,
-             non più una voce dentro il menu a tendina delle categorie -->
-        <div class="mode-tabs">
-            <button type="button" class="mode-tab active" id="tab-unita" onclick="setMode('unita')">Unità</button>
-            <button type="button" class="mode-tab" id="tab-valuta" onclick="setMode('valuta')">Valuta</button>
-        </div>
-
-        <!-- Visibile solo in modalità "Unità": scelta della categoria -->
-        <select class="category-select" id="category" onchange="populateUnits(this.value)">
-            <option value="lunghezza">Lunghezza</option>
-            <option value="peso">Peso &amp; Massa</option>
-            <option value="temperatura">Temperatura</option>
-            <option value="area">Area</option>
-            <option value="volume">Volume</option>
-            <option value="velocita">Velocità</option>
-            <option value="tempo">Tempo</option>
-            <option value="dati">Dati digitali</option>
-            <option value="pressione">Pressione</option>
-            <option value="energia">Energia</option>
-            <option value="potenza">Potenza</option>
-            <option value="angolo">Angoli</option>
-        </select>
-
-        <!-- Primo blocco: valore in alto + pulsante copia -->
-        <div class="input-row">
-            <input type="number" id="input1" placeholder="0" oninput="calculate(1)">
-            <select class="unit-select" id="unit1" onchange="calculate(1)"></select>
-            <span class="copy-btn copy-feedback" id="copy1" onclick="copyValue(1)" title="Copia valore">
-				<div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/>
-                        </svg>
-                    </div>
-			</span>
-        </div>
-
-        <div class="swap-icon">⇅</div>
-
-        <!-- Secondo blocco: valore in basso + pulsante copia -->
-        <div class="input-row">
-            <input type="number" id="input2" placeholder="0" oninput="calculate(2)">
-            <select class="unit-select" id="unit2" onchange="calculate(1)"></select>
-            <span class="copy-btn copy-feedback" id="copy2" onclick="copyValue(2)" title="Copia valore">
-				<div class="card-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
-							<path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/>
-                        </svg>
-				</div>
-					</span>
-        </div>
-
-        <div class="status" id="status-text">Pronto.</div>
+    <!-- Canvas di Sfondo -->
+    <div class="bg-canvas">
+        <div class="bg-grid-pattern"></div>
     </div>
 
-    <script>
-        // ---------------------------------------------------------
-        // 1. CAMBIO TEMA CHIARO/SCURO
-        // L'icona non viene più riscritta via JS: cambia da sola via CSS
-        // in base all'attributo data-theme, qui ci limitiamo a impostarlo.
-        // ---------------------------------------------------------
-        function toggleTheme() {
-            const body = document.body;
-            if (body.getAttribute('data-theme') === 'light') {
-                body.removeAttribute('data-theme');
-            } else {
-                body.setAttribute('data-theme', 'light');
-            }
-			
-            localStorage.setItem('toolbox_theme', goingLight ? 'light' : 'dark');
-        }
+    <div class="app-container">
 
-        // ---------------------------------------------------------
-        // 2. STATO DELLA MODALITÀ (Unità oppure Valuta)
-        // ---------------------------------------------------------
+        <!-- Navigation Bar -->
+        <nav class="top-nav">
+            <a class="back-link" href="dashboard.html">
+                <i data-lucide="arrow-left"></i>
+                Dashboard
+            </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="arrow-right-left"></i>
+                    Convertitore
+                </span>
+            </div>
+        </nav>
+
+        <!-- Area Principale Convertitore -->
+        <main class="tool-layout">
+            <div class="converter-card">
+                
+                <div class="card-header">
+                    <h2>Convertitore Universale</h2>
+                    <div class="subtitle">Unità di misura e valute in tempo reale</div>
+                </div>
+
+                <!-- Tab "Unità / Valuta" -->
+                <div class="mode-tabs">
+                    <button type="button" class="mode-tab active" id="tab-unita" onclick="setMode('unita')">
+                        <i data-lucide="scale"></i> Unità
+                    </button>
+                    <button type="button" class="mode-tab" id="tab-valuta" onclick="setMode('valuta')">
+                        <i data-lucide="coins"></i> Valuta
+                    </button>
+                </div>
+
+                <!-- Selezione Categoria (Visibile solo in modalità Unità) -->
+                <select class="category-select" id="category" onchange="populateUnits(this.value)">
+                    <option value="lunghezza">Lunghezza</option>
+                    <option value="peso">Peso &amp; Massa</option>
+                    <option value="temperatura">Temperatura</option>
+                    <option value="area">Area</option>
+                    <option value="volume">Volume</option>
+                    <option value="velocita">Velocità</option>
+                    <option value="tempo">Tempo</option>
+                    <option value="dati">Dati digitali</option>
+                    <option value="pressione">Pressione</option>
+                    <option value="energia">Energia</option>
+                    <option value="potenza">Potenza</option>
+                    <option value="angolo">Angoli</option>
+                </select>
+
+                <!-- Primo Blocco Input -->
+                <div class="input-row">
+                    <input type="number" id="input1" placeholder="0" oninput="calculate(1)">
+                    <select class="unit-select" id="unit1" onchange="calculate(1)"></select>
+                    <button type="button" class="copy-btn copy-feedback" id="copy1" onclick="copyValue(1)" title="Copia valore">
+                        <i data-lucide="copy"></i>
+                    </button>
+                </div>
+
+                <!-- Icona Separatore / Scambio -->
+                <div class="swap-icon">
+                    <i data-lucide="arrow-up-down"></i>
+                </div>
+
+                <!-- Secondo Blocco Input -->
+                <div class="input-row">
+                    <input type="number" id="input2" placeholder="0" oninput="calculate(2)">
+                    <select class="unit-select" id="unit2" onchange="calculate(1)"></select>
+                    <button type="button" class="copy-btn copy-feedback" id="copy2" onclick="copyValue(2)" title="Copia valore">
+                        <i data-lucide="copy"></i>
+                    </button>
+                </div>
+
+                <!-- Stato dell'operazione o aggiornamento valute -->
+                <div class="status" id="status-text">Pronto.</div>
+
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Creative Utility Toolbox — Riccardo Raineri</span>
+        </footer>
+
+    </div>
+
+    <!-- Script Logico del Convertitore e Gestione Tema -->
+    <script>
         let mode = 'unita';
 
-        /**
-         * Passa dalla modalità "Unità" a "Valuta" e viceversa: aggiorna lo
-         * stile dei due tab, mostra/nasconde la tendina delle categorie
-         * (non serve in modalità Valuta) e ripopola le tendine di unità
-         * con l'elenco corretto.
-         */
+        document.addEventListener('DOMContentLoaded', () => {
+            applyStoredTheme();
+            fetchCurrencies();
+            populateUnits(document.getElementById('category').value);
+            refreshIcons();
+        });
+
+        function refreshIcons() {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        /* -----------------------------------------------------------------
+           GESTIONE TEMA (DEFAULT SCURO / OPTIONAL LIGHT)
+           ----------------------------------------------------------------- */
+        function applyStoredTheme() {
+            const stored = localStorage.getItem('toolbox_theme');
+            if (stored === 'light') {
+                document.body.setAttribute('data-theme', 'light');
+            } else {
+                document.body.removeAttribute('data-theme');
+            }
+        }
+
+        function toggleTheme() {
+            const body = document.body;
+            const isLight = body.getAttribute('data-theme') === 'light';
+
+            if (isLight) {
+                body.removeAttribute('data-theme');
+                localStorage.setItem('toolbox_theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                localStorage.setItem('toolbox_theme', 'light');
+            }
+        }
+
+        /* -----------------------------------------------------------------
+           MODALITÀ (Unità / Valuta)
+           ----------------------------------------------------------------- */
         function setMode(newMode) {
             mode = newMode;
             document.getElementById('tab-unita').classList.toggle('active', mode === 'unita');
@@ -138,23 +173,13 @@
             }
         }
 
-        /**
-         * Restituisce la categoria "attiva" in questo momento: se siamo in
-         * modalità Valuta è sempre "valuta", altrimenti è quella scelta
-         * nella tendina delle categorie. Usata da calculate() e dal resto
-         * dello script per non dover ripetere questo controllo ovunque.
-         */
         function getActiveCategory() {
             return mode === 'valuta' ? 'valuta' : document.getElementById('category').value;
         }
 
-        // ---------------------------------------------------------
-        // 3. DIZIONARIO DELLE CONVERSIONI
-        // Ogni unità ha un valore rispetto a un'unità base per categoria.
-        // Elenco ampliato rispetto alla versione precedente, con molte
-        // più unità per ciascuna categoria e tre categorie nuove
-        // (pressione, energia, potenza, angoli).
-        // ---------------------------------------------------------
+        /* -----------------------------------------------------------------
+           DIZIONARIO DI CONVERSIONE
+           ----------------------------------------------------------------- */
         let conversionData = {
             lunghezza: {
                 "Millimetri (mm)": 0.001, "Centimetri (cm)": 0.01, "Decimetri (dm)": 0.1,
@@ -207,17 +232,12 @@
                 "Gradi (°)": 0.0174533, "Radianti (rad)": 1, "Gradi centesimali (gon)": 0.015708
             },
             temperatura: { "Celsius (°C)": "special", "Fahrenheit (°F)": "special", "Kelvin (K)": "special" },
-
-            // La valuta parte come "loading": viene sovrascritta da fetchCurrencies()
             valuta: { "EUR (€)": 1, "USD ($)": "loading", "GBP (£)": "loading", "JPY (¥)": "loading", "CHF (Fr)": "loading" }
         };
 
-        // ---------------------------------------------------------
-        // 4. RECUPERO VALUTE IN TEMPO REALE TRAMITE API
-        // Viene sempre lanciato all'avvio, indipendentemente dalla
-        // modalità attiva, così i tassi sono già pronti appena l'utente
-        // passa sul tab "Valuta".
-        // ---------------------------------------------------------
+        /* -----------------------------------------------------------------
+           FETCH VALUTE IN TEMPO REALE
+           ----------------------------------------------------------------- */
         async function fetchCurrencies() {
             try {
                 document.getElementById('status-text').innerText = "Aggiornamento valute in corso…";
@@ -234,21 +254,17 @@
                     "CNY (¥)": data.rates.CNY
                 };
 
-                // Se l'utente si trova già sul tab Valuta, ripopola con i tassi appena arrivati
                 if (mode === 'valuta') populateUnits('valuta');
 
-                document.getElementById('status-text').innerText = "Valute aggiornate: " + data.time_last_update_utc.split(' ')[0];
+                document.getElementById('status-text').innerText = "Valute aggiornate al " + data.time_last_update_utc.split(' ')[0];
             } catch (e) {
-                document.getElementById('status-text').innerText = "Errore di connessione alle valute.";
+                document.getElementById('status-text').innerText = "Errore di connessione al servizio valute.";
             }
         }
 
-        // ---------------------------------------------------------
-        // 5. POPOLA LE TENDINE DI UNITÀ PER LA CATEGORIA INDICATA
-        // Sostituisce la vecchia changeCategory(): ora riceve la categoria
-        // come parametro, perché può essere chiamata sia dal cambio della
-        // tendina categorie sia dal cambio di modalità (Unità/Valuta).
-        // ---------------------------------------------------------
+        /* -----------------------------------------------------------------
+           POPILAMENTO TENDINE & CALCOLO
+           ----------------------------------------------------------------- */
         function populateUnits(cat) {
             const u1 = document.getElementById('unit1');
             const u2 = document.getElementById('unit2');
@@ -266,9 +282,6 @@
             calculate(1);
         }
 
-        // ---------------------------------------------------------
-        // 6. FUNZIONE SPECIALE PER LA TEMPERATURA
-        // ---------------------------------------------------------
         function calcTemp(val, from, to) {
             let celsius;
             if (from.includes("Celsius")) celsius = val;
@@ -280,9 +293,6 @@
             if (to.includes("Kelvin")) return celsius + 273.15;
         }
 
-        // ---------------------------------------------------------
-        // 7. MOTORE DI CALCOLO PRINCIPALE
-        // ---------------------------------------------------------
         function calculate(source) {
             const cat = getActiveCategory();
             const val1 = document.getElementById('input1').value;
@@ -312,14 +322,14 @@
             document.getElementById(target).value = parseFloat(result.toFixed(5));
         }
 
-        // ---------------------------------------------------------
-        // 8. COPIA NEGLI APPUNTI
-        // ---------------------------------------------------------
+        /* -----------------------------------------------------------------
+           COPIA NEGLI APPUNTI
+           ----------------------------------------------------------------- */
         function copyValue(inputNumber) {
             const input = document.getElementById('input' + inputNumber);
             const btn = document.getElementById('copy' + inputNumber);
 
-            if (!input.value) return; // niente da copiare
+            if (!input.value) return;
 
             navigator.clipboard.writeText(input.value).then(() => {
                 btn.setAttribute('data-feedback', 'Copiato!');
@@ -327,16 +337,6 @@
                 setTimeout(() => btn.classList.remove('show'), 1200);
             });
         }
-
-        // ---------------------------------------------------------
-        // 9. INIZIALIZZAZIONE ALL'AVVIO
-        // ---------------------------------------------------------
-        fetchCurrencies();
-        populateUnits(document.getElementById('category').value);
-		
-		        // Applica subito il tema corretto all'apertura della pagina
-        applyStoredTheme();
     </script>
-
 </body>
 </html>
