@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contatore Avanzato di Parole — Editorial Craft</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Style Sheet -->
+    <link rel="stylesheet" href="contatoreparole.css">
+</head>
+<body>
+
+    <!-- Subtle Ambient Background Pattern -->
+    <div class="bg-canvas">
+        <div class="bg-editorial-pattern"></div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- Navigation Bar -->
+        <nav class="top-nav">
+            <!-- Link alla Dashboard -->
+            <a class="back-link" href="dashboard.html">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Dashboard
+            </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="book-open"></i>
+                    Studio di Scrittura
+                </span>
+            </div>
+        </nav>
+
+        <!-- Tool Header -->
+        <header class="tool-header">
+            <h1 class="tool-title">Contatore Avanzato di Parole</h1>
+            <p class="tool-subtitle">Analisi editoriale in tempo reale: metriche di lettura, sillabe e densità semantica.</p>
+        </header>
+
+        <!-- Main Layout Grid -->
+        <main class="tool-layout">
+
+            <!-- Area Editor di Testo -->
+            <section class="editor-section">
+                <div class="editor-card">
+                    <div class="editor-toolbar">
+                        <span class="toolbar-label">Bozza del Documento</span>
+                        <div class="toolbar-actions">
+                            <button id="btnSample" class="btn-icon-text" title="Inserisci testo di prova">
+                                <i data-lucide="sparkles"></i>
+                                <span>Esempio</span>
+                            </button>
+                            <button id="btnCopy" class="btn-icon-text" title="Copia testo">
+                                <i data-lucide="copy"></i>
+                                <span>Copia</span>
+                            </button>
+                            <button id="btnClear" class="btn-icon-text danger" title="Pulisci tutto">
+                                <i data-lucide="trash-2"></i>
+                                <span>Pulisci</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <textarea id="textInput" placeholder="Inizia a scrivere o incolla qui il tuo testo..." autofocus></textarea>
+
+                    <div class="editor-footer">
+                        <span id="charLimitNotice" class="footer-info">0 caratteri inseriti</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Pannello Statistiche & Analisi -->
+            <aside class="metrics-section">
+
+                <!-- Griglia Statistiche -->
+                <div class="stats-grid">
+                    <div class="stat-card highlight">
+                        <div class="stat-header">
+                            <i data-lucide="align-left"></i>
+                            <span>Totale Parole</span>
+                        </div>
+                        <div class="stat-value" id="valWords">0</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i data-lucide="clock"></i>
+                            <span>Tempo di Lettura</span>
+                        </div>
+                        <div class="stat-value" id="valReadTime">0 sec</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i data-lucide="type"></i>
+                            <span>Caratteri (Con Spazi)</span>
+                        </div>
+                        <div class="stat-value" id="valCharsWithSpaces">0</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i data-lucide="space"></i>
+                            <span>Caratteri (Senza Spazi)</span>
+                        </div>
+                        <div class="stat-value" id="valCharsNoSpaces">0</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i data-lucide="layers"></i>
+                            <span>Sillabe Stimate</span>
+                        </div>
+                        <div class="stat-value" id="valSyllables">0</div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <i data-lucide="pilcrow"></i>
+                            <span>Frasi / Paragrafi</span>
+                        </div>
+                        <div class="stat-value" id="valSentencesParagraphs">0 / 0</div>
+                    </div>
+                </div>
+
+                <!-- Scheda Densità Parole Chiave -->
+                <div class="density-card">
+                    <div class="density-header">
+                        <div class="density-title">
+                            <i data-lucide="bar-chart-2"></i>
+                            <h3>Densità Parole Chiave</h3>
+                        </div>
+                        <label class="toggle-switch" title="Escludi parole comuni (articoli, preposizioni)">
+                            <input type="checkbox" id="toggleStopwords" checked>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Filtra Stopwords</span>
+                        </label>
+                    </div>
+
+                    <div id="keywordsList" class="keywords-list">
+                        <div class="empty-keywords">Inserisci del testo per visualizzare l'analisi</div>
+                    </div>
+                </div>
+
+            </aside>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Editorial Craft Toolset — Studio di Scrittura</span>
+        </footer>
+
+    </div>
+
+    <!-- Script -->
+    <script src="contatoreparole.js"></script>
+</body>
+</html>

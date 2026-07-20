@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convertitore di Colori — Color Studio</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Style Sheet -->
+    <link rel="stylesheet" href="convertitorecolori.css">
+</head>
+<body>
+
+    <!-- Canvas di Sfondo -->
+    <div class="bg-canvas">
+        <div class="bg-grid-pattern"></div>
+    </div>
+
+    <div class="app-container">
+
+        <!-- Bar di Navigazione -->
+        <nav class="top-nav">
+            <!-- Link alla Dashboard -->
+            <a class="back-link" href="dashboard.html">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Dashboard
+            </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="palette"></i>
+                    Color Studio
+                </span>
+            </div>
+        </nav>
+
+        <!-- Header dello Strumento -->
+        <header class="tool-header">
+            <h1 class="tool-title">Convertitore di Colori</h1>
+            <p class="tool-subtitle">Conversione istantanea da codice HEX nei formati RGB, HSL e CMYK per grafica e sviluppo web.</p>
+        </header>
+
+        <!-- Layout Principale -->
+        <main class="tool-layout">
+
+            <!-- Sezione Input & Anteprima Colore -->
+            <section class="input-section">
+                <div class="instrument-card">
+                    <div class="card-header">
+                        <span class="card-label">Sorgente Colore</span>
+                    </div>
+
+                    <!-- Anteprima Colore & Picker Nativo -->
+                    <div class="swatch-preview" id="swatchPreview">
+                        <input type="color" id="nativeColorPicker" value="#06B6D4" title="Clicca per aprire la tavolozza di sistema">
+                        <span class="swatch-hint" id="swatchHint">Clicca per scegliere</span>
+                    </div>
+
+                    <!-- Input HEX -->
+                    <div class="input-group">
+                        <label for="hexInput">Codice HEX</label>
+                        <div class="hex-input-wrapper">
+                            <span class="hash-symbol">#</span>
+                            <input type="text" id="hexInput" value="06B6D4" maxlength="7" spellcheck="false" autocomplete="off" placeholder="06B6D4" autofocus>
+                            <button class="btn-copy-small" id="btnCopyHex" title="Copia HEX">
+                                <i data-lucide="copy"></i>
+                            </button>
+                        </div>
+                        <span class="input-error" id="hexError">Codice HEX non valido (usa es. #06B6D4 o #FFF)</span>
+                    </div>
+
+                    <!-- Presets / Palette Rapida -->
+                    <div class="preset-section">
+                        <span class="preset-label">Tonalità Rapide:</span>
+                        <div class="preset-colors">
+                            <button class="preset-btn" style="background-color: #06B6D4" data-hex="06B6D4" title="Cyan"></button>
+                            <button class="preset-btn" style="background-color: #3B82F6" data-hex="3B82F6" title="Blue"></button>
+                            <button class="preset-btn" style="background-color: #8B5CF6" data-hex="8B5CF6" title="Purple"></button>
+                            <button class="preset-btn" style="background-color: #EC4899" data-hex="EC4899" title="Pink"></button>
+                            <button class="preset-btn" style="background-color: #EF4444" data-hex="EF4444" title="Red"></button>
+                            <button class="preset-btn" style="background-color: #F59E0B" data-hex="F59E0B" title="Amber"></button>
+                            <button class="preset-btn" style="background-color: #10B981" data-hex="10B981" title="Emerald"></button>
+                            <button class="preset-btn" style="background-color: #0F172A" data-hex="0F172A" title="Dark Slate"></button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sezione Risultati della Conversione -->
+            <section class="results-section">
+
+                <!-- Scheda RGB -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <span class="format-badge">RGB</span>
+                            <h3>Red, Green, Blue</h3>
+                        </div>
+                        <button class="btn-copy" id="btnCopyRgb" data-target="resRgb">
+                            <i data-lucide="copy"></i>
+                            <span>Copia</span>
+                        </button>
+                    </div>
+                    <div class="result-value" id="resRgb">rgb(6, 182, 212)</div>
+
+                    <!-- Canali e Bar visuali -->
+                    <div class="channel-bars">
+                        <div class="channel-item">
+                            <span class="ch-label">R</span>
+                            <div class="ch-bar-bg"><div class="ch-bar-fill red" id="barR"></div></div>
+                            <span class="ch-val" id="valR">6</span>
+                        </div>
+                        <div class="channel-item">
+                            <span class="ch-label">G</span>
+                            <div class="ch-bar-bg"><div class="ch-bar-fill green" id="barG"></div></div>
+                            <span class="ch-val" id="valG">182</span>
+                        </div>
+                        <div class="channel-item">
+                            <span class="ch-label">B</span>
+                            <div class="ch-bar-bg"><div class="ch-bar-fill blue" id="barB"></div></div>
+                            <span class="ch-val" id="valB">212</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scheda HSL -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <span class="format-badge">HSL</span>
+                            <h3>Hue, Saturation, Lightness</h3>
+                        </div>
+                        <button class="btn-copy" id="btnCopyHsl" data-target="resHsl">
+                            <i data-lucide="copy"></i>
+                            <span>Copia</span>
+                        </button>
+                    </div>
+                    <div class="result-value" id="resHsl">hsl(189, 95%, 43%)</div>
+
+                    <div class="hsl-details">
+                        <div class="detail-box">
+                            <span class="detail-label">Tonalità (H)</span>
+                            <span class="detail-value" id="valH">189°</span>
+                        </div>
+                        <div class="detail-box">
+                            <span class="detail-label">Saturazione (S)</span>
+                            <span class="detail-value" id="valS">95%</span>
+                        </div>
+                        <div class="detail-box">
+                            <span class="detail-label">Luminosità (L)</span>
+                            <span class="detail-value" id="valL">43%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scheda CMYK -->
+                <div class="result-card">
+                    <div class="result-header">
+                        <div class="result-title">
+                            <span class="format-badge">CMYK</span>
+                            <h3>Cyan, Magenta, Yellow, Key</h3>
+                        </div>
+                        <button class="btn-copy" id="btnCopyCmyk" data-target="resCmyk">
+                            <i data-lucide="copy"></i>
+                            <span>Copia</span>
+                        </button>
+                    </div>
+                    <div class="result-value" id="resCmyk">cmyk(97%, 14%, 0%, 17%)</div>
+
+                    <div class="cmyk-grid">
+                        <div class="cmyk-item">
+                            <span class="cmyk-tag cyan">C</span>
+                            <span class="cmyk-val" id="valC">97%</span>
+                        </div>
+                        <div class="cmyk-item">
+                            <span class="cmyk-tag magenta">M</span>
+                            <span class="cmyk-val" id="valM">14%</span>
+                        </div>
+                        <div class="cmyk-item">
+                            <span class="cmyk-tag yellow">Y</span>
+                            <span class="cmyk-val" id="valY">0%</span>
+                        </div>
+                        <div class="cmyk-item">
+                            <span class="cmyk-tag key">K</span>
+                            <span class="cmyk-val" id="valK">17%</span>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <span>Color Studio — Strumenti di Precisione per Design &amp; Web</span>
+        </footer>
+
+    </div>
+
+    <!-- Script Logico -->
+    <script src="convertitorecolori.js"></script>
+</body>
+</html>
