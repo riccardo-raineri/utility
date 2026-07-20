@@ -167,7 +167,7 @@ body {
 .app-container {
     position: relative;
     z-index: 1;
-    max-width: 1440px; /* Leggermente ampliato per ospitare comodamente 4 colonne */
+    max-width: 1300px; /* Larghezza ottimizzata per 4 colonne */
     margin: 0 auto;
     padding: 32px 24px 60px;
     display: flex;
@@ -318,10 +318,10 @@ body {
     width: 100%;
 }
 
-/* Modificato minmax a 240px per permettere 4 colonne stabili su desktop */
+/* Griglia forzata esattamente a 4 colonne su desktop */
 .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 16px;
     perspective: 1000px;
 }
@@ -679,13 +679,20 @@ body {
     opacity: 0.4;
 }
 
-@media (max-width: 1024px) {
+/* Media Queries per adattamento responsivo graduale */
+@media (max-width: 1200px) {
     .tools-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
+    .tools-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 580px) {
     .app-container {
         padding: 20px 16px 40px;
         gap: 24px;
