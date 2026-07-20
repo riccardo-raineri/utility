@@ -9,12 +9,24 @@
 <body>
 
     <!-- Link di ritorno alla dashboard -->
-    <a class="back-link" href="dashboard.html">← Dashboard</a>
+    <a class="back-link" href="dashboard.html">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        Dashboard
+    </a>
 
     <div class="card">
         <!-- Header -->
         <div class="card-header">
-            <div class="icon">🖼️</div>
+            <div class="icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+            </div>
             <div class="title-group">
                 <h2>Convertitore Immagini</h2>
                 <p>Converti, confronta e ottimizza le tue immagini</p>
@@ -60,7 +72,12 @@
                 <span class="file-name" id="file-name">nome_file.jpg</span>
                 <span class="file-meta" id="file-meta">1920×1080 • 1.2 MB</span>
             </div>
-            <button class="btn-remove" onclick="resetFile()" title="Rimuovi immagine">✕</button>
+            <button class="btn-remove" onclick="resetFile()" title="Rimuovi immagine" aria-label="Rimuovi immagine">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
         </div>
 
         <!-- Opzioni e Conversione -->
@@ -87,29 +104,45 @@
             </div>
 
             <!-- Pulsante 1: CONVERTI -->
-            <button class="btn-primary" id="btn-convert" onclick="processConversion()">⚡ Converti Immagine</button>
+            <button class="btn-primary" id="btn-convert" onclick="processConversion()">
+                <svg class="btn-icon" viewBox="0 0 24 24">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                </svg>
+                Converti Immagine
+            </button>
         </div>
 
-        <!-- SEZIONE RISULTATI (Comparazione Prima/Dopo e Dati Utili) -->
+        <!-- SEZIONE RISULTATI (Comparazione Prima/Dopo con Slider e Dati Utili) -->
         <div class="result-section" id="result-section" style="display: none;">
             <hr class="divider">
             
             <h3 class="section-title">Confronto & Risultato</h3>
 
-            <!-- Grid Comparazione Immagini -->
-            <div class="comparison-grid">
-                <div class="compare-card">
-                    <span class="badge badge-before">PRIMA</span>
-                    <div class="compare-thumb">
-                        <img id="compare-before-img" src="" alt="Originale">
+            <!-- Interactive Image Comparison Slider -->
+            <div class="image-slider-container" id="slider-container">
+                <span class="badge-overlay badge-before">PRIMA</span>
+                <span class="badge-overlay badge-after">DOPO</span>
+
+                <!-- Immagine DOPO (Sfondo completo) -->
+                <img id="compare-after-img" class="slider-img" src="" alt="Convertito">
+
+                <!-- Immagine PRIMA (Ritaglio) -->
+                <div class="slider-before-wrapper" id="slider-before-wrapper">
+                    <img id="compare-before-img" class="slider-img" src="" alt="Originale">
+                </div>
+
+                <!-- Splitter/Handle trascinabile -->
+                <div class="slider-handle" id="slider-handle">
+                    <div class="slider-button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                            <polyline points="15 18 9 12 15 6" transform="rotate(180 12 12)"></polyline>
+                        </svg>
                     </div>
                 </div>
-                <div class="compare-card">
-                    <span class="badge badge-after">DOPO</span>
-                    <div class="compare-thumb">
-                        <img id="compare-after-img" src="" alt="Convertito">
-                    </div>
-                </div>
+
+                <!-- Input nativo sovrapposto per il controllo dello slider -->
+                <input type="range" class="range-slider-input" min="0" max="100" value="50" id="comparison-range" oninput="updateSliderPosition(this.value)">
             </div>
 
             <!-- Schede Dati Utili -->
@@ -129,7 +162,14 @@
             </div>
 
             <!-- Pulsante 2: SCARICA -->
-            <button class="btn-success" id="btn-download" onclick="downloadFile()">⬇️ Scarica Immagine</button>
+            <button class="btn-success" id="btn-download" onclick="downloadFile()">
+                <svg class="btn-icon" viewBox="0 0 24 24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Scarica Immagine
+            </button>
         </div>
     </div>
 
@@ -227,6 +267,27 @@
             document.getElementById('quality-value').textContent = val + '%';
         }
 
+        // Aggiorna lo Slider di comparazione Prima/Dopo
+        function updateSliderPosition(value) {
+            const wrapper = document.getElementById('slider-before-wrapper');
+            const handle = document.getElementById('slider-handle');
+            const container = document.getElementById('slider-container');
+            const beforeImg = document.getElementById('compare-before-img');
+            
+            wrapper.style.width = value + '%';
+            handle.style.left = value + '%';
+            
+            // Garantisce la corretta larghezza dell'immagine sovrapposta per evitare distorsioni
+            if (container) {
+                beforeImg.style.width = container.offsetWidth + 'px';
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            const sliderVal = document.getElementById('comparison-range').value;
+            updateSliderPosition(sliderVal);
+        });
+
         // Esegue la conversione e mostra la comparazione e i dati
         function processConversion() {
             if (!loadedImage || !originalFile) return;
@@ -259,7 +320,7 @@
                 convertedBlob = blob;
                 convertedUrl = URL.createObjectURL(blob);
 
-                // Popola la sezione comparazione
+                // Popola la sezione comparazione slider
                 document.getElementById('compare-before-img').src = document.getElementById('preview-img').src;
                 document.getElementById('compare-after-img').src = convertedUrl;
 
@@ -285,7 +346,13 @@
 
                 // Mostra la sezione Risultato
                 document.getElementById('result-section').style.display = 'block';
-                document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+                
+                // Resetta e sincronizza la dimensione iniziale dello slider
+                document.getElementById('comparison-range').value = 50;
+                setTimeout(() => {
+                    updateSliderPosition(50);
+                    document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+                }, 50);
 
             }, format, quality);
         }
@@ -322,7 +389,7 @@
             convertedUrl = null;
 
             document.getElementById('file-input').value = "";
-            document.getElementById('drop-zone').style.display = 'flex';
+            document.getElementById('drop-zone').style.display = 'block';
             document.getElementById('file-preview').style.display = 'none';
             document.getElementById('options-group').style.display = 'none';
             hideResults();
