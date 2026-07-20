@@ -816,11 +816,18 @@
             updateTimerDisplay();
         }
 
-        shuffleArray(players);
-        for (let i = 0; i < totalImpostors; i++) {
-            players[i].isImpostor = true;
+        // Assegnazione casuale delle spie mantenendo l'ordine sequenziale dei giocatori inseriti
+        let indices = Array.from({ length: totalPlayers }, (_, i) => i);
+        shuffleArray(indices);
+        let impostorIndices = indices.slice(0, totalImpostors);
+        
+        for (let i = 0; i < totalPlayers; i++) {
+            if (impostorIndices.includes(i)) {
+                players[i].isImpostor = true;
+            } else {
+                players[i].isImpostor = false;
+            }
         }
-        shuffleArray(players);
 
         currentPlayerIndex = 0;
         showPassScreen();
