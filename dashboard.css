@@ -580,12 +580,12 @@ body {
    BOTTONE STELLA & DRAWER PREFERITI
    ========================================================= */
 
-/* Header Top: Pulsante Drawer Preferiti */
+/* Pulsante Header Top per aprire i Preferiti */
 .favorites-toggle-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: var(--bg-surface);
+    background: #131826;
     border: 1px solid var(--border-subtle);
     color: var(--text-secondary);
     padding: 8px 16px;
@@ -619,25 +619,37 @@ body {
 }
 
 /* =========================================================
-   HEADER DELLA CARD: STELLA A SINISTRA DELLA CATEGORIA
+   HEADER DELLA CARD: ICONA A SX, STELLA E CATEGORIA A DX
    ========================================================= */
-.card-header-top {
+.card-header-top-row {
     display: flex;
     align-items: center;
-    gap: 8px; /* Spazio tra la stella e la categoria */
+    justify-content: space-between;
     margin-bottom: 16px;
+    width: 100%;
 }
 
-.card-header-top .category-badge {
+/* Icona del tool sulla sinistra */
+.card-header-top-row .card-icon-box {
     margin-bottom: 0;
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+}
+
+/* Gruppo a destra contenente stella preferiti e categoria */
+.card-header-right-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .fav-btn {
-    background: var(--bg-surface-hover);
+    background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--border-subtle);
     color: var(--text-tertiary);
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -663,7 +675,6 @@ body {
     width: 13px;
     height: 13px;
     fill: currentColor;
-}
 }
 
 /* Overlay e Pannello Laterale (Drawer) Preferiti */
@@ -743,7 +754,7 @@ body {
 }
 
 .drawer-close-btn:hover {
-    background: var(--bg-surface-hover);
+    background: rgba(255, 255, 255, 0.08);
     color: var(--text-primary);
 }
 

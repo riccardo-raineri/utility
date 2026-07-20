@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* =========================================================
-   PARTICELLE, SPOTLIGHT E 3D (Invariati)
+   PARTICELLE, SPOTLIGHT E 3D
    ========================================================= */
 function initParticles() {
     const container = document.getElementById('particlesContainer');
