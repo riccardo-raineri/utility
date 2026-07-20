@@ -1,0 +1,273 @@
+/* =========================================================
+   PDF TOOLBOX — STILE PULITO COERENTE CON GLI ALTRI TOOL
+   ========================================================= */
+
+.app-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 20px;
+}
+
+/* Header */
+.app-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary, #94a3b8);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.back-btn:hover {
+    color: var(--text-primary, #ffffff);
+}
+
+.app-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary, #ffffff);
+    margin: 0;
+    letter-spacing: -0.02em;
+}
+
+/* Griglia Card Stile Altri Tool */
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 16px;
+}
+
+.tool-card {
+    background: var(--card-bg, rgba(20, 24, 33, 0.6));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    border-radius: 12px;
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.tool-card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateY(-2px);
+    background: var(--card-hover-bg, rgba(25, 30, 42, 0.8));
+}
+
+.tool-card.active {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+}
+
+.card-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.tool-card h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary, #ffffff);
+    margin: 0 0 6px 0;
+}
+
+.tool-card p {
+    font-size: 12px;
+    color: var(--text-secondary, #94a3b8);
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Workspace Pannello Attivo */
+.workspace-panel {
+    background: var(--card-bg, rgba(20, 24, 33, 0.85));
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    border-radius: 14px;
+    padding: 24px;
+    margin-top: 30px;
+    animation: fadeIn 0.25s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.workspace-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.workspace-header h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary, #ffffff);
+    margin: 0;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary, #94a3b8);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary, #ffffff);
+}
+
+.close-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Upload Dropzone */
+.upload-dropzone {
+    border: 2px dashed var(--border-color, rgba(255, 255, 255, 0.12));
+    border-radius: 10px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.1);
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.upload-dropzone:hover {
+    border-color: #3b82f6;
+    background: rgba(59, 130, 246, 0.02);
+}
+
+.drop-icon {
+    width: 32px;
+    height: 32px;
+    color: var(--text-secondary, #94a3b8);
+    margin-bottom: 8px;
+}
+
+.upload-dropzone p {
+    font-size: 13px;
+    color: var(--text-secondary, #94a3b8);
+    margin: 0;
+}
+
+.upload-dropzone span {
+    color: #3b82f6;
+    font-weight: 500;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--text-primary, #ffffff);
+}
+
+.file-info svg {
+    width: 16px;
+    height: 16px;
+    color: #10b981;
+}
+
+.tool-options {
+    margin-top: 14px;
+}
+
+.tool-options label {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary, #94a3b8);
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.tool-options input, .tool-options select {
+    width: 100%;
+    padding: 9px 12px;
+    background: rgba(10, 13, 20, 0.9);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    color: var(--text-primary, #ffffff);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+}
+
+.tool-options input:focus, .tool-options select:focus {
+    border-color: #3b82f6;
+}
+
+.action-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 11px;
+    background: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.action-btn:hover:not(:disabled) {
+    background: #2563eb;
+}
+
+.action-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.action-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.result-area {
+    margin-top: 16px;
+    font-size: 13px;
+    text-align: center;
+}
