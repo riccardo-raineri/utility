@@ -45,13 +45,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // Funzioni di supporto per leggere lo stato corrente della card prima di aprirla
 function getActiveCardTitle(cardKey) {
     const isForward = conversionState[cardKey] === 'forward';
-    switch(cardKey) {
-        let title = '';
-        case 'word-tab': title = isForward ? 'PDF a Word' : 'Word a PDF'; break;
-        case 'ppt-tab': title = isForward ? 'PDF a PowerPoint' : 'PowerPoint a PDF'; break;
-        case 'excel-tab': title = isForward ? 'PDF a Excel' : 'Excel a PDF'; break;
-        case 'image-tab': title = isForward ? 'PDF a Immagini' : 'Immagini a PDF'; break;
-    }
     return getTitleString(cardKey, isForward);
 }
 
