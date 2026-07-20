@@ -14,16 +14,15 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <!-- Style Sheet -->
-    <link rel="stylesheet" href="dashboard_v2.css">
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
 
-    <!-- Sfondo Animato Cinematografico & Ambient Spotlight -->
+    <!-- Sfondo Animato & Ambient Spotlight -->
     <div class="bg-canvas">
         <div class="bg-gradient-mesh"></div>
         <div class="bg-blob blob-1"></div>
         <div class="bg-blob blob-2"></div>
-        <div class="bg-blob blob-3"></div>
         <div class="bg-perspective-grid"></div>
         <div class="bg-particles" id="particlesContainer"></div>
         <div class="bg-noise"></div>
@@ -33,16 +32,43 @@
     <div class="app-container">
 
         <!-- =========================================================
-             HERO HEADER (Creative Control Center)
+             HERO HEADER (Layout Pulito con Categorie in Alto)
              ========================================================= -->
         <header class="hero-header">
             <div class="hero-top">
-                <div class="brand-badge">
-                    <span class="status-indicator"></span>
-                    <span class="brand-name">RICCARDO RAINERI</span>
-                </div>
-                
-                <!-- Statistiche Dinamiche -->
+                <!-- BARRA DELLE CATEGORIE (Posizionata in alto a sinistra) -->
+                <nav class="filters-container" id="filterBar">
+                    <button class="filter-pill active" data-filter="tutti">
+                        <i data-lucide="layout-grid"></i>
+                        <span>Tutti</span>
+                    </button>
+                    <button class="filter-pill" data-filter="utilita">
+                        <i data-lucide="wrench"></i>
+                        <span>Utilità</span>
+                    </button>
+                    <button class="filter-pill" data-filter="finanza">
+                        <i data-lucide="coins"></i>
+                        <span>Finanza</span>
+                    </button>
+                    <button class="filter-pill" data-filter="cinema">
+                        <i data-lucide="clapperboard"></i>
+                        <span>Cinema</span>
+                    </button>
+                    <button class="filter-pill" data-filter="viaggi">
+                        <i data-lucide="compass"></i>
+                        <span>Viaggi</span>
+                    </button>
+                    <button class="filter-pill" data-filter="tempo">
+                        <i data-lucide="timer"></i>
+                        <span>Tempo</span>
+                    </button>
+                    <button class="filter-pill" data-filter="svago">
+                        <i data-lucide="gamepad-2"></i>
+                        <span>Svago</span>
+                    </button>
+                </nav>
+
+                <!-- STATISTICHE SINTETICHE (Posizionate a destra) -->
                 <div class="header-stats">
                     <div class="stat-item">
                         <span class="stat-label">STRUMENTI</span>
@@ -53,16 +79,6 @@
                         <span class="stat-label">CATEGORIE</span>
                         <span class="stat-value" id="statCategories">0</span>
                     </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-item">
-                        <span class="stat-label">BUILD</span>
-                        <span class="stat-value">v2.4</span>
-                    </div>
-                    <div class="stat-divider"></div>
-                    <div class="stat-item">
-                        <span class="stat-label">ULTIMO AGG.</span>
-                        <span class="stat-value">Lug 2026</span>
-                    </div>
                 </div>
             </div>
 
@@ -71,7 +87,7 @@
                 <p class="hero-subtitle">Creative Utility Dashboard</p>
             </div>
 
-            <!-- Barra di Ricerca Glassmorphism con Glow Focus -->
+            <!-- Barra di Ricerca -->
             <div class="search-wrapper">
                 <div class="search-glass-card">
                     <i data-lucide="search" class="search-icon"></i>
@@ -82,41 +98,7 @@
         </header>
 
         <!-- =========================================================
-             FILTRI CATEGORIA (Pills Neon & Interactive)
-             ========================================================= -->
-        <nav class="filters-container" id="filterBar">
-            <button class="filter-pill active" data-filter="tutti">
-                <i data-lucide="layout-grid"></i>
-                <span>Tutti</span>
-            </button>
-            <button class="filter-pill" data-filter="utilita">
-                <i data-lucide="wrench"></i>
-                <span>Utilità</span>
-            </button>
-            <button class="filter-pill" data-filter="finanza">
-                <i data-lucide="coins"></i>
-                <span>Finanza</span>
-            </button>
-            <button class="filter-pill" data-filter="cinema">
-                <i data-lucide="clapperboard"></i>
-                <span>Cinema</span>
-            </button>
-            <button class="filter-pill" data-filter="viaggi">
-                <i data-lucide="compass"></i>
-                <span>Viaggi</span>
-            </button>
-            <button class="filter-pill" data-filter="tempo">
-                <i data-lucide="timer"></i>
-                <span>Tempo</span>
-            </button>
-            <button class="filter-pill" data-filter="svago">
-                <i data-lucide="gamepad-2"></i>
-                <span>Svago</span>
-            </button>
-        </nav>
-
-        <!-- =========================================================
-             GRIGLIA STRUMENTI (Cards 3D Tilt & Light Reflections)
+             GRIGLIA STRUMENTI
              ========================================================= -->
         <main class="main-content">
             <div class="tools-grid" id="toolsGrid">
@@ -124,7 +106,6 @@
                 <!-- Convertitore Universale -->
                 <div class="tool-card" data-category="utilita">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -146,7 +127,6 @@
                 <!-- Calcola Sconto -->
                 <div class="tool-card" data-category="finanza">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -168,7 +148,6 @@
                 <!-- Costo Carburante -->
                 <div class="tool-card" data-category="viaggi">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -190,7 +169,6 @@
                 <!-- Esposimetro -->
                 <div class="tool-card" data-category="cinema">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -212,7 +190,6 @@
                 <!-- Distanza Fulmine -->
                 <div class="tool-card" data-category="utilita">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -234,7 +211,6 @@
                 <!-- Convertitore Immagini -->
                 <div class="tool-card" data-category="utilita">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -256,7 +232,6 @@
                 <!-- Data Sharing -->
                 <div class="tool-card" data-category="utilita">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -278,7 +253,6 @@
                 <!-- Test Digitazione -->
                 <div class="tool-card" data-category="svago">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -300,7 +274,6 @@
                 <!-- QR-CODE Generator -->
                 <div class="tool-card" data-category="utilita">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -322,7 +295,6 @@
                 <!-- Film al Cinema -->
                 <div class="tool-card" data-category="cinema">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -344,7 +316,6 @@
                 <!-- Cronometro Pomodoro (In Arrivo) -->
                 <div class="tool-card disabled" data-category="tempo">
                     <div class="card-glass-glow"></div>
-                    <div class="card-reflection"></div>
                     <div class="card-inner">
                         <div class="card-header">
                             <div class="card-icon-box">
@@ -365,7 +336,7 @@
 
             </div>
 
-            <!-- Empty State per ricerca senza corrispondenze -->
+            <!-- Empty State per nessuna corrispondenza -->
             <div id="noResults" class="no-results-box">
                 <i data-lucide="search-x" class="no-results-icon"></i>
                 <h3>Nessun risultato trovato</h3>
@@ -379,9 +350,7 @@
         <footer class="app-footer">
             <div class="footer-content">
                 <div class="footer-left">
-                    <span class="footer-author">Riccardo Raineri</span>
-                    <span class="footer-sep">•</span>
-                    <span class="footer-brand">Creative Toolbox</span>
+                    <span class="footer-brand">Creative Utility Toolbox</span>
                 </div>
                 <div class="footer-right">
                     <span class="footer-build">Build 2.4 — 2026</span>

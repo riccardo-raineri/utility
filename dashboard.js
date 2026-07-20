@@ -1,6 +1,6 @@
 /**
  * =====================================================================
- * DASHBOARD.JS — Interactive Engine (Vanilla JS)
+ * DASHBOARD.JS — Interactive Engine (Effetto 3D Ridotto)
  * =====================================================================
  */
 
@@ -10,10 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
         lucide.createIcons();
     }
 
-    // Inizializza i moduli
     initParticles();
     initSpotlight();
-    init3DTilt();
+    initSoft3DTilt();
     initSearchAndFilters();
     updateHeaderStats();
 });
@@ -25,12 +24,12 @@ function initParticles() {
     const container = document.getElementById('particlesContainer');
     if (!container) return;
 
-    const particleCount = 25;
+    const particleCount = 18;
     for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.className = 'particle';
 
-        const size = Math.random() * 3 + 1;
+        const size = Math.random() * 2 + 1;
         const left = Math.random() * 100;
         const duration = Math.random() * 10 + 10;
         const delay = Math.random() * 5;
@@ -67,9 +66,9 @@ function initSpotlight() {
 }
 
 /* =========================================================
-   3. TILT 3D PARALLAX SU HOVER CARD (Apple Vision Pro Style)
+   3. INCLINAZIONE 3D AMMORBIDITA & DELICATA (Sottile)
    ========================================================= */
-function init3DTilt() {
+function initSoft3DTilt() {
     const cards = document.querySelectorAll('.tool-card:not(.disabled)');
 
     cards.forEach(card => {
@@ -78,22 +77,21 @@ function init3DTilt() {
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
 
-            // Calcola coordinata relativa per il glow
             card.style.setProperty('--card-mouse-x', `${x}px`);
             card.style.setProperty('--card-mouse-y', `${y}px`);
 
-            // Calcolo inclinazione 3D
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
 
-            const rotateX = ((y - centerY) / centerY) * -8; // max -8deg
-            const rotateY = ((x - centerX) / centerX) * 8;  // max 8deg
+            // Inclinazione attenuata a max +/- 2.5 gradi per un movimento molto sobrio
+            const rotateX = ((y - centerY) / centerY) * -2.5; 
+            const rotateY = ((x - centerX) / centerX) * 2.5;  
 
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
         });
 
         card.addEventListener('mouseleave', () => {
-            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
         });
     });
 }
@@ -110,11 +108,10 @@ function initSearchAndFilters() {
     let activeCategory = 'tutti';
     let searchQuery = '';
 
-    // Filtraggio dinamico
     function filterGrid() {
         let visibleCount = 0;
 
-        cards.forEach((card, index) => {
+        cards.forEach((card) => {
             const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
             const desc = card.querySelector('.card-desc')?.textContent.toLowerCase() || '';
             const category = card.dataset.category || '';
@@ -124,26 +121,18 @@ function initSearchAndFilters() {
 
             if (matchesCategory && matchesSearch) {
                 card.style.display = 'block';
-                // Staggered Fade In Animation
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(15px)';
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, visibleCount * 40);
+                card.style.opacity = '1';
                 visibleCount++;
             } else {
                 card.style.display = 'none';
             }
         });
 
-        // Mostra Empty State se zero risultati
         if (noResults) {
             noResults.style.display = visibleCount === 0 ? 'block' : 'none';
         }
     }
 
-    // Listener Input
     if (searchInput) {
         searchInput.addEventListener('input', (e) => {
             searchQuery = e.target.value.toLowerCase().trim();
@@ -151,7 +140,6 @@ function initSearchAndFilters() {
         });
     }
 
-    // Listener Filtri Categoria
     filterPills.forEach(pill => {
         pill.addEventListener('click', () => {
             filterPills.forEach(p => p.classList.remove('active'));
@@ -162,7 +150,6 @@ function initSearchAndFilters() {
         });
     });
 
-    // Scorciatoia da tastiera Tastiera "/" per il focus rapido sulla ricerca
     document.addEventListener('keydown', (e) => {
         const activeTag = document.activeElement.tagName;
         if (e.key === '/' && activeTag !== 'INPUT' && activeTag !== 'TEXTAREA') {
