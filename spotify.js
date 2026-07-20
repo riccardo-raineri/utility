@@ -1,4 +1,4 @@
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxODP97AvFCgCT6OxmnGM6PKOycgRkXKVe9yjCyNpRon_JZNgdYu7ai-HZ63o6qduGw/exec';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyjMQN8oDMi93_SlXP0NTOee2nesSNJAQZmFuERp9WMkmbvJ5I6T4Std8ohI1hli7CT/exec';
 const SECRET_PIN = "1234"; 
 const ALL_USERS = ["Alessandra", "Chiara", "Giulia", "Riccardo", "Sergio", "Sharon", "Valentina"];
 
