@@ -67,7 +67,7 @@
                         <label for="price">Prezzo di Listino (€)</label>
                         <div class="input-wrapper">
                             <span class="input-prefix">€</span>
-                            <input type="number" id="price" placeholder="0.00" min="0" step="0.01" autofocus>
+                            <input type="number" id="price" placeholder="0.00" min="0" step="0.01" inputmode="numeric" pattern="[0-9]*"  autofocus>
                         </div>
                     </div>
 
@@ -76,13 +76,13 @@
                             <label for="discount">Sconto (%)</label>
                             <div class="input-wrapper">
                                 <span class="input-prefix">%</span>
-                                <input type="number" id="discount" placeholder="0" min="0" max="100">
+                                <input type="number" id="discount" placeholder="0" min="0" max="100" inputmode="numeric" pattern="[0-9]*">
                             </div>
                         </div>
                         <div class="input-group">
                             <label for="quantity">Quantità</label>
                             <div class="input-wrapper">
-                                <input type="number" id="quantity" placeholder="1" min="1" step="1" value="1">
+                                <input type="number" id="quantity" placeholder="1" min="1" step="1" value="1" inputmode="numeric" pattern="[0-9]*">
                             </div>
                         </div>
                     </div>
