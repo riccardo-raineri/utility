@@ -4,7 +4,7 @@
 
 // Incolla qui l'URL della Web App ottenuto dal deploy di Apps Script
 // (vedi ISTRUZIONI.txt, punto 4). Deve finire con "/exec".
-const URL_BACKEND = 'https://script.google.com/macros/s/AKfycbznX_X7cIUScD12JFhpq0xybLDNNZ3FagvlVAf9SDVyiFzGa6wJcHbR2WL0jqyBM0KL/exec';
+const URL_BACKEND = 'https://script.google.com/macros/s/AKfycbyccZhEDfsE8DYjSSHNQGnHPCpmAd0KuoriaDFku4JO4ohJ38EvExP5Pk2ukrYlO_nd/exec';
 
 // PIN per sbloccare la pagina (solo protezione lato client, non sicurezza reale)
 const PIN_CORRETTO = '1234';
