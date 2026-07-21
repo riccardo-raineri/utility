@@ -83,7 +83,7 @@
 
                 <!-- Primo Blocco Input -->
                 <div class="input-row">
-                    <input type="number" id="input1" placeholder="0" oninput="calculate(1)">
+                    <input type="number" id="input1" placeholder="0" inputmode="numeric" pattern="[0-9]*" oninput="calculate(1)">
                     <select class="unit-select" id="unit1" onchange="calculate(1)"></select>
                     <button type="button" class="copy-btn copy-feedback" id="copy1" onclick="copyValue(1)" title="Copia valore">
                         <i data-lucide="copy"></i>
@@ -97,7 +97,7 @@
 
                 <!-- Secondo Blocco Input -->
                 <div class="input-row">
-                    <input type="number" id="input2" placeholder="0" oninput="calculate(2)">
+                    <input type="number" id="input2" placeholder="0" inputmode="numeric" pattern="[0-9]*" oninput="calculate(2)">
                     <select class="unit-select" id="unit2" onchange="calculate(1)"></select>
                     <button type="button" class="copy-btn copy-feedback" id="copy2" onclick="copyValue(2)" title="Copia valore">
                         <i data-lucide="copy"></i>
@@ -265,7 +265,7 @@
         }
 
         /* -----------------------------------------------------------------
-           POPILAMENTO TENDINE & CALCOLO
+           POPOLAMENTO TENDINE & CALCOLO
            ----------------------------------------------------------------- */
         function populateUnits(cat) {
             const u1 = document.getElementById('unit1');
