@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aspect Ratio Calculator — Visual & Dimension Tool</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Foglio di Stile -->
+    <link rel="stylesheet" href="aspectratio.css">
+</head>
+<body>
+
+    <div class="bg-canvas">
+        <div class="bg-gradient-mesh"></div>
+    </div>
+
+    <div class="app-container">
+        <!-- Navigazione -->
+        <nav class="top-nav">
+            <a class="back-link" href="dashboard.html">
+                <i data-lucide="arrow-left"></i>
+                Dashboard
+            </a>
+        </nav>
+
+        <!-- Header -->
+        <header class="header-section">
+            <div class="header-icon">
+                <i data-lucide="aspect-ratio"></i>
+            </div>
+            <h1 class="title">Aspect Ratio Calculator</h1>
+            <p class="subtitle">Calcola e ridimensiona le proporzioni di immagini e video in tempo reale</p>
+        </header>
+
+        <!-- Card Calcolatore -->
+        <div class="card">
+            <div class="card-title">Preset & Standard Cinematografici</div>
+            <div class="presets-grid">
+                <!-- Social & Standard -->
+                <button class="btn-preset" onclick="setPreset(1, 1, this)">1.00 (1:1 Quadrato)</button>
+                <button class="btn-preset" onclick="setPreset(4, 5, this)">0.80 (4:5 Instagram)</button>
+                <button class="btn-preset" onclick="setPreset(9, 16, this)">0.56 (9:16 Reel/TikTok)</button>
+                
+                <!-- Video & Cinema -->
+                <button class="btn-preset" onclick="setPreset(4, 3, this)">1.33 (4:3 Video)</button>
+                <button class="btn-preset" onclick="setPreset(137, 100, this)">1.37 (4:3 Academy)</button>
+                <button class="btn-preset" onclick="setPreset(3, 2, this)">1.50 (3:2 35mm Video)</button>
+                <button class="btn-preset" onclick="setPreset(166, 100, this)">1.66 (Super 16mm, EU Widescreen)</button>
+                <button class="btn-preset active" onclick="setPreset(16, 9, this)">1.78 (16:9 Widescreen)</button>
+                <button class="btn-preset" onclick="setPreset(185, 100, this)">1.85 (DCI Flat, US Widescreen)</button>
+                <button class="btn-preset" onclick="setPreset(2, 1, this)">2.00 (SuperScope)</button>
+                <button class="btn-preset" onclick="setPreset(22, 10, this)">2.20 (70mm Standard)</button>
+                <button class="btn-preset" onclick="setPreset(235, 100, this)">2.35 (35mm Anamorphic)</button>
+                <button class="btn-preset" onclick="setPreset(239, 100, this)">2.39 (DCI Scope)</button>
+                <button class="btn-preset" onclick="setPreset(276, 100, this)">2.76 (Ultra 70mm)</button>
+            </div>
+
+            <div class="calculator-grid">
+                <!-- Rapporto di Origine -->
+                <div class="ratio-box">
+                    <span class="box-label">
+                        <i data-lucide="proportion" style="width:16px;height:16px;"></i> Rapporto / Origine
+                    </span>
+                    <div class="inputs-row">
+                        <div class="input-group">
+                            <label for="w1">LARGHEZZA (W1)</label>
+                            <input type="number" id="w1" value="1920" min="1" oninput="calculateFromRatio()">
+                        </div>
+                        <span class="ratio-separator">:</span>
+                        <div class="input-group">
+                            <label for="h1">ALTEZZA (H1)</label>
+                            <input type="number" id="h1" value="1080" min="1" oninput="calculateFromRatio()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="equals-badge">=</div>
+
+                <!-- Nuove Dimensioni Calcolate -->
+                <div class="ratio-box">
+                    <span class="box-label">
+                        <i data-lucide="scaling" style="width:16px;height:16px;"></i> Nuova Dimensione
+                    </span>
+                    <div class="inputs-row">
+                        <div class="input-group">
+                            <label for="w2">LARGHEZZA (W2)</label>
+                            <input type="number" id="w2" value="1280" min="1" oninput="calculateHeight()">
+                        </div>
+                        <span class="ratio-separator">:</span>
+                        <div class="input-group">
+                            <label for="h2">ALTEZZA (H2)</label>
+                            <input type="number" id="h2" value="720" min="1" oninput="calculateWidth()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Box di Anteprima Visiva -->
+            <div class="visualizer-container">
+                <div id="preview-box" class="preview-box">
+                    <span id="preview-text" class="preview-text">16:9</span>
+                </div>
+                <div class="info-summary">
+                    <span>Rapporto: <strong id="ratio-decimal">1.78:1</strong></span>
+                    <span>Semplificato: <strong id="ratio-simplified">16:9</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <footer class="app-footer">
+            <span>Aspect Ratio Calculator — Studio Tools — 2026</span>
+        </footer>
+    </div>
+
+    <!-- Script -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (window.lucide) lucide.createIcons();
+        calculateFromRatio();
+    });
+
+    function gcd(a, b) {
+        return b === 0 ? a : gcd(b, a % b);
+    }
+
+    function calculateHeight() {
+        const w1 = parseFloat(document.getElementById('w1').value) || 0;
+        const h1 = parseFloat(document.getElementById('h1').value) || 0;
+        const w2 = parseFloat(document.getElementById('w2').value) || 0;
+
+        if (w1 > 0 && h1 > 0 && w2 > 0) {
+            const h2 = Math.round((w2 * h1) / w1);
+            document.getElementById('h2').value = h2;
+            updateVisualizer(w1, h1, w2, h2);
+        }
+    }
+
+    function calculateWidth() {
+        const w1 = parseFloat(document.getElementById('w1').value) || 0;
+        const h1 = parseFloat(document.getElementById('h1').value) || 0;
+        const h2 = parseFloat(document.getElementById('h2').value) || 0;
+
+        if (w1 > 0 && h1 > 0 && h2 > 0) {
+            const w2 = Math.round((h2 * w1) / h1);
+            document.getElementById('w2').value = w2;
+            updateVisualizer(w1, h1, w2, h2);
+        }
+    }
+
+    function calculateFromRatio() {
+        const w1 = parseFloat(document.getElementById('w1').value) || 0;
+        const h1 = parseFloat(document.getElementById('h1').value) || 0;
+        const w2 = parseFloat(document.getElementById('w2').value) || 0;
+
+        if (w1 > 0 && h1 > 0) {
+            if (w2 > 0) {
+                calculateHeight();
+            } else {
+                updateVisualizer(w1, h1, w1, h1);
+            }
+        }
+    }
+
+    function setPreset(w, h, btnElement) {
+        document.getElementById('w1').value = w;
+        document.getElementById('h1').value = h;
+
+        const buttons = document.querySelectorAll('.btn-preset');
+        buttons.forEach(b => b.classList.remove('active'));
+        if (btnElement) btnElement.classList.add('active');
+
+        calculateFromRatio();
+    }
+
+    function updateVisualizer(w1, h1, w2, h2) {
+        const previewBox = document.getElementById('preview-box');
+        const previewText = document.getElementById('preview-text');
+        const ratioDecimal = document.getElementById('ratio-decimal');
+        const ratioSimplified = document.getElementById('ratio-simplified');
+
+        const ratio = w1 / h1;
+        ratioDecimal.innerText = `${ratio.toFixed(2)}:1`;
+
+        const commonDivisor = gcd(Math.round(w1), Math.round(h1));
+        const simpleW = Math.round(w1) / commonDivisor;
+        const simpleH = Math.round(h1) / commonDivisor;
+        ratioSimplified.innerText = `${simpleW}:${simpleH}`;
+
+        previewText.innerText = `${w2} × ${h2} (${ratio.toFixed(2)}:1)`;
+
+        const maxBoxWidth = 320;
+        const maxBoxHeight = 220;
+
+        let boxW, boxH;
+
+        if (ratio >= maxBoxWidth / maxBoxHeight) {
+            boxW = maxBoxWidth;
+            boxH = maxBoxWidth / ratio;
+        } else {
+            boxH = maxBoxHeight;
+            boxW = maxBoxHeight * ratio;
+        }
+
+        previewBox.style.width = `${Math.max(boxW, 60)}px`;
+        previewBox.style.height = `${Math.max(boxH, 60)}px`;
+    }
+    </script>
+</body>
+</html>
