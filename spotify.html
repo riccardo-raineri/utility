@@ -1,115 +1,136 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Spotify Family — Quote</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="spotify.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Family — Quote</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="spotify.css">
 </head>
 <body data-theme="dark">
 
-  <!-- ============ SCHERMATA PIN ============ -->
-  <!-- Overlay a schermo intero che blocca l'accesso finché non si
-       inserisce il PIN corretto. Il controllo è lato client: non è
-       una vera sicurezza, serve solo a evitare modifiche accidentali
-       o da parte di chi trova il link per caso. -->
-  <div id="pinGate" class="pin-gate">
-    <div class="pin-card">
-      <div class="pin-icon">●●●</div>
-      <h2>Accesso protetto</h2>
-      <p>Inserisci il PIN per aprire il pannello Spotify Family</p>
-      <input type="password" id="pinInput" inputmode="numeric" maxlength="8" placeholder="PIN">
-      <button id="pinSubmit">Sblocca</button>
-      <p id="pinErrore" class="pin-errore">PIN errato, riprova</p>
+    <!-- ============ SCHERMATA PIN ============ -->
+    <div id="pinGate" class="pin-gate">
+        <div class="pin-card">
+            <div class="pin-icon">
+                <i data-lucide="lock"></i>
+            </div>
+            <h2>Accesso protetto</h2>
+            <p>Inserisci il PIN per aprire il pannello Spotify Family</p>
+            <input type="password" id="pinInput" inputmode="numeric" maxlength="8" placeholder="PIN">
+            <button id="pinSubmit">Sblocca</button>
+            <p id="pinErrore" class="pin-errore">PIN errato, riprova</p>
+        </div>
     </div>
-  </div>
 
-  <!-- ============ CONTENUTO PRINCIPALE ============ -->
-  <div id="app" class="app hidden">
+    <!-- ============ CONTENUTO PRINCIPALE ============ -->
+    <div id="app" class="app-container hidden">
 
-    <header class="topbar">
-      <a href="dashboard.html" class="back-link">← Toolbox</a>
-      <div class="brand">
-        <span class="brand-dot"></span>
-        <h1>Spotify Family</h1>
-      </div>
-      <button id="themeToggle" class="theme-toggle" title="Cambia tema">◐</button>
-    </header>
+        <header class="app-header">
+            <div class="header-left">
+                <a href="dashboard.html" class="back-btn">
+                    <i data-lucide="arrow-left"></i>
+                    <span>Dashboard</span>
+                </a>
+            </div>
+            <div class="header-center">
+                <div class="brand">
+                    <span class="brand-dot"></span>
+                    <h1 class="app-title">Spotify Family</h1>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="themeToggle" class="theme-toggle" title="Cambia tema">
+                    <i data-lucide="moon"></i>
+                </button>
+            </div>
+        </header>
 
-    <main class="content">
+        <main class="content">
 
-      <!-- Periodo attuale: riepilogo E form insieme, direttamente modificabile -->
-      <section class="riepilogo" id="riepilogo">
-        <div class="riepilogo-header">
-          <h2 id="riepilogoTitolo">Periodo attuale</h2>
-          <button type="button" id="nuovoPeriodoBtn" class="btn-link">+ Nuovo periodo</button>
-        </div>
+            <!-- Periodo attuale: riepilogo E form insieme -->
+            <section class="riepilogo" id="riepilogo">
+                <div class="riepilogo-header">
+                    <h2 id="riepilogoTitolo">Periodo attuale</h2>
+                    <button type="button" id="nuovoPeriodoBtn" class="btn-link">
+                        <i data-lucide="plus"></i>
+                        <span>Nuovo periodo</span>
+                    </button>
+                </div>
 
-        <div class="barra-quota">
-          <div id="barraPagato" class="barra-pagato" style="width:0%"></div>
-        </div>
-        <div class="riepilogo-legenda">
-          <span><i class="dot dot-ok"></i> Pagato: <b id="countPagato">0</b>/<span id="countTotale">0</span></span>
-          <span><i class="dot dot-no"></i> Da pagare: <b id="countNonPagato">0</b></span>
-        </div>
+                <div class="barra-quota">
+                    <div id="barraPagato" class="barra-pagato" style="width:0%"></div>
+                </div>
+                <div class="riepilogo-legenda">
+                    <span><i class="dot dot-ok"></i> Pagato: <b id="countPagato">0</b>/<span id="countTotale">0</span></span>
+                    <span><i class="dot dot-no"></i> Da pagare: <b id="countNonPagato">0</b></span>
+                </div>
 
-        <form id="formPeriodo">
-          <div class="riga-campi">
-            <label>
-              Inizio periodo
-              <input type="date" id="campoInizio" required>
-            </label>
-            <label>
-              Fine periodo
-              <input type="date" id="campoFine" required>
-            </label>
-            <label>
-              € a persona <span class="opzionale">(opzionale)</span>
-              <input type="number" id="campoQuota" step="0.01" min="0" placeholder="ultimo importo usato">
-            </label>
-            <label>
-              Durata
-              <input type="text" id="campoDurata" placeholder="es. 3 mesi" required>
-            </label>
-          </div>
+                <form id="formPeriodo">
+                    <div class="riga-campi">
+                        <label>
+                            Inizio periodo
+                            <input type="date" id="campoInizio" required>
+                        </label>
+                        <label>
+                            Fine periodo
+                            <input type="date" id="campoFine" required>
+                        </label>
+                        <label>
+                            € a persona <span class="opzionale">(opzionale)</span>
+                            <input type="number" id="campoQuota" step="0.01" min="0" placeholder="ultimo importo usato">
+                        </label>
+                        <label>
+                            Durata
+                            <input type="text" id="campoDurata" placeholder="es. 3 mesi" required>
+                        </label>
+                    </div>
 
-          <div class="membri-box">
-            <p class="membri-titolo">Chi ha pagato?</p>
-            <div id="listaMembri" class="lista-membri-checkbox"></div>
-          </div>
+                    <div class="membri-box">
+                        <p class="membri-titolo">Chi ha pagato?</p>
+                        <div id="listaMembri" class="lista-membri-checkbox"></div>
+                    </div>
 
-          <button type="submit" id="salvaBtn">Salva modifiche</button>
-          <span id="salvaStato" class="salva-stato"></span>
-        </form>
-      </section>
+                    <div class="form-actions">
+                        <button type="submit" id="salvaBtn">Salva modifiche</button>
+                        <span id="salvaStato" class="salva-stato"></span>
+                    </div>
+                </form>
+            </section>
 
-      <!-- Storico dei periodi passati -->
-      <section class="storico">
-        <h2>Storico periodi</h2>
-        <div class="tabella-wrap">
-          <table id="tabellaStorico">
-            <thead>
-              <tr>
-                <th>Periodo</th>
-                <th>€ P.P.</th>
-                <th>Durata</th>
-                <th>Pagato</th>
-                <th>Da pagare</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="corpoTabella">
-              <!-- righe generate da spotify.js -->
-            </tbody>
-          </table>
-        </div>
-      </section>
+            <!-- Storico dei periodi passati -->
+            <section class="storico">
+                <h2>Storico periodi</h2>
+                <div class="tabella-wrap">
+                    <table id="tabellaStorico">
+                        <thead>
+                            <tr>
+                                <th>Periodo</th>
+                                <th>€ P.P.</th>
+                                <th>Durata</th>
+                                <th>Pagato</th>
+                                <th>Da pagare</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpoTabella">
+                            <!-- righe generate da spotify.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-    </main>
-  </div>
+        </main>
+    </div>
 
-  <script src="spotify.js"></script>
+    <script src="spotify.js"></script>
 </body>
 </html>
