@@ -4,19 +4,21 @@
 
 // Incolla qui l'URL della Web App ottenuto dal deploy di Apps Script
 // (vedi ISTRUZIONI.txt, punto 4). Deve finire con "/exec".
-const URL_BACKEND = 'https://script.google.com/macros/s/AKfycbx1_49drxJ75WOkucbend8j6pPwFq3_3ClKjC67obdzCmDLtNb-Sj0B8Df8a0cAqxp3/exec';
+const URL_BACKEND = 'https://script.google.com/macros/s/AKfycbznX_X7cIUScD12JFhpq0xybLDNNZ3FagvlVAf9SDVyiFzGa6wJcHbR2WL0jqyBM0KL/exec';
 
 // PIN per sbloccare la pagina (solo protezione lato client, non sicurezza reale)
 const PIN_CORRETTO = '1234';
 
-// Nomi dei membri del gruppo: modificali con i nomi veri.
-// L'ordine qui è l'ordine in cui compariranno i checkbox nel form.
-const MEMBRI = ['Chiara', 'Giulia', 'Riccardo', 'Valentina', 'Sharon', 'Sergio', 'Alessandra'];
+// I 6 membri ATTUALI del gruppo (usati per il periodo attuale e i nuovi
+// periodi). Alessandra è entrata al posto di Sergio da questo mese: i
+// periodi passati restano quelli davvero registrati per allora, e non
+// vengono toccati da questo elenco quando li visualizzi nello storico.
+const MEMBRI = ['Chiara', 'Giulia', 'Riccardo', 'Valentina', 'Sharon', 'Alessandra'];
 
 /* =====================================================
    STATO IN MEMORIA
    ===================================================== */
-let periodi = []; // elenco dei periodi caricati dal foglio
+let periodi = []; // elenco dei periodi caricati dal foglio (ordine originale)
 
 /* =====================================================
    PIN GATE
@@ -89,11 +91,12 @@ function caricaPeriodi() {
     .then(function (r) { return r.json(); })
     .then(function (dati) {
       periodi = dati;
-      renderTabella();
-      // Dopo ogni caricamento, il form mostra sempre il periodo più recente
-      // (cioè quello "in corso"), pronto per essere modificato al volo.
-      if (periodi.length > 0) {
-        caricaPeriodoNelForm(periodi[periodi.length - 1], 'Periodo attuale');
+      const ordinati = ordinaPerDataDiscendente(periodi);
+      renderTabella(ordinati);
+      // Il periodo attuale è sempre quello con la data più recente,
+      // non semplicemente l'ultima riga del foglio.
+      if (ordinati.length > 0) {
+        caricaPeriodoNelForm(ordinati[0], 'Periodo attuale');
       } else {
         resetForm('Nuovo periodo');
       }
@@ -104,6 +107,24 @@ function caricaPeriodi() {
 }
 
 /* =====================================================
+   ORDINAMENTO PER DATA
+   ===================================================== */
+// Converte "gg/mm/aaaa" in un vero oggetto Date, per poter confrontare
+// e ordinare correttamente i periodi (l'ordine delle righe sul foglio
+// non è affidabile: si vuole l'ordine cronologico reale).
+function analizzaData(stringaData) {
+  const parti = (stringaData || '').split('/');
+  if (parti.length !== 3) return new Date(0);
+  return new Date(parseInt(parti[2], 10), parseInt(parti[1], 10) - 1, parseInt(parti[0], 10));
+}
+
+function ordinaPerDataDiscendente(lista) {
+  return lista.slice().sort(function (a, b) {
+    return analizzaData(b.inizio) - analizzaData(a.inizio);
+  });
+}
+
+/* =====================================================
    RIEPILOGO LIVE — ricalcolato a ogni click sui checkbox,
    così la barra e i conteggi seguono quello che si sta per salvare,
    non solo l'ultimo dato salvato.
@@ -111,7 +132,7 @@ function caricaPeriodi() {
 function aggiornaBarraDaCheckbox() {
   const checkbox = Array.from(document.querySelectorAll('.membro-label input'));
   const pagati = checkbox.filter(function (c) { return c.checked; }).length;
-  const totale = checkbox.length;
+  const totale = checkbox.length; // sempre 6, quanti sono i MEMBRI attuali
   const percentuale = totale > 0 ? Math.round((pagati / totale) * 100) : 0;
 
   document.getElementById('barraPagato').style.width = percentuale + '%';
@@ -121,26 +142,25 @@ function aggiornaBarraDaCheckbox() {
 }
 
 /* =====================================================
-   RENDER — tabella storico
+   RENDER — tabella storico (ordinata dal più recente al più vecchio)
    ===================================================== */
-function renderTabella() {
+function renderTabella(listaOrdinata) {
   const corpo = document.getElementById('corpoTabella');
   corpo.innerHTML = '';
 
-  // Mostra i periodi dal più recente al più vecchio
-  periodi.slice().reverse().forEach(function (periodo, indice) {
-    const eUltimo = indice === 0; // il primo della lista invertita = il più recente
+  listaOrdinata.forEach(function (periodo, indice) {
+    const eIlPiuRecente = indice === 0;
     const riga = document.createElement('tr');
     riga.innerHTML =
       '<td>' + periodo.inizio + ' — ' + periodo.fine + '</td>' +
       '<td>€ ' + periodo.quota + '</td>' +
       '<td>' + periodo.durata + '</td>' +
-      '<td>' + (splitNomi(periodo.pagato).length) + '</td>' +
-      '<td>' + (splitNomi(periodo.nonPagato).length) + '</td>' +
+      '<td class="cella-nomi cella-ok">' + (periodo.pagato || '—') + '</td>' +
+      '<td class="cella-nomi cella-no">' + (periodo.nonPagato || '—') + '</td>' +
       '<td><button class="btn-modifica">Modifica</button></td>';
 
     riga.querySelector('.btn-modifica').addEventListener('click', function () {
-      caricaPeriodoNelForm(periodo, eUltimo ? 'Periodo attuale' : 'Modifica periodo');
+      caricaPeriodoNelForm(periodo, eIlPiuRecente ? 'Periodo attuale' : 'Modifica periodo');
       document.getElementById('riepilogo').scrollIntoView({ behavior: 'smooth' });
     });
 
@@ -203,8 +223,9 @@ function resetForm(titolo) {
 // Recupera l'ultimo valore non vuoto usato per un campo (es. "quota" o "durata"),
 // scorrendo i periodi salvati dal più recente al più vecchio.
 function ultimoValoreConosciuto(campo) {
-  for (let i = periodi.length - 1; i >= 0; i--) {
-    if (periodi[i][campo]) return periodi[i][campo];
+  const ordinati = ordinaPerDataDiscendente(periodi);
+  for (let i = 0; i < ordinati.length; i++) {
+    if (ordinati[i][campo]) return ordinati[i][campo];
   }
   return '';
 }
@@ -253,8 +274,7 @@ document.getElementById('formPeriodo').addEventListener('submit', function (e) {
   stato.textContent = 'Salvataggio in corso…';
 
   // Il backend (apps-script.gs) cerca già una riga con le stesse date:
-  // se esiste la aggiorna, altrimenti ne aggiunge una nuova. Non serve
-  // quindi distinguere qui tra "modifica" e "nuovo periodo".
+  // se esiste la aggiorna, altrimenti ne aggiunge una nuova.
   const url = URL_BACKEND + '?action=save&data=' + encodeURIComponent(JSON.stringify(periodo));
 
   fetch(url)
