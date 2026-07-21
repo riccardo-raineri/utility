@@ -112,31 +112,64 @@ async function extractTextFromPdf(file) {
   return fullText;
 }
 
-// Euristiche di riconoscimento per i cedolini italiani più comuni.
-// Sono pensate come punto di partenza: se il tuo cedolino ha un layout
-// diverso, i valori restano modificabili nel form prima di salvare.
+// Euristiche di riconoscimento tarate sul formato "agenzia di somministrazione"
+// (Manpower, modello Zucchetti) confermato dal testo grezzo condiviso.
+// Alcuni valori (es. Lordo) non hanno un'etichetta univoca adiacente in questo
+// layout tabellare: sono stimati con una regola strutturale e vanno sempre
+// ricontrollati nel form prima di salvare.
 function parseCedolino(text) {
   const norm = text.replace(/\s+/g, ' ');
-  const num = (re) => {
+  const NUM = '\\d+(?:\\.\\d{3})*,\\d+'; // decimali variabili: 845,01 (euro), 7,083 (giorni ferie), 12,93652 (tariffa oraria)
+  const clean = (s) => (s ? s.replace(/\./g, '').replace(',', '.') : '');
+  const grab = (re) => {
     const m = norm.match(re);
-    if (!m) return '';
-    return m[1].replace(/\./g, '').replace(',', '.');
+    return m ? clean(m[1]) : '';
   };
 
+  // Netto: protetto da asterischi anti-frode, es. "*****845,01"
+  const netto = grab(/\*{3,}\s*(\d+(?:\.\d{3})*,\d{2})/);
+
+  // Ferie / R.O.L. / ASSEM: "LABEL : Res.AP Matur. X Goduto Saldo Y"
+  const ferieSaldo = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
+  const ferieMatur = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
+  const rolSaldo = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
+  const rolMatur = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
+  const assemSaldo = grab(new RegExp(`ASSEM\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
+
+  // Straordinari: "Ore supplementari 35% p.t 4,750 12,93652 61,45" (ore, tariffa, competenza)
+  const straOre = grab(new RegExp(`ore\\s+supplementari\\s+\\d+%?\\s*p\\.?t\\.?\\s*(${NUM})`, 'i'));
+  const straEuroMatch = norm.match(
+    new RegExp(`ore\\s+supplementari\\s+\\d+%?\\s*p\\.?t\\.?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i')
+  );
+  const straEuro = straEuroMatch ? clean(straEuroMatch[1]) : '';
+
+  // Lordo: nessuna etichetta diretta in questo layout. Euristica: nel blocco
+  // finale il "TOT TRATTENUTE PREV./FISC." e il "TOT TRATTENUTE NETTO" spesso
+  // coincidono (X), con il "TOT COMPETENZE" (Y) in mezzo → pattern "X Y X".
+  const lordoTriple = norm.match(new RegExp(`(${NUM})\\s+(${NUM})\\s+\\1(?!\\d)`));
+  let lordo = lordoTriple ? clean(lordoTriple[2]) : '';
+  if (!lordo && netto) {
+    // Fallback ulteriore: netto + trattenute INPS/FSBS chiaramente etichettate
+    // (stima parziale, potrebbe non includere l'IRPEF per intero)
+    const inps = grab(new RegExp(`INPS-FPLD\\/IVS[^\\d]*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
+    const fsbs = grab(new RegExp(`FSBS-Somministr[^\\d]*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
+    if (inps && fsbs) lordo = (parseFloat(netto) + parseFloat(inps) + parseFloat(fsbs)).toFixed(2);
+  }
+
   return {
-    Netto: num(/netto\s+(?:in\s+busta|a\s+pagare|del\s+mese)?\s*[:€]*\s*([\d.,]+)/i),
-    Lordo: num(/(?:totale\s+)?lordo\s*(?:mensile)?\s*[:€]*\s*([\d.,]+)/i),
-    FerieResidue: num(/ferie\s+(?:residue|a\s+saldo|residuo)\s*[:]*\s*([\d.,]+)/i),
-    FerieMaturateMese: num(/ferie\s+maturate\s*[:]*\s*([\d.,]+)/i),
-    RolResiduo: num(/r\.?o\.?l\.?\s+residuo\s*[:]*\s*([\d.,]+)/i),
-    RolMaturatoMese: num(/r\.?o\.?l\.?\s+maturat[oi]\s*[:]*\s*([\d.,]+)/i),
-    StraordinariOre: num(/straordinari[oe]?\s+ore\s*[:]*\s*([\d.,]+)/i),
-    StraordinariEuro: num(/straordinari[oe]?\s+(?:importo|€)\s*[:]*\s*([\d.,]+)/i),
-    Tredicesima: num(/tredicesima\s*[:€]*\s*([\d.,]+)/i),
-    Quattordicesima: num(/quattordicesima\s*[:€]*\s*([\d.,]+)/i),
-    TFRAccantonato: num(/t\.?f\.?r\.?\s+accantonat[oa]\s*[:]*\s*([\d.,]+)/i),
+    Netto: netto,
+    Lordo: lordo,
+    FerieResidue: ferieSaldo,
+    FerieMaturateMese: ferieMatur,
+    RolResiduo: rolSaldo,
+    RolMaturatoMese: rolMatur,
+    StraordinariOre: straOre,
+    StraordinariEuro: straEuro,
+    Tredicesima: grab(new RegExp(`tredicesima\\s*[:€]*\\s*(${NUM})`, 'i')),
+    Quattordicesima: grab(new RegExp(`quattordicesima\\s*[:€]*\\s*(${NUM})`, 'i')),
+    TFRAccantonato: grab(new RegExp(`t\\.?f\\.?r\\.?\\s+accantonat[oa]\\s*[:]*\\s*(${NUM})`, 'i')),
     Extra: '',
-    NoteExtra: '',
+    NoteExtra: assemSaldo ? `Permessi/ASSEM residui: ${assemSaldo}` : '',
   };
 }
 
