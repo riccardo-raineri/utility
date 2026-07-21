@@ -3,7 +3,7 @@
    ===================================================== */
 
 const URL_BACKEND = 'https://script.google.com/macros/s/AKfycbw7WODeo97g_mzXBHy59j_FGHTXR61AlWORi0L9mYC9K0Yqi56IjwDn0PXJtX3RrdyG/exec';
-const PIN_CORRETTO = '1234';
+const PIN_CORRETTO = '0712';
 const MEMBRI = ['Chiara', 'Giulia', 'Riccardo', 'Valentina', 'Sharon', 'Alessandra'];
 
 /* =====================================================
@@ -154,7 +154,7 @@ function renderTabella(listaOrdinata) {
         const riga = document.createElement('tr');
         riga.innerHTML =
             '<td>' + periodo.inizio + ' — ' + periodo.fine + '</td>' +
-            '<td>€ ' + periodo.quota + '</td>' +
+            '<td>' + periodo.quota + '</td>' +
             '<td>' + periodo.durata + '</td>' +
             '<td class="cella-nomi cella-ok">' + (periodo.pagato || '—') + '</td>' +
             '<td class="cella-nomi cella-no">' + (periodo.nonPagato || '—') + '</td>' +
