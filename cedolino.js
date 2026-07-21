@@ -1,6 +1,10 @@
 // ---------- Config & tema ----------
 const $ = (sel) => document.querySelector(sel);
 
+// Senza indicare esplicitamente il worker, PDF.js fallisce a caricare il PDF
+// (spesso senza un errore chiaro a video) e l'estrazione del testo non parte mai.
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
 const state = {
   webAppUrl: localStorage.getItem('cedolino_webAppUrl') || '',
   cedolini: [],
@@ -66,12 +70,26 @@ async function handleFile(file) {
   setStatus('Lettura del PDF in corso...');
   try {
     const text = await extractTextFromPdf(file);
+    console.log('Testo estratto dal PDF:', text); // utile per debug in console
+
+    if (!text || text.trim().length === 0) {
+      setStatus('Il PDF non contiene testo selezionabile (probabile scansione/immagine): serve l\'OCR, non ancora attivo. Inserisci i dati a mano qui sotto.', true);
+      showReview({});
+      return;
+    }
+
     const parsed = parseCedolino(text);
-    setStatus('Dati letti — controlla e correggi qui sotto prima di salvare.');
-    showReview(parsed);
+    const anyFieldFound = Object.values(parsed).some((v) => v !== '');
+
+    if (anyFieldFound) {
+      setStatus('Dati letti — controlla e correggi qui sotto prima di salvare.');
+    } else {
+      setStatus('Ho letto il PDF ma non ho riconosciuto le diciture: correggi i campi a mano. Apri "Testo grezzo" qui sotto e condividilo con me per migliorare il riconoscimento.', true);
+    }
+    showReview(parsed, text);
   } catch (err) {
     console.error(err);
-    setStatus('Non sono riuscito a leggere il PDF. Puoi comunque inserire i dati a mano qui sotto.', true);
+    setStatus('Errore nella lettura del PDF (vedi console). Puoi comunque inserire i dati a mano qui sotto.', true);
     showReview({});
   }
 }
@@ -123,19 +141,29 @@ function parseCedolino(text) {
 }
 
 // ---------- Form di revisione ----------
-function showReview(data) {
+function showReview(data, rawText) {
   $('#reviewSection').classList.remove('hidden');
   const form = $('#reviewForm');
   Object.entries(data).forEach(([key, value]) => {
     const input = form.querySelector(`[name="${key}"]`);
     if (input && value !== undefined) input.value = value;
   });
+
+  const rawDetails = $('#rawTextDetails');
+  if (rawText) {
+    $('#rawTextArea').value = rawText;
+    rawDetails.classList.remove('hidden');
+  } else {
+    rawDetails.classList.add('hidden');
+  }
+
   $('#reviewSection').scrollIntoView({ behavior: 'smooth' });
 }
 
 $('#cancelReview').addEventListener('click', () => {
   $('#reviewSection').classList.add('hidden');
   $('#reviewForm').reset();
+  $('#rawTextDetails').classList.add('hidden');
   fileInput.value = '';
   setStatus('');
 });
