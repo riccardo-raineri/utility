@@ -33,6 +33,27 @@
 
     <!-- ============ CONTENUTO PRINCIPALE ============ -->
     <div id="app" class="app-container hidden">
+		
+		<!-- Navigation Bar -->
+        <nav class="top-nav">
+            <!-- Link alla Dashboard -->
+            <a class="back-link" href="dashboard.html">
+                <i data-lucide="arrow-left"></i>
+                Dashboard
+            </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="percent"></i>
+                    Calcolo Sconti
+                </span>
+            </div>
+        </nav>
+
 
         <header class="app-header">
             <div class="header-left">
