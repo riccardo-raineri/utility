@@ -21,23 +21,31 @@
 <body>
 
     <div class="bg-canvas">
-        <div class="bg-gradient-mesh"></div>
+        <div class="bg-grid-pattern"></div>
     </div>
 
     <div class="app-container">
-        <!-- Navigazione -->
+        <!-- Navigation Bar -->
         <nav class="top-nav">
             <a class="back-link" href="dashboard.html">
                 <i data-lucide="arrow-left"></i>
                 Dashboard
             </a>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Cambia tema">
+                    <i data-lucide="sun" class="icon-sun"></i>
+                    <i data-lucide="moon" class="icon-moon"></i>
+                </button>
+                <span class="tool-badge">
+                    <i data-lucide="scan"></i>
+                    Aspect Ratio
+                </span>
+            </div>
         </nav>
 
         <!-- Header -->
         <header class="header-section">
-            <div class="header-icon">
-                <i data-lucide="aspect-ratio"></i>
-            </div>
             <h1 class="title">Aspect Ratio Calculator</h1>
             <p class="subtitle">Calcola e ridimensiona le proporzioni di immagini e video in tempo reale</p>
         </header>
@@ -84,7 +92,7 @@
                     </div>
                 </div>
 
-                <div class="equals-badge">=</div>
+                <div class="equals-badge">|</div>
 
                 <!-- Nuove Dimensioni Calcolate -->
                 <div class="ratio-box">
@@ -118,7 +126,7 @@
         </div>
 
         <footer class="app-footer">
-            <span>Aspect Ratio Calculator — Studio Tools — 2026</span>
+            <span>Creative Utility Toolbox — Riccardo Raineri</span>
         </footer>
     </div>
 
@@ -126,9 +134,38 @@
     <script>
     document.addEventListener('DOMContentLoaded', () => {
         if (window.lucide) lucide.createIcons();
+        applyStoredTheme();
         calculateFromRatio();
     });
 
+    /* -----------------------------------------------------------------
+       GESTIONE TEMA (DARK / LIGHT)
+       ----------------------------------------------------------------- */
+    function applyStoredTheme() {
+        const stored = localStorage.getItem('toolbox_theme');
+        if (stored === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+        } else {
+            document.body.removeAttribute('data-theme');
+        }
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        const isLight = body.getAttribute('data-theme') === 'light';
+
+        if (isLight) {
+            body.removeAttribute('data-theme');
+            localStorage.setItem('toolbox_theme', 'dark');
+        } else {
+            body.setAttribute('data-theme', 'light');
+            localStorage.setItem('toolbox_theme', 'light');
+        }
+    }
+
+    /* -----------------------------------------------------------------
+       LOGICA DI CALCOLO ASPECT RATIO
+       ----------------------------------------------------------------- */
     function gcd(a, b) {
         return b === 0 ? a : gcd(b, a % b);
     }
