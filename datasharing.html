@@ -109,7 +109,7 @@
                         </div>
                         <div class="input-group">
                             <label for="create-pin">PIN di Protezione (4+ cifre)</label>
-                            <input type="password" id="create-pin" placeholder="****" maxlength="8">
+                            <input type="password" id="create-pin" placeholder="****" maxlength="4" inputmode="numeric" pattern="[0-9]*">
                         </div>
                         <button class="btn-primary" onclick="createRoom()">
                             <i data-lucide="door-open"></i>
@@ -129,7 +129,7 @@
                         </div>
                         <div class="input-group">
                             <label for="join-pin">Inserisci PIN Stanza</label>
-                            <input type="password" id="join-pin" placeholder="****" maxlength="8">
+                            <input type="password" id="join-pin" placeholder="****" maxlength="4" inputmode="numeric" pattern="[0-9]*">
                         </div>
                         <button class="btn-primary" onclick="joinRoom()">
                             <i data-lucide="key-round"></i>
