@@ -4,12 +4,12 @@
 
 // Incolla qui l'URL della Web App ottenuto dal deploy di Apps Script
 // (vedi ISTRUZIONI.txt, punto 4). Deve finire con "/exec".
-const URL_BACKEND = 'https://script.google.com/macros/s/AKfycbznX_X7cIUScD12JFhpq0xybLDNNZ3FagvlVAf9SDVyiFzGa6wJcHbR2WL0jqyBM0KL/exec';
+const URL_BACKEND = 'https://script.google.com/macros/s/AKfycbx1_49drxJ75WOkucbend8j6pPwFq3_3ClKjC67obdzCmDLtNb-Sj0B8Df8a0cAqxp3/exec';
 
 // PIN per sbloccare la pagina (solo protezione lato client, non sicurezza reale)
 const PIN_CORRETTO = '1234';
 
-// Nomi dei 6 membri del gruppo: modificali con i nomi veri.
+// Nomi dei membri del gruppo: modificali con i nomi veri.
 // L'ordine qui è l'ordine in cui compariranno i checkbox nel form.
 const MEMBRI = ['Chiara', 'Giulia', 'Riccardo', 'Valentina', 'Sharon', 'Sergio', 'Alessandra'];
 
@@ -17,7 +17,6 @@ const MEMBRI = ['Chiara', 'Giulia', 'Riccardo', 'Valentina', 'Sharon', 'Sergio',
    STATO IN MEMORIA
    ===================================================== */
 let periodi = []; // elenco dei periodi caricati dal foglio
-let periodoInModifica = null; // se stiamo modificando un periodo esistente
 
 /* =====================================================
    PIN GATE
@@ -79,6 +78,7 @@ function costruisciCheckboxMembri() {
     const checkbox = label.querySelector('input');
     checkbox.addEventListener('change', function () {
       label.classList.toggle('checked', checkbox.checked);
+      aggiornaBarraDaCheckbox(); // aggiorna subito il riepilogo, senza aspettare il salvataggio
     });
     contenitore.appendChild(label);
   });
@@ -89,8 +89,14 @@ function caricaPeriodi() {
     .then(function (r) { return r.json(); })
     .then(function (dati) {
       periodi = dati;
-      renderRiepilogo();
       renderTabella();
+      // Dopo ogni caricamento, il form mostra sempre il periodo più recente
+      // (cioè quello "in corso"), pronto per essere modificato al volo.
+      if (periodi.length > 0) {
+        caricaPeriodoNelForm(periodi[periodi.length - 1], 'Periodo attuale');
+      } else {
+        resetForm('Nuovo periodo');
+      }
     })
     .catch(function (errore) {
       document.getElementById('salvaStato').textContent = 'Errore nel caricamento dei dati: ' + errore.message;
@@ -98,42 +104,20 @@ function caricaPeriodi() {
 }
 
 /* =====================================================
-   RENDER — riepilogo periodo più recente
+   RIEPILOGO LIVE — ricalcolato a ogni click sui checkbox,
+   così la barra e i conteggi seguono quello che si sta per salvare,
+   non solo l'ultimo dato salvato.
    ===================================================== */
-function renderRiepilogo() {
-  if (periodi.length === 0) {
-    document.getElementById('periodoAttualeLabel').textContent = 'Nessun periodo registrato';
-    return;
-  }
+function aggiornaBarraDaCheckbox() {
+  const checkbox = Array.from(document.querySelectorAll('.membro-label input'));
+  const pagati = checkbox.filter(function (c) { return c.checked; }).length;
+  const totale = checkbox.length;
+  const percentuale = totale > 0 ? Math.round((pagati / totale) * 100) : 0;
 
-  const attuale = periodi[periodi.length - 1]; // l'ultimo inserito
-  const pagatoNomi = splitNomi(attuale.pagato);
-  const nonPagatoNomi = splitNomi(attuale.nonPagato);
-  const totale = pagatoNomi.length + nonPagatoNomi.length;
-  const percentuale = totale > 0 ? Math.round((pagatoNomi.length / totale) * 100) : 0;
-
-  document.getElementById('periodoAttualeLabel').textContent = attuale.inizio + ' — ' + attuale.fine;
   document.getElementById('barraPagato').style.width = percentuale + '%';
-  document.getElementById('countPagato').textContent = pagatoNomi.length;
+  document.getElementById('countPagato').textContent = pagati;
   document.getElementById('countTotale').textContent = totale;
-  document.getElementById('countNonPagato').textContent = nonPagatoNomi.length;
-
-  const chipLista = document.getElementById('chipListaAttuale');
-  chipLista.innerHTML = '';
-  pagatoNomi.forEach(function (nome) { chipLista.appendChild(creaChip(nome, 'pagato')); });
-  nonPagatoNomi.forEach(function (nome) { chipLista.appendChild(creaChip(nome, 'non-pagato')); });
-}
-
-function creaChip(nome, classe) {
-  const span = document.createElement('span');
-  span.className = 'chip ' + classe;
-  span.textContent = nome;
-  return span;
-}
-
-function splitNomi(stringa) {
-  if (!stringa) return [];
-  return stringa.split(',').map(function (n) { return n.trim(); }).filter(Boolean);
+  document.getElementById('countNonPagato').textContent = totale - pagati;
 }
 
 /* =====================================================
@@ -144,7 +128,8 @@ function renderTabella() {
   corpo.innerHTML = '';
 
   // Mostra i periodi dal più recente al più vecchio
-  periodi.slice().reverse().forEach(function (periodo) {
+  periodi.slice().reverse().forEach(function (periodo, indice) {
+    const eUltimo = indice === 0; // il primo della lista invertita = il più recente
     const riga = document.createElement('tr');
     riga.innerHTML =
       '<td>' + periodo.inizio + ' — ' + periodo.fine + '</td>' +
@@ -155,22 +140,28 @@ function renderTabella() {
       '<td><button class="btn-modifica">Modifica</button></td>';
 
     riga.querySelector('.btn-modifica').addEventListener('click', function () {
-      caricaPeriodoNelForm(periodo);
+      caricaPeriodoNelForm(periodo, eUltimo ? 'Periodo attuale' : 'Modifica periodo');
+      document.getElementById('riepilogo').scrollIntoView({ behavior: 'smooth' });
     });
 
     corpo.appendChild(riga);
   });
 }
 
+function splitNomi(stringa) {
+  if (!stringa) return [];
+  return stringa.split(',').map(function (n) { return n.trim(); }).filter(Boolean);
+}
+
 /* =====================================================
-   FORM — carica un periodo esistente per modificarlo
+   FORM — carica un periodo (attuale o storico) nel riepilogo/form
    ===================================================== */
-function caricaPeriodoNelForm(periodo) {
-  periodoInModifica = periodo;
+function caricaPeriodoNelForm(periodo, titolo) {
+  document.getElementById('riepilogoTitolo').textContent = titolo;
 
   document.getElementById('campoInizio').value = dataInputDaVisualizzata(periodo.inizio);
   document.getElementById('campoFine').value = dataInputDaVisualizzata(periodo.fine);
-  document.getElementById('campoQuota').value = periodo.quota;
+  document.getElementById('campoQuota').value = periodo.quota || '';
   document.getElementById('campoDurata').value = periodo.durata;
 
   const pagatoNomi = splitNomi(periodo.pagato);
@@ -180,7 +171,42 @@ function caricaPeriodoNelForm(periodo) {
     label.classList.toggle('checked', checkbox.checked);
   });
 
-  document.getElementById('formPeriodo').scrollIntoView({ behavior: 'smooth' });
+  aggiornaBarraDaCheckbox();
+}
+
+/* =====================================================
+   FORM — "+ Nuovo periodo": svuota le date e i checkbox,
+   ma tiene precompilati quota e durata con gli ultimi valori usati,
+   così di solito basta scegliere le nuove date e chi ha pagato.
+   ===================================================== */
+document.getElementById('nuovoPeriodoBtn').addEventListener('click', function () {
+  resetForm('Nuovo periodo');
+});
+
+function resetForm(titolo) {
+  document.getElementById('riepilogoTitolo').textContent = titolo;
+
+  document.getElementById('campoInizio').value = '';
+  document.getElementById('campoFine').value = '';
+  document.getElementById('campoQuota').value = '';
+  document.getElementById('campoDurata').value = ultimoValoreConosciuto('durata');
+
+  document.querySelectorAll('.membro-label').forEach(function (label) {
+    const checkbox = label.querySelector('input');
+    checkbox.checked = false;
+    label.classList.remove('checked');
+  });
+
+  aggiornaBarraDaCheckbox();
+}
+
+// Recupera l'ultimo valore non vuoto usato per un campo (es. "quota" o "durata"),
+// scorrendo i periodi salvati dal più recente al più vecchio.
+function ultimoValoreConosciuto(campo) {
+  for (let i = periodi.length - 1; i >= 0; i--) {
+    if (periodi[i][campo]) return periodi[i][campo];
+  }
+  return '';
 }
 
 // Converte "gg/mm/aaaa" (formato mostrato) in "aaaa-mm-gg" (formato input date)
@@ -209,10 +235,15 @@ document.getElementById('formPeriodo').addEventListener('submit', function (e) {
   });
   const membriNonPagato = MEMBRI.filter(function (nome) { return membriPagato.indexOf(nome) === -1; });
 
+  // La quota è facoltativa: se il campo è vuoto, riusa automaticamente
+  // l'ultimo importo a persona salvato in uno dei periodi precedenti.
+  const quotaInserita = document.getElementById('campoQuota').value;
+  const quota = quotaInserita !== '' ? quotaInserita : ultimoValoreConosciuto('quota');
+
   const periodo = {
     inizio: dataVisualizzataDaInput(document.getElementById('campoInizio').value),
     fine: dataVisualizzataDaInput(document.getElementById('campoFine').value),
-    quota: document.getElementById('campoQuota').value,
+    quota: quota,
     durata: document.getElementById('campoDurata').value,
     pagato: membriPagato.join(', '),
     nonPagato: membriNonPagato.join(', ')
@@ -221,15 +252,15 @@ document.getElementById('formPeriodo').addEventListener('submit', function (e) {
   const stato = document.getElementById('salvaStato');
   stato.textContent = 'Salvataggio in corso…';
 
+  // Il backend (apps-script.gs) cerca già una riga con le stesse date:
+  // se esiste la aggiorna, altrimenti ne aggiunge una nuova. Non serve
+  // quindi distinguere qui tra "modifica" e "nuovo periodo".
   const url = URL_BACKEND + '?action=save&data=' + encodeURIComponent(JSON.stringify(periodo));
 
   fetch(url)
     .then(function (r) { return r.json(); })
     .then(function () {
       stato.textContent = 'Salvato ✓';
-      periodoInModifica = null;
-      document.getElementById('formPeriodo').reset();
-      document.querySelectorAll('.membro-label').forEach(function (label) { label.classList.remove('checked'); });
       caricaPeriodi();
       setTimeout(function () { stato.textContent = ''; }, 2500);
     })

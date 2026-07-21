@@ -125,6 +125,17 @@ section h2 { font-family: var(--font-display); font-size: 1rem; margin: 0 0 1rem
 /* ---------- RIEPILOGO / BARRA "traccia" ---------- */
 .riepilogo-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .8rem; }
 .periodo-label { color: var(--text-muted); font-size: .85rem; }
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+.btn-link:hover { text-decoration: underline; }
+.opzionale { font-weight: 400; color: var(--text-muted); font-size: .72rem; }
 
 .barra-quota {
   height: 8px;

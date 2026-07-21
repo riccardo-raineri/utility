@@ -40,12 +40,13 @@
 
     <main class="content">
 
-      <!-- Riepilogo del periodo più recente -->
+      <!-- Periodo attuale: riepilogo E form insieme, direttamente modificabile -->
       <section class="riepilogo" id="riepilogo">
         <div class="riepilogo-header">
-          <h2>Periodo attuale</h2>
-          <span id="periodoAttualeLabel" class="periodo-label">—</span>
+          <h2 id="riepilogoTitolo">Periodo attuale</h2>
+          <button type="button" id="nuovoPeriodoBtn" class="btn-link">+ Nuovo periodo</button>
         </div>
+
         <div class="barra-quota">
           <div id="barraPagato" class="barra-pagato" style="width:0%"></div>
         </div>
@@ -53,12 +54,7 @@
           <span><i class="dot dot-ok"></i> Pagato: <b id="countPagato">0</b>/<span id="countTotale">0</span></span>
           <span><i class="dot dot-no"></i> Da pagare: <b id="countNonPagato">0</b></span>
         </div>
-        <div class="chip-lista" id="chipListaAttuale"></div>
-      </section>
 
-      <!-- Form di aggiunta / aggiornamento periodo -->
-      <section class="form-periodo">
-        <h2>Aggiungi / aggiorna periodo</h2>
         <form id="formPeriodo">
           <div class="riga-campi">
             <label>
@@ -70,8 +66,8 @@
               <input type="date" id="campoFine" required>
             </label>
             <label>
-              € a persona
-              <input type="number" id="campoQuota" step="0.01" min="0" required>
+              € a persona <span class="opzionale">(opzionale)</span>
+              <input type="number" id="campoQuota" step="0.01" min="0" placeholder="ultimo importo usato">
             </label>
             <label>
               Durata
@@ -84,7 +80,7 @@
             <div id="listaMembri" class="lista-membri-checkbox"></div>
           </div>
 
-          <button type="submit" id="salvaBtn">Salva periodo</button>
+          <button type="submit" id="salvaBtn">Salva modifiche</button>
           <span id="salvaStato" class="salva-stato"></span>
         </form>
       </section>
