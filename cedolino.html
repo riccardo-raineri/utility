@@ -68,7 +68,7 @@
 
             <!-- UPLOAD CARD -->
             <section id="uploadSection" class="card upload-card">
-                <h2 class="section-title"><i data-lucide="upload-cloud"></i> Carica cedolino PDF</h2>
+                <h2 class="section-title"><i data-lucide="upload-cloud"></i> Carica il cedolino</h2>
                 <div id="dropZone" class="dropzone">
                     <div class="dropzone-icon">
                         <i data-lucide="file-up"></i>
@@ -91,8 +91,8 @@
                         <div class="form-section-title"><i data-lucide="wallet"></i> Retribuzione & Generale</div>
                         <div class="form-grid-3">
                             <label>Mese di riferimento<input type="month" name="MeseAnno" required /></label>
-                            <label>Netto in busta (€)<input type="number" step="0.01" name="Netto" required /></label>
-                            <label>Lordo / Tot. Competenze (€)<input type="number" step="0.01" name="Lordo" /></label>
+                            <label>Netto (€)<input type="number" step="0.01" name="Netto" required /></label>
+                            <label>Lordo (€)<input type="number" step="0.01" name="Lordo" /></label>
                         </div>
                     </div>
 
@@ -102,11 +102,11 @@
                         <div class="form-grid-3">
                             <label>Ferie Maturate (h)<input type="number" step="0.001" name="FerieMaturateMese" /></label>
                             <label>Ferie Godute (h)<input type="number" step="0.001" name="FerieGoduteMese" /></label>
-                            <label>Ferie Saldo / Residuo (h)<input type="number" step="0.001" name="FerieResidue" /></label>
+                            <label>Ferie Residue (h)<input type="number" step="0.001" name="FerieResidue" /></label>
                             
                             <label>ROL Maturato (h)<input type="number" step="0.001" name="RolMaturatoMese" /></label>
                             <label>ROL Goduto (h)<input type="number" step="0.001" name="RolGodutoMese" /></label>
-                            <label>ROL Saldo / Residuo (h)<input type="number" step="0.001" name="RolResiduo" /></label>
+                            <label>ROL Residuo (h)<input type="number" step="0.001" name="RolResiduo" /></label>
                         </div>
                     </div>
 
@@ -195,7 +195,7 @@
             <!-- DASHBOARD STATS & STORICO -->
             <section class="card dashboard-card">
                 <div class="dashboard-header">
-                    <h2 class="section-title"><i data-lucide="bar-chart-3"></i> Panoramica Cedolini</h2>
+                    <h2 class="section-title"><i data-lucide="bar-chart-3"></i> Storico Cedolini</h2>
                     <div class="search-box">
                         <i data-lucide="search"></i>
                         <input type="text" id="searchInput" placeholder="Filtra per anno o mese..." />
