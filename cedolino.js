@@ -248,6 +248,22 @@ $('#closeDetail').addEventListener('click', () => {
   $('#detailSection').classList.add('hidden');
 });
 
+$('#deleteDetail').addEventListener('click', async () => {
+  const mese = $('#detailSection').dataset.mese;
+  if (!mese) return;
+  if (!confirm(`Eliminare definitivamente il cedolino di ${monthLabel(mese)}? L'operazione non è reversibile.`)) return;
+
+  try {
+    await fetch(apiUrl({ action: 'delete', mese }));
+    $('#detailSection').classList.add('hidden');
+    setStatus('Cedolino eliminato.');
+    loadCedolini();
+  } catch (err) {
+    console.error(err);
+    alert('Errore durante l\'eliminazione. Controlla la connessione e riprova.');
+  }
+});
+
 async function loadCedolini() {
   if (!state.webAppUrl) return;
   const timeline = $('#timeline');
@@ -324,6 +340,7 @@ function renderTimeline() {
 function showDetail(mese) {
   const c = state.cedolini.find((x) => x.MeseAnno === mese);
   if (!c) return;
+  $('#detailSection').dataset.mese = mese;
   const fields = [
     ['Lordo', 'Lordo (€)'],
     ['Netto', 'Netto (€)'],

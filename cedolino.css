@@ -175,7 +175,10 @@ body {
 .btn-small { padding: 7px 14px; font-size: 12px; }
 .btn-primary { background: var(--red); border-color: var(--red); color: #fff; }
 .btn-ghost { background: transparent; }
+.btn-danger { background: transparent; border-color: var(--red); color: var(--red); }
 .btn:hover { opacity: 0.9; }
+
+.detail-header { display: flex; justify-content: space-between; align-items: center; }
 
 .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 
