@@ -12,6 +12,8 @@ const state = {
     cedolini: [],
 };
 
+let salaryChartInstance = null;
+
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     if (window.lucide) lucide.createIcons();
@@ -34,6 +36,7 @@ $('#themeToggle').addEventListener('click', () => {
     document.body.setAttribute('data-theme', nuovo);
     localStorage.setItem('cedolino_theme', nuovo);
     aggiornaIconaTema(nuovo);
+    if (state.cedolini.length > 0) renderChart();
 });
 
 function aggiornaIconaTema(tema) {
@@ -71,7 +74,6 @@ function apiUrl(params) {
     }
 }
 
-// PARSER NUMERICO
 function parseNumber(val) {
     if (val === null || val === undefined || val === '') return 0;
     if (typeof val === 'number') return isNaN(val) ? 0 : val;
@@ -113,7 +115,6 @@ function formatOre(val) {
     }).format(num) + ' h';
 }
 
-// UPLOAD PDF
 const dropZone = $('#dropZone');
 const fileInput = $('#fileInput');
 
@@ -182,7 +183,6 @@ async function extractTextFromPdf(file) {
     return fullText;
 }
 
-// REGEX PARSER AGGIORNATO
 function parseCedolino(text) {
     const norm = text.replace(/\s+/g, ' ');
     const NUM = '\\d+(?:\\.\\d{3})*,\\d+';
@@ -193,16 +193,13 @@ function parseCedolino(text) {
         return m ? clean(m[1]) : '';
     };
 
-    // Netto e Lordo
     const netto = grab(/\*{3,}\s*(\d+(?:\.\d{3})*,\d{2})/);
     let lordo = grab(new RegExp(`(?:TOT\\.?\\s*COMPETENZE|TOTALE\\s+COMPETENZE)\\s*[:€]*\\s*(${NUM})`, 'i'));
 
-    // Ferie
     const ferieMatur = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
     const ferieGodut = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Godut[oa]\\s*(${NUM})`, 'i'));
     const ferieSaldo = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
 
-    // ROL & Ex Fest Godute
     const rolMatur = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
     const rolGodut = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Godut[oa]\\s*(${NUM})`, 'i'));
     const rolSaldo = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
@@ -211,35 +208,28 @@ function parseCedolino(text) {
     const exFestGodMatch = norm.match(new RegExp(`(?:Ex\\s*fest\\.?\\s*godut[ea]|R\\.?o\\.?l\\.?\\s*\\/?\\s*Ex\\s*fest\\.?\\s*godut[ea])\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
     const exFestGodEuro = exFestGodMatch ? clean(exFestGodMatch[1]) : '';
 
-    // Ore supplementari 35%
     const straOre = grab(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])(?:\\s*35%)?\\s*(${NUM})`, 'i'));
     const straEuroMatch = norm.match(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])(?:\\s*35%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
     const straEuro = straEuroMatch ? clean(straEuroMatch[1]) : '';
 
-    // Ore supplementari 50%
     const stra50Ore = grab(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])\\s*50%\\s*(${NUM})`, 'i'));
     const stra50EuroMatch = norm.match(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])\\s*50%\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
     const stra50Euro = stra50EuroMatch ? clean(stra50EuroMatch[1]) : '';
 
-    // Maggiorazione Festivo 50%
     const festOre = grab(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*fest\\.?|Festiv[io])(?:\\s*50%)?\\s*(${NUM})`, 'i'));
     const festEuroMatch = norm.match(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*fest\\.?|Festiv[io])(?:\\s*50%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
     const festEuro = festEuroMatch ? clean(festEuroMatch[1]) : '';
 
-    // Maggiorazione Notturno 25%
     const nott25Ore = grab(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*notturn[oa]|Notturn[oa])(?:\\s*25%)?\\s*(${NUM})`, 'i'));
     const nott25EuroMatch = norm.match(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*notturn[oa]|Notturn[oa])(?:\\s*25%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
     const nott25Euro = nott25EuroMatch ? clean(nott25EuroMatch[1]) : '';
 
-    // Festività non goduta (Ore ed Euro)
     const festNonGodOre = grab(new RegExp(`(?:Festivit[àa]\\s+non\\s+goduta)\\s*(${NUM})`, 'i'));
     const festNonGodMatch = norm.match(new RegExp(`(?:Festivit[àa]\\s+non\\s+goduta)\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
     const festNonGodEuro = festNonGodMatch ? clean(festNonGodMatch[1]) : grab(new RegExp(`(?:Festivit[àa]\\s+non\\s+goduta)\\s*[:€]*\\s*(${NUM})`, 'i'));
 
-    // Premio Risultato
     const premioRis = grab(new RegExp(`(?:Premio\\s+Risultato|Premio\\s+di\\s+risultato)\\s*[:€]*\\s*(${NUM})`, 'i'));
 
-    // Mese/Anno
     const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
     const meseMatch = norm.match(new RegExp(`\\b(${MESI.join('|')})\\s+(\\d{4})\\b`, 'i'));
     const meseAnno = meseMatch ? `${meseMatch[2]}-${String(MESI.indexOf(meseMatch[1].toLowerCase()) + 1).padStart(2, '0')}` : '';
@@ -349,6 +339,7 @@ async function loadCedolini() {
 
         state.cedolini = (data || []).sort((a, b) => (a.MeseAnno < b.MeseAnno ? 1 : -1));
         renderStats();
+        renderChart();
         renderTimeline();
     } catch (err) {
         console.error(err);
@@ -407,6 +398,84 @@ function renderStats() {
     refreshIcons();
 }
 
+function renderChart() {
+    const ctx = document.getElementById('salaryChart');
+    if (!ctx) return;
+
+    const sortedAsc = [...state.cedolini].sort((a, b) => (a.MeseAnno > b.MeseAnno ? 1 : -1));
+    const labels = sortedAsc.map((c) => monthLabel(c.MeseAnno));
+    const netData = sortedAsc.map((c) => parseNumber(c.Netto));
+    const grossData = sortedAsc.map((c) => parseNumber(c.Lordo));
+
+    const isLight = document.body.getAttribute('data-theme') === 'light';
+    const textColor = isLight ? '#475569' : '#94A3B8';
+    const gridColor = isLight ? '#E2E8F0' : 'rgba(255, 255, 255, 0.06)';
+
+    if (salaryChartInstance) {
+        salaryChartInstance.destroy();
+    }
+
+    salaryChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Netto (€)',
+                    data: netData,
+                    borderColor: '#F43F5E',
+                    backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3
+                },
+                {
+                    label: 'Lordo (€)',
+                    data: grossData,
+                    borderColor: '#3B82F6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                    borderWidth: 2,
+                    borderDash: [4, 4],
+                    fill: false,
+                    tension: 0.3
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: textColor,
+                        font: { family: "'Plus Jakarta Sans', sans-serif", weight: '600' }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': ' + formatEuro(context.raw);
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    ticks: { color: textColor },
+                    grid: { color: gridColor }
+                },
+                y: {
+                    ticks: {
+                        color: textColor,
+                        callback: function(value) { return value + ' €'; }
+                    },
+                    grid: { color: gridColor }
+                }
+            }
+        }
+    });
+}
+
 $('#searchInput').addEventListener('input', (e) => {
     renderTimeline(e.target.value.trim().toLowerCase());
 });
@@ -428,20 +497,24 @@ function renderTimeline(filtro = '') {
         return;
     }
 
-    timeline.innerHTML = filtrati
+    timeline.innerHTML = `<div class="timeline-grid">` + filtrati
         .map(
             (c) => `
-            <div class="stub" data-mese="${c.MeseAnno}">
-                <div>
+            <div class="stub-card" data-mese="${c.MeseAnno}">
+                <div class="stub-header">
                     <div class="stub-month">${monthLabel(c.MeseAnno)}</div>
-                    <div class="stub-meta">Ferie Saldo: <b>${formatOre(c.FerieResidue)}</b> · ROL Saldo: <b>${formatOre(c.RolResiduo)}</b></div>
+                    <div class="stub-net">${formatEuro(c.Netto)}</div>
                 </div>
-                <div class="stub-net">${formatEuro(c.Netto)}</div>
+                <div class="stub-details">
+                    <div class="stub-details-row"><span>Ferie Saldo:</span> <b>${formatOre(c.FerieResidue)}</b></div>
+                    <div class="stub-details-row"><span>ROL Saldo:</span> <b>${formatOre(c.RolResiduo)}</b></div>
+                    <div class="stub-details-row"><span>Lordo:</span> <b>${formatEuro(c.Lordo)}</b></div>
+                </div>
             </div>`
         )
-        .join('');
+        .join('') + `</div>`;
 
-    timeline.querySelectorAll('.stub').forEach((el) => {
+    timeline.querySelectorAll('.stub-card').forEach((el) => {
         el.addEventListener('click', () => showDetail(el.dataset.mese));
     });
 }
@@ -518,7 +591,6 @@ function showDetail(mese) {
     $('#detailSection').scrollIntoView({ behavior: 'smooth' });
 }
 
-// BOTTONE MODIFICA
 $('#editDetail').addEventListener('click', () => {
     const mese = $('#detailSection').dataset.mese;
     const c = state.cedolini.find((x) => x.MeseAnno === mese);
@@ -526,7 +598,7 @@ $('#editDetail').addEventListener('click', () => {
 
     showReview(c);
     $('#detailSection').classList.add('hidden');
-    setStatus(`Modifica in corso per il cedolino di ${monthLabel(mese)}`);
+    setStatus(`Modifica in corso per il cedolino di ${monthLabel(mese)}. Clicca su Salva per aggiornare.`);
 });
 
 $('#closeDetail').addEventListener('click', () => {

@@ -13,6 +13,9 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <link rel="stylesheet" href="cedolino.css" />
 </head>
 <body data-theme="dark">
@@ -107,9 +110,9 @@
                         </div>
                     </div>
 
-                    <!-- SEZIONE 3: MAGGIORAZIONI & STRAORDINARI (ORE & EURO AFFIANCATI) -->
+                    <!-- SEZIONE 3: MAGGIORAZIONI & STRAORDINARI -->
                     <div class="form-section">
-                        <div class="form-section-title"><i data-lucide="clock"></i> Maggiorazioni & Straordinari (Ore e Importi)</div>
+                        <div class="form-section-title"><i data-lucide="clock"></i> Maggiorazioni & Straordinari</div>
                         <div class="paired-grid">
                             
                             <div class="paired-card">
@@ -200,6 +203,14 @@
                 </div>
 
                 <div id="statsRow" class="stats-grid"></div>
+
+                <!-- SEZIONE GRAFICO ANDAMENTO STIPENDIO -->
+                <div class="form-section" style="margin-top: 24px;">
+                    <div class="form-section-title"><i data-lucide="trending-up"></i> Andamento Stipendio (Netto vs Lordo)</div>
+                    <div class="chart-container">
+                        <canvas id="salaryChart"></canvas>
+                    </div>
+                </div>
 
                 <div id="timeline" class="timeline">
                     <div class="loader-container">
