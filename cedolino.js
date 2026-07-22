@@ -104,7 +104,6 @@ function formatEuro(val) {
     }).format(num);
 }
 
-// ORE FORMATTATE CON 3 DECIMALI
 function formatOre(val) {
     if (val === '' || val === null || val === undefined) return '0,000 h';
     const num = parseNumber(val);
@@ -183,7 +182,7 @@ async function extractTextFromPdf(file) {
     return fullText;
 }
 
-// REGEX PARSER AGGIORNATO CON NUOVE REGOLE
+// REGEX PARSER AGGIORNATO
 function parseCedolino(text) {
     const norm = text.replace(/\s+/g, ' ');
     const NUM = '\\d+(?:\\.\\d{3})*,\\d+';
@@ -194,10 +193,8 @@ function parseCedolino(text) {
         return m ? clean(m[1]) : '';
     };
 
-    // Netto
+    // Netto e Lordo
     const netto = grab(/\*{3,}\s*(\d+(?:\.\d{3})*,\d{2})/);
-
-    // Lordo
     let lordo = grab(new RegExp(`(?:TOT\\.?\\s*COMPETENZE|TOTALE\\s+COMPETENZE)\\s*[:€]*\\s*(${NUM})`, 'i'));
 
     // Ferie
@@ -205,11 +202,14 @@ function parseCedolino(text) {
     const ferieGodut = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Godut[oa]\\s*(${NUM})`, 'i'));
     const ferieSaldo = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
 
-    // ROL
+    // ROL & Ex Fest Godute
     const rolMatur = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
     const rolGodut = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Godut[oa]\\s*(${NUM})`, 'i'));
     const rolSaldo = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
-    const exFestGod = grab(new RegExp(`(?:Ex\\s*fest\\.?\\s*godut[ea]|R\\.?o\\.?l\\.?\\s*\\/?\\s*Ex\\s*fest\\.?\\s*godut[ea])\\s*(${NUM})`, 'i'));
+    
+    const exFestGodOre = grab(new RegExp(`(?:Ex\\s*fest\\.?\\s*godut[ea]|R\\.?o\\.?l\\.?\\s*\\/?\\s*Ex\\s*fest\\.?\\s*godut[ea])\\s*(${NUM})`, 'i'));
+    const exFestGodMatch = norm.match(new RegExp(`(?:Ex\\s*fest\\.?\\s*godut[ea]|R\\.?o\\.?l\\.?\\s*\\/?\\s*Ex\\s*fest\\.?\\s*godut[ea])\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
+    const exFestGodEuro = exFestGodMatch ? clean(exFestGodMatch[1]) : '';
 
     // Ore supplementari 35%
     const straOre = grab(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])(?:\\s*35%)?\\s*(${NUM})`, 'i'));
@@ -231,8 +231,12 @@ function parseCedolino(text) {
     const nott25EuroMatch = norm.match(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*notturn[oa]|Notturn[oa])(?:\\s*25%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
     const nott25Euro = nott25EuroMatch ? clean(nott25EuroMatch[1]) : '';
 
-    // Festività non goduta & Premio Risultato
-    const festNonGod = grab(new RegExp(`(?:Festivit[àa]\\s+non\\s+goduta)\\s*[:€]*\\s*(${NUM})`, 'i'));
+    // Festività non goduta (Ore ed Euro)
+    const festNonGodOre = grab(new RegExp(`(?:Festivit[àa]\\s+non\\s+goduta)\\s*(${NUM})`, 'i'));
+    const festNonGodMatch = norm.match(new RegExp(`(?:Festivit[àa]\\s+non\\s+goduta)\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
+    const festNonGodEuro = festNonGodMatch ? clean(festNonGodMatch[1]) : grab(new RegExp(`(?:Festivit[àa]\\s+non\\s+goduta)\\s*[:€]*\\s*(${NUM})`, 'i'));
+
+    // Premio Risultato
     const premioRis = grab(new RegExp(`(?:Premio\\s+Risultato|Premio\\s+di\\s+risultato)\\s*[:€]*\\s*(${NUM})`, 'i'));
 
     // Mese/Anno
@@ -250,7 +254,8 @@ function parseCedolino(text) {
         RolResiduo: rolSaldo,
         RolMaturatoMese: rolMatur,
         RolGodutoMese: rolGodut,
-        ExFestGoduteOre: exFestGod,
+        ExFestGoduteOre: exFestGodOre,
+        ExFestGoduteEuro: exFestGodEuro,
         StraordinariOre: straOre,
         StraordinariEuro: straEuro,
         Straordinari50Ore: stra50Ore,
@@ -259,7 +264,8 @@ function parseCedolino(text) {
         FestiviEuro: festEuro,
         Notturno25Ore: nott25Ore,
         Notturno25Euro: nott25Euro,
-        FestivitaNonGodutaEuro: festNonGod,
+        FestivitaNonGodutaOre: festNonGodOre,
+        FestivitaNonGodutaEuro: festNonGodEuro,
         PremioRisultato: premioRis,
         Tredicesima: grab(new RegExp(`tredicesima\\s*[:€]*\\s*(${NUM})`, 'i')),
         Quattordicesima: grab(new RegExp(`quattordicesima\\s*[:€]*\\s*(${NUM})`, 'i')),
@@ -446,48 +452,65 @@ function showDetail(mese) {
 
     $('#detailSection').dataset.mese = mese;
 
-    const campiMostrati = [
-        ['Netto', 'Netto in Busta', 'euro'],
-        ['Lordo', 'Lordo / Tot. Competenze', 'euro'],
-        ['FerieMaturateMese', 'Ferie Maturate (Mese)', 'ore'],
-        ['FerieGoduteMese', 'Ferie Godute (Mese)', 'ore'],
-        ['FerieResidue', 'Ferie Saldo / Residuo', 'ore'],
-        ['RolMaturatoMese', 'ROL Maturato (Mese)', 'ore'],
-        ['RolGodutoMese', 'ROL Goduto (Mese)', 'ore'],
-        ['RolResiduo', 'ROL Saldo / Residuo', 'ore'],
-        ['ExFestGoduteOre', 'R.o.L. / Ex Fest. Godute', 'ore'],
-        ['StraordinariOre', 'Ore Supplementari 35%', 'ore'],
-        ['StraordinariEuro', 'Importo Supplementari 35%', 'euro'],
-        ['Straordinari50Ore', 'Ore Supplementari 50%', 'ore'],
-        ['Straordinari50Euro', 'Importo Supplementari 50%', 'euro'],
-        ['FestiviOre', 'Magg. Lav. Festivo 50%', 'ore'],
-        ['FestiviEuro', 'Importo Festivo 50%', 'euro'],
-        ['Notturno25Ore', 'Magg. Lav. Notturno 25%', 'ore'],
-        ['Notturno25Euro', 'Importo Notturno 25%', 'euro'],
-        ['FestivitaNonGodutaEuro', 'Festività non goduta', 'euro'],
-        ['PremioRisultato', 'Premio Risultato', 'euro'],
-        ['Tredicesima', 'Tredicesima', 'euro'],
-        ['Quattordicesima', 'Quattordicesima', 'euro'],
-        ['TFRAccantonato', 'TFR Accantonato', 'euro'],
-        ['Extra', 'Extra', 'euro'],
-        ['NoteExtra', 'Note', 'testo'],
+    const coppieAffiancate = [
+        ['StraordinariOre', 'StraordinariEuro', 'Ore Supplementari 35%'],
+        ['Straordinari50Ore', 'Straordinari50Euro', 'Ore Supplementari 50%'],
+        ['FestiviOre', 'FestiviEuro', 'Magg. Lav. Festivo 50%'],
+        ['Notturno25Ore', 'Notturno25Euro', 'Magg. Lav. Notturno 25%'],
+        ['FestivitaNonGodutaOre', 'FestivitaNonGodutaEuro', 'Festività non goduta'],
+        ['ExFestGoduteOre', 'ExFestGoduteEuro', 'R.o.L. / Ex Fest. Godute'],
     ];
 
-    const htmlRighe = campiMostrati
-        .map(([key, label, tipo]) => {
-            let valFormatted = '—';
-            if (c[key] !== '' && c[key] !== undefined && c[key] !== null) {
-                if (tipo === 'euro') valFormatted = formatEuro(c[key]);
-                else if (tipo === 'ore') valFormatted = formatOre(c[key]);
-                else valFormatted = c[key];
-            }
-            return `<div class="detail-row"><span>${label}</span><span class="val">${valFormatted}</span></div>`;
-        })
-        .join('');
+    const htmlCoppie = coppieAffiancate
+        .map(([kOre, kEuro, titolo]) => `
+            <div class="paired-detail-card">
+                <div class="paired-detail-title">${titolo}</div>
+                <div class="paired-detail-values">
+                    <div><span class="label">Ore:</span><span class="val">${formatOre(c[kOre])}</span></div>
+                    <div><span class="label">Importo:</span><span class="val">${formatEuro(c[kEuro])}</span></div>
+                </div>
+            </div>
+        `).join('');
 
     $('#detailContent').innerHTML = `
         <h2 class="section-title"><i data-lucide="calendar"></i> Cedolino di ${monthLabel(c.MeseAnno)}</h2>
-        <div class="detail-grid">${htmlRighe}</div>
+        
+        <div class="form-section">
+            <div class="form-section-title"><i data-lucide="wallet"></i> Retribuzione</div>
+            <div class="detail-grid">
+                <div class="detail-row"><span>Netto in Busta</span><span class="val">${formatEuro(c.Netto)}</span></div>
+                <div class="detail-row"><span>Lordo / Tot. Competenze</span><span class="val">${formatEuro(c.Lordo)}</span></div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title"><i data-lucide="palmtree"></i> Ferie & R.O.L.</div>
+            <div class="detail-grid">
+                <div class="detail-row"><span>Ferie Maturate (Mese)</span><span class="val">${formatOre(c.FerieMaturateMese)}</span></div>
+                <div class="detail-row"><span>Ferie Godute (Mese)</span><span class="val">${formatOre(c.FerieGoduteMese)}</span></div>
+                <div class="detail-row"><span>Ferie Saldo / Residuo</span><span class="val">${formatOre(c.FerieResidue)}</span></div>
+                <div class="detail-row"><span>ROL Maturato (Mese)</span><span class="val">${formatOre(c.RolMaturatoMese)}</span></div>
+                <div class="detail-row"><span>ROL Goduto (Mese)</span><span class="val">${formatOre(c.RolGodutoMese)}</span></div>
+                <div class="detail-row"><span>ROL Saldo / Residuo</span><span class="val">${formatOre(c.RolResiduo)}</span></div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title"><i data-lucide="clock"></i> Maggiorazioni & Straordinari</div>
+            <div class="paired-grid">${htmlCoppie}</div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-section-title"><i data-lucide="gift"></i> Premi & Altri Compensi</div>
+            <div class="detail-grid">
+                <div class="detail-row"><span>Premio Risultato</span><span class="val">${formatEuro(c.PremioRisultato)}</span></div>
+                <div class="detail-row"><span>Tredicesima</span><span class="val">${formatEuro(c.Tredicesima)}</span></div>
+                <div class="detail-row"><span>Quattordicesima</span><span class="val">${formatEuro(c.Quattordicesima)}</span></div>
+                <div class="detail-row"><span>TFR Accantonato</span><span class="val">${formatEuro(c.TFRAccantonato)}</span></div>
+                <div class="detail-row"><span>Extra</span><span class="val">${formatEuro(c.Extra)}</span></div>
+                <div class="detail-row"><span>Note</span><span class="val">${c.NoteExtra || '—'}</span></div>
+            </div>
+        </div>
     `;
 
     $('#detailSection').classList.remove('hidden');
@@ -522,6 +545,7 @@ $('#copySummaryBtn').addEventListener('click', () => {
 🏖️ Ferie Saldo: ${formatOre(c.FerieResidue)}
 ⏱️ ROL Saldo: ${formatOre(c.RolResiduo)}
 ⚡ Extra/Maggiorazioni: ${formatEuro(c.StraordinariEuro)}
+🏆 Premio Risultato: ${formatEuro(c.PremioRisultato)}
 🏦 TFR Accantonato: ${formatEuro(c.TFRAccantonato)}`;
 
     navigator.clipboard.writeText(testo).then(() => {

@@ -79,45 +79,103 @@
             <!-- FORM REVISIONE DATI ESTRATTI -->
             <section id="reviewSection" class="card review-card hidden">
                 <h2 class="section-title"><i data-lucide="check-square"></i> Dati Cedolino</h2>
-                <p class="section-sub">Verifica o modifica i dati prima di salvare nel tuo Google Foglio.</p>
+                <p class="section-sub">Verifica o modifica i dati organizzati per sezioni prima di salvare.</p>
                 
-                <form id="reviewForm" class="review-grid">
-                    <label>Mese di riferimento<input type="month" name="MeseAnno" required /></label>
-                    <label>Netto in busta (€)<input type="number" step="0.01" name="Netto" required /></label>
-                    <label>Lordo / Tot. Competenze (€)<input type="number" step="0.01" name="Lordo" /></label>
+                <form id="reviewForm">
                     
-                    <!-- FERIE (step 0.001 per 3 decimali) -->
-                    <label>Ferie Maturate (h)<input type="number" step="0.001" name="FerieMaturateMese" /></label>
-                    <label>Ferie Godute (h)<input type="number" step="0.001" name="FerieGoduteMese" /></label>
-                    <label>Ferie Saldo / Residuo (h)<input type="number" step="0.001" name="FerieResidue" /></label>
-                    
-                    <!-- ROL & EX FEST -->
-                    <label>ROL Maturato (h)<input type="number" step="0.001" name="RolMaturatoMese" /></label>
-                    <label>ROL Goduto (h)<input type="number" step="0.001" name="RolGodutoMese" /></label>
-                    <label>ROL Saldo / Residuo (h)<input type="number" step="0.001" name="RolResiduo" /></label>
-                    <label>R.o.L. / Ex Fest. Godute (h)<input type="number" step="0.001" name="ExFestGoduteOre" /></label>
+                    <!-- SEZIONE 1: GENERALE -->
+                    <div class="form-section">
+                        <div class="form-section-title"><i data-lucide="wallet"></i> Retribuzione & Generale</div>
+                        <div class="form-grid-3">
+                            <label>Mese di riferimento<input type="month" name="MeseAnno" required /></label>
+                            <label>Netto in busta (€)<input type="number" step="0.01" name="Netto" required /></label>
+                            <label>Lordo / Tot. Competenze (€)<input type="number" step="0.01" name="Lordo" /></label>
+                        </div>
+                    </div>
 
-                    <!-- MAGGIORAZIONI & STRAORDINARI -->
-                    <label>Ore Supplementari 35% (h)<input type="number" step="0.001" name="StraordinariOre" /></label>
-                    <label>Ore Supplementari 35% (€)<input type="number" step="0.01" name="StraordinariEuro" /></label>
-                    
-                    <label>Ore Supplementari 50% (h)<input type="number" step="0.001" name="Straordinari50Ore" /></label>
-                    <label>Ore Supplementari 50% (€)<input type="number" step="0.01" name="Straordinari50Euro" /></label>
+                    <!-- SEZIONE 2: FERIE E ROL -->
+                    <div class="form-section">
+                        <div class="form-section-title"><i data-lucide="palmtree"></i> Ferie & R.O.L.</div>
+                        <div class="form-grid-3">
+                            <label>Ferie Maturate (h)<input type="number" step="0.001" name="FerieMaturateMese" /></label>
+                            <label>Ferie Godute (h)<input type="number" step="0.001" name="FerieGoduteMese" /></label>
+                            <label>Ferie Saldo / Residuo (h)<input type="number" step="0.001" name="FerieResidue" /></label>
+                            
+                            <label>ROL Maturato (h)<input type="number" step="0.001" name="RolMaturatoMese" /></label>
+                            <label>ROL Goduto (h)<input type="number" step="0.001" name="RolGodutoMese" /></label>
+                            <label>ROL Saldo / Residuo (h)<input type="number" step="0.001" name="RolResiduo" /></label>
+                        </div>
+                    </div>
 
-                    <label>Magg. Lav. Festivo 50% (h)<input type="number" step="0.001" name="FestiviOre" /></label>
-                    <label>Magg. Lav. Festivo 50% (€)<input type="number" step="0.01" name="FestiviEuro" /></label>
+                    <!-- SEZIONE 3: MAGGIORAZIONI & STRAORDINARI (ORE & EURO AFFIANCATI) -->
+                    <div class="form-section">
+                        <div class="form-section-title"><i data-lucide="clock"></i> Maggiorazioni & Straordinari (Ore e Importi)</div>
+                        <div class="paired-grid">
+                            
+                            <div class="paired-card">
+                                <div class="paired-card-title">Ore Supplementari 35%</div>
+                                <div class="paired-fields">
+                                    <label>Ore (h)<input type="number" step="0.001" name="StraordinariOre" /></label>
+                                    <label>Importo (€)<input type="number" step="0.01" name="StraordinariEuro" /></label>
+                                </div>
+                            </div>
 
-                    <label>Magg. Lav. Notturno 25% (h)<input type="number" step="0.001" name="Notturno25Ore" /></label>
-                    <label>Magg. Lav. Notturno 25% (€)<input type="number" step="0.01" name="Notturno25Euro" /></label>
+                            <div class="paired-card">
+                                <div class="paired-card-title">Ore Supplementari 50%</div>
+                                <div class="paired-fields">
+                                    <label>Ore (h)<input type="number" step="0.001" name="Straordinari50Ore" /></label>
+                                    <label>Importo (€)<input type="number" step="0.01" name="Straordinari50Euro" /></label>
+                                </div>
+                            </div>
 
-                    <!-- ALTRE COMPETENZE -->
-                    <label>Festività non goduta (€)<input type="number" step="0.01" name="FestivitaNonGodutaEuro" /></label>
-                    <label>Premio Risultato (€)<input type="number" step="0.01" name="PremioRisultato" /></label>
-                    <label>Tredicesima (€)<input type="number" step="0.01" name="Tredicesima" /></label>
-                    <label>Quattordicesima (€)<input type="number" step="0.01" name="Quattordicesima" /></label>
-                    <label>TFR Accantonato (€)<input type="number" step="0.01" name="TFRAccantonato" /></label>
-                    <label>Extra (€)<input type="number" step="0.01" name="Extra" /></label>
-                    <label class="full-width">Note extra<input type="text" name="NoteExtra" /></label>
+                            <div class="paired-card">
+                                <div class="paired-card-title">Magg. Lav. Festivo 50%</div>
+                                <div class="paired-fields">
+                                    <label>Ore (h)<input type="number" step="0.001" name="FestiviOre" /></label>
+                                    <label>Importo (€)<input type="number" step="0.01" name="FestiviEuro" /></label>
+                                </div>
+                            </div>
+
+                            <div class="paired-card">
+                                <div class="paired-card-title">Magg. Lav. Notturno 25%</div>
+                                <div class="paired-fields">
+                                    <label>Ore (h)<input type="number" step="0.001" name="Notturno25Ore" /></label>
+                                    <label>Importo (€)<input type="number" step="0.01" name="Notturno25Euro" /></label>
+                                </div>
+                            </div>
+
+                            <div class="paired-card">
+                                <div class="paired-card-title">Festività non goduta</div>
+                                <div class="paired-fields">
+                                    <label>Ore (h)<input type="number" step="0.001" name="FestivitaNonGodutaOre" /></label>
+                                    <label>Importo (€)<input type="number" step="0.01" name="FestivitaNonGodutaEuro" /></label>
+                                </div>
+                            </div>
+
+                            <div class="paired-card">
+                                <div class="paired-card-title">R.o.L. / Ex Fest. Godute</div>
+                                <div class="paired-fields">
+                                    <label>Ore (h)<input type="number" step="0.001" name="ExFestGoduteOre" /></label>
+                                    <label>Importo (€)<input type="number" step="0.01" name="ExFestGoduteEuro" /></label>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- SEZIONE 4: PREMI & ALTRI COMPENSI -->
+                    <div class="form-section">
+                        <div class="form-section-title"><i data-lucide="gift"></i> Premi & Altri Compensi</div>
+                        <div class="form-grid-3">
+                            <label>Premio Risultato (€)<input type="number" step="0.01" name="PremioRisultato" /></label>
+                            <label>Tredicesima (€)<input type="number" step="0.01" name="Tredicesima" /></label>
+                            <label>Quattordicesima (€)<input type="number" step="0.01" name="Quattordicesima" /></label>
+                            <label>TFR Accantonato (€)<input type="number" step="0.01" name="TFRAccantonato" /></label>
+                            <label>Extra (€)<input type="number" step="0.01" name="Extra" /></label>
+                            <label class="full-width">Note Extra<input type="text" name="NoteExtra" /></label>
+                        </div>
+                    </div>
+
                 </form>
 
                 <div class="review-actions">
