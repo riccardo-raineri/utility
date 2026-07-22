@@ -4,7 +4,6 @@
 
 const $ = (sel) => document.querySelector(sel);
 
-// Worker src obbligatorio per PDF.js
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 const state = {
@@ -13,7 +12,6 @@ const state = {
     cedolini: [],
 };
 
-// ---------- INIT & ICONE LUCIDE ----------
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
     if (window.lucide) lucide.createIcons();
@@ -24,7 +22,6 @@ function refreshIcons() {
     if (window.lucide) lucide.createIcons();
 }
 
-// ---------- TEMA CHIARO / SCURO ----------
 function initTheme() {
     const saved = localStorage.getItem('cedolino_theme') || 'dark';
     document.body.setAttribute('data-theme', saved);
@@ -47,7 +44,6 @@ function aggiornaIconaTema(tema) {
     }
 }
 
-// ---------- SETTINGS PANEL ----------
 $('#settingsToggle').addEventListener('click', () => {
     $('#settingsPanel').classList.toggle('hidden');
     $('#webAppUrl').value = state.webAppUrl;
@@ -75,7 +71,7 @@ function apiUrl(params) {
     }
 }
 
-// ---------- PARSER NUMERICO / VALUTA ITALIANA (FIX "00") ----------
+// PARSER NUMERICO / FORMATTAZIONE
 function parseNumber(val) {
     if (val === null || val === undefined || val === '') return 0;
     if (typeof val === 'number') return isNaN(val) ? 0 : val;
@@ -83,7 +79,6 @@ function parseNumber(val) {
     let str = String(val).trim().replace(/[€$\s]/g, '');
     if (!str) return 0;
 
-    // Gestione formato italiano (1.234,56) vs US (1234.56)
     if (str.includes('.') && str.includes(',')) {
         if (str.lastIndexOf(',') > str.lastIndexOf('.')) {
             str = str.replace(/\./g, '').replace(',', '.');
@@ -118,7 +113,7 @@ function formatOre(val) {
     }).format(num) + ' h';
 }
 
-// ---------- DRAG & DROP & UPLOAD ----------
+// UPLOAD PDF
 const dropZone = $('#dropZone');
 const fileInput = $('#fileInput');
 
@@ -153,7 +148,6 @@ async function handleFile(file) {
     setStatus('Analisi del PDF in corso...');
     try {
         const text = await extractTextFromPdf(file);
-
         if (!text || text.trim().length === 0) {
             setStatus('PDF scansionato senza testo selezionabile. Inserisci i dati manualmente.', true);
             showReview({});
@@ -161,17 +155,11 @@ async function handleFile(file) {
         }
 
         const parsed = parseCedolino(text);
-        const anyFieldFound = Object.values(parsed).some((v) => v !== '');
-
-        if (anyFieldFound) {
-            setStatus('Dati estratti con successo! Verifica i campi e salva.');
-        } else {
-            setStatus('Nessun campo riconosciuto automaticamente. Compila i dati a mano.', true);
-        }
+        setStatus('Dati estratti con successo! Verifica i campi prima di salvare.');
         showReview(parsed, text);
     } catch (err) {
         console.error(err);
-        setStatus('Errore nella lettura del PDF. Compila i dati a mano qui sotto.', true);
+        setStatus('Errore nella lettura del PDF. Inserisci i dati a mano.', true);
         showReview({});
     }
 }
@@ -194,32 +182,48 @@ async function extractTextFromPdf(file) {
     return fullText;
 }
 
-// ---------- REGEX PARSER CEDOLINO ----------
+// REGEX PARSER AGGIORNATO CON NUOVE REGOLE
 function parseCedolino(text) {
     const norm = text.replace(/\s+/g, ' ');
     const NUM = '\\d+(?:\\.\\d{3})*,\\d+';
     const clean = (s) => (s ? s.replace(/\./g, '').replace(',', '.') : '');
+    
     const grab = (re) => {
         const m = norm.match(re);
         return m ? clean(m[1]) : '';
     };
 
+    // Netto
     const netto = grab(/\*{3,}\s*(\d+(?:\.\d{3})*,\d{2})/);
-    const ferieSaldo = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
-    const ferieMatur = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
-    const rolSaldo = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
-    const rolMatur = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
-    const assemSaldo = grab(new RegExp(`ASSEM\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
 
-    const straOre = grab(new RegExp(`ore\\s+supplementari\\s+\\d+%?\\s*p\\.?t\\.?\\s*(${NUM})`, 'i'));
-    const straEuroMatch = norm.match(
-        new RegExp(`ore\\s+supplementari\\s+\\d+%?\\s*p\\.?t\\.?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i')
-    );
+    // Lordo (Cerca TOT COMPETENZE o TOTALE COMPETENZE)
+    let lordo = grab(new RegExp(`(?:TOT\\.?\\s*COMPETENZE|TOTALE\\s+COMPETENZE)\\s*[:€]*\\s*(${NUM})`, 'i'));
+    if (!lordo) {
+        const lordoTriple = norm.match(new RegExp(`(${NUM})\\s+(${NUM})\\s+\\1(?!\\d)`));
+        if (lordoTriple) lordo = clean(lordoTriple[2]);
+    }
+
+    // Ferie: Maturate (dopo Matur.), Godute (dopo Goduto), Saldo/Residue (dopo Saldo)
+    const ferieMatur = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
+    const ferieGodut = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Godut[oa]\\s*(${NUM})`, 'i'));
+    const ferieSaldo = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
+
+    // ROL: Maturati (dopo Matur.), Goduti (dopo Goduto), Saldo/Residuo (dopo Saldo)
+    const rolMatur = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
+    const rolGodut = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Godut[oa]\\s*(${NUM})`, 'i'));
+    const rolSaldo = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
+
+    // Straordinari 35% (Ore Supplementari 35%)
+    const straOre = grab(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])(?:\\s*35%|\\s*\\d+%)?\\s*(${NUM})`, 'i'));
+    const straEuroMatch = norm.match(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])(?:\\s*35%|\\s*\\d+%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
     const straEuro = straEuroMatch ? clean(straEuroMatch[1]) : '';
 
-    const lordoTriple = norm.match(new RegExp(`(${NUM})\\s+(${NUM})\\s+\\1(?!\\d)`));
-    let lordo = lordoTriple ? clean(lordoTriple[2]) : '';
+    // Maggiorazione Festivo / Domenica 50%
+    const festOre = grab(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*fest\\.?|Festiv[io])(?:\\s*50%|\\s*\\d+%)?\\s*(${NUM})`, 'i'));
+    const festEuroMatch = norm.match(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*fest\\.?|Festiv[io])(?:\\s*50%|\\s*\\d+%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
+    const festEuro = festEuroMatch ? clean(festEuroMatch[1]) : '';
 
+    // Mese/Anno
     const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
     const meseMatch = norm.match(new RegExp(`\\b(${MESI.join('|')})\\s+(\\d{4})\\b`, 'i'));
     const meseAnno = meseMatch ? `${meseMatch[2]}-${String(MESI.indexOf(meseMatch[1].toLowerCase()) + 1).padStart(2, '0')}` : '';
@@ -230,19 +234,22 @@ function parseCedolino(text) {
         Lordo: lordo,
         FerieResidue: ferieSaldo,
         FerieMaturateMese: ferieMatur,
+        FerieGoduteMese: ferieGodut,
         RolResiduo: rolSaldo,
         RolMaturatoMese: rolMatur,
+        RolGodutoMese: rolGodut,
         StraordinariOre: straOre,
         StraordinariEuro: straEuro,
+        FestiviOre: festOre,
+        FestiviEuro: festEuro,
         Tredicesima: grab(new RegExp(`tredicesima\\s*[:€]*\\s*(${NUM})`, 'i')),
         Quattordicesima: grab(new RegExp(`quattordicesima\\s*[:€]*\\s*(${NUM})`, 'i')),
         TFRAccantonato: grab(new RegExp(`t\\.?f\\.?r\\.?\\s+accantonat[oa]\\s*[:]*\\s*(${NUM})`, 'i')),
         Extra: '',
-        NoteExtra: assemSaldo ? `Permessi/ASSEM residui: ${assemSaldo} h` : '',
+        NoteExtra: '',
     };
 }
 
-// ---------- FORM REVISIONE ----------
 function showReview(data, rawText) {
     $('#reviewSection').classList.remove('hidden');
     const form = $('#reviewForm');
@@ -268,7 +275,6 @@ function showReview(data, rawText) {
 $('#cancelReview').addEventListener('click', () => {
     $('#reviewSection').classList.add('hidden');
     $('#reviewForm').reset();
-    $('#rawTextDetails').classList.add('hidden');
     fileInput.value = '';
     setStatus('');
 });
@@ -282,12 +288,12 @@ $('#saveReview').addEventListener('click', async () => {
     payload.DataCaricamento = new Date().toISOString();
 
     if (!state.webAppUrl) {
-        alert('Imposta prima l\'URL della Web App nelle Impostazioni Cloud (icona ingranaggio in alto).');
+        alert('Configura prima l\'URL nelle Impostazioni Cloud (icona ingranaggio).');
         return;
     }
 
     try {
-        setStatus('Salvataggio su Google Sheets in corso...');
+        setStatus('Salvataggio in corso...');
         await fetch(apiUrl({ action: 'save', data: JSON.stringify(payload) }));
         $('#reviewSection').classList.add('hidden');
         form.reset();
@@ -296,15 +302,14 @@ $('#saveReview').addEventListener('click', async () => {
         loadCedolini();
     } catch (err) {
         console.error(err);
-        setStatus('Errore durante il salvataggio. Verifica le impostazioni.', true);
+        setStatus('Errore durante il salvataggio.', true);
     }
 });
 
-// ---------- CARICAMENTO E DASHBOARD ----------
 async function loadCedolini() {
     const timeline = $('#timeline');
     if (!state.webAppUrl) {
-        timeline.innerHTML = '<p class="empty-state">Configura l\'URL Google Apps Script nelle impostazioni per visualizzare i tuoi cedolini.</p>';
+        timeline.innerHTML = '<p class="empty-state">Configura l\'URL Google Apps Script nelle impostazioni per caricare i dati.</p>';
         return;
     }
 
@@ -313,7 +318,7 @@ async function loadCedolini() {
         const data = await res.json();
 
         if (data && data.status === 'unauthorized') {
-            timeline.innerHTML = '<p class="empty-state">Token/PIN non valido. Verifica le impostazioni.</p>';
+            timeline.innerHTML = '<p class="empty-state">Token/PIN d\'accesso non valido.</p>';
             return;
         }
 
@@ -322,11 +327,10 @@ async function loadCedolini() {
         renderTimeline();
     } catch (err) {
         console.error(err);
-        timeline.innerHTML = '<p class="empty-state">Impossibile caricare i dati dal server Cloud.</p>';
+        timeline.innerHTML = '<p class="empty-state">Impossibile connettersi al server Cloud.</p>';
     }
 }
 
-// ---------- KPI STATS (CON CALCOLO ANNO E DELTA) ----------
 function renderStats() {
     const row = $('#statsRow');
     if (state.cedolini.length === 0) {
@@ -337,7 +341,6 @@ function renderStats() {
     const last = state.cedolini[0];
     const prev = state.cedolini[1];
 
-    // Delta rispetto al mese precedente
     let deltaHtml = '';
     if (prev && last.Netto && prev.Netto) {
         const diff = parseNumber(last.Netto) - parseNumber(prev.Netto);
@@ -351,7 +354,6 @@ function renderStats() {
         }
     }
 
-    // Totale Guadagnato Anno Corrente (YTD)
     const annoCorrente = last.MeseAnno ? last.MeseAnno.split('-')[0] : new Date().getFullYear().toString();
     const totaleAnno = state.cedolini
         .filter((c) => c.MeseAnno && c.MeseAnno.startsWith(annoCorrente))
@@ -368,11 +370,11 @@ function renderStats() {
             <div class="stat-value">${formatEuro(totaleAnno)}</div>
         </div>
         <div class="stat-box accent-blue">
-            <div class="stat-label">Ferie Residue</div>
+            <div class="stat-label">Ferie Saldo</div>
             <div class="stat-value">${formatOre(last.FerieResidue)}</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">ROL Residuo</div>
+            <div class="stat-label">ROL Saldo</div>
             <div class="stat-value">${formatOre(last.RolResiduo)}</div>
         </div>
     `;
@@ -380,7 +382,6 @@ function renderStats() {
     refreshIcons();
 }
 
-// ---------- SEARCH & TIMELINE ----------
 $('#searchInput').addEventListener('input', (e) => {
     renderTimeline(e.target.value.trim().toLowerCase());
 });
@@ -388,18 +389,17 @@ $('#searchInput').addEventListener('input', (e) => {
 function renderTimeline(filtro = '') {
     const timeline = $('#timeline');
     if (state.cedolini.length === 0) {
-        timeline.innerHTML = '<p class="empty-state">Nessun cedolino salvato finora. Caricane uno per iniziare.</p>';
+        timeline.innerHTML = '<p class="empty-state">Nessun cedolino presente nel database.</p>';
         return;
     }
 
     const filtrati = state.cedolini.filter((c) => {
         if (!filtro) return true;
-        const etichettaMese = monthLabel(c.MeseAnno).toLowerCase();
-        return etichettaMese.includes(filtro) || c.MeseAnno.includes(filtro);
+        return monthLabel(c.MeseAnno).toLowerCase().includes(filtro) || c.MeseAnno.includes(filtro);
     });
 
     if (filtrati.length === 0) {
-        timeline.innerHTML = '<p class="empty-state">Nessun cedolino corrisponde alla ricerca.</p>';
+        timeline.innerHTML = '<p class="empty-state">Nessun risultato trovato.</p>';
         return;
     }
 
@@ -409,7 +409,7 @@ function renderTimeline(filtro = '') {
             <div class="stub" data-mese="${c.MeseAnno}">
                 <div>
                     <div class="stub-month">${monthLabel(c.MeseAnno)}</div>
-                    <div class="stub-meta">Ferie: <b>${formatOre(c.FerieResidue)}</b> · ROL: <b>${formatOre(c.RolResiduo)}</b></div>
+                    <div class="stub-meta">Ferie Saldo: <b>${formatOre(c.FerieResidue)}</b> · ROL Saldo: <b>${formatOre(c.RolResiduo)}</b></div>
                 </div>
                 <div class="stub-net">${formatEuro(c.Netto)}</div>
             </div>`
@@ -421,7 +421,6 @@ function renderTimeline(filtro = '') {
     });
 }
 
-// ---------- DETTAGLIO CEDOLINO ----------
 function showDetail(mese) {
     const c = state.cedolini.find((x) => x.MeseAnno === mese);
     if (!c) return;
@@ -430,13 +429,17 @@ function showDetail(mese) {
 
     const campiMostrati = [
         ['Netto', 'Netto in Busta', 'euro'],
-        ['Lordo', 'Lordo', 'euro'],
-        ['FerieResidue', 'Ferie Residue', 'ore'],
+        ['Lordo', 'Lordo / Tot. Competenze', 'euro'],
         ['FerieMaturateMese', 'Ferie Maturate (Mese)', 'ore'],
-        ['RolResiduo', 'ROL Residuo', 'ore'],
+        ['FerieGoduteMese', 'Ferie Godute (Mese)', 'ore'],
+        ['FerieResidue', 'Ferie Saldo / Residuo', 'ore'],
         ['RolMaturatoMese', 'ROL Maturato (Mese)', 'ore'],
-        ['StraordinariOre', 'Straordinari', 'ore'],
-        ['StraordinariEuro', 'Straordinari', 'euro'],
+        ['RolGodutoMese', 'ROL Goduto (Mese)', 'ore'],
+        ['RolResiduo', 'ROL Saldo / Residuo', 'ore'],
+        ['StraordinariOre', 'Ore Supplementari 35%', 'ore'],
+        ['StraordinariEuro', 'Importo Supplementari 35%', 'euro'],
+        ['FestiviOre', 'Magg. Lav. Festivo 50%', 'ore'],
+        ['FestiviEuro', 'Importo Festivo 50%', 'euro'],
         ['Tredicesima', 'Tredicesima', 'euro'],
         ['Quattordicesima', 'Quattordicesima', 'euro'],
         ['TFRAccantonato', 'TFR Accantonato', 'euro'],
@@ -470,7 +473,6 @@ $('#closeDetail').addEventListener('click', () => {
     $('#detailSection').classList.add('hidden');
 });
 
-// QoL: COPIA RIEPILOGO NEGLI APPUNTI
 $('#copySummaryBtn').addEventListener('click', () => {
     const mese = $('#detailSection').dataset.mese;
     const c = state.cedolini.find((x) => x.MeseAnno === mese);
@@ -480,8 +482,10 @@ $('#copySummaryBtn').addEventListener('click', () => {
 ----------------------------
 💰 Netto: ${formatEuro(c.Netto)}
 📊 Lordo: ${formatEuro(c.Lordo)}
-🏝️ Ferie Residue: ${formatOre(c.FerieResidue)}
-⏱️ ROL Residuo: ${formatOre(c.RolResiduo)}
+🏖️ Ferie (Mat: ${formatOre(c.FerieMaturateMese)} | God: ${formatOre(c.FerieGoduteMese)} | Saldo: ${formatOre(c.FerieResidue)})
+⏱️ ROL (Mat: ${formatOre(c.RolMaturatoMese)} | God: ${formatOre(c.RolGodutoMese)} | Saldo: ${formatOre(c.RolResiduo)})
+⚡ Straordinari 35%: ${formatOre(c.StraordinariOre)} (${formatEuro(c.StraordinariEuro)})
+🎉 Festivi 50%: ${formatOre(c.FestiviOre)} (${formatEuro(c.FestiviEuro)})
 🏦 TFR Accantonato: ${formatEuro(c.TFRAccantonato)}`;
 
     navigator.clipboard.writeText(testo).then(() => {
@@ -492,7 +496,7 @@ $('#copySummaryBtn').addEventListener('click', () => {
 $('#deleteDetail').addEventListener('click', async () => {
     const mese = $('#detailSection').dataset.mese;
     if (!mese) return;
-    if (!confirm(`Sei sicuro di voler eliminare il cedolino di ${monthLabel(mese)}?`)) return;
+    if (!confirm(`Vuoi eliminare definitivamente il cedolino di ${monthLabel(mese)}?`)) return;
 
     try {
         await fetch(apiUrl({ action: 'delete', mese }));

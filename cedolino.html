@@ -19,7 +19,7 @@
 
     <div class="app-container">
 
-        <!-- ============ HEADER NAVIGAZIONE ============ -->
+        <!-- HEADER NAVIGAZIONE -->
         <header class="app-header">
             <div class="header-left">
                 <a href="dashboard.html" class="back-btn">
@@ -45,7 +45,7 @@
             </div>
         </header>
 
-        <!-- ============ PANNELLO IMPOSTAZIONI CLOUD ============ -->
+        <!-- CONFIGURAZIONE APPS SCRIPT -->
         <div id="settingsPanel" class="settings-panel hidden">
             <h2 class="section-title"><i data-lucide="cloud"></i> Configurazione Google Apps Script</h2>
             <div class="settings-grid">
@@ -59,12 +59,11 @@
                 </label>
             </div>
             <button id="saveSettings" class="btn btn-primary"><i data-lucide="save"></i> Salva configurazione</button>
-            <p class="settings-hint">Collegando il tuo script Google, tutti i cedolini verranno sincronizzati e salvati in cloud nel tuo Google Sheet.</p>
         </div>
 
         <main class="content">
 
-            <!-- ============ UPLOAD CARD ============ -->
+            <!-- UPLOAD CARD -->
             <section id="uploadSection" class="card upload-card">
                 <h2 class="section-title"><i data-lucide="upload-cloud"></i> Carica cedolino PDF</h2>
                 <div id="dropZone" class="dropzone">
@@ -77,29 +76,38 @@
                 <p id="uploadStatus" class="upload-status"></p>
             </section>
 
-            <!-- ============ FORM REVISIONE DATI ESTRATTI ============ -->
+            <!-- FORM REVISIONE DATI ESTRATTI -->
             <section id="reviewSection" class="card review-card hidden">
                 <h2 class="section-title"><i data-lucide="check-square"></i> Controlla i dati letti</h2>
-                <p class="section-sub">Verifica la correttezza dei dati estratti dal PDF prima di confermare il salvataggio.</p>
+                <p class="section-sub">Verifica i valori prima di salvare nel tuo Google Foglio.</p>
                 
                 <form id="reviewForm" class="review-grid">
                     <label>Mese di riferimento<input type="month" name="MeseAnno" required /></label>
-                    <label>Netto in busta (€)<input type="number" step="0.01" name="Netto" placeholder="es. 1234.56" required /></label>
-                    <label>Lordo (€)<input type="number" step="0.01" name="Lordo" placeholder="es. 1800.00" /></label>
+                    <label>Netto in busta (€)<input type="number" step="0.01" name="Netto" required /></label>
+                    <label>Lordo / Tot. Competenze (€)<input type="number" step="0.01" name="Lordo" /></label>
                     
-                    <!-- CORRETTO IN ORE (h) -->
-                    <label>Ferie residue (h)<input type="number" step="0.01" name="FerieResidue" placeholder="es. 32.50" /></label>
-                    <label>Ferie maturate nel mese (h)<input type="number" step="0.01" name="FerieMaturateMese" placeholder="es. 8.66" /></label>
-                    <label>ROL residuo (h)<input type="number" step="0.01" name="RolResiduo" placeholder="es. 16.00" /></label>
-                    <label>ROL maturato nel mese (h)<input type="number" step="0.01" name="RolMaturatoMese" placeholder="es. 4.00" /></label>
+                    <!-- FERIE -->
+                    <label>Ferie Maturate (h)<input type="number" step="0.01" name="FerieMaturateMese" /></label>
+                    <label>Ferie Godute (h)<input type="number" step="0.01" name="FerieGoduteMese" /></label>
+                    <label>Ferie Saldo / Residuo (h)<input type="number" step="0.01" name="FerieResidue" /></label>
                     
-                    <label>Straordinari (h)<input type="number" step="0.01" name="StraordinariOre" placeholder="es. 5.00" /></label>
-                    <label>Straordinari (€)<input type="number" step="0.01" name="StraordinariEuro" placeholder="es. 75.00" /></label>
+                    <!-- ROL -->
+                    <label>ROL Maturato (h)<input type="number" step="0.01" name="RolMaturatoMese" /></label>
+                    <label>ROL Goduto (h)<input type="number" step="0.01" name="RolGodutoMese" /></label>
+                    <label>ROL Saldo / Residuo (h)<input type="number" step="0.01" name="RolResiduo" /></label>
+                    
+                    <!-- STRAORDINARI & FESTIVI SEPARATI -->
+                    <label>Ore Supplementari 35% (h)<input type="number" step="0.01" name="StraordinariOre" /></label>
+                    <label>Ore Supplementari 35% (€)<input type="number" step="0.01" name="StraordinariEuro" /></label>
+                    
+                    <label>Magg. Lav. Festivo 50% (h)<input type="number" step="0.01" name="FestiviOre" /></label>
+                    <label>Magg. Lav. Festivo 50% (€)<input type="number" step="0.01" name="FestiviEuro" /></label>
+
                     <label>Tredicesima (€)<input type="number" step="0.01" name="Tredicesima" /></label>
                     <label>Quattordicesima (€)<input type="number" step="0.01" name="Quattordicesima" /></label>
-                    <label>TFR accantonato (€)<input type="number" step="0.01" name="TFRAccantonato" /></label>
+                    <label>TFR Accantonato (€)<input type="number" step="0.01" name="TFRAccantonato" /></label>
                     <label>Extra (€)<input type="number" step="0.01" name="Extra" /></label>
-                    <label class="full-width">Note extra<input type="text" name="NoteExtra" placeholder="es. Rimborso trasferta, bonus produttività" /></label>
+                    <label class="full-width">Note extra<input type="text" name="NoteExtra" /></label>
                 </form>
 
                 <div class="review-actions">
@@ -113,7 +121,7 @@
                 </details>
             </section>
 
-            <!-- ============ DASHBOARD STATS & STORICO ============ -->
+            <!-- DASHBOARD STATS & STORICO -->
             <section class="card dashboard-card">
                 <div class="dashboard-header">
                     <h2 class="section-title"><i data-lucide="bar-chart-3"></i> Panoramica Cedolini</h2>
@@ -123,10 +131,8 @@
                     </div>
                 </div>
 
-                <!-- KPI STATS -->
                 <div id="statsRow" class="stats-grid"></div>
 
-                <!-- TIMELINE STORICO -->
                 <div id="timeline" class="timeline">
                     <div class="loader-container">
                         <div class="spinner"></div>
@@ -135,12 +141,12 @@
                 </div>
             </section>
 
-            <!-- ============ DETTAGLIO CEDOLINO SELEZIONATO ============ -->
+            <!-- DETTAGLIO CEDOLINO -->
             <section id="detailSection" class="card detail-card hidden">
                 <div class="detail-header">
                     <button id="closeDetail" class="btn btn-ghost btn-small"><i data-lucide="arrow-left"></i> Torna allo storico</button>
                     <div class="header-actions">
-                        <button id="copySummaryBtn" class="btn btn-ghost btn-small" title="Copia riepilogo negli appunti"><i data-lucide="copy"></i> Copia riepilogo</button>
+                        <button id="copySummaryBtn" class="btn btn-ghost btn-small"><i data-lucide="copy"></i> Copia riepilogo</button>
                         <button id="deleteDetail" class="btn btn-danger btn-small"><i data-lucide="trash-2"></i> Elimina</button>
                     </div>
                 </div>
