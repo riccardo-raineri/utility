@@ -375,6 +375,7 @@ function renderStats() {
         .filter((c) => c.MeseAnno && c.MeseAnno.startsWith(annoCorrente))
         .reduce((acc, c) => acc + parseNumber(c.Netto), 0);
 
+    // Rimossi i box di Ferie Saldo e ROL Saldo dalla panoramica come richiesto
     row.innerHTML = `
         <div class="stat-box accent-red">
             <div class="stat-label">Ultimo Netto (${monthLabel(last.MeseAnno)})</div>
@@ -384,14 +385,6 @@ function renderStats() {
         <div class="stat-box accent-green">
             <div class="stat-label">Totale Netto ${annoCorrente}</div>
             <div class="stat-value">${formatEuro(totaleAnno)}</div>
-        </div>
-        <div class="stat-box accent-blue">
-            <div class="stat-label">Ferie Saldo</div>
-            <div class="stat-value">${formatOre(last.FerieResidue)}</div>
-        </div>
-        <div class="stat-box">
-            <div class="stat-label">ROL Saldo</div>
-            <div class="stat-value">${formatOre(last.RolResiduo)}</div>
         </div>
     `;
 

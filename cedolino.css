@@ -90,7 +90,7 @@ body {
     padding: 32px 20px 60px;
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 36px; /* Aumentato lo spazio tra le sezioni principali */
 }
 
 .app-header {
@@ -571,10 +571,10 @@ body {
     padding: 16px;
 }
 
-/* Timeline & Card Storico Modernizzato */
+/* Timeline & Card Storico Modernizzato (Colonna Unica) */
 .timeline-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    display: flex;
+    flex-direction: column;
     gap: 16px;
 }
 
