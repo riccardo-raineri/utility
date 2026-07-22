@@ -1,5 +1,5 @@
 /* =========================================================
-   CEDOLINO+ — LOGICA ED ESTRAZIONE
+   CEDOLINO+ — LOGICA COMPLETA ED ESTRAZIONE
    ========================================================= */
 
 const $ = (sel) => document.querySelector(sel);
@@ -71,7 +71,7 @@ function apiUrl(params) {
     }
 }
 
-// PARSER NUMERICO / FORMATTAZIONE
+// PARSER NUMERICO
 function parseNumber(val) {
     if (val === null || val === undefined || val === '') return 0;
     if (typeof val === 'number') return isNaN(val) ? 0 : val;
@@ -104,12 +104,13 @@ function formatEuro(val) {
     }).format(num);
 }
 
+// ORE FORMATTATE CON 3 DECIMALI
 function formatOre(val) {
-    if (val === '' || val === null || val === undefined) return '0 h';
+    if (val === '' || val === null || val === undefined) return '0,000 h';
     const num = parseNumber(val);
     return new Intl.NumberFormat('it-IT', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
+        minimumFractionDigits: 3,
+        maximumFractionDigits: 3
     }).format(num) + ' h';
 }
 
@@ -196,32 +197,43 @@ function parseCedolino(text) {
     // Netto
     const netto = grab(/\*{3,}\s*(\d+(?:\.\d{3})*,\d{2})/);
 
-    // Lordo (Cerca TOT COMPETENZE o TOTALE COMPETENZE)
+    // Lordo
     let lordo = grab(new RegExp(`(?:TOT\\.?\\s*COMPETENZE|TOTALE\\s+COMPETENZE)\\s*[:€]*\\s*(${NUM})`, 'i'));
-    if (!lordo) {
-        const lordoTriple = norm.match(new RegExp(`(${NUM})\\s+(${NUM})\\s+\\1(?!\\d)`));
-        if (lordoTriple) lordo = clean(lordoTriple[2]);
-    }
 
-    // Ferie: Maturate (dopo Matur.), Godute (dopo Goduto), Saldo/Residue (dopo Saldo)
+    // Ferie
     const ferieMatur = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
     const ferieGodut = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Godut[oa]\\s*(${NUM})`, 'i'));
     const ferieSaldo = grab(new RegExp(`FERIE\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
 
-    // ROL: Maturati (dopo Matur.), Goduti (dopo Goduto), Saldo/Residuo (dopo Saldo)
+    // ROL
     const rolMatur = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Matur\\.?\\s*(${NUM})`, 'i'));
     const rolGodut = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Godut[oa]\\s*(${NUM})`, 'i'));
     const rolSaldo = grab(new RegExp(`R\\.?O\\.?L\\.?\\s*:?[\\s\\S]*?Saldo\\s*(${NUM})`, 'i'));
+    const exFestGod = grab(new RegExp(`(?:Ex\\s*fest\\.?\\s*godut[ea]|R\\.?o\\.?l\\.?\\s*\\/?\\s*Ex\\s*fest\\.?\\s*godut[ea])\\s*(${NUM})`, 'i'));
 
-    // Straordinari 35% (Ore Supplementari 35%)
-    const straOre = grab(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])(?:\\s*35%|\\s*\\d+%)?\\s*(${NUM})`, 'i'));
-    const straEuroMatch = norm.match(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])(?:\\s*35%|\\s*\\d+%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
+    // Ore supplementari 35%
+    const straOre = grab(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])(?:\\s*35%)?\\s*(${NUM})`, 'i'));
+    const straEuroMatch = norm.match(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])(?:\\s*35%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
     const straEuro = straEuroMatch ? clean(straEuroMatch[1]) : '';
 
-    // Maggiorazione Festivo / Domenica 50%
-    const festOre = grab(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*fest\\.?|Festiv[io])(?:\\s*50%|\\s*\\d+%)?\\s*(${NUM})`, 'i'));
-    const festEuroMatch = norm.match(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*fest\\.?|Festiv[io])(?:\\s*50%|\\s*\\d+%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
+    // Ore supplementari 50%
+    const stra50Ore = grab(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])\\s*50%\\s*(${NUM})`, 'i'));
+    const stra50EuroMatch = norm.match(new RegExp(`(?:Ore\\s+supplementari|Straordinar[io])\\s*50%\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
+    const stra50Euro = stra50EuroMatch ? clean(stra50EuroMatch[1]) : '';
+
+    // Maggiorazione Festivo 50%
+    const festOre = grab(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*fest\\.?|Festiv[io])(?:\\s*50%)?\\s*(${NUM})`, 'i'));
+    const festEuroMatch = norm.match(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*fest\\.?|Festiv[io])(?:\\s*50%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
     const festEuro = festEuroMatch ? clean(festEuroMatch[1]) : '';
+
+    // Maggiorazione Notturno 25%
+    const nott25Ore = grab(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*notturn[oa]|Notturn[oa])(?:\\s*25%)?\\s*(${NUM})`, 'i'));
+    const nott25EuroMatch = norm.match(new RegExp(`(?:Magg\\.?\\s*lav\\.?\\s*notturn[oa]|Notturn[oa])(?:\\s*25%)?\\s*${NUM}\\s+${NUM}\\s+(${NUM})`, 'i'));
+    const nott25Euro = nott25EuroMatch ? clean(nott25EuroMatch[1]) : '';
+
+    // Festività non goduta & Premio Risultato
+    const festNonGod = grab(new RegExp(`(?:Festivit[àa]\\s+non\\s+goduta)\\s*[:€]*\\s*(${NUM})`, 'i'));
+    const premioRis = grab(new RegExp(`(?:Premio\\s+Risultato|Premio\\s+di\\s+risultato)\\s*[:€]*\\s*(${NUM})`, 'i'));
 
     // Mese/Anno
     const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
@@ -238,10 +250,17 @@ function parseCedolino(text) {
         RolResiduo: rolSaldo,
         RolMaturatoMese: rolMatur,
         RolGodutoMese: rolGodut,
+        ExFestGoduteOre: exFestGod,
         StraordinariOre: straOre,
         StraordinariEuro: straEuro,
+        Straordinari50Ore: stra50Ore,
+        Straordinari50Euro: stra50Euro,
         FestiviOre: festOre,
         FestiviEuro: festEuro,
+        Notturno25Ore: nott25Ore,
+        Notturno25Euro: nott25Euro,
+        FestivitaNonGodutaEuro: festNonGod,
+        PremioRisultato: premioRis,
         Tredicesima: grab(new RegExp(`tredicesima\\s*[:€]*\\s*(${NUM})`, 'i')),
         Quattordicesima: grab(new RegExp(`quattordicesima\\s*[:€]*\\s*(${NUM})`, 'i')),
         TFRAccantonato: grab(new RegExp(`t\\.?f\\.?r\\.?\\s+accantonat[oa]\\s*[:]*\\s*(${NUM})`, 'i')),
@@ -256,8 +275,8 @@ function showReview(data, rawText) {
 
     Object.entries(data).forEach(([key, value]) => {
         const input = form.querySelector(`[name="${key}"]`);
-        if (input && value !== undefined) {
-            input.value = value;
+        if (input) {
+            input.value = value !== undefined && value !== null ? value : '';
         }
     });
 
@@ -436,10 +455,17 @@ function showDetail(mese) {
         ['RolMaturatoMese', 'ROL Maturato (Mese)', 'ore'],
         ['RolGodutoMese', 'ROL Goduto (Mese)', 'ore'],
         ['RolResiduo', 'ROL Saldo / Residuo', 'ore'],
+        ['ExFestGoduteOre', 'R.o.L. / Ex Fest. Godute', 'ore'],
         ['StraordinariOre', 'Ore Supplementari 35%', 'ore'],
         ['StraordinariEuro', 'Importo Supplementari 35%', 'euro'],
+        ['Straordinari50Ore', 'Ore Supplementari 50%', 'ore'],
+        ['Straordinari50Euro', 'Importo Supplementari 50%', 'euro'],
         ['FestiviOre', 'Magg. Lav. Festivo 50%', 'ore'],
         ['FestiviEuro', 'Importo Festivo 50%', 'euro'],
+        ['Notturno25Ore', 'Magg. Lav. Notturno 25%', 'ore'],
+        ['Notturno25Euro', 'Importo Notturno 25%', 'euro'],
+        ['FestivitaNonGodutaEuro', 'Festività non goduta', 'euro'],
+        ['PremioRisultato', 'Premio Risultato', 'euro'],
         ['Tredicesima', 'Tredicesima', 'euro'],
         ['Quattordicesima', 'Quattordicesima', 'euro'],
         ['TFRAccantonato', 'TFR Accantonato', 'euro'],
@@ -469,6 +495,17 @@ function showDetail(mese) {
     $('#detailSection').scrollIntoView({ behavior: 'smooth' });
 }
 
+// BOTTONE MODIFICA
+$('#editDetail').addEventListener('click', () => {
+    const mese = $('#detailSection').dataset.mese;
+    const c = state.cedolini.find((x) => x.MeseAnno === mese);
+    if (!c) return;
+
+    showReview(c);
+    $('#detailSection').classList.add('hidden');
+    setStatus(`Modifica in corso per il cedolino di ${monthLabel(mese)}`);
+});
+
 $('#closeDetail').addEventListener('click', () => {
     $('#detailSection').classList.add('hidden');
 });
@@ -482,10 +519,9 @@ $('#copySummaryBtn').addEventListener('click', () => {
 ----------------------------
 💰 Netto: ${formatEuro(c.Netto)}
 📊 Lordo: ${formatEuro(c.Lordo)}
-🏖️ Ferie (Mat: ${formatOre(c.FerieMaturateMese)} | God: ${formatOre(c.FerieGoduteMese)} | Saldo: ${formatOre(c.FerieResidue)})
-⏱️ ROL (Mat: ${formatOre(c.RolMaturatoMese)} | God: ${formatOre(c.RolGodutoMese)} | Saldo: ${formatOre(c.RolResiduo)})
-⚡ Straordinari 35%: ${formatOre(c.StraordinariOre)} (${formatEuro(c.StraordinariEuro)})
-🎉 Festivi 50%: ${formatOre(c.FestiviOre)} (${formatEuro(c.FestiviEuro)})
+🏖️ Ferie Saldo: ${formatOre(c.FerieResidue)}
+⏱️ ROL Saldo: ${formatOre(c.RolResiduo)}
+⚡ Extra/Maggiorazioni: ${formatEuro(c.StraordinariEuro)}
 🏦 TFR Accantonato: ${formatEuro(c.TFRAccantonato)}`;
 
     navigator.clipboard.writeText(testo).then(() => {

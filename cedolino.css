@@ -417,31 +417,45 @@ body {
     gap: 12px;
 }
 
+/* BARRA DI RICERCA CON LENTE ALLINEATA */
 .search-box {
     position: relative;
-    max-width: 240px;
+    max-width: 280px;
     width: 100%;
+    display: flex;
+    align-items: center;
 }
 
 .search-box input {
     width: 100%;
-    padding: 8px 12px 8px 32px;
+    padding: 8px 12px 8px 36px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
     background: var(--input-bg);
     color: var(--text-primary);
-    font-size: 0.82rem;
+    font-size: 0.85rem;
     outline: none;
+    height: 38px;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-.search-box i {
+.search-box input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.search-box i,
+.search-box svg {
     position: absolute;
     left: 10px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-secondary);
-    width: 14px;
-    height: 14px;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+    display: block;
 }
 
 .timeline {
