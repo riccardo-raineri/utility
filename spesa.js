@@ -4,9 +4,9 @@
    IMPORTANTE: dopo aver pubblicato lo script come Web App, incolla qui sotto
    l'URL che Google ti da (finisce con /exec).
    ============================================================================ */
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxmtXY1qGdTLYOo-vElncFxXg2FtGxYIhrmOdQQsJpBt44FUSYwILZtIGvRUN0UUD0y/exec';
+const WEBAPP_URL = 'INCOLLA_QUI_URL_WEB_APP';
 
-// Categorie in ordine di visualizzazione, con icona
+// Categorie in ordine di visualizzazione predefinito, con icona
 const CATEGORIE = [
   { id: 'Frutta e Verdura', icona: '\u{1F96C}' },
   { id: 'Latticini', icona: '\u{1F9C0}' },
@@ -23,10 +23,11 @@ const CATEGORIE = [
 ];
 
 // Stato applicativo in memoria: viene ricaricato da Google Fogli a ogni avvio
-let stato = { prodotti: [], rilevazioni: [], lista: [] };
+let stato = { prodotti: [], rilevazioni: [], lista: [], ordini: {} };
 let graficoStorico = null;
 let graficoCategorie = null;
 let graficoMensile = null;
+let ordineCorrente = []; // usato mentre si modifica l'ordine corsie di un supermercato
 
 /* ----------------------------------------------------------------------- *
  *  COMUNICAZIONE COL BACKEND
@@ -46,6 +47,7 @@ async function caricaDati() {
     stato.prodotti = json.prodotti;
     stato.rilevazioni = json.rilevazioni;
     stato.lista = json.lista;
+    stato.ordini = json.ordini || {};
     renderTutto();
   } catch (err) {
     mostraToast('Errore nel caricamento: ' + err.message);
@@ -84,8 +86,35 @@ function collegaEventi() {
   document.getElementById('input-prezzo').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-unita').addEventListener('change', aggiornaAnteprimaProdotto);
 
+  // L'ordine delle corsie dipende dal supermercato selezionato: ri-raggruppa la lista quando cambia
+  document.getElementById('input-supermercato').addEventListener('input', renderListaSpesa);
+
   document.getElementById('storico-select-prodotto').addEventListener('change', renderStorico);
   document.getElementById('confronto-select-prodotto').addEventListener('change', renderConfronto);
+
+  // Ordine corsie
+  document.getElementById('btn-ordine-corsie').addEventListener('click', apriPannelloOrdine);
+  document.getElementById('btn-chiudi-ordine').addEventListener('click', function () {
+    document.getElementById('pannello-ordine').classList.add('nascosto');
+  });
+  document.getElementById('btn-salva-ordine').addEventListener('click', salvaOrdineCorsie);
+  document.getElementById('ordine-lista').addEventListener('click', function (e) {
+    const btn = e.target.closest('.freccia');
+    if (!btn) return;
+    spostaCategoria(Number(btn.dataset.indice), Number(btn.dataset.dir));
+  });
+
+  // Prodotti base
+  document.getElementById('btn-prodotti-base').addEventListener('click', apriPannelloBase);
+  document.getElementById('btn-chiudi-base').addEventListener('click', function () {
+    document.getElementById('pannello-base').classList.add('nascosto');
+  });
+  document.getElementById('base-lista').addEventListener('click', function (e) {
+    const btn = e.target.closest('.stella');
+    if (!btn) return;
+    toggleBaseProdotto(btn.dataset.nome);
+  });
+  document.getElementById('btn-aggiungi-base').addEventListener('click', aggiungiProdottiBase);
 }
 
 function cambiaVista(view) {
@@ -163,8 +192,9 @@ function aggiornaAnteprimaProdotto() {
 
   if (!peso || !prezzo) { hint.textContent = ''; hint.className = 'hint'; return; }
 
+  // Calcolo automatico del prezzo al kg (o all'unita' equivalente) a partire da peso e prezzo a confezione
   const prezzoKg = calcolaPrezzoKg(peso, unita, prezzo);
-  let testo = '\u20AC/kg equivalente: ' + prezzoKg.toFixed(2);
+  let testo = '\u20AC/kg: ' + prezzoKg.toFixed(2);
 
   const ultima = ultimaRilevazione(nome);
   hint.className = 'hint';
@@ -209,14 +239,29 @@ async function aggiungiProdottoALista() {
 }
 
 /* ----------------------------------------------------------------------- *
- *  VISTA: LISTA DELLA SPESA (checklist raggruppata per categoria)
+ *  VISTA: LISTA DELLA SPESA (checklist raggruppata per categoria, per corsia)
  * ----------------------------------------------------------------------- */
+
+/** Restituisce l'ordine delle categorie da usare per il supermercato attualmente selezionato. */
+function ordineCategorieAttuale() {
+  const supermercato = document.getElementById('input-supermercato').value.trim();
+  const personalizzato = stato.ordini && stato.ordini[supermercato];
+  const tutteLeCategorie = CATEGORIE.map(function (c) { return c.id; });
+
+  if (personalizzato && personalizzato.length) {
+    // usa l'ordine salvato, aggiungendo in fondo eventuali categorie non ancora ordinate (es. nuove)
+    const mancanti = tutteLeCategorie.filter(function (id) { return personalizzato.indexOf(id) === -1; });
+    return personalizzato.concat(mancanti);
+  }
+  return tutteLeCategorie;
+}
 
 function renderListaSpesa() {
   const contenitore = document.getElementById('lista-categorie');
   contenitore.innerHTML = '';
 
-  CATEGORIE.forEach(function (cat) {
+  ordineCategorieAttuale().forEach(function (catId) {
+    const cat = CATEGORIE.find(function (c) { return c.id === catId; }) || { id: catId, icona: '' };
     const items = stato.lista
       .map(function (item, indiceReale) { return { item: item, indiceReale: indiceReale }; })
       .filter(function (x) { return x.item.categoria === cat.id; });
@@ -237,7 +282,19 @@ function renderListaSpesa() {
   aggiornaScontrino();
 }
 
+/** Crea la riga di un prodotto con supporto swipe: destra = spunta, sinistra = rimuovi dalla lista. */
 function creaRigaProdotto(item, indice) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'prodotto-riga-wrapper';
+
+  const sfondoDestra = document.createElement('div');
+  sfondoDestra.className = 'swipe-azione swipe-destra';
+  sfondoDestra.textContent = '\u2713';
+
+  const sfondoSinistra = document.createElement('div');
+  sfondoSinistra.className = 'swipe-azione swipe-sinistra';
+  sfondoSinistra.textContent = '\u{1F5D1}';
+
   const riga = document.createElement('div');
   riga.className = 'prodotto-riga' + (item.spuntato ? ' spuntato' : '');
 
@@ -265,7 +322,57 @@ function creaRigaProdotto(item, indice) {
   riga.appendChild(info);
   riga.appendChild(prezzo);
   riga.appendChild(elimina);
-  return riga;
+
+  wrapper.appendChild(sfondoDestra);
+  wrapper.appendChild(sfondoSinistra);
+  wrapper.appendChild(riga);
+
+  abilitaSwipe(riga, indice);
+
+  return wrapper;
+}
+
+/**
+ * Abilita lo swipe su una riga prodotto (solo touch, pensato per mobile):
+ * swipe verso destra = spunta/rimuovi spunta, swipe verso sinistra = rimuove
+ * il prodotto dalla lista corrente (utile sia per eliminarlo per errore, sia
+ * per "rimandarlo" semplicemente non comprandolo oggi).
+ */
+function abilitaSwipe(riga, indice) {
+  let startX = 0, startY = 0, deltaX = 0, tracciando = false, orizzontale = null;
+  const SOGLIA = 70;
+
+  riga.addEventListener('touchstart', function (e) {
+    const t = e.touches[0];
+    startX = t.clientX; startY = t.clientY; deltaX = 0; tracciando = true; orizzontale = null;
+    riga.style.transition = 'none';
+  }, { passive: true });
+
+  riga.addEventListener('touchmove', function (e) {
+    if (!tracciando) return;
+    const t = e.touches[0];
+    const dx = t.clientX - startX;
+    const dy = t.clientY - startY;
+    if (orizzontale === null) orizzontale = Math.abs(dx) > Math.abs(dy);
+    if (!orizzontale) return;
+    deltaX = dx;
+    riga.style.transform = 'translateX(' + deltaX + 'px)';
+  }, { passive: true });
+
+  riga.addEventListener('touchend', function () {
+    if (!tracciando) return;
+    tracciando = false;
+    riga.style.transition = 'transform .2s ease';
+    if (orizzontale && deltaX > SOGLIA) {
+      riga.style.transform = 'translateX(0)';
+      toggleSpuntato(indice);
+    } else if (orizzontale && deltaX < -SOGLIA) {
+      riga.style.transform = 'translateX(-100%)';
+      setTimeout(function () { eliminaDaLista(indice); }, 180);
+    } else {
+      riga.style.transform = 'translateX(0)';
+    }
+  });
 }
 
 async function toggleSpuntato(indice) {
@@ -313,11 +420,128 @@ async function registraSpesaOdierna() {
     stato.prodotti = json.prodotti;
     stato.rilevazioni = json.rilevazioni;
     stato.lista = json.lista;
+    stato.ordini = json.ordini || stato.ordini;
     renderTutto();
     mostraToast('Spesa registrata nello storico');
   } catch (err) {
     mostraToast('Errore: ' + err.message);
   }
+}
+
+/* ----------------------------------------------------------------------- *
+ *  ORDINE CORSIE PER SUPERMERCATO
+ * ----------------------------------------------------------------------- */
+
+function apriPannelloOrdine() {
+  const supermercato = document.getElementById('input-supermercato').value.trim();
+  if (!supermercato) { mostraToast('Scrivi prima il nome del supermercato'); return; }
+
+  document.getElementById('ordine-supermercato-nome').textContent = supermercato;
+
+  const salvato = stato.ordini && stato.ordini[supermercato];
+  ordineCorrente = (salvato && salvato.length) ? salvato.slice() : CATEGORIE.map(function (c) { return c.id; });
+  CATEGORIE.forEach(function (c) { if (ordineCorrente.indexOf(c.id) === -1) ordineCorrente.push(c.id); });
+
+  renderPannelloOrdine();
+  document.getElementById('pannello-ordine').classList.remove('nascosto');
+}
+
+function renderPannelloOrdine() {
+  const cont = document.getElementById('ordine-lista');
+  cont.innerHTML = ordineCorrente.map(function (catId, indice) {
+    const cat = CATEGORIE.find(function (c) { return c.id === catId; });
+    return '<div class="ordine-riga">' +
+      '<span>' + (cat ? cat.icona : '') + ' ' + catId + '</span>' +
+      '<span class="ordine-frecce">' +
+      '<button class="freccia" data-indice="' + indice + '" data-dir="-1"' + (indice === 0 ? ' disabled' : '') + '>\u2191</button>' +
+      '<button class="freccia" data-indice="' + indice + '" data-dir="1"' + (indice === ordineCorrente.length - 1 ? ' disabled' : '') + '>\u2193</button>' +
+      '</span></div>';
+  }).join('');
+}
+
+function spostaCategoria(indice, dir) {
+  const nuovoIndice = indice + dir;
+  if (nuovoIndice < 0 || nuovoIndice >= ordineCorrente.length) return;
+  const tmp = ordineCorrente[indice];
+  ordineCorrente[indice] = ordineCorrente[nuovoIndice];
+  ordineCorrente[nuovoIndice] = tmp;
+  renderPannelloOrdine();
+}
+
+async function salvaOrdineCorsie() {
+  const supermercato = document.getElementById('input-supermercato').value.trim();
+  try {
+    const json = await chiamaBackend('salvaOrdine', { data: JSON.stringify({ supermercato: supermercato, ordine: ordineCorrente }) });
+    stato.ordini = json.ordini;
+    renderListaSpesa();
+    document.getElementById('pannello-ordine').classList.add('nascosto');
+    mostraToast('Ordine corsie salvato per ' + supermercato);
+  } catch (err) {
+    mostraToast('Errore: ' + err.message);
+  }
+}
+
+/* ----------------------------------------------------------------------- *
+ *  PRODOTTI BASE (riordino rapido)
+ * ----------------------------------------------------------------------- */
+
+function apriPannelloBase() {
+  const cont = document.getElementById('base-lista');
+  const prodottiOrdinati = stato.prodotti.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome); });
+
+  cont.innerHTML = prodottiOrdinati.map(function (p) {
+    return '<div class="base-riga">' +
+      '<button class="stella' + (p.base ? ' attiva' : '') + '" data-nome="' + p.nome + '">' + (p.base ? '\u2605' : '\u2606') + '</button>' +
+      '<span>' + p.nome + '</span></div>';
+  }).join('') || '<p class="hint">Nessun prodotto ancora registrato: aggiungine uno alla lista prima di impostarlo come base.</p>';
+
+  document.getElementById('pannello-base').classList.remove('nascosto');
+}
+
+async function toggleBaseProdotto(nome) {
+  try {
+    const json = await chiamaBackend('toggleBase', { nome: nome });
+    stato.prodotti = json.prodotti;
+    apriPannelloBase();
+  } catch (err) {
+    mostraToast('Errore: ' + err.message);
+  }
+}
+
+/** Aggiunge alla lista corrente tutti i prodotti segnati come "base", precompilati con l'ultimo prezzo noto. */
+async function aggiungiProdottiBase() {
+  const base = stato.prodotti.filter(function (p) { return p.base; });
+  if (base.length === 0) {
+    mostraToast('Nessun prodotto base impostato: usa "Prodotti base" per sceglierli');
+    return;
+  }
+
+  const supermercatoCorrente = document.getElementById('input-supermercato').value.trim();
+  let aggiunti = 0;
+
+  base.forEach(function (p) {
+    const giaPresente = stato.lista.some(function (i) { return i.prodotto === p.nome; });
+    if (giaPresente) return;
+
+    const ultima = ultimaRilevazione(p.nome);
+    stato.lista.push({
+      prodotto: p.nome,
+      categoria: p.categoria,
+      unita: p.unita,
+      peso: ultima ? ultima.peso : 0,
+      prezzo: ultima ? ultima.prezzo : 0,
+      supermercato: supermercatoCorrente || (ultima ? ultima.supermercato : 'Non specificato'),
+      spuntato: false
+    });
+    aggiunti++;
+  });
+
+  renderListaSpesa();
+  try { await sincronizzaLista(); } catch (err) { mostraToast('Non sincronizzato: ' + err.message); }
+
+  mostraToast(aggiunti > 0
+    ? aggiunti + ' prodotti base aggiunti (verifica peso e prezzo al banco)'
+    : 'I prodotti base sono gia\' tutti nella lista');
 }
 
 /* ----------------------------------------------------------------------- *

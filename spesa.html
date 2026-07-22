@@ -75,7 +75,34 @@
       <div id="hint-prezzo" class="hint"></div>
 
       <button id="btn-aggiungi" class="btn btn-primary">+ Aggiungi alla lista</button>
+
+      <div class="azioni-rapide">
+        <button id="btn-ordine-corsie" class="btn btn-ghost btn-small">&#8597; Ordina corsie</button>
+        <button id="btn-prodotti-base" class="btn btn-ghost btn-small">&#9733; Prodotti base</button>
+        <button id="btn-aggiungi-base" class="btn btn-ghost btn-small">+ Aggiungi base alla lista</button>
+      </div>
     </div>
+
+    <div id="pannello-ordine" class="card pannello nascosto">
+      <h3>Ordine corsie &mdash; <span id="ordine-supermercato-nome"></span></h3>
+      <p class="hint">Sposta le categorie con le frecce per farle corrispondere al percorso reale in negozio: la lista si raggruppera' cosi' ogni volta che selezioni questo supermercato.</p>
+      <div id="ordine-lista"></div>
+      <div class="scontrino-azioni">
+        <button id="btn-chiudi-ordine" class="btn btn-ghost">Chiudi</button>
+        <button id="btn-salva-ordine" class="btn btn-primary">Salva ordine</button>
+      </div>
+    </div>
+
+    <div id="pannello-base" class="card pannello nascosto">
+      <h3>Prodotti base (riordino rapido)</h3>
+      <p class="hint">Segna con la stella i prodotti che compri quasi ogni settimana, poi usa "+ Aggiungi base alla lista".</p>
+      <div id="base-lista"></div>
+      <div class="scontrino-azioni">
+        <button id="btn-chiudi-base" class="btn btn-ghost">Chiudi</button>
+      </div>
+    </div>
+
+    <p class="hint suggerimento-swipe">Su mobile: scorri un prodotto verso destra per spuntarlo, verso sinistra per rimuoverlo dalla lista.</p>
 
     <div id="lista-categorie"></div>
 
