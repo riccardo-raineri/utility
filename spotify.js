@@ -95,6 +95,20 @@ function costruisciCheckboxMembri() {
 }
 
 function caricaPeriodi() {
+	// 1. Mostra lo spinner nella tabella mentre carica
+    const corpo = document.getElementById('corpoTabella');
+    corpo.innerHTML = `
+        <tr>
+            <td colspan="6">
+                <div class="loader-container">
+                    <div class="spinner"></div>
+                    <span>Caricamento dati in corso...</span>
+                </div>
+            </td>
+        </tr>
+    `;
+	
+	// 2. Chiamata API al tuo Apps Script
     fetch(URL_BACKEND)
         .then(function (r) { return r.json(); })
         .then(function (dati) {
@@ -108,6 +122,14 @@ function caricaPeriodi() {
             }
         })
         .catch(function (errore) {
+            // In caso di errore, mostralo direttamente nella tabella
+            corpo.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; color: var(--warn); padding: 20px;">
+                        Errore nel caricamento dei dati: ${errore.message}
+                    </td>
+                </tr>
+            `;
             document.getElementById('salvaStato').textContent = 'Errore nel caricamento dei dati: ' + errore.message;
         });
 }
