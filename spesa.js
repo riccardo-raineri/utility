@@ -4,7 +4,7 @@
    IMPORTANTE: dopo aver pubblicato lo script come Web App, incolla qui sotto
    l'URL che Google ti da (finisce con /exec).
    ============================================================================ */
-const WEBAPP_URL = 'INCOLLA_QUI_URL_WEB_APP';
+const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxmtXY1qGdTLYOo-vElncFxXg2FtGxYIhrmOdQQsJpBt44FUSYwILZtIGvRUN0UUD0y/exec';
 
 // Categorie in ordine di visualizzazione predefinito, con icona
 const CATEGORIE = [
