@@ -7,6 +7,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 
 const state = {
   webAppUrl: localStorage.getItem('cedolino_webAppUrl') || '',
+  accessToken: localStorage.getItem('cedolino_accessToken') || '',
   cedolini: [],
 };
 
@@ -29,16 +30,24 @@ $('#themeToggle').addEventListener('click', () => {
 $('#settingsToggle').addEventListener('click', () => {
   $('#settingsPanel').classList.toggle('hidden');
   $('#webAppUrl').value = state.webAppUrl;
+  $('#accessToken').value = state.accessToken;
 });
 
 $('#saveSettings').addEventListener('click', () => {
   state.webAppUrl = $('#webAppUrl').value.trim();
+  state.accessToken = $('#accessToken').value.trim();
   localStorage.setItem('cedolino_webAppUrl', state.webAppUrl);
+  localStorage.setItem('cedolino_accessToken', state.accessToken);
   $('#settingsPanel').classList.add('hidden');
   loadCedolini();
 });
 
-// ---------- Upload & parsing PDF ----------
+function apiUrl(params) {
+  const url = new URL(state.webAppUrl);
+  url.searchParams.set('token', state.accessToken);
+  Object.entries(params || {}).forEach(([k, v]) => url.searchParams.set(k, v));
+  return url.toString();
+}
 const dropZone = $('#dropZone');
 const fileInput = $('#fileInput');
 
@@ -156,7 +165,13 @@ function parseCedolino(text) {
     if (inps && fsbs) lordo = (parseFloat(netto) + parseFloat(inps) + parseFloat(fsbs)).toFixed(2);
   }
 
+  // Mese di riferimento: es. "Ottobre 2025" -> "2025-10" (formato richiesto da <input type="month">)
+  const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+  const meseMatch = norm.match(new RegExp(`\\b(${MESI.join('|')})\\s+(\\d{4})\\b`, 'i'));
+  const meseAnno = meseMatch ? `${meseMatch[2]}-${String(MESI.indexOf(meseMatch[1].toLowerCase()) + 1).padStart(2, '0')}` : '';
+
   return {
+    MeseAnno: meseAnno,
     Netto: netto,
     Lordo: lordo,
     FerieResidue: ferieSaldo,
@@ -215,7 +230,7 @@ $('#saveReview').addEventListener('click', async () => {
   }
 
   try {
-    await fetch(`${state.webAppUrl}?action=save&data=${encodeURIComponent(JSON.stringify(payload))}`);
+    await fetch(apiUrl({ action: 'save', data: JSON.stringify(payload) }));
     $('#reviewSection').classList.add('hidden');
     form.reset();
     fileInput.value = '';
@@ -237,8 +252,12 @@ async function loadCedolini() {
   if (!state.webAppUrl) return;
   const timeline = $('#timeline');
   try {
-    const res = await fetch(state.webAppUrl);
+    const res = await fetch(apiUrl());
     const data = await res.json();
+    if (data && data.status === 'unauthorized') {
+      timeline.innerHTML = '<p class="empty-state">Token non valido: controlla il PIN nelle impostazioni.</p>';
+      return;
+    }
     state.cedolini = data.sort((a, b) => (a.MeseAnno < b.MeseAnno ? 1 : -1));
     renderTimeline();
     renderStats();

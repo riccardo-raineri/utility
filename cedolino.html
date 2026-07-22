@@ -6,7 +6,7 @@
 <title>Cedolino+</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="cedolino.css"/>
+<link rel="stylesheet" href="cedolino.css" />
 </head>
 <body>
 
@@ -30,8 +30,10 @@
 <div id="settingsPanel" class="settings-panel hidden">
   <label for="webAppUrl">URL della Web App (Apps Script)</label>
   <input type="url" id="webAppUrl" placeholder="https://script.google.com/macros/s/AKfycb.../exec" />
+  <label for="accessToken">Token/PIN d'accesso</label>
+  <input type="password" id="accessToken" placeholder="Il codice segreto impostato nello script" />
   <button id="saveSettings" class="btn btn-primary">Salva</button>
-  <p class="settings-hint">La trovi seguendo le istruzioni in <code>instructions.md</code>.</p>
+  <p class="settings-hint">Trovi entrambi in <code>instructions.md</code>. Il token protegge i dati anche se qualcuno scoprisse l'URL.</p>
 </div>
 
 <main class="container">
@@ -55,11 +57,11 @@
       <label>Mese di riferimento<input type="month" name="MeseAnno" required /></label>
       <label>Netto in busta (€)<input type="number" step="0.01" name="Netto" /></label>
       <label>Lordo (€)<input type="number" step="0.01" name="Lordo" /></label>
-      <label>Ferie residue (gg)<input type="number" step="0.001" name="FerieResidue" /></label>
-      <label>Ferie maturate nel mese (gg)<input type="number" step="0.001" name="FerieMaturateMese" /></label>
-      <label>ROL residuo (h)<input type="number" step="0.001" name="RolResiduo" /></label>
-      <label>ROL maturato nel mese (h)<input type="number" step="0.001" name="RolMaturatoMese" /></label>
-      <label>Straordinari (ore)<input type="number" step="0.001" name="StraordinariOre" /></label>
+      <label>Ferie residue (gg)<input type="number" step="0.01" name="FerieResidue" /></label>
+      <label>Ferie maturate nel mese (gg)<input type="number" step="0.01" name="FerieMaturateMese" /></label>
+      <label>ROL residuo (h)<input type="number" step="0.01" name="RolResiduo" /></label>
+      <label>ROL maturato nel mese (h)<input type="number" step="0.01" name="RolMaturatoMese" /></label>
+      <label>Straordinari (ore)<input type="number" step="0.01" name="StraordinariOre" /></label>
       <label>Straordinari (€)<input type="number" step="0.01" name="StraordinariEuro" /></label>
       <label>Tredicesima (€)<input type="number" step="0.01" name="Tredicesima" /></label>
       <label>Quattordicesima (€)<input type="number" step="0.01" name="Quattordicesima" /></label>
