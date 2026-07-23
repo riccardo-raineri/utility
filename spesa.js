@@ -2,35 +2,36 @@
    LISTA DELLA SPESA 2.0 - Frontend
    ============================================================================
    IMPORTANTE: dopo aver pubblicato lo script come Web App, incolla qui sotto
-   l'URL che Google ti da (finisce con /exec).
+   l'URL che Google ti dà (finisce con /exec).
    ============================================================================ */
 const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxmtXY1qGdTLYOo-vElncFxXg2FtGxYIhrmOdQQsJpBt44FUSYwILZtIGvRUN0UUD0y/exec';
 
 // Categorie in ordine di visualizzazione predefinito, con icona
 const CATEGORIE = [
-  { id: 'Frutta e Verdura', icona: '\u{1F96C}' },
-  { id: 'Latticini', icona: '\u{1F9C0}' },
-  { id: 'Carne e Pesce', icona: '\u{1F41F}' },
-  { id: 'Salumi', icona: '\u{1F953}' },
-  { id: 'Scatolame', icona: '\u{1F96B}' },
-  { id: 'Surgelati', icona: '\u{1F9CA}' },
-  { id: 'Condimenti', icona: '\u{1F9C2}' },
-  { id: 'Colazione', icona: '\u{1F950}' },
-  { id: 'Snacks', icona: '\u{1F36A}' },
-  { id: 'Vini e Birra', icona: '\u{1F377}' },
-  { id: 'Chimici', icona: '\u{1F9F4}' },
-  { id: 'Altro', icona: '\u{1F4E6}' }
+  { id: 'Frutta e Verdura', icona: '🥬' },
+  { id: 'Pasta', icona: '🍝' },
+  { id: 'Latticini', icona: '🧀' },
+  { id: 'Carne e Pesce', icona: '🐟' },
+  { id: 'Salumi', icona: '🥓' },
+  { id: 'Scatolame', icona: '🥫' },
+  { id: 'Surgelati', icona: '🧊' },
+  { id: 'Condimenti', icona: '🧂' },
+  { id: 'Colazione', icona: '🥐' },
+  { id: 'Snacks', icona: '🍪' },
+  { id: 'Vini e Birra', icona: '🍷' },
+  { id: 'Chimici', icona: '🧴' },
+  { id: 'Altro', icona: '📦' }
 ];
 
 // Modelli generici di percorso in negozio
 const MODELLI_SUPERMERCATO = {
-  generico: ['Frutta e Verdura', 'Latticini', 'Carne e Pesce', 'Salumi', 'Scatolame', 'Surgelati', 'Condimenti', 'Colazione', 'Snacks', 'Vini e Birra', 'Chimici', 'Altro'],
-  esselunga: ['Frutta e Verdura', 'Colazione', 'Latticini', 'Salumi', 'Carne e Pesce', 'Scatolame', 'Condimenti', 'Snacks', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro'],
-  conad: ['Frutta e Verdura', 'Salumi', 'Latticini', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
-  coop: ['Frutta e Verdura', 'Carne e Pesce', 'Salumi', 'Latticini', 'Colazione', 'Condimenti', 'Scatolame', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
-  lidl: ['Frutta e Verdura', 'Colazione', 'Salumi', 'Latticini', 'Carne e Pesce', 'Scatolame', 'Snacks', 'Condimenti', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
-  eurospin: ['Frutta e Verdura', 'Colazione', 'Scatolame', 'Latticini', 'Salumi', 'Carne e Pesce', 'Condimenti', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
-  carrefour: ['Frutta e Verdura', 'Latticini', 'Salumi', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro']
+  generico: ['Frutta e Verdura', 'Pasta', 'Latticini', 'Carne e Pesce', 'Salumi', 'Scatolame', 'Surgelati', 'Condimenti', 'Colazione', 'Snacks', 'Vini e Birra', 'Chimici', 'Altro'],
+  esselunga: ['Frutta e Verdura', 'Pasta', 'Colazione', 'Latticini', 'Salumi', 'Carne e Pesce', 'Scatolame', 'Condimenti', 'Snacks', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro'],
+  conad: ['Frutta e Verdura', 'Pasta', 'Salumi', 'Latticini', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  coop: ['Frutta e Verdura', 'Pasta', 'Carne e Pesce', 'Salumi', 'Latticini', 'Colazione', 'Condimenti', 'Scatolame', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  lidl: ['Frutta e Verdura', 'Pasta', 'Colazione', 'Salumi', 'Latticini', 'Carne e Pesce', 'Scatolame', 'Snacks', 'Condimenti', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  eurospin: ['Frutta e Verdura', 'Pasta', 'Colazione', 'Scatolame', 'Latticini', 'Salumi', 'Carne e Pesce', 'Condimenti', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  carrefour: ['Frutta e Verdura', 'Pasta', 'Latticini', 'Salumi', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro']
 };
 
 let stato = { prodotti: [], rilevazioni: [], lista: [], ordini: {} };
@@ -111,6 +112,7 @@ function collegaEventi() {
   document.getElementById('input-prodotto').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-peso').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-prezzo').addEventListener('input', aggiornaAnteprimaProdotto);
+  document.getElementById('input-prezzo-offerta').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-unita').addEventListener('change', aggiornaAnteprimaProdotto);
 
   document.getElementById('input-supermercato').addEventListener('change', function () {
@@ -286,19 +288,22 @@ function aggiornaAnteprimaProdotto() {
 
   const peso = parseFloat(document.getElementById('input-peso').value);
   const prezzo = parseFloat(document.getElementById('input-prezzo').value);
+  const prezzoOfferta = parseFloat(document.getElementById('input-prezzo-offerta').value);
   const unita = document.getElementById('input-unita').value;
 
-  if (!peso || !prezzo) { hint.textContent = ''; hint.className = 'hint'; return; }
+  const prezzoAttivo = !isNaN(prezzoOfferta) ? prezzoOfferta : prezzo;
 
-  const prezzoKg = calcolaPrezzoKg(peso, unita, prezzo);
-  let testo = '\u20AC/kg: ' + prezzoKg.toFixed(2);
+  if (!peso || isNaN(prezzoAttivo)) { hint.textContent = ''; hint.className = 'hint'; return; }
+
+  const prezzoKg = calcolaPrezzoKg(peso, unita, prezzoAttivo);
+  let testo = '€/kg: ' + prezzoKg.toFixed(2);
 
   const ultima = ultimaRilevazione(nome);
   hint.className = 'hint';
   if (ultima && ultima.prezzoKg) {
     const diff = ((prezzoKg - ultima.prezzoKg) / ultima.prezzoKg) * 100;
     if (Math.abs(diff) >= 1) {
-      testo += '  \u2022  ' + (diff > 0 ? '+' : '') + diff.toFixed(0) + '% rispetto a ' + ultima.data;
+      testo += '  •  ' + (diff > 0 ? '+' : '') + diff.toFixed(0) + '% rispetto a ' + ultima.data;
       hint.classList.add(diff > 0 ? 'up' : 'down');
     }
   }
@@ -318,14 +323,29 @@ async function aggiungiProdottoALista() {
   const unita = document.getElementById('input-unita').value;
   const peso = parseFloat(document.getElementById('input-peso').value);
   const prezzo = parseFloat(document.getElementById('input-prezzo').value);
+  const prezzoOfferta = parseFloat(document.getElementById('input-prezzo-offerta').value);
   const supermercato = supermercatoSelezionato() || 'Non specificato';
 
-  if (!nome || !peso || !prezzo) {
-    mostraToast('Inserisci almeno prodotto, peso e prezzo');
+  const hasOfferta = !isNaN(prezzoOfferta) && prezzoOfferta > 0;
+  const prezzoRilevante = hasOfferta ? prezzoOfferta : prezzo;
+
+  if (!nome || !peso || isNaN(prezzoRilevante)) {
+    mostraToast('Inserisci almeno prodotto, peso e un prezzo valido');
     return;
   }
 
-  const nuovoItem = { prodotto: nome, marca: marca, categoria: categoria, unita: unita, peso: peso, prezzo: prezzo, supermercato: supermercato, spuntato: false };
+  const nuovoItem = { 
+    prodotto: nome, 
+    marca: marca, 
+    categoria: categoria, 
+    unita: unita, 
+    peso: peso, 
+    prezzo: prezzoRilevante, 
+    prezzoOriginale: hasOfferta ? prezzo : null,
+    inOfferta: hasOfferta,
+    supermercato: supermercato, 
+    spuntato: false 
+  };
 
   if (indiceInModifica !== null) {
     nuovoItem.spuntato = stato.lista[indiceInModifica].spuntato;
@@ -338,6 +358,7 @@ async function aggiungiProdottoALista() {
     document.getElementById('input-marca').value = '';
     document.getElementById('input-peso').value = '';
     document.getElementById('input-prezzo').value = '';
+    document.getElementById('input-prezzo-offerta').value = '';
     document.getElementById('hint-prezzo').textContent = '';
   }
 
@@ -353,7 +374,14 @@ function modificaProdottoInLista(indice) {
   document.getElementById('input-categoria').value = item.categoria;
   document.getElementById('input-peso').value = item.peso;
   document.getElementById('input-unita').value = item.unita;
-  document.getElementById('input-prezzo').value = item.prezzo;
+
+  if (item.inOfferta) {
+    document.getElementById('input-prezzo').value = item.prezzoOriginale || '';
+    document.getElementById('input-prezzo-offerta').value = item.prezzo;
+  } else {
+    document.getElementById('input-prezzo').value = item.prezzo;
+    document.getElementById('input-prezzo-offerta').value = '';
+  }
 
   const selectSuper = document.getElementById('input-supermercato');
   if ([...selectSuper.options].some(function (o) { return o.value === item.supermercato; })) {
@@ -361,7 +389,7 @@ function modificaProdottoInLista(indice) {
   }
 
   indiceInModifica = indice;
-  document.getElementById('btn-aggiungi').textContent = '\u2713 Salva modifiche';
+  document.getElementById('btn-aggiungi').textContent = '✓ Salva modifiche';
   document.getElementById('btn-annulla-modifica').classList.remove('nascosto');
 
   aggiornaAnteprimaProdotto();
@@ -376,6 +404,7 @@ function annullaModifica() {
   document.getElementById('input-marca').value = '';
   document.getElementById('input-peso').value = '';
   document.getElementById('input-prezzo').value = '';
+  document.getElementById('input-prezzo-offerta').value = '';
   document.getElementById('hint-prezzo').textContent = '';
 }
 
@@ -432,11 +461,11 @@ function creaRigaProdotto(item, indice) {
 
   const sfondoDestra = document.createElement('div');
   sfondoDestra.className = 'swipe-azione swipe-destra';
-  sfondoDestra.textContent = '\u2713';
+  sfondoDestra.textContent = '✓';
 
   const sfondoSinistra = document.createElement('div');
   sfondoSinistra.className = 'swipe-azione swipe-sinistra';
-  sfondoSinistra.textContent = '\u{1F5D1}';
+  sfondoSinistra.textContent = '🗑';
 
   const riga = document.createElement('div');
   riga.className = 'prodotto-riga' + (item.spuntato ? ' spuntato' : '');
@@ -452,23 +481,28 @@ function creaRigaProdotto(item, indice) {
   if (item.marca) dettagli.push(item.marca);
   dettagli.push(item.peso + ' ' + item.unita);
   dettagli.push(item.supermercato);
-  dettagli.push('\u20AC/kg ' + prezzoKg.toFixed(2));
+  dettagli.push('€/kg ' + prezzoKg.toFixed(2));
   info.innerHTML = '<div class="prodotto-nome">' + item.prodotto + '</div>' +
-    '<div class="prodotto-dettaglio">' + dettagli.join(' \u2022 ') + '</div>';
+    '<div class="prodotto-dettaglio">' + dettagli.join(' • ') + '</div>';
 
   const prezzo = document.createElement('div');
   prezzo.className = 'prodotto-prezzo';
-  prezzo.textContent = '\u20AC ' + Number(item.prezzo).toFixed(2);
+  if (item.inOfferta && item.prezzoOriginale) {
+    prezzo.innerHTML = '<span class="prezzo-originale">€ ' + Number(item.prezzoOriginale).toFixed(2) + '</span> ' +
+                       '<span class="prezzo-offerta">€ ' + Number(item.prezzo).toFixed(2) + '</span>';
+  } else {
+    prezzo.textContent = '€ ' + Number(item.prezzo).toFixed(2);
+  }
 
   const modifica = document.createElement('button');
   modifica.className = 'riga-modifica';
-  modifica.textContent = '\u270E';
+  modifica.textContent = '✏';
   modifica.title = 'Modifica prodotto';
   modifica.addEventListener('click', function () { modificaProdottoInLista(indice); });
 
   const elimina = document.createElement('button');
   elimina.className = 'riga-elimina';
-  elimina.textContent = '\u2715';
+  elimina.textContent = '✕';
   elimina.title = 'Rimuovi dalla lista';
   elimina.addEventListener('click', function () { eliminaDaLista(indice); });
 
@@ -540,7 +574,7 @@ async function eliminaDaLista(indice) {
 function aggiornaScontrino() {
   const spuntati = stato.lista.filter(function (i) { return i.spuntato; });
   const totale = spuntati.reduce(function (somma, i) { return somma + Number(i.prezzo); }, 0);
-  document.getElementById('totale-carrello').textContent = '\u20AC ' + totale.toFixed(2);
+  document.getElementById('totale-carrello').textContent = '€ ' + totale.toFixed(2);
   document.getElementById('conteggio-spuntati').textContent = spuntati.length + ' di ' + stato.lista.length + ' prodotti nel carrello';
 }
 
@@ -604,8 +638,8 @@ function renderPannelloOrdine() {
     return '<div class="ordine-riga">' +
       '<span>' + (cat ? cat.icona : '') + ' ' + catId + '</span>' +
       '<span class="ordine-frecce">' +
-      '<button class="freccia" data-indice="' + indice + '" data-dir="-1"' + (indice === 0 ? ' disabled' : '') + '>\u2191</button>' +
-      '<button class="freccia" data-indice="' + indice + '" data-dir="1"' + (indice === ordineCorrente.length - 1 ? ' disabled' : '') + '>\u2193</button>' +
+      '<button class="freccia" data-indice="' + indice + '" data-dir="-1"' + (indice === 0 ? ' disabled' : '') + '>↑</button>' +
+      '<button class="freccia" data-indice="' + indice + '" data-dir="1"' + (indice === ordineCorrente.length - 1 ? ' disabled' : '') + '>↓</button>' +
       '</span></div>';
   }).join('');
 }
@@ -642,7 +676,7 @@ function apriPannelloBase() {
 
   cont.innerHTML = prodottiOrdinati.map(function (p) {
     return '<div class="base-riga">' +
-      '<button class="stella' + (p.base ? ' attiva' : '') + '" data-nome="' + p.nome + '">' + (p.base ? '\u2605' : '\u2606') + '</button>' +
+      '<button class="stella' + (p.base ? ' attiva' : '') + '" data-nome="' + p.nome + '">' + (p.base ? '★' : '☆') + '</button>' +
       '<span>' + p.nome + '</span></div>';
   }).join('') || '<p class="hint">Nessun prodotto ancora registrato.</p>';
 
@@ -681,6 +715,8 @@ async function aggiungiProdottiBase() {
       unita: p.unita,
       peso: ultima ? ultima.peso : 0,
       prezzo: ultima ? ultima.prezzo : 0,
+      prezzoOriginale: ultima ? ultima.prezzoOriginale : null,
+      inOfferta: ultima ? ultima.inOfferta : false,
       supermercato: supermercatoCorrente || (ultima ? ultima.supermercato : 'Non specificato'),
       spuntato: false
     });
@@ -690,7 +726,7 @@ async function aggiungiProdottiBase() {
   renderListaSpesa();
   try { await sincronizzaLista(); } catch (err) { mostraToast('Non sincronizzato: ' + err.message); }
 
-  mostraToast(aggiunti > 0 ? aggiunti + ' prodotti base aggiunti' : 'I prodotti base sono gia\' tutti nella lista');
+  mostraToast(aggiunti > 0 ? aggiunti + ' prodotti base aggiunti' : 'I prodotti base sono già tutti nella lista');
 }
 
 /* ----------------------------------------------------------------------- *
@@ -717,7 +753,7 @@ function renderStorico() {
     data: {
       labels: righe.map(function (r) { return r.data; }),
       datasets: [{
-        label: '\u20AC/kg',
+        label: '€/kg',
         data: righe.map(function (r) { return r.prezzoKg; }),
         borderColor: '#f59e0b',
         backgroundColor: 'rgba(245,158,11,0.15)',
@@ -733,12 +769,19 @@ function renderStorico() {
   tbody.innerHTML = '';
   righe.slice().reverse().forEach(function (r) {
     const tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + r.data + '</td><td>' + (r.marca || '\u2014') + '</td><td>' + r.supermercato + '</td><td>' + r.peso + ' ' + r.unita + '</td>' +
-      '<td>\u20AC ' + Number(r.prezzo).toFixed(2) + '</td><td>' + Number(r.prezzoKg).toFixed(2) + '</td><td></td>';
+    
+    let prezzoHtml = '€ ' + Number(r.prezzo).toFixed(2);
+    if (r.inOfferta && r.prezzoOriginale) {
+      prezzoHtml = '<span class="prezzo-originale">€ ' + Number(r.prezzoOriginale).toFixed(2) + '</span> ' +
+                   '<span class="prezzo-offerta">€ ' + Number(r.prezzo).toFixed(2) + '</span>';
+    }
+
+    tr.innerHTML = '<td>' + r.data + '</td><td>' + (r.marca || '—') + '</td><td>' + r.supermercato + '</td><td>' + r.peso + ' ' + r.unita + '</td>' +
+      '<td>' + prezzoHtml + '</td><td>' + Number(r.prezzoKg).toFixed(2) + '</td><td></td>';
     const tdBtn = tr.lastElementChild;
     const btn = document.createElement('button');
     btn.className = 'riga-elimina';
-    btn.textContent = '\u2715';
+    btn.textContent = '✕';
     btn.title = 'Elimina questa rilevazione';
     btn.addEventListener('click', function () { eliminaRilevazione(r.id); });
     tdBtn.appendChild(btn);
@@ -777,7 +820,7 @@ function renderConfronto() {
 
   const tbody = document.querySelector('#tabella-confronto tbody');
   tbody.innerHTML = elenco.map(function (r) {
-    return '<tr><td>' + r.supermercato + '</td><td>' + (r.marca || '\u2014') + '</td><td>\u20AC ' + Number(r.prezzoKg).toFixed(2) + '</td><td>' + r.data + '</td></tr>';
+    return '<tr><td>' + r.supermercato + '</td><td>' + (r.marca || '—') + '</td><td>€ ' + Number(r.prezzoKg).toFixed(2) + '</td><td>' + r.data + '</td></tr>';
   }).join('') || '<tr><td colspan="4">Nessun dato per questo prodotto</td></tr>';
 }
 
@@ -798,14 +841,14 @@ function renderStatistiche() {
 
   const rilevazioniMeseCorrente = stato.rilevazioni.filter(function (r) { return chiaveMese(r.data) === chiaveMeseCorrente; });
   const totaleMese = rilevazioniMeseCorrente.reduce(function (s, r) { return s + Number(r.prezzo); }, 0);
-  document.getElementById('stat-mese-totale').textContent = '\u20AC ' + totaleMese.toFixed(2);
+  document.getElementById('stat-mese-totale').textContent = '€ ' + totaleMese.toFixed(2);
 
   const perCategoria = {};
   rilevazioniMeseCorrente.forEach(function (r) {
     perCategoria[r.categoria] = (perCategoria[r.categoria] || 0) + Number(r.prezzo);
   });
   const categorieOrdinate = Object.entries(perCategoria).sort(function (a, b) { return b[1] - a[1]; });
-  document.getElementById('stat-top-categoria').textContent = categorieOrdinate[0] ? categorieOrdinate[0][0] : '\u2014';
+  document.getElementById('stat-top-categoria').textContent = categorieOrdinate[0] ? categorieOrdinate[0][0] : '—';
 
   const ctxCat = document.getElementById('chart-categorie');
   if (graficoCategorie) graficoCategorie.destroy();

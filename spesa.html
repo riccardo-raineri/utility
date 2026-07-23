@@ -67,8 +67,8 @@
         </label>
       </div>
 
-      <!-- Riga 2 del Form: Categoria, Peso, Prezzo -->
-      <div class="form-grid-row">
+      <!-- Riga 2 del Form: Categoria, Peso, Prezzo Pieno, Prezzo Offerta -->
+      <div class="form-grid-row form-grid-4col">
         <label>
           Categoria
           <select id="input-categoria"></select>
@@ -87,8 +87,12 @@
           </div>
         </label>
         <label>
-          Prezzo &euro;
+          Prezzo Pieno &euro;
           <input type="number" id="input-prezzo" step="0.01" min="0" placeholder="0.00">
+        </label>
+        <label>
+          In Offerta &euro; <span class="opzionale">(opz.)</span>
+          <input type="number" id="input-prezzo-offerta" step="0.01" min="0" placeholder="0.00">
         </label>
       </div>
 
@@ -141,7 +145,7 @@
 
     <input type="text" id="ricerca-prodotto" class="input-ricerca" placeholder="&#128269; Cerca un prodotto nella lista...">
 
-    <p class="hint suggerimento-swipe">💡 Da mobile: scorri a destra per spuntare, a sinistra per rimuovere.</p>
+    <p class="hint suggerimento-swipe">&#128161; Da mobile: scorri a destra per spuntare, a sinistra per rimuovere.</p>
 
     <div id="lista-categorie"></div>
 
@@ -233,3 +237,8 @@
 <script src="spesa.js"></script>
 </body>
 </html>
+```[cite: 12]
+
+---
+
+## 2. File `spesa.css`[cite: 11]
