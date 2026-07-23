@@ -51,6 +51,55 @@ body {
   padding-bottom: 80px;
 }
 
+/* ---------- Spotify Loading Overlay ---------- */
+
+.loading-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 18, 22, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  z-index: 9999;
+  transition: opacity .3s ease;
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--testo-attenuato);
+  letter-spacing: 0.05em;
+}
+
+.loading-overlay.nascosto {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.spotify-loader {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  height: 32px;
+}
+
+.spotify-loader .bar {
+  width: 6px;
+  background: var(--accento-gradient);
+  animation: spotify-wave 1.2s infinite ease-in-out;
+  border-radius: 4px;
+}
+
+.spotify-loader .bar:nth-child(1) { animation-delay: -1.2s; }
+.spotify-loader .bar:nth-child(2) { animation-delay: -1.0s; }
+.spotify-loader .bar:nth-child(3) { animation-delay: -0.8s; }
+.spotify-loader .bar:nth-child(4) { animation-delay: -0.6s; }
+
+@keyframes spotify-wave {
+  0%, 40%, 100% { height: 8px; }
+  20% { height: 32px; }
+}
+
 /* ---------- Topbar & Navigazione a Pillola ---------- */
 
 .topbar {
@@ -176,7 +225,7 @@ main { max-width: 760px; margin: 0 auto; padding: 20px 24px; }
   gap: 8px;
 }
 
-/* ---------- Form & Campi Input (Nuovo layout a griglia 3+3) ---------- */
+/* ---------- Form & Campi Input (Layout griglia 3+3) ---------- */
 
 .form-grid-row {
   display: grid;

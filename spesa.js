@@ -42,15 +42,29 @@ let indiceInModifica = null;
 let filtroRicerca = '';       
 
 /* ----------------------------------------------------------------------- *
- *  COMUNICAZIONE COL BACKEND
+ *  COMUNICAZIONE COL BACKEND & LOADER VISIVO
  * ----------------------------------------------------------------------- */
 
+function mostraCaricamento(attiva) {
+  const overlay = document.getElementById('loading-overlay');
+  if (attiva) {
+    overlay.classList.remove('nascosto');
+  } else {
+    overlay.classList.add('nascosto');
+  }
+}
+
 async function chiamaBackend(action, extraParams) {
-  const params = new URLSearchParams(Object.assign({ action: action }, extraParams || {}));
-  const res = await fetch(WEBAPP_URL + '?' + params.toString());
-  const json = await res.json();
-  if (!json.ok) throw new Error(json.errore || 'Errore sconosciuto dal backend');
-  return json;
+  mostraCaricamento(true);
+  try {
+    const params = new URLSearchParams(Object.assign({ action: action }, extraParams || {}));
+    const res = await fetch(WEBAPP_URL + '?' + params.toString());
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.errore || 'Errore sconosciuto dal backend');
+    return json;
+  } finally {
+    mostraCaricamento(false);
+  }
 }
 
 async function caricaDati() {
