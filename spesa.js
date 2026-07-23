@@ -4,7 +4,7 @@
    IMPORTANTE: dopo aver pubblicato lo script come Web App, incolla qui sotto
    l'URL che Google ti da (finisce con /exec).
    ============================================================================ */
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxmtXY1qGdTLYOo-vElncFxXg2FtGxYIhrmOdQQsJpBt44FUSYwILZtIGvRUN0UUD0y/exec';
+const WEBAPP_URL = 'INCOLLA_QUI_URL_WEB_APP';
 
 // Categorie in ordine di visualizzazione predefinito, con icona
 const CATEGORIE = [
@@ -22,12 +22,27 @@ const CATEGORIE = [
   { id: 'Altro', icona: '\u{1F4E6}' }
 ];
 
+// Modelli generici di percorso in negozio, usati solo come punto di partenza
+// nel pannello "Ordina corsie": restano comunque modificabili con le frecce,
+// perche' la planimetria reale varia da punto vendita a punto vendita.
+const MODELLI_SUPERMERCATO = {
+  generico: ['Frutta e Verdura', 'Latticini', 'Carne e Pesce', 'Salumi', 'Scatolame', 'Surgelati', 'Condimenti', 'Colazione', 'Snacks', 'Vini e Birra', 'Chimici', 'Altro'],
+  esselunga: ['Frutta e Verdura', 'Colazione', 'Latticini', 'Salumi', 'Carne e Pesce', 'Scatolame', 'Condimenti', 'Snacks', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro'],
+  conad: ['Frutta e Verdura', 'Salumi', 'Latticini', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  coop: ['Frutta e Verdura', 'Carne e Pesce', 'Salumi', 'Latticini', 'Colazione', 'Condimenti', 'Scatolame', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  lidl: ['Frutta e Verdura', 'Colazione', 'Salumi', 'Latticini', 'Carne e Pesce', 'Scatolame', 'Snacks', 'Condimenti', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  eurospin: ['Frutta e Verdura', 'Colazione', 'Scatolame', 'Latticini', 'Salumi', 'Carne e Pesce', 'Condimenti', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  carrefour: ['Frutta e Verdura', 'Latticini', 'Salumi', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro']
+};
+
 // Stato applicativo in memoria: viene ricaricato da Google Fogli a ogni avvio
 let stato = { prodotti: [], rilevazioni: [], lista: [], ordini: {} };
 let graficoStorico = null;
 let graficoCategorie = null;
 let graficoMensile = null;
-let ordineCorrente = []; // usato mentre si modifica l'ordine corsie di un supermercato
+let ordineCorrente = [];      // usato mentre si modifica l'ordine corsie di un supermercato
+let indiceInModifica = null;  // indice in stato.lista del prodotto che si sta modificando (null = nessuno)
+let filtroRicerca = '';       // testo della barra di ricerca nella lista corrente
 
 /* ----------------------------------------------------------------------- *
  *  COMUNICAZIONE COL BACKEND
@@ -78,6 +93,7 @@ function collegaEventi() {
 
   document.getElementById('theme-toggle').addEventListener('click', cambiaTema);
   document.getElementById('btn-aggiungi').addEventListener('click', aggiungiProdottoALista);
+  document.getElementById('btn-annulla-modifica').addEventListener('click', annullaModifica);
   document.getElementById('btn-registra').addEventListener('click', registraSpesaOdierna);
   document.getElementById('btn-svuota').addEventListener('click', svuotaListaCorrente);
 
@@ -86,8 +102,28 @@ function collegaEventi() {
   document.getElementById('input-prezzo').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-unita').addEventListener('change', aggiornaAnteprimaProdotto);
 
-  // L'ordine delle corsie dipende dal supermercato selezionato: ri-raggruppa la lista quando cambia
-  document.getElementById('input-supermercato').addEventListener('input', renderListaSpesa);
+  // Selettore supermercato: menu a tendina + opzione per aggiungerne uno nuovo
+  document.getElementById('input-supermercato').addEventListener('change', function () {
+    const inputNuovo = document.getElementById('input-supermercato-nuovo');
+    if (this.value === '__nuovo__') {
+      inputNuovo.classList.remove('nascosto');
+      inputNuovo.value = '';
+      inputNuovo.focus();
+    } else {
+      inputNuovo.classList.add('nascosto');
+      renderListaSpesa(); // l'ordine delle corsie dipende dal supermercato selezionato
+    }
+  });
+  document.getElementById('input-supermercato-nuovo').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') confermaNuovoSupermercato();
+  });
+  document.getElementById('input-supermercato-nuovo').addEventListener('blur', confermaNuovoSupermercato);
+
+  // Ricerca prodotto nella lista corrente
+  document.getElementById('ricerca-prodotto').addEventListener('input', function () {
+    filtroRicerca = this.value.trim().toLowerCase();
+    renderListaSpesa();
+  });
 
   document.getElementById('storico-select-prodotto').addEventListener('change', renderStorico);
   document.getElementById('confronto-select-prodotto').addEventListener('change', renderConfronto);
@@ -102,6 +138,11 @@ function collegaEventi() {
     const btn = e.target.closest('.freccia');
     if (!btn) return;
     spostaCategoria(Number(btn.dataset.indice), Number(btn.dataset.dir));
+  });
+  document.getElementById('ordine-modello').addEventListener('change', function () {
+    const modello = MODELLI_SUPERMERCATO[this.value] || MODELLI_SUPERMERCATO.generico;
+    ordineCorrente = modello.slice();
+    renderPannelloOrdine();
   });
 
   // Prodotti base
@@ -146,7 +187,58 @@ function cambiaTema() {
 }
 
 /* ----------------------------------------------------------------------- *
- *  VISTA: FORM AGGIUNTA PRODOTTO
+ *  SELETTORE SUPERMERCATO (menu a tendina + aggiunta di uno nuovo)
+ * ----------------------------------------------------------------------- */
+
+/** Ricostruisce le opzioni del menu a tendina a partire da tutti i supermercati gia' noti. */
+function popolaSelectSupermercato() {
+  const select = document.getElementById('input-supermercato');
+  const valorePrecedente = select.value;
+
+  const daRilevazioni = stato.rilevazioni.map(function (r) { return r.supermercato; });
+  const daOrdini = Object.keys(stato.ordini || {});
+  const daLista = stato.lista.map(function (i) { return i.supermercato; });
+  const elenco = [...new Set([...daRilevazioni, ...daOrdini, ...daLista].filter(Boolean))].sort();
+
+  select.innerHTML = elenco.map(function (s) {
+    return '<option value="' + s + '">' + s + '</option>';
+  }).join('') + '<option value="__nuovo__">+ Nuovo supermercato...</option>';
+
+  if (valorePrecedente && elenco.indexOf(valorePrecedente) !== -1) {
+    select.value = valorePrecedente;
+  } else if (elenco.length > 0) {
+    select.value = elenco[0];
+  } else {
+    select.value = '__nuovo__';
+  }
+}
+
+/** Restituisce il supermercato attualmente selezionato, ignorando il placeholder "nuovo" non ancora confermato. */
+function supermercatoSelezionato() {
+  const select = document.getElementById('input-supermercato');
+  return select.value === '__nuovo__' ? '' : select.value;
+}
+
+function confermaNuovoSupermercato() {
+  const inputNuovo = document.getElementById('input-supermercato-nuovo');
+  const nome = inputNuovo.value.trim();
+  if (!nome) { inputNuovo.classList.add('nascosto'); return; }
+
+  const select = document.getElementById('input-supermercato');
+  const giaPresente = [...select.options].some(function (o) { return o.value === nome; });
+  if (!giaPresente) {
+    const opzione = document.createElement('option');
+    opzione.value = nome;
+    opzione.textContent = nome;
+    select.insertBefore(opzione, select.querySelector('option[value="__nuovo__"]'));
+  }
+  select.value = nome;
+  inputNuovo.classList.add('nascosto');
+  renderListaSpesa();
+}
+
+/* ----------------------------------------------------------------------- *
+ *  VISTA: FORM AGGIUNTA / MODIFICA PRODOTTO
  * ----------------------------------------------------------------------- */
 
 function popolaSelectCategorie() {
@@ -156,14 +248,9 @@ function popolaSelectCategorie() {
   }).join('');
 }
 
-function popolaDatalist() {
+function popolaDatalistProdotti() {
   document.getElementById('prodotti-list').innerHTML = stato.prodotti.map(function (p) {
     return '<option value="' + p.nome + '">';
-  }).join('');
-
-  const supermercati = [...new Set(stato.rilevazioni.map(function (r) { return r.supermercato; }))];
-  document.getElementById('supermercati-list').innerHTML = supermercati.map(function (s) {
-    return '<option value="' + s + '">';
   }).join('');
 }
 
@@ -214,28 +301,70 @@ function calcolaPrezzoKg(peso, unita, prezzo) {
   return pesoKg > 0 ? prezzo / pesoKg : prezzo;
 }
 
+/** Aggiunge un nuovo prodotto alla lista, oppure salva le modifiche se si stava modificando un prodotto esistente. */
 async function aggiungiProdottoALista() {
   const nome = document.getElementById('input-prodotto').value.trim();
   const categoria = document.getElementById('input-categoria').value;
   const unita = document.getElementById('input-unita').value;
   const peso = parseFloat(document.getElementById('input-peso').value);
   const prezzo = parseFloat(document.getElementById('input-prezzo').value);
-  const supermercato = document.getElementById('input-supermercato').value.trim() || 'Non specificato';
+  const supermercato = supermercatoSelezionato() || 'Non specificato';
 
   if (!nome || !peso || !prezzo) {
     mostraToast('Inserisci almeno prodotto, peso e prezzo');
     return;
   }
 
-  stato.lista.push({ prodotto: nome, categoria: categoria, unita: unita, peso: peso, prezzo: prezzo, supermercato: supermercato, spuntato: false });
+  const nuovoItem = { prodotto: nome, categoria: categoria, unita: unita, peso: peso, prezzo: prezzo, supermercato: supermercato, spuntato: false };
 
+  if (indiceInModifica !== null) {
+    nuovoItem.spuntato = stato.lista[indiceInModifica].spuntato; // mantiene lo stato spuntato del prodotto originale
+    stato.lista[indiceInModifica] = nuovoItem;
+    annullaModifica();
+    mostraToast('Prodotto aggiornato');
+  } else {
+    stato.lista.push(nuovoItem);
+    document.getElementById('input-prodotto').value = '';
+    document.getElementById('input-peso').value = '';
+    document.getElementById('input-prezzo').value = '';
+    document.getElementById('hint-prezzo').textContent = '';
+  }
+
+  renderListaSpesa();
+  try { await sincronizzaLista(); } catch (err) { mostraToast('Non sincronizzato: ' + err.message); }
+}
+
+/** Precompila il form con i dati di un prodotto gia' in lista, per modificarlo. */
+function modificaProdottoInLista(indice) {
+  const item = stato.lista[indice];
+
+  document.getElementById('input-prodotto').value = item.prodotto;
+  document.getElementById('input-categoria').value = item.categoria;
+  document.getElementById('input-peso').value = item.peso;
+  document.getElementById('input-unita').value = item.unita;
+  document.getElementById('input-prezzo').value = item.prezzo;
+
+  const selectSuper = document.getElementById('input-supermercato');
+  if ([...selectSuper.options].some(function (o) { return o.value === item.supermercato; })) {
+    selectSuper.value = item.supermercato;
+  }
+
+  indiceInModifica = indice;
+  document.getElementById('btn-aggiungi').textContent = '\u2713 Salva modifiche';
+  document.getElementById('btn-annulla-modifica').classList.remove('nascosto');
+
+  aggiornaAnteprimaProdotto();
+  document.getElementById('input-prodotto').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function annullaModifica() {
+  indiceInModifica = null;
+  document.getElementById('btn-aggiungi').textContent = '+ Aggiungi alla lista';
+  document.getElementById('btn-annulla-modifica').classList.add('nascosto');
   document.getElementById('input-prodotto').value = '';
   document.getElementById('input-peso').value = '';
   document.getElementById('input-prezzo').value = '';
   document.getElementById('hint-prezzo').textContent = '';
-
-  renderListaSpesa();
-  try { await sincronizzaLista(); } catch (err) { mostraToast('Non sincronizzato: ' + err.message); }
 }
 
 /* ----------------------------------------------------------------------- *
@@ -244,7 +373,7 @@ async function aggiungiProdottoALista() {
 
 /** Restituisce l'ordine delle categorie da usare per il supermercato attualmente selezionato. */
 function ordineCategorieAttuale() {
-  const supermercato = document.getElementById('input-supermercato').value.trim();
+  const supermercato = supermercatoSelezionato();
   const personalizzato = stato.ordini && stato.ordini[supermercato];
   const tutteLeCategorie = CATEGORIE.map(function (c) { return c.id; });
 
@@ -264,7 +393,8 @@ function renderListaSpesa() {
     const cat = CATEGORIE.find(function (c) { return c.id === catId; }) || { id: catId, icona: '' };
     const items = stato.lista
       .map(function (item, indiceReale) { return { item: item, indiceReale: indiceReale }; })
-      .filter(function (x) { return x.item.categoria === cat.id; });
+      .filter(function (x) { return x.item.categoria === cat.id; })
+      .filter(function (x) { return !filtroRicerca || x.item.prodotto.toLowerCase().indexOf(filtroRicerca) !== -1; });
 
     if (items.length === 0) return;
 
@@ -278,6 +408,10 @@ function renderListaSpesa() {
 
     contenitore.appendChild(blocco);
   });
+
+  if (filtroRicerca && contenitore.innerHTML === '') {
+    contenitore.innerHTML = '<p class="hint">Nessun prodotto trovato per "' + filtroRicerca + '"</p>';
+  }
 
   aggiornaScontrino();
 }
@@ -312,6 +446,12 @@ function creaRigaProdotto(item, indice) {
   prezzo.className = 'prodotto-prezzo';
   prezzo.textContent = '\u20AC ' + Number(item.prezzo).toFixed(2);
 
+  const modifica = document.createElement('button');
+  modifica.className = 'riga-modifica';
+  modifica.textContent = '\u270E';
+  modifica.title = 'Modifica prodotto';
+  modifica.addEventListener('click', function () { modificaProdottoInLista(indice); });
+
   const elimina = document.createElement('button');
   elimina.className = 'riga-elimina';
   elimina.textContent = '\u2715';
@@ -321,6 +461,7 @@ function creaRigaProdotto(item, indice) {
   riga.appendChild(checkbox);
   riga.appendChild(info);
   riga.appendChild(prezzo);
+  riga.appendChild(modifica);
   riga.appendChild(elimina);
 
   wrapper.appendChild(sfondoDestra);
@@ -382,6 +523,7 @@ async function toggleSpuntato(indice) {
 }
 
 async function eliminaDaLista(indice) {
+  if (indiceInModifica === indice) annullaModifica();
   stato.lista.splice(indice, 1);
   renderListaSpesa();
   try { await sincronizzaLista(); } catch (err) { mostraToast('Non sincronizzato: ' + err.message); }
@@ -433,13 +575,14 @@ async function registraSpesaOdierna() {
  * ----------------------------------------------------------------------- */
 
 function apriPannelloOrdine() {
-  const supermercato = document.getElementById('input-supermercato').value.trim();
-  if (!supermercato) { mostraToast('Scrivi prima il nome del supermercato'); return; }
+  const supermercato = supermercatoSelezionato();
+  if (!supermercato) { mostraToast('Seleziona prima un supermercato'); return; }
 
   document.getElementById('ordine-supermercato-nome').textContent = supermercato;
+  document.getElementById('ordine-modello').value = 'generico';
 
   const salvato = stato.ordini && stato.ordini[supermercato];
-  ordineCorrente = (salvato && salvato.length) ? salvato.slice() : CATEGORIE.map(function (c) { return c.id; });
+  ordineCorrente = (salvato && salvato.length) ? salvato.slice() : MODELLI_SUPERMERCATO.generico.slice();
   CATEGORIE.forEach(function (c) { if (ordineCorrente.indexOf(c.id) === -1) ordineCorrente.push(c.id); });
 
   renderPannelloOrdine();
@@ -469,7 +612,7 @@ function spostaCategoria(indice, dir) {
 }
 
 async function salvaOrdineCorsie() {
-  const supermercato = document.getElementById('input-supermercato').value.trim();
+  const supermercato = supermercatoSelezionato();
   try {
     const json = await chiamaBackend('salvaOrdine', { data: JSON.stringify({ supermercato: supermercato, ordine: ordineCorrente }) });
     stato.ordini = json.ordini;
@@ -516,7 +659,7 @@ async function aggiungiProdottiBase() {
     return;
   }
 
-  const supermercatoCorrente = document.getElementById('input-supermercato').value.trim();
+  const supermercatoCorrente = supermercatoSelezionato();
   let aggiunti = 0;
 
   base.forEach(function (p) {
@@ -699,7 +842,8 @@ function renderStatistiche() {
  * ----------------------------------------------------------------------- */
 
 function renderTutto() {
-  popolaDatalist();
+  popolaSelectSupermercato();
+  popolaDatalistProdotti();
   renderListaSpesa();
   popolaSelectProdottiStorico();
 }
