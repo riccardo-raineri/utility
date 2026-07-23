@@ -1,51 +1,44 @@
 /* ============================================================================
-   LISTA DELLA SPESA 2.0 - Stile "Scontrino Termico" & Accento Giallo
+   LISTA DELLA SPESA 2.0 - Stile Spotify/Cedolino+ & Scontrino Termico
+   Palette: Base scura profonda, accento Giallo Aranciato (Ambra),
+   dettagli in stile biglietto della spesa / scontrino fiscale.
    ============================================================================ */
 
 :root {
-  /* Tema Scuro (Terminale di cassa) */
-  --bg: #161819;
-  --bg-elevata: #202325;
-  --bg-card: #262a2d;
-  --bg-hover: #2e3337;
-  --bordo: rgba(255, 255, 255, 0.15);
-  --bordo-focus: rgba(244, 208, 63, 0.5);
-  
-  --testo: #f0f0f0;
-  --testo-attenuato: #9ba3a9;
-  
-  /* Giallo Accento (Scontrino / Etichetta Prezzo) */
-  --accento: #f4d03f;
-  --accento-hover: #f1c40f;
-  --accento-testo: #111111;
-  
-  --verde: #2ecc71;
-  --rosso: #e74c3c;
-  
-  /* Angoli netti per simulare la carta */
-  --radius: 4px;
-  --radius-sm: 2px;
-  
-  --font-display: 'Space Grotesk', -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
-  --font-body: 'Inter', -apple-system, sans-serif;
-  
-  --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --bg: #0f1216;
+  --bg-elevata: #181d24;
+  --bg-card: #1e242e;
+  --bordo: #2c3542;
+  --testo: #f3f4f6;
+  --testo-attenuato: #9ca3af;
+  --accento: #f59e0b;               /* Giallo caldo tendente all'arancione */
+  --accento-secondario: #ea580c;    /* Arancio caldo di transizione */
+  --accento-gradient: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+  --accento-testo: #0f1216;
+  --verde: #10b981;                 /* Risparmio / Prezzo sceso */
+  --rosso: #ef4444;                 /* Rincaro / Prezzo salito */
+  --radius: 14px;
+  --radius-sm: 8px;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --font-body: 'Inter', sans-serif;
+  --ombra-card: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --ombra-accento: 0 0 15px rgba(245, 158, 11, 0.2);
 }
 
 [data-theme="light"] {
-  /* Tema Chiaro (Effetto Carta Termica) */
-  --bg: #e6e5df;
-  --bg-elevata: #fdfcf7;
-  --bg-card: #fdfcf7;
-  --bg-hover: #f0eee5;
-  --bordo: #cfccc0;
-  --bordo-focus: rgba(228, 185, 59, 0.6);
-  --testo: #1a1a1a;
-  --testo-attenuato: #6b6b6b;
-  --accento: #e4b93b;
-  --accento-hover: #d4a72c;
-  --accento-testo: #111111;
+  --bg: #f4f6f9;
+  --bg-elevata: #ffffff;
+  --bg-card: #ffffff;
+  --bordo: #e2e8f0;
+  --testo: #0f172a;
+  --testo-attenuato: #64748b;
+  --accento: #d97706;
+  --accento-secondario: #c2410c;
+  --accento-gradient: linear-gradient(135deg, #f59e0b 0%, #c2410c 100%);
+  --accento-testo: #ffffff;
+  --ombra-card: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --ombra-accento: 0 0 12px rgba(217, 119, 6, 0.15);
 }
 
 * { box-sizing: border-box; }
@@ -55,202 +48,354 @@ body {
   background: var(--bg);
   color: var(--testo);
   font-family: var(--font-body);
-  transition: background .2s ease, color .2s ease;
+  transition: background .25s ease, color .25s ease;
   padding-bottom: 80px;
 }
 
-/* ---------- Header e Navigazione ---------- */
+/* ---------- Topbar & Navigazione a Pillola ---------- */
 
 .topbar {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 20px;
+  padding: 20px 24px;
   background: var(--bg-elevata);
-  border-bottom: 2px dashed var(--bordo); /* Linea tratteggiata */
+  border-bottom: 1px solid var(--bordo);
   position: sticky;
   top: 0;
   z-index: 100;
+  backdrop-filter: blur(10px);
 }
 
 .back-link {
   color: var(--testo-attenuato);
   text-decoration: none;
-  font-size: 20px;
-  transition: color .2s ease;
+  font-size: 22px;
+  line-height: 1;
+  transition: color .2s;
 }
 .back-link:hover { color: var(--accento); }
 
 .logo {
-  font-family: var(--font-mono); /* Font da scontrino per il logo */
-  font-weight: 600;
-  font-size: 18px;
-  text-transform: uppercase;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  letter-spacing: -0.02em;
   margin: 0;
   flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-.logo-accent { color: var(--accento); }
+.logo-accent {
+  background: var(--accento-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
 .icon-btn {
-  background: transparent;
+  background: var(--bg-card);
   border: 1px solid var(--bordo);
   color: var(--testo);
-  border-radius: var(--radius-sm);
-  width: 36px;
-  height: 36px;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all .2s ease;
 }
-.icon-btn:hover { background: var(--bg-hover); border-color: var(--accento); }
-
-/* ---------- Tabs ---------- */
+.icon-btn:hover {
+  border-color: var(--accento);
+  box-shadow: var(--ombra-accento);
+}
 
 .tabs {
   display: flex;
-  gap: 4px;
-  padding: 12px 20px 0;
+  gap: 8px;
+  padding: 16px 24px 4px;
+  max-width: 760px;
+  margin: 0 auto;
   overflow-x: auto;
-  border-bottom: 1px dashed var(--bordo);
 }
 
 .tab-btn {
-  background: transparent;
-  border: 1px solid transparent;
-  border-bottom: none;
+  background: var(--bg-card);
+  border: 1px solid var(--bordo);
   color: var(--testo-attenuato);
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 12px;
-  text-transform: uppercase;
-  padding: 10px 16px;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 13px;
+  padding: 10px 18px;
+  border-radius: 20px;
   cursor: pointer;
   white-space: nowrap;
+  transition: all .2s ease;
 }
 
-.tab-btn:hover { color: var(--testo); }
+.tab-btn:hover {
+  color: var(--testo);
+  border-color: var(--testo-attenuato);
+}
 
 .tab-btn.active {
-  background: var(--bg-elevata);
-  border-color: var(--bordo);
-  border-bottom: 1px solid var(--bg-elevata); /* Fonde il tab col contenuto */
-  color: var(--accento);
-  margin-bottom: -1px;
+  background: var(--accento-gradient);
+  color: var(--accento-testo);
+  border-color: transparent;
+  font-weight: 600;
+  box-shadow: var(--ombra-accento);
 }
 
-main { max-width: 680px; margin: 0 auto; padding: 20px 16px 40px; }
-.view { display: none; flex-direction: column; gap: 16px; }
+main { max-width: 760px; margin: 0 auto; padding: 20px 24px; }
+
+.view { display: none; flex-direction: column; gap: 20px; }
 .view.active { display: flex; }
 
-/* ---------- Dashboard & Card ---------- */
+/* ---------- Card Generiche ---------- */
 
 .card {
-  background: var(--bg-elevata);
-  border: 1px dashed var(--bordo); /* Stile scontrino */
+  background: var(--bg-card);
+  border: 1px solid var(--bordo);
   border-radius: var(--radius);
-  padding: 18px;
+  padding: 22px;
+  box-shadow: var(--ombra-card);
+  position: relative;
+  overflow: hidden;
 }
 
 .card h3 {
-  margin: 0 0 14px;
-  font-family: var(--font-mono);
-  font-size: 13px;
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  font-size: 16px;
   font-weight: 600;
-  text-transform: uppercase;
-  color: var(--testo-attenuato);
-  border-bottom: 1px dashed var(--bordo);
-  padding-bottom: 8px;
+  color: var(--testo);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
-/* ---------- Form e Input ---------- */
+/* ---------- Form & Campi Input ---------- */
 
-.field-row { margin-bottom: 12px; }
-/* Layout Desktop: proporzioni corrette e allineamento basso per il bottone */
+.field-row { margin-bottom: 14px; }
 .field-row-grid {
   display: grid;
-  grid-template-columns: 2fr 1.2fr 1.4fr 1.2fr auto;
+  grid-template-columns: 1.6fr 1.2fr 1.2fr 1.1fr 0.9fr;
   gap: 12px;
-  align-items: end; /* Allinea il bottone perfettamente alla base degli input */
 }
+
+.opzionale { font-weight: 400; text-transform: none; letter-spacing: normal; opacity: 0.6; }
+
 label {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-family: var(--font-mono);
   font-size: 11px;
   color: var(--testo-attenuato);
+  font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 input, select {
-  background: var(--bg);
+  background: var(--bg-elevata);
   border: 1px solid var(--bordo);
   color: var(--testo);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
-  font-family: var(--font-mono); /* Tutto monospace per i dati */
-  font-size: 13px;
-}
-input:focus, select:focus {
-  outline: none;
-  border-color: var(--accento);
-  box-shadow: 0 0 0 1px var(--accento);
-}
-
-.input-with-unit { display: flex; gap: 4px; }
-.input-with-unit input { flex: 1; min-width: 0; }
-.input-with-unit select { width: 62px; }
-
-.hint { font-family: var(--font-mono); font-size: 11px; color: var(--testo-attenuato); min-height: 16px; margin-bottom: 12px; }
-.hint.up { color: var(--rosso); }
-.hint.down { color: var(--verde); }
-
-/* ---------- Pulsanti ---------- */
-
-.btn {
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
-  padding: 10px 16px;
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 13px;
-  text-transform: uppercase;
-  cursor: pointer;
+  padding: 10px 12px;
+  font-family: var(--font-body);
+  font-size: 14px;
   transition: all .2s ease;
 }
 
-.btn-primary { background: var(--accento); color: var(--accento-testo); box-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
-.btn-primary:active { transform: translate(2px, 2px); box-shadow: none; }
-
-.btn-ghost { background: transparent; border-color: var(--bordo); color: var(--testo); }
-.btn-ghost:hover { border-color: var(--accento); color: var(--accento); }
-
-.input-ricerca { width: 100%; margin-top: 8px; border-style: dashed; }
-
-.azioni-rapide { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
-.btn-small { padding: 6px 10px; font-size: 11px; }
-
-/* ---------- Prodotti (Righe da Scontrino) ---------- */
-
-.categoria-blocco { margin-bottom: 20px; }
-
-.categoria-titolo {
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--accento);
-  text-transform: uppercase;
-  margin: 16px 0 8px;
-  border-bottom: 2px dashed var(--bordo);
-  padding-bottom: 4px;
-  display: inline-block;
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--accento);
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
 }
 
-.prodotto-riga-wrapper { position: relative; overflow: hidden; margin-bottom: 4px; }
+.input-with-unit { display: flex; gap: 6px; }
+.input-with-unit input { flex: 1; min-width: 0; }
+.input-with-unit select { width: 66px; }
 
-.swipe-azione { position: absolute; top: 0; bottom: 0; width: 70px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #111; font-weight: bold; }
+.hint {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--testo-attenuato);
+  min-height: 18px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.hint.up { color: var(--rosso); }
+.hint.down { color: var(--verde); }
+
+.btn {
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all .2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary { 
+  background: var(--accento-gradient); 
+  color: var(--accento-testo); 
+  box-shadow: var(--ombra-accento);
+}
+.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: var(--bg-elevata);
+  border: 1px solid var(--bordo);
+  color: var(--testo);
+}
+.btn-ghost:hover {
+  background: var(--bordo);
+  color: var(--testo);
+}
+
+.input-with-add { display: flex; gap: 8px; }
+.input-with-add select { flex: 1; }
+.input-with-add input { flex: 1; }
+
+.form-azioni {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.input-ricerca {
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 12px 16px;
+  font-size: 14px;
+  background: var(--bg-card);
+  border-radius: var(--radius);
+}
+
+/* ---------- Azioni Rapide & Pannelli Corsie/Base ---------- */
+
+.azioni-rapide {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--bordo);
+}
+
+.btn-small { padding: 8px 12px; font-size: 12px; border-radius: 8px; }
+
+.pannello { margin-bottom: 20px; border-left: 4px solid var(--accento); }
+.nascosto { display: none !important; }
+
+.ordine-riga, .base-riga {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-elevata);
+  border: 1px solid var(--bordo);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+.base-riga { justify-content: flex-start; gap: 12px; }
+
+.ordine-frecce { display: flex; gap: 6px; }
+
+.freccia {
+  background: var(--bg-card);
+  border: 1px solid var(--bordo);
+  color: var(--testo);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+}
+.freccia:hover:not(:disabled) { background: var(--accento); color: var(--accento-testo); border-color: transparent; }
+.freccia:disabled { opacity: 0.3; cursor: default; }
+
+.stella {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--accento);
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: transform .15s;
+}
+.stella:hover { transform: scale(1.2); }
+
+.suggerimento-swipe { 
+  display: none; 
+  font-size: 11px;
+  color: var(--testo-attenuato);
+  text-align: center;
+  margin-bottom: 10px;
+  font-family: var(--font-mono);
+}
+@media (pointer: coarse) {
+  .suggerimento-swipe { display: block; }
+}
+
+/* ---------- Lista Spesa per Categoria (Stile Biglietto) ---------- */
+
+.categoria-blocco { margin-bottom: 16px; }
+
+.categoria-titolo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--accento);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 16px 0 8px;
+  padding-left: 4px;
+}
+
+.prodotto-riga-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.swipe-azione {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #fff;
+  font-weight: bold;
+}
 .swipe-destra { left: 0; background: var(--verde); }
 .swipe-sinistra { right: 0; background: var(--rosso); }
 
@@ -258,132 +403,197 @@ input:focus, select:focus {
   display: grid;
   grid-template-columns: auto 1fr auto auto auto;
   align-items: center;
-  gap: 10px;
-  padding: 10px 8px;
-  background: var(--bg-elevata);
-  border-bottom: 1px dashed var(--bordo); /* Righe tratteggiate tra prodotti */
-  transition: transform .15s ease;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--bordo);
+  border-radius: var(--radius-sm);
+  position: relative;
+  touch-action: pan-y;
+  transition: border-color .2s;
+}
+.prodotto-riga:hover { border-color: var(--testo-attenuato); }
+
+.prodotto-riga input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accento);
+  cursor: pointer;
 }
 
-.prodotto-riga.spuntato { opacity: 0.4; background: var(--bg); }
+.prodotto-riga.spuntato { opacity: 0.45; background: var(--bg-elevata); }
 .prodotto-riga.spuntato .prodotto-nome { text-decoration: line-through; }
 
-.prodotto-nome { font-family: var(--font-body); font-weight: 500; font-size: 14px; }
-.prodotto-dettaglio { font-family: var(--font-mono); font-size: 11px; color: var(--testo-attenuato); margin-top: 4px; }
-.prodotto-prezzo { font-family: var(--font-mono); font-weight: 600; font-size: 14px; text-align: right; }
+.prodotto-nome { font-weight: 600; font-size: 14px; }
+.prodotto-dettaglio {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--testo-attenuato);
+  margin-top: 2px;
+}
+
+.prodotto-prezzo {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 14px;
+  text-align: right;
+}
 
 .riga-elimina, .riga-modifica {
-  background: none; border: none; color: var(--testo-attenuato); cursor: pointer; font-size: 14px;
+  background: none;
+  border: none;
+  color: var(--testo-attenuato);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all .15s;
 }
-.riga-modifica:hover { color: var(--accento); }
-.riga-elimina:hover { color: var(--rosso); }
+.riga-modifica:hover { color: var(--accento); background: var(--bg-elevata); }
+.riga-elimina:hover { color: var(--rosso); background: var(--bg-elevata); }
 
-/* ---------- Scontrino Finale (Effetto Strappato) ---------- */
+/* ---------- Scontrino Fiscale (Riepilogo Carrello) ---------- */
 
 .scontrino {
   background: var(--bg-elevata);
-  border: 1px dashed var(--bordo);
+  border: 1px dashed var(--accento);
   border-radius: var(--radius) var(--radius) 0 0;
-  padding: 20px 20px 24px;
+  padding: 20px;
   font-family: var(--font-mono);
   position: relative;
-  margin-top: 16px;
-  box-shadow: var(--shadow);
+  margin-top: 24px;
+  box-shadow: 0 -10px 30px rgba(0,0,0,0.2);
 }
 
-/* Bordo inferiore a zig-zag stile carta strappata */
+/* Chicca grafica: Timbro / Intestazione scontrino */
+.scontrino::before {
+  content: "★ TICKET FISCALE SPESA 2.0 ★";
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--accento);
+  margin-bottom: 12px;
+  opacity: 0.8;
+  border-bottom: 1px dashed var(--bordo);
+  padding-bottom: 8px;
+}
+
+/* Bordo inferiore "strappato" da scontrino con gradiente a zig-zag */
 .scontrino::after {
   content: "";
   position: absolute;
   left: 0; right: 0; bottom: -12px;
   height: 12px;
-  background-image: linear-gradient(135deg, var(--bg-elevata) 50%, transparent 50%),
-                    linear-gradient(45deg, var(--bg-elevata) 50%, transparent 50%);
+  background-image: linear-gradient(135deg, var(--bg) 50%, transparent 50%),
+                     linear-gradient(45deg, var(--bg) 50%, transparent 50%);
   background-size: 16px 16px;
   background-position: bottom left, bottom left;
   background-repeat: repeat-x;
-  filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));
 }
 
 .scontrino-riga {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px dashed var(--bordo);
+  padding: 6px 0;
+  border-top: 1px dashed var(--bordo);
+  font-size: 13px;
 }
-.scontrino-riga:last-of-type { border-bottom: none; }
+.scontrino-riga:first-of-type { border-top: none; }
 
-.scontrino-totale { font-size: 18px; font-weight: 600; color: var(--accento); margin-top: 8px; border-top: 2px dashed var(--bordo); padding-top: 12px; }
-.scontrino-sub { font-size: 12px; color: var(--testo-attenuato); border: none; padding-top: 4px; }
+.scontrino-totale { 
+  font-size: 18px; 
+  font-weight: 600; 
+  color: var(--accento);
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 2px solid var(--accento) !important;
+}
+.scontrino-sub { font-size: 11px; color: var(--testo-attenuato); border-top: none; padding-top: 2px; }
 
-.scontrino-azioni { display: flex; gap: 10px; margin-top: 20px; }
+/* Chicca grafica: Codice a barre in fondo allo scontrino */
+.barcode-container {
+  text-align: center;
+  margin: 16px 0 8px;
+  letter-spacing: 3px;
+  font-size: 18px;
+  color: var(--testo-attenuato);
+  opacity: 0.6;
+  font-family: monospace;
+  user-select: none;
+}
+
+.scontrino-azioni {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
 .scontrino-azioni .btn { flex: 1; }
 
-/* ---------- Tabelle & Statistiche (Stile Testo Incolonnato) ---------- */
+/* ---------- Tabelle Storico & Confronto ---------- */
 
-.tabella { width: 100%; border-collapse: collapse; font-size: 12px; }
+.tabella { width: 100%; border-collapse: collapse; font-size: 13px; }
 .tabella th {
   text-align: left;
-  color: var(--accento);
-  font-family: var(--font-mono);
+  color: var(--testo-attenuato);
   font-weight: 600;
   font-size: 11px;
   text-transform: uppercase;
-  padding: 10px 8px;
-  border-bottom: 2px dashed var(--bordo);
+  letter-spacing: 0.05em;
+  padding: 10px 12px;
+  border-bottom: 2px solid var(--bordo);
 }
 .tabella td {
-  padding: 10px 8px;
-  border-bottom: 1px dashed var(--bordo);
+  padding: 12px;
+  border-bottom: 1px solid var(--bordo);
   font-family: var(--font-mono);
 }
+.tabella td:first-child, .tabella th:first-child { font-family: var(--font-body); }
+.tabella tr:hover td { background: var(--bg-elevata); }
 
-.stat-riepilogo { display: flex; gap: 24px; padding-bottom: 16px; border-bottom: 1px dashed var(--bordo); margin-bottom: 16px; }
-.stat-riepilogo > div { display: flex; flex-direction: column; gap: 6px; }
-.stat-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--testo-attenuato); }
-.stat-valore { font-family: var(--font-mono); font-size: 24px; font-weight: 600; color: var(--accento); }
+/* ---------- Statistiche ---------- */
 
-/* ---------- Toast Floating ---------- */
+.stat-riepilogo {
+  display: flex;
+  gap: 32px;
+  background: var(--accento-gradient);
+  color: var(--accento-testo);
+  border: none;
+}
+.stat-riepilogo .stat-label { color: rgba(15, 18, 22, 0.75); font-weight: 600; }
+.stat-riepilogo .stat-valore { color: var(--accento-testo); }
+.stat-riepilogo > div { display: flex; flex-direction: column; gap: 4px; }
+.stat-label { font-size: 11px; color: var(--testo-attenuato); text-transform: uppercase; letter-spacing: 0.05em; }
+.stat-valore { font-family: var(--font-display); font-size: 26px; font-weight: 700; }
+
+/* ---------- Toast di Notifica ---------- */
 
 .toast {
   position: fixed;
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: var(--accento);
-  color: var(--accento-testo);
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 12px;
-  text-transform: uppercase;
+  background: var(--bg-elevata);
+  border: 1px solid var(--accento);
+  color: var(--testo);
   padding: 12px 20px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   opacity: 0;
   pointer-events: none;
-  box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
-  transition: opacity .2s ease, transform .2s ease;
+  transition: opacity .25s ease, transform .25s ease;
   z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .toast.visibile { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-.grid-azione .btn {
-  width: 100%;
-  padding: 9px 16px; /* Bilancia l'altezza per matchare gli input */
-}
-
-/* Layout Mobile: riposizionamento intelligente degli elementi */
-@media (max-width: 650px) {
-  .field-row-grid {
-    grid-template-columns: 1fr 1fr; /* Divide lo spazio in 2 colonne */
-    row-gap: 16px;
-  }
-  
-  .grid-prodotto {
-    grid-column: span 2; /* Il prodotto occupa tutta la riga superiore */
-  }
-  
-  .grid-azione {
-    grid-column: span 2; /* Il pulsante occupa tutta la riga inferiore */
-    margin-top: 4px;
-  }
+@media (max-width: 600px) {
+  .field-row-grid { grid-template-columns: 1fr 1fr; }
+  .stat-riepilogo { flex-direction: column; gap: 16px; }
+  .topbar { padding: 16px; }
+  main { padding: 16px; }
 }

@@ -22,9 +22,7 @@ const CATEGORIE = [
   { id: 'Altro', icona: '\u{1F4E6}' }
 ];
 
-// Modelli generici di percorso in negozio, usati solo come punto di partenza
-// nel pannello "Ordina corsie": restano comunque modificabili con le frecce,
-// perche' la planimetria reale varia da punto vendita a punto vendita.
+// Modelli generici di percorso in negozio
 const MODELLI_SUPERMERCATO = {
   generico: ['Frutta e Verdura', 'Latticini', 'Carne e Pesce', 'Salumi', 'Scatolame', 'Surgelati', 'Condimenti', 'Colazione', 'Snacks', 'Vini e Birra', 'Chimici', 'Altro'],
   esselunga: ['Frutta e Verdura', 'Colazione', 'Latticini', 'Salumi', 'Carne e Pesce', 'Scatolame', 'Condimenti', 'Snacks', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro'],
@@ -35,14 +33,13 @@ const MODELLI_SUPERMERCATO = {
   carrefour: ['Frutta e Verdura', 'Latticini', 'Salumi', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro']
 };
 
-// Stato applicativo in memoria: viene ricaricato da Google Fogli a ogni avvio
 let stato = { prodotti: [], rilevazioni: [], lista: [], ordini: {} };
 let graficoStorico = null;
 let graficoCategorie = null;
 let graficoMensile = null;
-let ordineCorrente = [];      // usato mentre si modifica l'ordine corsie di un supermercato
-let indiceInModifica = null;  // indice in stato.lista del prodotto che si sta modificando (null = nessuno)
-let filtroRicerca = '';       // testo della barra di ricerca nella lista corrente
+let ordineCorrente = [];      
+let indiceInModifica = null;  
+let filtroRicerca = '';       
 
 /* ----------------------------------------------------------------------- *
  *  COMUNICAZIONE COL BACKEND
@@ -82,12 +79,6 @@ document.addEventListener('DOMContentLoaded', function () {
   popolaSelectCategorie();
   collegaEventi();
   caricaDati();
-  
-  // Impostazioni globali Chart.js per lo stile "Scontrino"
-  if (typeof Chart !== 'undefined') {
-    Chart.defaults.color = '#9ba3a9';
-    Chart.defaults.font.family = "'IBM Plex Mono', 'Courier New', monospace";
-  }
 });
 
 function collegaEventi() {
@@ -108,7 +99,6 @@ function collegaEventi() {
   document.getElementById('input-prezzo').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-unita').addEventListener('change', aggiornaAnteprimaProdotto);
 
-  // Selettore supermercato: menu a tendina + opzione per aggiungerne uno nuovo
   document.getElementById('input-supermercato').addEventListener('change', function () {
     const inputNuovo = document.getElementById('input-supermercato-nuovo');
     if (this.value === '__nuovo__') {
@@ -117,7 +107,7 @@ function collegaEventi() {
       inputNuovo.focus();
     } else {
       inputNuovo.classList.add('nascosto');
-      renderListaSpesa(); // l'ordine delle corsie dipende dal supermercato selezionato
+      renderListaSpesa();
     }
   });
   document.getElementById('input-supermercato-nuovo').addEventListener('keydown', function (e) {
@@ -125,7 +115,6 @@ function collegaEventi() {
   });
   document.getElementById('input-supermercato-nuovo').addEventListener('blur', confermaNuovoSupermercato);
 
-  // Ricerca prodotto nella lista corrente
   document.getElementById('ricerca-prodotto').addEventListener('input', function () {
     filtroRicerca = this.value.trim().toLowerCase();
     renderListaSpesa();
@@ -134,7 +123,6 @@ function collegaEventi() {
   document.getElementById('storico-select-prodotto').addEventListener('change', renderStorico);
   document.getElementById('confronto-select-prodotto').addEventListener('change', renderConfronto);
 
-  // Ordine corsie
   document.getElementById('btn-ordine-corsie').addEventListener('click', apriPannelloOrdine);
   document.getElementById('btn-chiudi-ordine').addEventListener('click', function () {
     document.getElementById('pannello-ordine').classList.add('nascosto');
@@ -151,7 +139,6 @@ function collegaEventi() {
     renderPannelloOrdine();
   });
 
-  // Prodotti base
   document.getElementById('btn-prodotti-base').addEventListener('click', apriPannelloBase);
   document.getElementById('btn-chiudi-base').addEventListener('click', function () {
     document.getElementById('pannello-base').classList.add('nascosto');
@@ -177,7 +164,7 @@ function cambiaVista(view) {
 }
 
 /* ----------------------------------------------------------------------- *
- *  TEMA CHIARO / SCURO (default scuro, coerente col resto del sito)
+ *  TEMA CHIARO / SCURO
  * ----------------------------------------------------------------------- */
 
 function inizializzaTema() {
@@ -193,7 +180,7 @@ function cambiaTema() {
 }
 
 /* ----------------------------------------------------------------------- *
- *  SELETTORE SUPERMERCATO (menu a tendina + aggiunta di uno nuovo)
+ *  SELETTORE SUPERMERCATO
  * ----------------------------------------------------------------------- */
 
 function popolaSelectSupermercato() {
@@ -396,7 +383,6 @@ function ordineCategorieAttuale() {
 
 function renderListaSpesa() {
   const contenitore = document.getElementById('lista-categorie');
-  if (!contenitore) return;
   contenitore.innerHTML = '';
 
   ordineCategorieAttuale().forEach(function (catId) {
@@ -540,10 +526,8 @@ async function eliminaDaLista(indice) {
 function aggiornaScontrino() {
   const spuntati = stato.lista.filter(function (i) { return i.spuntato; });
   const totale = spuntati.reduce(function (somma, i) { return somma + Number(i.prezzo); }, 0);
-  const totEl = document.getElementById('totale-carrello');
-  const countEl = document.getElementById('conteggio-spuntati');
-  if(totEl) totEl.textContent = '\u20AC ' + totale.toFixed(2);
-  if(countEl) countEl.textContent = spuntati.length + ' di ' + stato.lista.length + ' prodotti nel carrello';
+  document.getElementById('totale-carrello').textContent = '\u20AC ' + totale.toFixed(2);
+  document.getElementById('conteggio-spuntati').textContent = spuntati.length + ' di ' + stato.lista.length + ' prodotti nel carrello';
 }
 
 async function svuotaListaCorrente() {
@@ -635,7 +619,7 @@ async function salvaOrdineCorsie() {
 }
 
 /* ----------------------------------------------------------------------- *
- *  PRODOTTI BASE (riordino rapido)
+ *  PRODOTTI BASE
  * ----------------------------------------------------------------------- */
 
 function apriPannelloBase() {
@@ -646,7 +630,7 @@ function apriPannelloBase() {
     return '<div class="base-riga">' +
       '<button class="stella' + (p.base ? ' attiva' : '') + '" data-nome="' + p.nome + '">' + (p.base ? '\u2605' : '\u2606') + '</button>' +
       '<span>' + p.nome + '</span></div>';
-  }).join('') || '<p class="hint">Nessun prodotto ancora registrato: aggiungine uno alla lista prima di impostarlo come base.</p>';
+  }).join('') || '<p class="hint">Nessun prodotto ancora registrato.</p>';
 
   document.getElementById('pannello-base').classList.remove('nascosto');
 }
@@ -664,7 +648,7 @@ async function toggleBaseProdotto(nome) {
 async function aggiungiProdottiBase() {
   const base = stato.prodotti.filter(function (p) { return p.base; });
   if (base.length === 0) {
-    mostraToast('Nessun prodotto base impostato: usa "Prodotti base" per sceglierli');
+    mostraToast('Nessun prodotto base impostato');
     return;
   }
 
@@ -692,81 +676,60 @@ async function aggiungiProdottiBase() {
   renderListaSpesa();
   try { await sincronizzaLista(); } catch (err) { mostraToast('Non sincronizzato: ' + err.message); }
 
-  mostraToast(aggiunti > 0
-    ? aggiunti + ' prodotti base aggiunti (verifica peso e prezzo al banco)'
-    : 'I prodotti base sono gia\' tutti nella lista');
+  mostraToast(aggiunti > 0 ? aggiunti + ' prodotti base aggiunti' : 'I prodotti base sono gia\' tutti nella lista');
 }
 
 /* ----------------------------------------------------------------------- *
- *  VISTA: STORICO PREZZI DI UN PRODOTTO
+ *  VISTA: STORICO PREZZI
  * ----------------------------------------------------------------------- */
 
 function popolaSelectProdottiStorico() {
   const nomi = [...new Set(stato.rilevazioni.map(function (r) { return r.prodotto; }))].sort();
   const opzioni = nomi.map(function (n) { return '<option value="' + n + '">' + n + '</option>'; }).join('');
-  
-  const selStorico = document.getElementById('storico-select-prodotto');
-  const selConfronto = document.getElementById('confronto-select-prodotto');
-  
-  if(selStorico) selStorico.innerHTML = opzioni || '<option value="">Nessuna rilevazione ancora</option>';
-  if(selConfronto) selConfronto.innerHTML = opzioni || '<option value="">Nessuna rilevazione ancora</option>';
+  document.getElementById('storico-select-prodotto').innerHTML = opzioni || '<option value="">Nessuna rilevazione</option>';
+  document.getElementById('confronto-select-prodotto').innerHTML = opzioni || '<option value="">Nessuna rilevazione</option>';
 }
 
 function renderStorico() {
-  const selProdotto = document.getElementById('storico-select-prodotto');
-  if(!selProdotto) return;
-  
-  const prodotto = selProdotto.value;
+  const prodotto = document.getElementById('storico-select-prodotto').value;
   const righe = stato.rilevazioni
     .filter(function (r) { return r.prodotto === prodotto; })
     .sort(function (a, b) { return a.data < b.data ? -1 : 1; });
 
   const ctx = document.getElementById('chart-storico');
-  if (ctx) {
-    if (graficoStorico) graficoStorico.destroy();
-    graficoStorico = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: righe.map(function (r) { return r.data; }),
-        datasets: [{
-          label: '\u20AC/kg',
-          data: righe.map(function (r) { return r.prezzoKg; }),
-          borderColor: '#f4d03f', // Aggiornato con il nuovo accento
-          backgroundColor: 'rgba(244, 208, 63, 0.15)', // Sfondo semi-trasparente
-          borderWidth: 2,
-          tension: 0, // Linee spigolose (stile scontrino)
-          fill: true,
-          pointBackgroundColor: '#f4d03f',
-          pointRadius: 3
-        }]
-      },
-      options: { 
-        plugins: { legend: { display: false } }, 
-        scales: { 
-          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-          x: { grid: { display: false } }
-        } 
-      }
-    });
-  }
+  if (graficoStorico) graficoStorico.destroy();
+  graficoStorico = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: righe.map(function (r) { return r.data; }),
+      datasets: [{
+        label: '\u20AC/kg',
+        data: righe.map(function (r) { return r.prezzoKg; }),
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(245,158,11,0.15)',
+        tension: 0.25,
+        fill: true,
+        pointBackgroundColor: '#ea580c'
+      }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
 
   const tbody = document.querySelector('#tabella-storico tbody');
-  if(tbody) {
-    tbody.innerHTML = '';
-    righe.slice().reverse().forEach(function (r) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = '<td>' + r.data + '</td><td>' + (r.marca || '\u2014') + '</td><td>' + r.supermercato + '</td><td>' + r.peso + ' ' + r.unita + '</td>' +
-        '<td>\u20AC ' + Number(r.prezzo).toFixed(2) + '</td><td>' + Number(r.prezzoKg).toFixed(2) + '</td><td></td>';
-      const tdBtn = tr.lastElementChild;
-      const btn = document.createElement('button');
-      btn.className = 'riga-elimina';
-      btn.textContent = '\u2715';
-      btn.title = 'Elimina questa rilevazione';
-      btn.addEventListener('click', function () { eliminaRilevazione(r.id); });
-      tdBtn.appendChild(btn);
-      tbody.appendChild(tr);
-    });
-  }
+  tbody.innerHTML = '';
+  righe.slice().reverse().forEach(function (r) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + r.data + '</td><td>' + (r.marca || '\u2014') + '</td><td>' + r.supermercato + '</td><td>' + r.peso + ' ' + r.unita + '</td>' +
+      '<td>\u20AC ' + Number(r.prezzo).toFixed(2) + '</td><td>' + Number(r.prezzoKg).toFixed(2) + '</td><td></td>';
+    const tdBtn = tr.lastElementChild;
+    const btn = document.createElement('button');
+    btn.className = 'riga-elimina';
+    btn.textContent = '\u2715';
+    btn.title = 'Elimina questa rilevazione';
+    btn.addEventListener('click', function () { eliminaRilevazione(r.id); });
+    tdBtn.appendChild(btn);
+    tbody.appendChild(tr);
+  });
 }
 
 async function eliminaRilevazione(id) {
@@ -783,13 +746,11 @@ async function eliminaRilevazione(id) {
 }
 
 /* ----------------------------------------------------------------------- *
- *  VISTA: CONFRONTO TRA SUPERMERCATI
+ *  VISTA: CONFRONTO SUPERMERCATI
  * ----------------------------------------------------------------------- */
 
 function renderConfronto() {
-  const selProdotto = document.getElementById('confronto-select-prodotto');
-  if(!selProdotto) return;
-  const prodotto = selProdotto.value;
+  const prodotto = document.getElementById('confronto-select-prodotto').value;
   const righe = stato.rilevazioni.filter(function (r) { return r.prodotto === prodotto; });
 
   const perSupermercato = {};
@@ -801,11 +762,9 @@ function renderConfronto() {
   const elenco = Object.values(perSupermercato).sort(function (a, b) { return a.prezzoKg - b.prezzoKg; });
 
   const tbody = document.querySelector('#tabella-confronto tbody');
-  if(tbody) {
-    tbody.innerHTML = elenco.map(function (r) {
-      return '<tr><td>' + r.supermercato + '</td><td>' + (r.marca || '\u2014') + '</td><td>\u20AC ' + Number(r.prezzoKg).toFixed(2) + '</td><td>' + r.data + '</td></tr>';
-    }).join('') || '<tr><td colspan="4">Nessun dato per questo prodotto</td></tr>';
-  }
+  tbody.innerHTML = elenco.map(function (r) {
+    return '<tr><td>' + r.supermercato + '</td><td>' + (r.marca || '\u2014') + '</td><td>\u20AC ' + Number(r.prezzoKg).toFixed(2) + '</td><td>' + r.data + '</td></tr>';
+  }).join('') || '<tr><td colspan="4">Nessun dato per questo prodotto</td></tr>';
 }
 
 /* ----------------------------------------------------------------------- *
@@ -825,35 +784,28 @@ function renderStatistiche() {
 
   const rilevazioniMeseCorrente = stato.rilevazioni.filter(function (r) { return chiaveMese(r.data) === chiaveMeseCorrente; });
   const totaleMese = rilevazioniMeseCorrente.reduce(function (s, r) { return s + Number(r.prezzo); }, 0);
-  
-  const elTotaleMese = document.getElementById('stat-mese-totale');
-  if(elTotaleMese) elTotaleMese.textContent = '\u20AC ' + totaleMese.toFixed(2);
+  document.getElementById('stat-mese-totale').textContent = '\u20AC ' + totaleMese.toFixed(2);
 
   const perCategoria = {};
   rilevazioniMeseCorrente.forEach(function (r) {
     perCategoria[r.categoria] = (perCategoria[r.categoria] || 0) + Number(r.prezzo);
   });
   const categorieOrdinate = Object.entries(perCategoria).sort(function (a, b) { return b[1] - a[1]; });
-  
-  const elTopCat = document.getElementById('stat-top-categoria');
-  if(elTopCat) elTopCat.textContent = categorieOrdinate[0] ? categorieOrdinate[0][0] : '\u2014';
+  document.getElementById('stat-top-categoria').textContent = categorieOrdinate[0] ? categorieOrdinate[0][0] : '\u2014';
 
   const ctxCat = document.getElementById('chart-categorie');
-  if (ctxCat) {
-    if (graficoCategorie) graficoCategorie.destroy();
-    graficoCategorie = new Chart(ctxCat, {
-      type: 'doughnut',
-      data: {
-        labels: categorieOrdinate.map(function (c) { return c[0]; }),
-        datasets: [{
-          data: categorieOrdinate.map(function (c) { return c[1]; }),
-          // Inserito il nuovo giallo come primo colore della lista
-          backgroundColor: ['#f4d03f', '#4c9a6a', '#e2574c', '#7a8fd6', '#c77dd6', '#5bb8b0', '#d69a5b', '#8fa15e', '#c7597a', '#6b8fe2', '#a3a3a3', '#9a7a5b']
-        }]
-      },
-      options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
-    });
-  }
+  if (graficoCategorie) graficoCategorie.destroy();
+  graficoCategorie = new Chart(ctxCat, {
+    type: 'doughnut',
+    data: {
+      labels: categorieOrdinate.map(function (c) { return c[0]; }),
+      datasets: [{
+        data: categorieOrdinate.map(function (c) { return c[1]; }),
+        backgroundColor: ['#f59e0b', '#ea580c', '#10b981', '#6366f1', '#ec4899', '#14b8a6', '#f97316', '#84cc16', '#06b6d4', '#8b5cf6', '#64748b', '#d97706']
+      }]
+    },
+    options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+  });
 
   const totaliMensili = mesiChiave.map(function (chiave) {
     return stato.rilevazioni
@@ -862,27 +814,15 @@ function renderStatistiche() {
   });
 
   const ctxMese = document.getElementById('chart-mensile');
-  if (ctxMese) {
-    if (graficoMensile) graficoMensile.destroy();
-    graficoMensile = new Chart(ctxMese, {
-      type: 'bar',
-      data: {
-        labels: mesiChiave,
-        datasets: [{ 
-          data: totaliMensili, 
-          backgroundColor: '#f4d03f', // Aggiornato colore
-          borderRadius: 2 // Barre squadrate
-        }]
-      },
-      options: { 
-        plugins: { legend: { display: false } }, 
-        scales: { 
-          y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-          x: { grid: { display: false } }
-        } 
-      }
-    });
-  }
+  if (graficoMensile) graficoMensile.destroy();
+  graficoMensile = new Chart(ctxMese, {
+    type: 'bar',
+    data: {
+      labels: mesiChiave,
+      datasets: [{ data: totaliMensili, backgroundColor: '#f59e0b', borderRadius: 6 }]
+    },
+    options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+  });
 }
 
 /* ----------------------------------------------------------------------- *
@@ -899,7 +839,6 @@ function renderTutto() {
 let toastTimer = null;
 function mostraToast(messaggio) {
   const toast = document.getElementById('toast');
-  if(!toast) return;
   toast.textContent = messaggio;
   toast.classList.add('visibile');
   clearTimeout(toastTimer);
