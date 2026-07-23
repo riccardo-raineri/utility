@@ -38,8 +38,10 @@
       <div class="field-row">
         <label>
           Supermercato
-          <input list="supermercati-list" id="input-supermercato" placeholder="es. Conad">
-          <datalist id="supermercati-list"></datalist>
+          <div class="input-with-add">
+            <select id="input-supermercato"></select>
+            <input type="text" id="input-supermercato-nuovo" class="nascosto" placeholder="Nome nuovo supermercato">
+          </div>
         </label>
       </div>
 
@@ -74,7 +76,10 @@
 
       <div id="hint-prezzo" class="hint"></div>
 
-      <button id="btn-aggiungi" class="btn btn-primary">+ Aggiungi alla lista</button>
+      <div class="form-azioni">
+        <button id="btn-aggiungi" class="btn btn-primary">+ Aggiungi alla lista</button>
+        <button id="btn-annulla-modifica" class="btn btn-ghost nascosto">Annulla modifica</button>
+      </div>
 
       <div class="azioni-rapide">
         <button id="btn-ordine-corsie" class="btn btn-ghost btn-small">&#8597; Ordina corsie</button>
@@ -85,7 +90,21 @@
 
     <div id="pannello-ordine" class="card pannello nascosto">
       <h3>Ordine corsie &mdash; <span id="ordine-supermercato-nome"></span></h3>
-      <p class="hint">Sposta le categorie con le frecce per farle corrispondere al percorso reale in negozio: la lista si raggruppera' cosi' ogni volta che selezioni questo supermercato.</p>
+      <p class="hint">Parti da un modello generico per il tipo di supermercato, poi affina l'ordine con le frecce in base al negozio in cui vai davvero.</p>
+
+      <label>
+        Parti da un modello
+        <select id="ordine-modello">
+          <option value="generico">Generico</option>
+          <option value="esselunga">Esselunga</option>
+          <option value="conad">Conad</option>
+          <option value="coop">Coop</option>
+          <option value="lidl">Lidl</option>
+          <option value="eurospin">Eurospin</option>
+          <option value="carrefour">Carrefour</option>
+        </select>
+      </label>
+
       <div id="ordine-lista"></div>
       <div class="scontrino-azioni">
         <button id="btn-chiudi-ordine" class="btn btn-ghost">Chiudi</button>
@@ -101,6 +120,8 @@
         <button id="btn-chiudi-base" class="btn btn-ghost">Chiudi</button>
       </div>
     </div>
+
+    <input type="text" id="ricerca-prodotto" class="input-ricerca" placeholder="&#128269; Cerca un prodotto nella lista...">
 
     <p class="hint suggerimento-swipe">Su mobile: scorri un prodotto verso destra per spuntarlo, verso sinistra per rimuoverlo dalla lista.</p>
 
