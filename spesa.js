@@ -9,6 +9,7 @@ const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxmtXY1qGdTLYOo-vEln
 // Categorie in ordine di visualizzazione predefinito, con icona
 const CATEGORIE = [
   { id: 'Frutta e Verdura', icona: '🥬' },
+  { id: 'Veg', icona: '🌱' },
   { id: 'Pasta', icona: '🍝' },
   { id: 'Latticini', icona: '🧀' },
   { id: 'Carne e Pesce', icona: '🐟' },
@@ -17,7 +18,8 @@ const CATEGORIE = [
   { id: 'Surgelati', icona: '🧊' },
   { id: 'Condimenti', icona: '🧂' },
   { id: 'Colazione', icona: '🥐' },
-  { id: 'Snacks', icona: '🍪' },
+  { id: 'Snacks e Patatine', icona: '🍿' },
+  { id: 'Bibite', icona: '🥤' },
   { id: 'Vini e Birra', icona: '🍷' },
   { id: 'Chimici', icona: '🧴' },
   { id: 'Altro', icona: '📦' }
@@ -25,13 +27,13 @@ const CATEGORIE = [
 
 // Modelli generici di percorso in negozio
 const MODELLI_SUPERMERCATO = {
-  generico: ['Frutta e Verdura', 'Pasta', 'Latticini', 'Carne e Pesce', 'Salumi', 'Scatolame', 'Surgelati', 'Condimenti', 'Colazione', 'Snacks', 'Vini e Birra', 'Chimici', 'Altro'],
-  esselunga: ['Frutta e Verdura', 'Pasta', 'Colazione', 'Latticini', 'Salumi', 'Carne e Pesce', 'Scatolame', 'Condimenti', 'Snacks', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro'],
-  conad: ['Frutta e Verdura', 'Pasta', 'Salumi', 'Latticini', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
-  coop: ['Frutta e Verdura', 'Pasta', 'Carne e Pesce', 'Salumi', 'Latticini', 'Colazione', 'Condimenti', 'Scatolame', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
-  lidl: ['Frutta e Verdura', 'Pasta', 'Colazione', 'Salumi', 'Latticini', 'Carne e Pesce', 'Scatolame', 'Snacks', 'Condimenti', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
-  eurospin: ['Frutta e Verdura', 'Pasta', 'Colazione', 'Scatolame', 'Latticini', 'Salumi', 'Carne e Pesce', 'Condimenti', 'Snacks', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
-  carrefour: ['Frutta e Verdura', 'Pasta', 'Latticini', 'Salumi', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro']
+  generico: ['Frutta e Verdura', 'Veg', 'Pasta', 'Latticini', 'Carne e Pesce', 'Salumi', 'Scatolame', 'Surgelati', 'Condimenti', 'Colazione', 'Snacks e Patatine', 'Bibite', 'Vini e Birra', 'Chimici', 'Altro'],
+  esselunga: ['Frutta e Verdura', 'Veg', 'Pasta', 'Colazione', 'Latticini', 'Salumi', 'Carne e Pesce', 'Scatolame', 'Condimenti', 'Snacks e Patatine', 'Bibite', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro'],
+  conad: ['Frutta e Verdura', 'Veg', 'Pasta', 'Salumi', 'Latticini', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks e Patatine', 'Bibite', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  coop: ['Frutta e Verdura', 'Veg', 'Pasta', 'Carne e Pesce', 'Salumi', 'Latticini', 'Colazione', 'Condimenti', 'Scatolame', 'Snacks e Patatine', 'Bibite', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  lidl: ['Frutta e Verdura', 'Veg', 'Pasta', 'Colazione', 'Salumi', 'Latticini', 'Carne e Pesce', 'Scatolame', 'Snacks e Patatine', 'Bibite', 'Condimenti', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  eurospin: ['Frutta e Verdura', 'Veg', 'Pasta', 'Colazione', 'Scatolame', 'Latticini', 'Salumi', 'Carne e Pesce', 'Condimenti', 'Snacks e Patatine', 'Bibite', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  carrefour: ['Frutta e Verdura', 'Veg', 'Pasta', 'Latticini', 'Salumi', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks e Patatine', 'Bibite', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro']
 };
 
 let stato = { prodotti: [], rilevazioni: [], lista: [], ordini: {} };
