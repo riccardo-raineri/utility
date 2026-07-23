@@ -1,215 +1,145 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lista della Spesa 2.0</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista della Spesa 2.0</title>
 
-<!-- Font: display condensato (titoli/etichette), monospace (prezzi, "da scontrino"), sans (testo) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Space Grotesk (Titoli), IBM Plex Mono (Dati/Scontrino), Inter (Testi base) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 
-<!-- Chart.js per gli andamenti dei prezzi e le statistiche -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 
-<link rel="stylesheet" href="spesa.css">
+  <!-- Collegamento al file CSS (assicurati che si chiami spesa.css) -->
+  <link rel="stylesheet" href="spesa.css">
 </head>
 <body>
 
-<header class="topbar">
-  <a href="dashboard.html" class="back-link" title="Torna alla dashboard">&larr;</a>
-  <h1 class="logo">Lista della Spesa <span class="logo-accent">2.0</span></h1>
-  <button id="theme-toggle" class="icon-btn" title="Cambia tema" aria-label="Cambia tema">&#9788;</button>
-</header>
+  <!-- Topbar -->
+  <header class="topbar">
+    <a href="#" class="back-link">←</a>
+    <h1 class="logo">Spesa<span class="logo-accent">2.0</span></h1>
+    <button id="theme-toggle" class="icon-btn" title="Cambia Tema">☼</button>
+  </header>
 
-<nav class="tabs" id="tabs">
-  <button class="tab-btn active" data-view="spesa">Spesa</button>
-  <button class="tab-btn" data-view="storico">Storico</button>
-  <button class="tab-btn" data-view="confronto">Confronto</button>
-  <button class="tab-btn" data-view="statistiche">Statistiche</button>
-</nav>
+  <!-- Navigazione a Tabs -->
+  <nav class="tabs">
+    <button class="tab-btn active" data-target="view-lista">Lista</button>
+    <button class="tab-btn" data-target="view-scontrino">Scontrino</button>
+    <button class="tab-btn" data-target="view-statistiche">Storico & Stat.</button>
+  </nav>
 
-<main id="app">
-
-  <!-- =================== VISTA: SPESA (checklist corrente) =================== -->
-  <section id="view-spesa" class="view active">
-
-    <div class="card form-card">
-      <div class="field-row">
-        <label>
-          Supermercato
-          <div class="input-with-add">
-            <select id="input-supermercato"></select>
-            <input type="text" id="input-supermercato-nuovo" class="nascosto" placeholder="Nome nuovo supermercato">
-          </div>
-        </label>
-      </div>
-
-      <div class="field-row field-row-grid">
-        <label>
-          Prodotto
-          <input list="prodotti-list" id="input-prodotto" placeholder="es. Parmigiano Reggiano">
-          <datalist id="prodotti-list"></datalist>
-        </label>
-        <label>
-          Categoria
-          <select id="input-categoria"></select>
-        </label>
-        <label>
-          Peso
-          <div class="input-with-unit">
-            <input type="number" id="input-peso" step="0.001" min="0" placeholder="0">
-            <select id="input-unita">
-              <option value="kg">kg</option>
-              <option value="g">g</option>
-              <option value="l">l</option>
-              <option value="ml">ml</option>
-              <option value="pz">pz</option>
-            </select>
-          </div>
-        </label>
-        <label>
-          Prezzo &euro;
-          <input type="number" id="input-prezzo" step="0.01" min="0" placeholder="0.00">
-        </label>
-      </div>
-
-      <div id="hint-prezzo" class="hint"></div>
-
-      <div class="form-azioni">
-        <button id="btn-aggiungi" class="btn btn-primary">+ Aggiungi alla lista</button>
-        <button id="btn-annulla-modifica" class="btn btn-ghost nascosto">Annulla modifica</button>
-      </div>
-
-      <div class="azioni-rapide">
-        <button id="btn-ordine-corsie" class="btn btn-ghost btn-small">&#8597; Ordina corsie</button>
-        <button id="btn-prodotti-base" class="btn btn-ghost btn-small">&#9733; Prodotti base</button>
-        <button id="btn-aggiungi-base" class="btn btn-ghost btn-small">+ Aggiungi base alla lista</button>
-      </div>
-    </div>
-
-    <div id="pannello-ordine" class="card pannello nascosto">
-      <h3>Ordine corsie &mdash; <span id="ordine-supermercato-nome"></span></h3>
-      <p class="hint">Parti da un modello generico per il tipo di supermercato, poi affina l'ordine con le frecce in base al negozio in cui vai davvero.</p>
-
-      <label>
-        Parti da un modello
-        <select id="ordine-modello">
-          <option value="generico">Generico</option>
-          <option value="esselunga">Esselunga</option>
-          <option value="conad">Conad</option>
-          <option value="coop">Coop</option>
-          <option value="lidl">Lidl</option>
-          <option value="eurospin">Eurospin</option>
-          <option value="carrefour">Carrefour</option>
+  <main>
+    <!-- VISTA 1: LISTA DELLA SPESA -->
+    <div id="view-lista" class="view active">
+      <div class="card">
+        <h3>Aggiungi Prodotto</h3>
+<form id="form-prodotto">
+  <div class="field-row-grid">
+    
+    <label class="grid-prodotto">
+      Prodotto
+      <input type="text" id="input-nome" placeholder="Es. Latte" required>
+    </label>
+    
+    <label class="grid-categoria">
+      Categoria
+      <select id="input-categoria">
+        <option value="Alimentari">Alimentari</option>
+        <option value="Casa">Casa</option>
+        <option value="Igiene">Igiene</option>
+        <option value="Extra">Extra</option>
+      </select>
+    </label>
+    
+    <label class="grid-qta">
+      Q.tà / Unità
+      <div class="input-with-unit">
+        <input type="number" id="input-qta" value="1" min="0.1" step="0.1" required>
+        <select id="input-unita">
+          <option value="pz">pz</option>
+          <option value="kg">kg</option>
+          <option value="lt">lt</option>
         </select>
-      </label>
+      </div>
+    </label>
+    
+    <label class="grid-prezzo">
+      Prezzo (€)
+      <input type="number" id="input-prezzo" placeholder="0.00" step="0.01" required>
+    </label>
+    
+    <!-- Avvolto in un div senza <label> per allinearlo correttamente -->
+    <div class="grid-azione">
+      <button type="submit" class="btn btn-primary">Aggiungi</button>
+    </div>
+    
+  </div>
+</form>
+      </div>
 
-      <div id="ordine-lista"></div>
-      <div class="scontrino-azioni">
-        <button id="btn-chiudi-ordine" class="btn btn-ghost">Chiudi</button>
-        <button id="btn-salva-ordine" class="btn btn-primary">Salva ordine</button>
+      <div id="lista-prodotti">
+        <!-- I prodotti verranno iniettati qui da JavaScript -->
       </div>
     </div>
 
-    <div id="pannello-base" class="card pannello nascosto">
-      <h3>Prodotti base (riordino rapido)</h3>
-      <p class="hint">Segna con la stella i prodotti che compri quasi ogni settimana, poi usa "+ Aggiungi base alla lista".</p>
-      <div id="base-lista"></div>
-      <div class="scontrino-azioni">
-        <button id="btn-chiudi-base" class="btn btn-ghost">Chiudi</button>
+    <!-- VISTA 2: SCONTRINO (CARRELLO) -->
+    <div id="view-scontrino" class="view">
+      <div class="card">
+        <h3>Riepilogo Scontrino</h3>
+        <p style="font-size: 12px; color: var(--testo-attenuato);">Prodotti spuntati dalla tua lista.</p>
+        
+        <div class="scontrino">
+          <div id="scontrino-contenuto">
+            <!-- Righe dello scontrino iniettate da JS -->
+          </div>
+          <div class="scontrino-totale">
+            TOTALE: <span id="scontrino-totale-valore">€ 0.00</span>
+          </div>
+        </div>
+        
+        <div class="scontrino-azioni">
+          <button class="btn btn-ghost" id="btn-svuota">Svuota Carrello</button>
+          <button class="btn btn-primary" id="btn-salva">Salva e Archivia</button>
+        </div>
       </div>
     </div>
 
-    <input type="text" id="ricerca-prodotto" class="input-ricerca" placeholder="&#128269; Cerca un prodotto nella lista...">
-
-    <p class="hint suggerimento-swipe">Su mobile: scorri un prodotto verso destra per spuntarlo, verso sinistra per rimuoverlo dalla lista.</p>
-
-    <div id="lista-categorie"></div>
-
-    <div class="scontrino" id="scontrino">
-      <div class="scontrino-riga scontrino-totale">
-        <span>Totale carrello</span>
-        <span id="totale-carrello">&euro; 0,00</span>
+    <!-- VISTA 3: STATISTICHE E STORICO -->
+    <div id="view-statistiche" class="view">
+      
+      <!-- Statistiche Mensili -->
+      <div class="card">
+        <h3>Andamento Mensile</h3>
+        <div class="stat-riepilogo">
+          <div>
+            <span class="stat-label">Spesa Mensile</span>
+            <span class="stat-valore">€ 142.50</span>
+          </div>
+          <div>
+            <span class="stat-label">Media Scontrino</span>
+            <span class="stat-valore">€ 35.60</span>
+          </div>
+        </div>
+        <canvas id="chart-mensile" height="150"></canvas>
       </div>
-      <div class="scontrino-riga scontrino-sub">
-        <span id="conteggio-spuntati">0 prodotti spuntati</span>
+
+      <!-- Storico Prezzi (Esempio) -->
+      <div class="card">
+        <h3>Storico Prezzi (€/kg)</h3>
+        <canvas id="chart-storico" height="120"></canvas>
       </div>
-      <div class="scontrino-azioni">
-        <button id="btn-svuota" class="btn btn-ghost">Svuota lista</button>
-        <button id="btn-registra" class="btn btn-primary">Registra spesa di oggi</button>
-      </div>
+      
     </div>
+  </main>
 
-  </section>
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Azione completata!</div>
 
-  <!-- =================== VISTA: STORICO =================== -->
-  <section id="view-storico" class="view">
-    <div class="card">
-      <label>
-        Prodotto
-        <select id="storico-select-prodotto"></select>
-      </label>
-    </div>
-
-    <div class="card">
-      <canvas id="chart-storico" height="120"></canvas>
-    </div>
-
-    <div class="card">
-      <table class="tabella" id="tabella-storico">
-        <thead>
-          <tr><th>Data</th><th>Supermercato</th><th>Peso</th><th>Prezzo</th><th>&euro;/kg</th><th></th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- =================== VISTA: CONFRONTO SUPERMERCATI =================== -->
-  <section id="view-confronto" class="view">
-    <div class="card">
-      <label>
-        Prodotto
-        <select id="confronto-select-prodotto"></select>
-      </label>
-    </div>
-    <div class="card">
-      <table class="tabella" id="tabella-confronto">
-        <thead>
-          <tr><th>Supermercato</th><th>&euro;/kg piu&ugrave; recente</th><th>Data</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- =================== VISTA: STATISTICHE =================== -->
-  <section id="view-statistiche" class="view">
-    <div class="card stat-riepilogo">
-      <div>
-        <span class="stat-label">Speso questo mese</span>
-        <span class="stat-valore" id="stat-mese-totale">&euro; 0,00</span>
-      </div>
-      <div>
-        <span class="stat-label">Categoria che pesa di pi&ugrave;</span>
-        <span class="stat-valore" id="stat-top-categoria">&mdash;</span>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Spesa per categoria (questo mese)</h3>
-      <canvas id="chart-categorie" height="160"></canvas>
-    </div>
-    <div class="card">
-      <h3>Andamento spesa mensile</h3>
-      <canvas id="chart-mensile" height="140"></canvas>
-    </div>
-  </section>
-
-</main>
-
-<div id="toast" class="toast"></div>
-
-<script src="spesa.js"></script>
+  <!-- Collegamento al file JS -->
+  <script src="spesa.js"></script>
 </body>
 </html>

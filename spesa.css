@@ -1,36 +1,51 @@
 /* ============================================================================
-   LISTA DELLA SPESA 2.0 - Stile
-   Palette: base scura da "corsia del supermercato di sera", accento giallo
-   senape da cartellino prezzo, verde fresco per risparmio, rosso per rincari.
-   Firma grafica: la lista attiva e il riepilogo carrello sono trattati come
-   uno scontrino (font monospace, linee tratteggiate, bordo "strappato").
+   LISTA DELLA SPESA 2.0 - Stile "Scontrino Termico" & Accento Giallo
    ============================================================================ */
 
 :root {
-  --bg: #14181a;
-  --bg-elevata: #1b2124;
-  --bg-card: #1f262a;
-  --bordo: #2b3438;
-  --testo: #e9e7e1;
-  --testo-attenuato: #99a3a6;
-  --accento: #e4b93b;       /* giallo senape / cartellino prezzo */
-  --accento-testo: #14181a;
-  --verde: #4c9a6a;         /* prezzo sceso / risparmio */
-  --rosso: #e2574c;         /* prezzo salito */
-  --radius: 10px;
-  --font-display: 'Space Grotesk', sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
-  --font-body: 'Inter', sans-serif;
+  /* Tema Scuro (Terminale di cassa) */
+  --bg: #161819;
+  --bg-elevata: #202325;
+  --bg-card: #262a2d;
+  --bg-hover: #2e3337;
+  --bordo: rgba(255, 255, 255, 0.15);
+  --bordo-focus: rgba(244, 208, 63, 0.5);
+  
+  --testo: #f0f0f0;
+  --testo-attenuato: #9ba3a9;
+  
+  /* Giallo Accento (Scontrino / Etichetta Prezzo) */
+  --accento: #f4d03f;
+  --accento-hover: #f1c40f;
+  --accento-testo: #111111;
+  
+  --verde: #2ecc71;
+  --rosso: #e74c3c;
+  
+  /* Angoli netti per simulare la carta */
+  --radius: 4px;
+  --radius-sm: 2px;
+  
+  --font-display: 'Space Grotesk', -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-body: 'Inter', -apple-system, sans-serif;
+  
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 [data-theme="light"] {
-  --bg: #f4f3ef;
-  --bg-elevata: #ffffff;
-  --bg-card: #ffffff;
-  --bordo: #e0ddd3;
-  --testo: #1c2124;
-  --testo-attenuato: #6b716f;
-  --accento-testo: #14181a;
+  /* Tema Chiaro (Effetto Carta Termica) */
+  --bg: #e6e5df;
+  --bg-elevata: #fdfcf7;
+  --bg-card: #fdfcf7;
+  --bg-hover: #f0eee5;
+  --bordo: #cfccc0;
+  --bordo-focus: rgba(228, 185, 59, 0.6);
+  --testo: #1a1a1a;
+  --testo-attenuato: #6b6b6b;
+  --accento: #e4b93b;
+  --accento-hover: #d4a72c;
+  --accento-testo: #111111;
 }
 
 * { box-sizing: border-box; }
@@ -41,31 +56,36 @@ body {
   color: var(--testo);
   font-family: var(--font-body);
   transition: background .2s ease, color .2s ease;
-  padding-bottom: 60px;
+  padding-bottom: 80px;
 }
 
-/* ---------- Header e navigazione ---------- */
+/* ---------- Header e Navigazione ---------- */
 
 .topbar {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 18px 20px;
-  border-bottom: 1px solid var(--bordo);
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--bg-elevata);
+  border-bottom: 2px dashed var(--bordo); /* Linea tratteggiata */
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .back-link {
   color: var(--testo-attenuato);
   text-decoration: none;
   font-size: 20px;
-  line-height: 1;
+  transition: color .2s ease;
 }
+.back-link:hover { color: var(--accento); }
 
 .logo {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 22px;
-  letter-spacing: -0.02em;
+  font-family: var(--font-mono); /* Font da scontrino per il logo */
+  font-weight: 600;
+  font-size: 18px;
+  text-transform: uppercase;
   margin: 0;
   flex: 1;
 }
@@ -73,232 +93,164 @@ body {
 .logo-accent { color: var(--accento); }
 
 .icon-btn {
-  background: none;
+  background: transparent;
   border: 1px solid var(--bordo);
   color: var(--testo);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   width: 36px;
   height: 36px;
   cursor: pointer;
   font-size: 16px;
+  transition: all .2s ease;
 }
+.icon-btn:hover { background: var(--bg-hover); border-color: var(--accento); }
+
+/* ---------- Tabs ---------- */
 
 .tabs {
   display: flex;
-  gap: 6px;
-  padding: 14px 20px 0;
+  gap: 4px;
+  padding: 12px 20px 0;
   overflow-x: auto;
+  border-bottom: 1px dashed var(--bordo);
 }
 
 .tab-btn {
-  background: none;
-  border: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
   color: var(--testo-attenuato);
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 14px;
-  padding: 10px 14px;
-  border-radius: 8px 8px 0 0;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   cursor: pointer;
   white-space: nowrap;
-  border-bottom: 2px solid transparent;
 }
+
+.tab-btn:hover { color: var(--testo); }
 
 .tab-btn.active {
-  color: var(--testo);
-  border-bottom: 2px solid var(--accento);
+  background: var(--bg-elevata);
+  border-color: var(--bordo);
+  border-bottom: 1px solid var(--bg-elevata); /* Fonde il tab col contenuto */
+  color: var(--accento);
+  margin-bottom: -1px;
 }
 
-main { max-width: 720px; margin: 0 auto; padding: 20px; }
-
+main { max-width: 680px; margin: 0 auto; padding: 20px 16px 40px; }
 .view { display: none; flex-direction: column; gap: 16px; }
 .view.active { display: flex; }
 
-/* ---------- Card generiche ---------- */
+/* ---------- Dashboard & Card ---------- */
 
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--bordo);
+  background: var(--bg-elevata);
+  border: 1px dashed var(--bordo); /* Stile scontrino */
   border-radius: var(--radius);
   padding: 18px;
 }
 
 .card h3 {
-  margin: 0 0 10px;
-  font-family: var(--font-display);
-  font-size: 15px;
-  font-weight: 500;
+  margin: 0 0 14px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
   color: var(--testo-attenuato);
+  border-bottom: 1px dashed var(--bordo);
+  padding-bottom: 8px;
 }
 
-/* ---------- Form aggiunta prodotto ---------- */
+/* ---------- Form e Input ---------- */
 
 .field-row { margin-bottom: 12px; }
+/* Layout Desktop: proporzioni corrette e allineamento basso per il bottone */
 .field-row-grid {
   display: grid;
-  grid-template-columns: 2fr 1.3fr 1.3fr 1fr;
-  gap: 10px;
+  grid-template-columns: 2fr 1.2fr 1.4fr 1.2fr auto;
+  gap: 12px;
+  align-items: end; /* Allinea il bottone perfettamente alla base degli input */
 }
-
 label {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
   color: var(--testo-attenuato);
-  font-weight: 500;
+  text-transform: uppercase;
 }
 
 input, select {
-  background: var(--bg-elevata);
+  background: var(--bg);
   border: 1px solid var(--bordo);
   color: var(--testo);
-  border-radius: 8px;
-  padding: 9px 10px;
-  font-family: var(--font-body);
-  font-size: 14px;
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-family: var(--font-mono); /* Tutto monospace per i dati */
+  font-size: 13px;
 }
-
 input:focus, select:focus {
-  outline: 2px solid var(--accento);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--accento);
+  box-shadow: 0 0 0 1px var(--accento);
 }
 
-.input-with-unit { display: flex; gap: 6px; }
+.input-with-unit { display: flex; gap: 4px; }
 .input-with-unit input { flex: 1; min-width: 0; }
 .input-with-unit select { width: 62px; }
 
-.hint {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--testo-attenuato);
-  min-height: 16px;
-  margin-bottom: 12px;
-}
+.hint { font-family: var(--font-mono); font-size: 11px; color: var(--testo-attenuato); min-height: 16px; margin-bottom: 12px; }
 .hint.up { color: var(--rosso); }
 .hint.down { color: var(--verde); }
 
+/* ---------- Pulsanti ---------- */
+
 .btn {
-  border: none;
-  border-radius: 8px;
-  padding: 11px 16px;
-  font-family: var(--font-display);
-  font-weight: 500;
-  font-size: 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
   cursor: pointer;
+  transition: all .2s ease;
 }
 
-.btn-primary { background: var(--accento); color: var(--accento-testo); }
-.btn-ghost {
-  background: none;
-  border: 1px solid var(--bordo);
-  color: var(--testo-attenuato);
-}
+.btn-primary { background: var(--accento); color: var(--accento-testo); box-shadow: 2px 2px 0 rgba(0,0,0,0.2); }
+.btn-primary:active { transform: translate(2px, 2px); box-shadow: none; }
 
-.input-with-add { display: flex; gap: 8px; }
-.input-with-add select { flex: 1; }
-.input-with-add input { flex: 1; }
+.btn-ghost { background: transparent; border-color: var(--bordo); color: var(--testo); }
+.btn-ghost:hover { border-color: var(--accento); color: var(--accento); }
 
-.form-azioni {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 4px;
-}
+.input-ricerca { width: 100%; margin-top: 8px; border-style: dashed; }
 
-.input-ricerca {
-  width: 100%;
-  margin-bottom: 4px;
-}
+.azioni-rapide { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.btn-small { padding: 6px 10px; font-size: 11px; }
 
-/* ---------- Azioni rapide e pannelli (ordine corsie / prodotti base) ---------- */
+/* ---------- Prodotti (Righe da Scontrino) ---------- */
 
-.azioni-rapide {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-
-.btn-small { padding: 7px 10px; font-size: 12px; }
-
-.pannello { margin-bottom: 16px; }
-.nascosto { display: none !important; }
-
-.ordine-riga, .base-riga {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 9px 10px;
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-.base-riga { justify-content: flex-start; }
-
-.ordine-frecce { display: flex; gap: 4px; }
-
-.freccia {
-  background: var(--bg-elevata);
-  border: 1px solid var(--bordo);
-  color: var(--testo);
-  border-radius: 6px;
-  width: 28px;
-  height: 28px;
-  cursor: pointer;
-}
-.freccia:disabled { opacity: 0.3; cursor: default; }
-
-.stella {
-  background: none;
-  border: none;
-  font-size: 18px;
-  color: var(--accento);
-  cursor: pointer;
-  margin-right: 10px;
-  padding: 0;
-}
-
-.suggerimento-swipe { display: none; }
-@media (pointer: coarse) {
-  .suggerimento-swipe { display: block; }
-}
-
-/* ---------- Lista raggruppata per categoria ---------- */
-
-.categoria-blocco { margin-bottom: 10px; }
+.categoria-blocco { margin-bottom: 20px; }
 
 .categoria-titolo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: var(--font-display);
-  font-size: 13px;
-  color: var(--testo-attenuato);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accento);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin: 14px 0 6px;
+  margin: 16px 0 8px;
+  border-bottom: 2px dashed var(--bordo);
+  padding-bottom: 4px;
+  display: inline-block;
 }
 
-.prodotto-riga-wrapper {
-  position: relative;
-  overflow: hidden;
-  border-radius: 8px;
-  margin-bottom: 6px;
-}
+.prodotto-riga-wrapper { position: relative; overflow: hidden; margin-bottom: 4px; }
 
-.swipe-azione {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 70px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 18px;
-  color: #fff;
-}
+.swipe-azione { position: absolute; top: 0; bottom: 0; width: 70px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #111; font-weight: bold; }
 .swipe-destra { left: 0; background: var(--verde); }
 .swipe-sinistra { right: 0; background: var(--rosso); }
 
@@ -307,141 +259,131 @@ input:focus, select:focus {
   grid-template-columns: auto 1fr auto auto auto;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--bordo);
-  border-radius: 8px;
-  position: relative;
-  touch-action: pan-y;
+  padding: 10px 8px;
+  background: var(--bg-elevata);
+  border-bottom: 1px dashed var(--bordo); /* Righe tratteggiate tra prodotti */
+  transition: transform .15s ease;
 }
 
-.prodotto-riga.spuntato { opacity: 0.5; }
+.prodotto-riga.spuntato { opacity: 0.4; background: var(--bg); }
 .prodotto-riga.spuntato .prodotto-nome { text-decoration: line-through; }
 
-.prodotto-nome { font-weight: 500; }
-.prodotto-dettaglio {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--testo-attenuato);
-}
-
-.prodotto-prezzo {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  text-align: right;
-}
-
-.delta-badge {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 5px;
-  margin-left: 6px;
-}
-.delta-badge.up { background: rgba(226,87,76,0.15); color: var(--rosso); }
-.delta-badge.down { background: rgba(76,154,106,0.15); color: var(--verde); }
+.prodotto-nome { font-family: var(--font-body); font-weight: 500; font-size: 14px; }
+.prodotto-dettaglio { font-family: var(--font-mono); font-size: 11px; color: var(--testo-attenuato); margin-top: 4px; }
+.prodotto-prezzo { font-family: var(--font-mono); font-weight: 600; font-size: 14px; text-align: right; }
 
 .riga-elimina, .riga-modifica {
-  background: none;
-  border: none;
-  color: var(--testo-attenuato);
-  cursor: pointer;
-  font-size: 16px;
+  background: none; border: none; color: var(--testo-attenuato); cursor: pointer; font-size: 14px;
 }
+.riga-modifica:hover { color: var(--accento); }
+.riga-elimina:hover { color: var(--rosso); }
 
-/* ---------- Scontrino (riepilogo carrello) ---------- */
+/* ---------- Scontrino Finale (Effetto Strappato) ---------- */
 
 .scontrino {
   background: var(--bg-elevata);
   border: 1px dashed var(--bordo);
   border-radius: var(--radius) var(--radius) 0 0;
-  padding: 16px 18px 12px;
+  padding: 20px 20px 24px;
   font-family: var(--font-mono);
   position: relative;
-  margin-top: 4px;
+  margin-top: 16px;
+  box-shadow: var(--shadow);
 }
 
-/* Bordo inferiore "strappato" da scontrino, fatto con un gradiente a zig-zag */
+/* Bordo inferiore a zig-zag stile carta strappata */
 .scontrino::after {
   content: "";
   position: absolute;
-  left: 0; right: 0; bottom: -10px;
-  height: 10px;
-  background-image: linear-gradient(135deg, var(--bg) 50%, transparent 50%),
-                     linear-gradient(45deg, var(--bg) 50%, transparent 50%);
-  background-size: 14px 14px;
+  left: 0; right: 0; bottom: -12px;
+  height: 12px;
+  background-image: linear-gradient(135deg, var(--bg-elevata) 50%, transparent 50%),
+                    linear-gradient(45deg, var(--bg-elevata) 50%, transparent 50%);
+  background-size: 16px 16px;
   background-position: bottom left, bottom left;
   background-repeat: repeat-x;
+  filter: drop-shadow(0 4px 2px rgba(0,0,0,0.1));
 }
 
 .scontrino-riga {
   display: flex;
   justify-content: space-between;
-  padding: 4px 0;
-  border-top: 1px dashed var(--bordo);
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--bordo);
 }
-.scontrino-riga:first-child { border-top: none; }
+.scontrino-riga:last-of-type { border-bottom: none; }
 
-.scontrino-totale { font-size: 17px; font-weight: 600; color: var(--accento); }
-.scontrino-sub { font-size: 12px; color: var(--testo-attenuato); border-top: none; padding-top: 0; }
+.scontrino-totale { font-size: 18px; font-weight: 600; color: var(--accento); margin-top: 8px; border-top: 2px dashed var(--bordo); padding-top: 12px; }
+.scontrino-sub { font-size: 12px; color: var(--testo-attenuato); border: none; padding-top: 4px; }
 
-.scontrino-azioni {
-  display: flex;
-  gap: 10px;
-  margin-top: 14px;
-}
+.scontrino-azioni { display: flex; gap: 10px; margin-top: 20px; }
 .scontrino-azioni .btn { flex: 1; }
 
-/* ---------- Tabelle (storico / confronto) ---------- */
+/* ---------- Tabelle & Statistiche (Stile Testo Incolonnato) ---------- */
 
-.tabella { width: 100%; border-collapse: collapse; font-size: 13px; }
+.tabella { width: 100%; border-collapse: collapse; font-size: 12px; }
 .tabella th {
   text-align: left;
-  color: var(--testo-attenuato);
-  font-weight: 500;
+  color: var(--accento);
+  font-family: var(--font-mono);
+  font-weight: 600;
   font-size: 11px;
   text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 6px 8px;
-  border-bottom: 1px solid var(--bordo);
+  padding: 10px 8px;
+  border-bottom: 2px dashed var(--bordo);
 }
 .tabella td {
-  padding: 8px;
-  border-bottom: 1px solid var(--bordo);
+  padding: 10px 8px;
+  border-bottom: 1px dashed var(--bordo);
   font-family: var(--font-mono);
 }
-.tabella td:first-child, .tabella th:first-child { font-family: var(--font-body); }
 
-/* ---------- Statistiche ---------- */
+.stat-riepilogo { display: flex; gap: 24px; padding-bottom: 16px; border-bottom: 1px dashed var(--bordo); margin-bottom: 16px; }
+.stat-riepilogo > div { display: flex; flex-direction: column; gap: 6px; }
+.stat-label { font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; color: var(--testo-attenuato); }
+.stat-valore { font-family: var(--font-mono); font-size: 24px; font-weight: 600; color: var(--accento); }
 
-.stat-riepilogo {
-  display: flex;
-  gap: 24px;
-}
-.stat-riepilogo > div { display: flex; flex-direction: column; gap: 4px; }
-.stat-label { font-size: 12px; color: var(--testo-attenuato); }
-.stat-valore { font-family: var(--font-display); font-size: 22px; font-weight: 700; }
-
-/* ---------- Toast ---------- */
+/* ---------- Toast Floating ---------- */
 
 .toast {
   position: fixed;
-  bottom: 20px;
+  bottom: 24px;
   left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: var(--bg-elevata);
-  border: 1px solid var(--bordo);
-  color: var(--testo);
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-size: 13px;
+  background: var(--accento);
+  color: var(--accento-testo);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
   opacity: 0;
   pointer-events: none;
+  box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
   transition: opacity .2s ease, transform .2s ease;
+  z-index: 1000;
 }
 .toast.visibile { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-@media (max-width: 560px) {
-  .field-row-grid { grid-template-columns: 1fr 1fr; }
-  .stat-riepilogo { flex-direction: column; gap: 12px; }
+.grid-azione .btn {
+  width: 100%;
+  padding: 9px 16px; /* Bilancia l'altezza per matchare gli input */
+}
+
+/* Layout Mobile: riposizionamento intelligente degli elementi */
+@media (max-width: 650px) {
+  .field-row-grid {
+    grid-template-columns: 1fr 1fr; /* Divide lo spazio in 2 colonne */
+    row-gap: 16px;
+  }
+  
+  .grid-prodotto {
+    grid-column: span 2; /* Il prodotto occupa tutta la riga superiore */
+  }
+  
+  .grid-azione {
+    grid-column: span 2; /* Il pulsante occupa tutta la riga inferiore */
+    margin-top: 4px;
+  }
 }
