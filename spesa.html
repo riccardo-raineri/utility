@@ -57,12 +57,12 @@
         </label>
         <label>
           Prodotto
-          <input list="prodotti-list" id="input-prodotto" placeholder="es. Parmigiano">
+          <input list="prodotti-list" id="input-prodotto" placeholder="es. Fusilli">
           <datalist id="prodotti-list"></datalist>
         </label>
         <label>
-          Marca <span class="opzionale">(opz.)</span>
-          <input list="marche-list" id="input-marca" placeholder="es. Barilla">
+          Marca (opz.)
+          <input list="marche-list" id="input-marca" placeholder="es. Rummo">
           <datalist id="marche-list"></datalist>
         </label>
       </div>
@@ -76,7 +76,7 @@
         <label>
           Peso
           <div class="input-with-unit">
-            <input type="number" id="input-peso" step="0.001" min="0" placeholder="0">
+            <input type="number" id="input-peso" step="0.001" min="0" placeholder="0" inputmode="numeric" pattern="[0-9]*">
             <select id="input-unita">
               <option value="kg">kg</option>
               <option value="g">g</option>
@@ -88,11 +88,11 @@
         </label>
         <label>
           Prezzo Pieno &euro;
-          <input type="number" id="input-prezzo" step="0.01" min="0" placeholder="0.00">
+          <input type="number" id="input-prezzo" step="0.01" min="0" placeholder="0.00" inputmode="numeric" pattern="[0-9]*">
         </label>
         <label>
-          In Offerta &euro; <span class="opzionale">(opz.)</span>
-          <input type="number" id="input-prezzo-offerta" step="0.01" min="0" placeholder="0.00">
+          In Offerta &euro;
+          <input type="number" id="input-prezzo-offerta" step="0.01" min="0" placeholder="0.00" inputmode="numeric" pattern="[0-9]*">
         </label>
       </div>
 
@@ -122,7 +122,7 @@
           <option value="conad">Conad</option>
           <option value="coop">Coop</option>
           <option value="lidl">Lidl</option>
-          <option value="eurospin">Eurospin</option>
+          <option value="dm">DM</option>
           <option value="carrefour">Carrefour</option>
         </select>
       </label>
@@ -145,7 +145,7 @@
 
     <input type="text" id="ricerca-prodotto" class="input-ricerca" placeholder="&#128269; Cerca un prodotto nella lista...">
 
-    <p class="hint suggerimento-swipe">&#128161; Da mobile: scorri a destra per spuntare, a sinistra per rimuovere.</p>
+    <p class="hint suggerimento-swipe">&#128161; Sei da mobile?: scorri a destra per spuntare, a sinistra per rimuovere.</p>
 
     <div id="lista-categorie"></div>
 
@@ -237,8 +237,3 @@
 <script src="spesa.js"></script>
 </body>
 </html>
-```[cite: 12]
-
----
-
-## 2. File `spesa.css`[cite: 11]

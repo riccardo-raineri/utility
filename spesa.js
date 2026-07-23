@@ -32,7 +32,7 @@ const MODELLI_SUPERMERCATO = {
   conad: ['Frutta e Verdura', 'Veg', 'Pasta', 'Salumi', 'Latticini', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks e Patatine', 'Bibite', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
   coop: ['Frutta e Verdura', 'Veg', 'Pasta', 'Carne e Pesce', 'Salumi', 'Latticini', 'Colazione', 'Condimenti', 'Scatolame', 'Snacks e Patatine', 'Bibite', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
   lidl: ['Frutta e Verdura', 'Veg', 'Pasta', 'Colazione', 'Salumi', 'Latticini', 'Carne e Pesce', 'Scatolame', 'Snacks e Patatine', 'Bibite', 'Condimenti', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
-  eurospin: ['Frutta e Verdura', 'Veg', 'Pasta', 'Colazione', 'Scatolame', 'Latticini', 'Salumi', 'Carne e Pesce', 'Condimenti', 'Snacks e Patatine', 'Bibite', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
+  dm: ['Frutta e Verdura', 'Veg', 'Pasta', 'Colazione', 'Scatolame', 'Latticini', 'Salumi', 'Carne e Pesce', 'Condimenti', 'Snacks e Patatine', 'Bibite', 'Surgelati', 'Vini e Birra', 'Chimici', 'Altro'],
   carrefour: ['Frutta e Verdura', 'Veg', 'Pasta', 'Latticini', 'Salumi', 'Carne e Pesce', 'Colazione', 'Scatolame', 'Condimenti', 'Snacks e Patatine', 'Bibite', 'Vini e Birra', 'Surgelati', 'Chimici', 'Altro']
 };
 
