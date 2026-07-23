@@ -35,17 +35,15 @@
   <section id="view-spesa" class="view active">
 
     <div class="card form-card">
-      <div class="field-row">
+      <!-- Riga 1 del Form: Supermercato, Prodotto, Marca -->
+      <div class="form-grid-row">
         <label>
           Supermercato
           <div class="input-with-add">
             <select id="input-supermercato"></select>
-            <input type="text" id="input-supermercato-nuovo" class="nascosto" placeholder="Nome nuovo supermercato">
+            <input type="text" id="input-supermercato-nuovo" class="nascosto" placeholder="Nuovo supermercato">
           </div>
         </label>
-      </div>
-
-      <div class="field-row field-row-grid">
         <label>
           Prodotto
           <input list="prodotti-list" id="input-prodotto" placeholder="es. Parmigiano">
@@ -56,6 +54,10 @@
           <input list="marche-list" id="input-marca" placeholder="es. Barilla">
           <datalist id="marche-list"></datalist>
         </label>
+      </div>
+
+      <!-- Riga 2 del Form: Categoria, Peso, Prezzo -->
+      <div class="form-grid-row">
         <label>
           Categoria
           <select id="input-categoria"></select>
