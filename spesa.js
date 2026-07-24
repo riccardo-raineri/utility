@@ -28,12 +28,22 @@ let filtroRicerca = '';
 let modalitaSupermercato = false; // Stato attivo/disattivato della modalità supermercato (nasconde i prodotti spuntati)
 
 /* ----------------------------------------------------------------------- *
- *  COMUNICAZIONE COL BACKEND & LOADER
+ *  COMUNICAZIONE COL BACKEND & LOADER NON INVASIVO
  * ----------------------------------------------------------------------- */
 function mostraCaricamento(attiva) {
-  const overlay = document.getElementById('loading-overlay');
-  if (attiva) overlay.classList.remove('nascosto');
-  else overlay.classList.add('nascosto');
+  const indicator = document.getElementById('sync-indicator');
+  if (!indicator) return;
+  if (attiva) {
+    indicator.classList.remove('nascosto');
+    requestAnimationFrame(() => indicator.classList.add('visibile'));
+  } else {
+    indicator.classList.remove('visibile');
+    setTimeout(() => {
+      if (!indicator.classList.contains('visibile')) {
+        indicator.classList.add('nascosto');
+      }
+    }, 200);
+  }
 }
 
 async function chiamaBackend(action, extraParams) {

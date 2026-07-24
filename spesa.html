@@ -13,15 +13,10 @@
 </head>
 <body>
 
-<!-- Schermata di caricamento visivo in stile Spotify -->
-<div id="loading-overlay" class="loading-overlay">
-  <div class="spotify-loader">
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-    <div class="bar"></div>
-  </div>
-  <span>Sincronizzazione dati&hellip;</span>
+<!-- Indicatore di sincronizzazione non invasivo (sostituisce il vecchio overlay) -->
+<div id="sync-indicator" class="sync-indicator nascosto">
+  <div class="spinner"></div>
+  <span>Sincronizzazione...</span>
 </div>
 
 <header class="topbar">
