@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Lista della Spesa 2.0</title>
 
-<!-- Font: Space Grotesk (display), IBM Plex Mono (scontrino/prezzi), Inter (corpo) -->
+<!-- Font: Space Grotesk, IBM Plex Mono, Inter -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -13,7 +13,7 @@
 </head>
 <body>
 
-<!-- Indicatore di sincronizzazione non invasivo -->
+<!-- Indicatore di sincronizzazione -->
 <div id="sync-indicator" class="sync-indicator nascosto">
   <div class="spinner"></div>
   <span>Sincronizzazione...</span>
@@ -84,9 +84,6 @@
       </div>
 
       <div id="hint-prezzo" class="hint"></div>
-      
-      <!-- Contenitore Smart Chips per i prezzi per supermercato -->
-      <div id="prezzi-noti-container" class="prezzi-noti-container nascosto"></div>
 
       <div class="form-azioni">
         <button id="btn-aggiungi" class="btn btn-primary">+ Aggiungi alla lista</button>
@@ -94,7 +91,6 @@
       </div>
 
       <div class="azioni-rapide">
-        <!-- Tasto con menu a tendina personalizzato integrato per la scelta del supermercato -->
         <div class="supermercato-dropdown-wrapper">
           <button id="btn-sono-al-supermercato" class="btn btn-primary btn-small">🛒 Sono al supermercato</button>
           <div id="dropdown-supermercato-spesa" class="dropdown-supermercato nascosto"></div>

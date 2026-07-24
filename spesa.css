@@ -117,15 +117,6 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 
 .filtri-barra { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; }
 
-/* ---------- Smart Chips Prezzi ---------- */
-.prezzi-noti-container { margin-bottom: 14px; background: var(--bg-elevata); padding: 12px; border-radius: var(--radius-sm); border: 1px dashed var(--bordo); }
-.titolo-prezzi { font-size: 11px; color: var(--testo-attenuato); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; font-weight: 600; }
-.chips-wrapper { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip-prezzo { background: var(--bg-card); border: 1px solid var(--bordo); padding: 8px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; transition: all .2s ease; }
-.chip-prezzo:hover { border-color: var(--accento); background: rgba(245, 158, 11, 0.05); transform: translateY(-2px); }
-.chip-prezzo .supermercato { font-weight: 700; color: var(--accento); font-size: 11px; text-transform: uppercase; }
-.chip-prezzo .prezzo { font-family: var(--font-mono); font-weight: 600; margin-top: 2px; }
-
 /* ---------- Offerte e Prezzi Sbarrati ---------- */
 .prezzo-originale { text-decoration: line-through; color: var(--testo-attenuato); font-size: 0.85em; margin-right: 4px; }
 .prezzo-offerta { color: var(--verde); font-weight: 700; }
@@ -136,7 +127,7 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .pannello { margin-bottom: 20px; border-left: 4px solid var(--accento); }
 .nascosto { display: none !important; }
 
-/* Menu a tendina personalizzato e curato per scelta supermercato */
+/* Menu a tendina personalizzato per scelta supermercato */
 .supermercato-dropdown-wrapper { position: relative; display: inline-block; }
 .dropdown-supermercato {
   position: absolute; left: 0; bottom: 100%; margin-bottom: 8px; z-index: 200;
@@ -208,9 +199,6 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .lista-footer {
   margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--bordo); text-align: center;
 }
-.totale-riga {
-  display: none !important;
-}
 .barcode {
   font-family: monospace; font-size: 28px; letter-spacing: 2px; color: var(--testo-attenuato); opacity: 0.5; user-select: none; line-height: 1;
 }
@@ -232,15 +220,16 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
   background: var(--bg-elevata);
   border: none; border-bottom: 1px dashed var(--bordo); border-radius: 0;
   position: relative; z-index: 2;
-  touch-action: pan-y; transition: background .25s;
+  touch-action: pan-y; transition: background .25s, opacity .25s;
 }
 .categoria-blocco:last-child .prodotto-riga-wrapper:last-child .prodotto-riga { border-bottom: none; }
 
 .prodotto-riga input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accento); cursor: pointer; }
 
+/* Stile per i prodotti spuntati (comprati) */
 .prodotto-riga.spuntato { 
   background: var(--bg-elevata); 
-  color: var(--testo-attenuato);
+  opacity: 0.55;
 }
 .prodotto-riga.spuntato .prodotto-nome { text-decoration: line-through; color: var(--testo-attenuato); }
 .prodotto-riga.spuntato .prodotto-dettaglio { color: var(--testo-attenuato); }
