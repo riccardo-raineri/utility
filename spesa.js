@@ -129,12 +129,12 @@ function collegaEventi() {
       const stores = [...new Set([...daOrdini, ...daLista].filter(Boolean))].sort();
 
       if (stores.length === 0) {
-        const nuovoNegozio = prompt('Inserisci il nome del supermercato in cui ti trovi:');
+        const nuovoNegozio = prompt('In quale supermercato di trovi?');
         if (nuovoNegozio && nuovoNegozio.trim()) {
           const negozio = nuovoNegozio.trim();
           document.getElementById('input-supermercato').value = negozio;
           modalitaSupermercato = true;
-          btnSpesa.textContent = 'Ho finito!';
+          btnSpesa.textContent = 'Ho finito la spesa!';
           btnSpesa.classList.add('btn-active');
           renderListaSpesa();
           mostraToast(`🛒 Spesa attiva per: ${negozio}`);
@@ -163,7 +163,7 @@ function collegaEventi() {
 
     document.getElementById('input-supermercato').value = negozioScelto;
     modalitaSupermercato = true;
-    btnSpesa.textContent = 'Ho finito!';
+    btnSpesa.textContent = 'Ho finito la spesa!';
     btnSpesa.classList.add('btn-active');
     dropdownSpesa.classList.add('nascosto');
     renderListaSpesa();
