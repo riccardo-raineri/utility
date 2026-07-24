@@ -103,7 +103,7 @@ function collegaEventi() {
   document.getElementById('input-prezzo-offerta').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-unita').addEventListener('change', aggiornaAnteprimaProdotto);
 
-  // Pulsante stella rapido nel form
+  // Pulsante stella rapido nel form (corretto e reso pienamente reattivo)
   document.getElementById('btn-toggle-base-form').addEventListener('click', async function() {
     const nomeInput = document.getElementById('input-prodotto').value.trim();
     if (!nomeInput) {
@@ -115,16 +115,22 @@ function collegaEventi() {
       const cat = document.getElementById('input-categoria').value;
       const unita = document.getElementById('input-unita').value;
       const marca = document.getElementById('input-marca').value.trim();
-      try {
-        const json = await chiamaBackend('toggleBase', { nome: nomeInput });
-        stato.prodotti = json.prodotti;
-      } catch(e) {
-        stato.prodotti.push({ nome: nomeInput, categoria: cat, unita: unita, marca: marca, base: true });
-      }
+      prodTrovato = { nome: nomeInput, categoria: cat, unita: unita, marca: marca, base: true };
+      stato.prodotti.push(prodTrovato);
     } else {
-      await toggleBaseProdotto(prodTrovato.nome);
+      prodTrovato.base = !prodTrovato.base;
     }
+    
     aggiornaStatoStellaForm(nomeInput);
+    renderListaSpesa();
+    mostraToast(prodTrovato.base ? `"${nomeInput}" aggiunto ai preferiti ⭐` : `"${nomeInput}" rimosso dai preferiti`);
+
+    try {
+      const json = await chiamaBackend('toggleBase', { nome: nomeInput });
+      if (json && json.prodotti) stato.prodotti = json.prodotti;
+    } catch(e) {
+      console.warn('Sincronizzazione preferito salvata in locale', e);
+    }
   });
 
   document.getElementById('input-supermercato').addEventListener('change', function () {
@@ -148,7 +154,7 @@ function collegaEventi() {
     renderListaSpesa();
   });
 
-  // Gestione pulsante "Sono al supermercato" / "Ho finito!" con menu a tendina integrato
+  // Gestione pulsante "Sono al supermercato" / "Ho finito!" con menu a tendina personalizzato e curato
   const btnSpesa = document.getElementById('btn-sono-al-supermercato');
   const dropdownSpesa = document.getElementById('dropdown-supermercato-spesa');
 
@@ -169,13 +175,13 @@ function collegaEventi() {
           btnSpesa.textContent = 'Ho finito!';
           btnSpesa.classList.add('btn-active');
           renderListaSpesa();
-          mostraToast(`🛒 Modalità spesa attiva per: ${negozio} (prodotti spuntati nascosti)`);
+          mostraToast(`🛒 Modalità spesa attiva per: ${negozio}`);
         }
         return;
       }
 
-      dropdownSpesa.innerHTML = '<option value="" disabled selected>Seleziona negozio...</option>' + 
-        stores.map(s => `<option value="${s}">${s}</option>`).join('');
+      dropdownSpesa.innerHTML = `<div class="dropdown-supermercato-header">Seleziona Supermercato</div>` +
+        stores.map(s => `<div class="dropdown-item-supermercato" data-negozio="${s}">🛒 ${s}</div>`).join('');
       
       dropdownSpesa.classList.toggle('nascosto');
     } else {
@@ -185,12 +191,14 @@ function collegaEventi() {
       btnSpesa.classList.remove('btn-active');
       dropdownSpesa.classList.add('nascosto');
       renderListaSpesa();
-      mostraToast('Modalità spesa disattivata (mostrati tutti i prodotti)');
+      mostraToast('Modalità spesa disattivata (visualizzazione completa ripristinata)');
     }
   });
 
-  dropdownSpesa.addEventListener('change', function() {
-    const negozioScelto = this.value;
+  dropdownSpesa.addEventListener('click', function(e) {
+    const item = e.target.closest('.dropdown-item-supermercato');
+    if (!item) return;
+    const negozioScelto = item.dataset.negozio;
     if (!negozioScelto) return;
 
     document.getElementById('input-supermercato').value = negozioScelto;
@@ -199,7 +207,7 @@ function collegaEventi() {
     btnSpesa.classList.add('btn-active');
     dropdownSpesa.classList.add('nascosto');
     renderListaSpesa();
-    mostraToast(`🛒 Modalità spesa attiva per: ${negozioScelto} (prodotti spuntati nascosti)`);
+    mostraToast(`🛒 Modalità spesa attiva per: ${negozioScelto}`);
   });
 
   // Chiudi il menu a tendina se si clicca altrove nella pagina
@@ -568,6 +576,11 @@ function creaRigaProdotto(item, indice) {
   checkbox.checked = item.spuntato;
   checkbox.addEventListener('change', function () { toggleSpuntato(indice); });
 
+  // Verifica se il prodotto è fra i preferiti (base) per mostrare l'icona stella
+  const noto = stato.prodotti.find(p => p.nome.toLowerCase() === item.prodotto.toLowerCase());
+  const isPreferito = noto && noto.base;
+  const iconaPref = isPreferito ? '<span class="preferito-icon" title="Prodotto preferito">★</span>' : '';
+
   const info = document.createElement('div');
   const prezzoKg = calcolaPrezzoKg(item.peso, item.unita, item.prezzo);
   const dettagli = [];
@@ -575,7 +588,7 @@ function creaRigaProdotto(item, indice) {
   dettagli.push(item.peso + ' ' + item.unita);
   dettagli.push(item.supermercato);
   dettagli.push('€/kg ' + prezzoKg.toFixed(2));
-  info.innerHTML = '<div class="prodotto-nome">' + item.prodotto + '</div>' +
+  info.innerHTML = '<div class="prodotto-nome">' + iconaPref + item.prodotto + '</div>' +
     '<div class="prodotto-dettaglio">' + dettagli.join(' • ') + '</div>';
 
   const prezzo = document.createElement('div');
@@ -719,10 +732,22 @@ function apriPannelloBase() {
 async function toggleBaseProdotto(nome) {
   try {
     const json = await chiamaBackend('toggleBase', { nome: nome });
-    stato.prodotti = json.prodotti; 
+    if (json && json.prodotti) stato.prodotti = json.prodotti;
+    else {
+      let p = stato.prodotti.find(x => x.nome.toLowerCase() === nome.toLowerCase());
+      if (p) p.base = !p.base;
+    }
     apriPannelloBase();
+    renderListaSpesa();
     aggiornaStatoStellaForm(document.getElementById('input-prodotto').value.trim());
-  } catch (err) { mostraToast('Errore: ' + err.message); }
+  } catch (err) { 
+    // Fallback locale in caso di problemi di rete
+    let p = stato.prodotti.find(x => x.nome.toLowerCase() === nome.toLowerCase());
+    if (p) p.base = !p.base;
+    apriPannelloBase();
+    renderListaSpesa();
+    aggiornaStatoStellaForm(document.getElementById('input-prodotto').value.trim());
+  }
 }
 
 async function aggiungiProdottiBase() {
@@ -733,7 +758,7 @@ async function aggiungiProdottiBase() {
   let aggiunti = 0;
 
   base.forEach(function (p) {
-    if (stato.lista.some(function (i) { return i.prodotto === p.nome; })) return;
+    if (stato.lista.some(function (i) { return i.prodotto.toLowerCase() === p.nome.toLowerCase(); })) return;
     const ultima = ultimaRilevazione(p.nome);
     stato.lista.push({
       prodotto: p.nome, marca: ultima ? (ultima.marca || '') : (p.marca || ''), categoria: p.categoria, unita: p.unita,

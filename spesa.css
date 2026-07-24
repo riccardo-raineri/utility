@@ -88,7 +88,7 @@ main { max-width: 760px; margin: 0 auto; padding: 20px 24px; }
 .view.active { display: flex; }
 
 /* ---------- Card Generiche ---------- */
-.card { background: var(--bg-card); border: 1px solid var(--bordo); border-radius: var(--radius); padding: 22px; box-shadow: var(--ombra-card); position: relative; overflow: hidden; }
+.card { background: var(--bg-card); border: 1px solid var(--bordo); border-radius: var(--radius); padding: 22px; box-shadow: var(--ombra-card); position: relative; overflow: visible; }
 .card h3 { margin: 0 0 12px; font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--testo); display: flex; align-items: center; gap: 8px; }
 
 /* ---------- Form & Campi Input ---------- */
@@ -131,18 +131,38 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .prezzo-offerta { color: var(--verde); font-weight: 700; }
 
 /* ---------- Azioni Rapide & Pannelli Corsie/Base ---------- */
-.azioni-rapide { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordo); }
+.azioni-rapide { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordo); position: relative; }
 .btn-small { padding: 8px 12px; font-size: 12px; border-radius: 8px; }
 .pannello { margin-bottom: 20px; border-left: 4px solid var(--accento); }
 .nascosto { display: none !important; }
 
-/* Menu a tendina per scelta supermercato da azione rapida */
+/* Menu a tendina personalizzato e curato per scelta supermercato */
 .supermercato-dropdown-wrapper { position: relative; display: inline-block; }
 .dropdown-supermercato {
-  position: absolute; left: 0; top: 100%; margin-top: 6px; z-index: 50;
+  position: absolute; left: 0; bottom: 100%; margin-bottom: 8px; z-index: 200;
   background: var(--bg-elevata); color: var(--testo); border: 1px solid var(--bordo);
-  padding: 8px; border-radius: var(--radius-sm); font-size: 13px; width: 210px;
-  box-shadow: var(--ombra-card);
+  border-radius: var(--radius); font-size: 13px; width: 230px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4); overflow: hidden;
+  animation: fadeInDrop 0.15s ease;
+}
+@keyframes fadeInDrop {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.dropdown-supermercato-header {
+  padding: 10px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+  color: var(--testo-attenuato); background: var(--bg-card); border-bottom: 1px solid var(--bordo);
+  letter-spacing: 0.05em;
+}
+.dropdown-item-supermercato {
+  padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid var(--bordo); transition: background 0.15s ease, color 0.15s ease;
+  font-weight: 500;
+}
+.dropdown-item-supermercato:last-child { border-bottom: none; }
+.dropdown-item-supermercato:hover {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--accento);
 }
 
 .ordine-riga, .base-riga { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-elevata); border: 1px solid var(--bordo); border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 14px; }
@@ -226,7 +246,8 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .prodotto-riga.spuntato .prodotto-dettaglio { color: var(--testo-attenuato); }
 .prodotto-riga.spuntato .prodotto-prezzo { text-decoration: line-through; color: var(--testo-attenuato); }
 
-.prodotto-nome { font-weight: 600; font-size: 14px; font-family: var(--font-mono); }
+.prodotto-nome { font-weight: 600; font-size: 14px; font-family: var(--font-mono); display: flex; align-items: center; gap: 6px; }
+.preferito-icon { color: var(--accento); font-size: 13px; line-height: 1; }
 .prodotto-dettaglio { font-family: var(--font-mono); font-size: 11px; color: var(--testo-attenuato); margin-top: 4px; }
 .prodotto-prezzo { font-family: var(--font-mono); font-weight: 600; font-size: 14px; text-align: right; }
 .riga-elimina, .riga-modifica { background: none; border: none; color: var(--testo-attenuato); cursor: pointer; font-size: 16px; padding: 6px; border-radius: 6px; transition: all .15s; }
