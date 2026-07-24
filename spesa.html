@@ -41,15 +41,13 @@
         <label>
           Prodotto
           <div style="display: flex; gap: 6px;">
-            <input list="prodotti-list" id="input-prodotto" placeholder="es. Fusilli (inizia a digitare...)" style="flex: 1;">
-            <button type="button" id="btn-toggle-base-form" class="icon-btn" title="Aggiungi / Rimuovi dai prodotti base" style="width: 42px; height: 42px; flex-shrink: 0;">☆</button>
+            <input type="text" id="input-prodotto" placeholder="es. Fusilli Barilla..." style="flex: 1;">
+            <button type="button" id="btn-toggle-base-form" class="icon-btn" title="Aggiungi / Rimuovi dai preferiti" style="width: 42px; height: 42px; flex-shrink: 0;">☆</button>
           </div>
-          <datalist id="prodotti-list"></datalist>
         </label>
         <label>
           Marca (opz.)
-          <input list="marche-list" id="input-marca" placeholder="es. Rummo">
-          <datalist id="marche-list"></datalist>
+          <input type="text" id="input-marca" placeholder="es. Rummo">
         </label>
       </div>
 
@@ -77,16 +75,13 @@
           Prezzo Pieno &euro;
           <input type="number" id="input-prezzo" step="0.01" min="0" placeholder="0.00" inputmode="numeric" pattern="[0-9]*">
         </label>
-        <label>
-          In Offerta &euro;
+        <label class="field-offerta">
+          <span>In Offerta &euro; <span class="badge-offerta">🏷️ Offerta</span></span>
           <input type="number" id="input-prezzo-offerta" step="0.01" min="0" placeholder="0.00" inputmode="numeric" pattern="[0-9]*">
         </label>
       </div>
 
       <div id="hint-prezzo" class="hint"></div>
-      
-      <!-- Contenitore Smart Chips per i prezzi per supermercato -->
-      <div id="prezzi-noti-container" class="prezzi-noti-container nascosto"></div>
 
       <div class="form-azioni">
         <button id="btn-aggiungi" class="btn btn-primary">+ Aggiungi alla lista</button>
@@ -100,12 +95,10 @@
           <div id="dropdown-supermercato-spesa" class="dropdown-supermercato nascosto"></div>
         </div>
         <button id="btn-ordine-corsie" class="btn btn-ghost btn-small">&#8597; Ordina corsie</button>
-        <button id="btn-prodotti-base" class="btn btn-ghost btn-small">&#9733; Prodotti base</button>
-        <button id="btn-aggiungi-base" class="btn btn-ghost btn-small">+ Aggiungi base</button>
       </div>
     </div>
 
-    <!-- Pannelli nascosti -->
+    <!-- Pannello Ordine Corsie -->
     <div id="pannello-ordine" class="card pannello nascosto">
       <h3>Ordine corsie &mdash; <span id="ordine-supermercato-nome"></span></h3>
       <p class="hint">Personalizza il percorso per questo punto vendita usando le frecce.</p>
@@ -125,15 +118,6 @@
       <div class="scontrino-azioni" style="display: flex; gap: 10px; margin-top: 15px;">
         <button id="btn-chiudi-ordine" class="btn btn-ghost">Chiudi</button>
         <button id="btn-salva-ordine" class="btn btn-primary">Salva ordine</button>
-      </div>
-    </div>
-
-    <div id="pannello-base" class="card pannello nascosto">
-      <h3>Prodotti base (riordino rapido)</h3>
-      <p class="hint">Segna con la stella i prodotti ricorrenti della spesa settimanale.</p>
-      <div id="base-lista" style="margin-top: 12px;"></div>
-      <div class="scontrino-azioni" style="display: flex; gap: 10px; margin-top: 15px;">
-        <button id="btn-chiudi-base" class="btn btn-ghost">Chiudi</button>
       </div>
     </div>
 

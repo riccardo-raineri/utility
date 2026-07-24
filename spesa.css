@@ -50,7 +50,7 @@ body {
   padding-bottom: 80px;
 }
 
-/* ---------- Indicatore di Sincronizzazione Non Invasivo ---------- */
+/* ---------- Indicatore di Sincronizzazione ---------- */
 .sync-indicator {
   position: fixed; bottom: 24px; left: 50%;
   transform: translateX(-50%) translateY(10px);
@@ -102,6 +102,24 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .input-with-unit input { flex: 1; min-width: 0; }
 .input-with-unit select { width: 66px; flex-shrink: 0; }
 
+/* ---------- Evidenziazione Campo Prezzo Offerta ---------- */
+.field-offerta span {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.badge-offerta {
+  font-size: 9px; background: rgba(16, 185, 129, 0.2); color: var(--verde); border: 1px solid var(--verde); padding: 1px 5px; border-radius: 4px; font-weight: 700; text-transform: uppercase;
+}
+#input-prezzo-offerta {
+  border-color: rgba(16, 185, 129, 0.5);
+  background: rgba(16, 185, 129, 0.06);
+  color: var(--verde);
+  font-weight: 600;
+}
+#input-prezzo-offerta:focus {
+  border-color: var(--verde);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+}
+
 .hint { font-family: var(--font-mono); font-size: 12px; color: var(--testo-attenuato); min-height: 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 6px; }
 .btn { border: none; border-radius: var(--radius-sm); padding: 12px 18px; font-family: var(--font-display); font-weight: 600; font-size: 13px; cursor: pointer; transition: all .2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
 .btn-primary { background: var(--accento-gradient); color: var(--accento-testo); box-shadow: var(--ombra-accento); }
@@ -117,26 +135,31 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 
 .filtri-barra { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; }
 
-/* ---------- Smart Chips Prezzi ---------- */
-.prezzi-noti-container { margin-bottom: 14px; background: var(--bg-elevata); padding: 12px; border-radius: var(--radius-sm); border: 1px dashed var(--bordo); }
-.titolo-prezzi { font-size: 11px; color: var(--testo-attenuato); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; font-weight: 600; }
-.chips-wrapper { display: flex; flex-wrap: wrap; gap: 8px; }
-.chip-prezzo { background: var(--bg-card); border: 1px solid var(--bordo); padding: 8px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; transition: all .2s ease; }
-.chip-prezzo:hover { border-color: var(--accento); background: rgba(245, 158, 11, 0.05); transform: translateY(-2px); }
-.chip-prezzo .supermercato { font-weight: 700; color: var(--accento); font-size: 11px; text-transform: uppercase; }
-.chip-prezzo .prezzo { font-family: var(--font-mono); font-weight: 600; margin-top: 2px; }
+/* ---------- Visualizzazione Doppia Offerta e Prezzo Barrato ---------- */
+.prezzo-originale {
+  text-decoration: line-through;
+  color: var(--testo-attenuato);
+  font-size: 0.85em;
+  margin-right: 6px;
+  opacity: 0.75;
+}
+.prezzo-offerta {
+  color: var(--verde);
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.15);
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  display: inline-block;
+}
 
-/* ---------- Offerte e Prezzi Sbarrati ---------- */
-.prezzo-originale { text-decoration: line-through; color: var(--testo-attenuato); font-size: 0.85em; margin-right: 4px; }
-.prezzo-offerta { color: var(--verde); font-weight: 700; }
-
-/* ---------- Azioni Rapide & Pannelli Corsie/Base ---------- */
+/* ---------- Azioni Rapide & Pannelli ---------- */
 .azioni-rapide { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordo); position: relative; }
 .btn-small { padding: 8px 12px; font-size: 12px; border-radius: 8px; }
 .pannello { margin-bottom: 20px; border-left: 4px solid var(--accento); }
 .nascosto { display: none !important; }
 
-/* Menu a tendina personalizzato e curato per scelta supermercato */
+/* Menu a tendina personalizzato */
 .supermercato-dropdown-wrapper { position: relative; display: inline-block; }
 .dropdown-supermercato {
   position: absolute; left: 0; bottom: 100%; margin-bottom: 8px; z-index: 200;
@@ -165,15 +188,11 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
   color: var(--accento);
 }
 
-.ordine-riga, .base-riga { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-elevata); border: 1px solid var(--bordo); border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 14px; }
-.base-riga { justify-content: flex-start; gap: 12px; }
+.ordine-riga { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-elevata); border: 1px solid var(--bordo); border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 14px; }
 .ordine-frecce { display: flex; gap: 6px; }
 .freccia { background: var(--bg-card); border: 1px solid var(--bordo); color: var(--testo); border-radius: 6px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
 .freccia:hover:not(:disabled) { background: var(--accento); color: var(--accento-testo); border-color: transparent; }
 .freccia:disabled { opacity: 0.3; cursor: default; }
-.stella { background: none; border: none; font-size: 20px; color: var(--testo-attenuato); cursor: pointer; padding: 0; line-height: 1; transition: transform .15s; }
-.stella.attiva { color: var(--accento); }
-.stella:hover { transform: scale(1.2); }
 
 .suggerimento-swipe { display: none; font-size: 11px; color: var(--testo-attenuato); text-align: center; margin-bottom: 10px; font-family: var(--font-mono); }
 @media (pointer: coarse) { .suggerimento-swipe { display: block; } }
@@ -201,15 +220,9 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .lista-header {
   text-align: center; border-bottom: 2px dashed var(--bordo); padding-bottom: 16px; margin-bottom: 16px;
 }
-.lista-header h2 {
-  margin: 0 0 4px; font-family: var(--font-display); font-size: 20px; color: var(--testo); text-transform: uppercase; letter-spacing: 2px;
-}
 .lista-header div { font-size: 12px; color: var(--testo-attenuato); }
 .lista-footer {
   margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--bordo); text-align: center;
-}
-.totale-riga {
-  display: none !important;
 }
 .barcode {
   font-family: monospace; font-size: 28px; letter-spacing: 2px; color: var(--testo-attenuato); opacity: 0.5; user-select: none; line-height: 1;
@@ -247,7 +260,10 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .prodotto-riga.spuntato .prodotto-prezzo { text-decoration: line-through; color: var(--testo-attenuato); }
 
 .prodotto-nome { font-weight: 600; font-size: 14px; font-family: var(--font-mono); display: flex; align-items: center; gap: 6px; }
-.preferito-icon { color: var(--accento); font-size: 13px; line-height: 1; }
+.preferito-toggle { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--testo-attenuato); padding: 0 4px; line-height: 1; transition: transform 0.15s; }
+.preferito-toggle.attivo { color: var(--accento); }
+.preferito-toggle:hover { transform: scale(1.2); }
+
 .prodotto-dettaglio { font-family: var(--font-mono); font-size: 11px; color: var(--testo-attenuato); margin-top: 4px; }
 .prodotto-prezzo { font-family: var(--font-mono); font-weight: 600; font-size: 14px; text-align: right; }
 .riga-elimina, .riga-modifica { background: none; border: none; color: var(--testo-attenuato); cursor: pointer; font-size: 16px; padding: 6px; border-radius: 6px; transition: all .15s; }
