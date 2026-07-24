@@ -172,7 +172,7 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
   margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--bordo); text-align: center;
 }
 .totale-riga {
-  display: flex; justify-content: space-between; font-size: 18px; font-weight: 700; color: var(--testo); margin-bottom: 16px;
+  display: none !important; /* Rimosso come richiesto */
 }
 .barcode {
   font-family: monospace; font-size: 28px; letter-spacing: 2px; color: var(--testo-attenuato); opacity: 0.5; user-select: none; line-height: 1;
@@ -195,14 +195,22 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
   background: var(--bg-elevata); /* SFONDO SOLIDO: Nasconde i tasti swipe ai lati */
   border: none; border-bottom: 1px dashed var(--bordo); border-radius: 0;
   position: relative; z-index: 2; /* Mette la riga sopra ai tasti nascosti */
-  touch-action: pan-y; transition: opacity .2s;
+  touch-action: pan-y; transition: background .25s;
 }
 /* Rimuovi la linea tratteggiata per l'ultimo elemento di ogni categoria */
 .categoria-blocco:last-child .prodotto-riga-wrapper:last-child .prodotto-riga { border-bottom: none; }
 
 .prodotto-riga input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accento); cursor: pointer; }
-.prodotto-riga.spuntato { opacity: 0.4; background: var(--bg-elevata); }
-.prodotto-riga.spuntato .prodotto-nome { text-decoration: line-through; }
+
+/* SPUNTATO: Mantiene lo sfondo pieno solido (evita trasparenze) ma attenua i testi e sbarra */
+.prodotto-riga.spuntato { 
+  background: var(--bg-elevata); 
+  color: var(--testo-attenuato);
+}
+.prodotto-riga.spuntato .prodotto-nome { text-decoration: line-through; color: var(--testo-attenuato); }
+.prodotto-riga.spuntato .prodotto-dettaglio { color: var(--testo-attenuato); }
+.prodotto-riga.spuntato .prodotto-prezzo { text-decoration: line-through; color: var(--testo-attenuato); }
+
 .prodotto-nome { font-weight: 600; font-size: 14px; font-family: var(--font-mono); }
 .prodotto-dettaglio { font-family: var(--font-mono); font-size: 11px; color: var(--testo-attenuato); margin-top: 4px; }
 .prodotto-prezzo { font-family: var(--font-mono); font-weight: 600; font-size: 14px; text-align: right; }
