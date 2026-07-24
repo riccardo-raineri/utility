@@ -13,7 +13,7 @@
 </head>
 <body>
 
-<!-- Indicatore di sincronizzazione non invasivo (sostituisce il vecchio overlay) -->
+<!-- Indicatore di sincronizzazione non invasivo -->
 <div id="sync-indicator" class="sync-indicator nascosto">
   <div class="spinner"></div>
   <span>Sincronizzazione...</span>
@@ -94,7 +94,11 @@
       </div>
 
       <div class="azioni-rapide">
-        <button id="btn-sono-al-supermercato" class="btn btn-primary btn-small">🛒 Sono al supermercato</button>
+        <!-- Tasto con menu a tendina integrato per la scelta del supermercato -->
+        <div class="supermercato-dropdown-wrapper">
+          <button id="btn-sono-al-supermercato" class="btn btn-primary btn-small">🛒 Sono al supermercato</button>
+          <select id="dropdown-supermercato-spesa" class="dropdown-supermercato nascosto"></select>
+        </div>
         <button id="btn-ordine-corsie" class="btn btn-ghost btn-small">&#8597; Ordina corsie</button>
         <button id="btn-prodotti-base" class="btn btn-ghost btn-small">&#9733; Prodotti base</button>
         <button id="btn-aggiungi-base" class="btn btn-ghost btn-small">+ Aggiungi base</button>

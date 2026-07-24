@@ -148,48 +148,65 @@ function collegaEventi() {
     renderListaSpesa();
   });
 
-  // Tasto integrato "Sono al supermercato": sceglie il negozio e attiva il filtro per nascondere i prodotti spuntati
-  document.getElementById('btn-sono-al-supermercato').addEventListener('click', function() {
-    const daRilevazioni = stato.rilevazioni.map(r => r.supermercato);
-    const daOrdini = Object.keys(stato.ordini || {});
-    const daLista = stato.lista.map(i => i.supermercato);
-    const stores = [...new Set([...daRilevazioni, ...daOrdini, ...daLista].filter(Boolean))].sort();
+  // Gestione pulsante "Sono al supermercato" / "Ho finito!" con menu a tendina integrato
+  const btnSpesa = document.getElementById('btn-sono-al-supermercato');
+  const dropdownSpesa = document.getElementById('dropdown-supermercato-spesa');
 
-    if (stores.length === 0) {
-      const nuovoNegozio = prompt('Nessun supermercato registrato. Inserisci il nome del negozio in cui ti trovi:');
-      if (nuovoNegozio && nuovoNegozio.trim()) {
-        document.getElementById('input-supermercato').value = nuovoNegozio.trim();
-        modalitaSupermercato = true;
-        document.getElementById('btn-sono-al-supermercato').classList.add('btn-active');
-        renderListaSpesa();
-        mostraToast(`Modalità supermercato attiva: ${nuovoNegozio.trim()} (filtrati prodotti spuntati)`);
+  btnSpesa.addEventListener('click', function(e) {
+    e.stopPropagation();
+    if (!modalitaSupermercato) {
+      const daRilevazioni = stato.rilevazioni.map(r => r.supermercato);
+      const daOrdini = Object.keys(stato.ordini || {});
+      const daLista = stato.lista.map(i => i.supermercato);
+      const stores = [...new Set([...daRilevazioni, ...daOrdini, ...daLista].filter(Boolean))].sort();
+
+      if (stores.length === 0) {
+        const nuovoNegozio = prompt('Nessun supermercato registrato. Inserisci il nome del negozio in cui ti trovi:');
+        if (nuovoNegozio && nuovoNegozio.trim()) {
+          const negozio = nuovoNegozio.trim();
+          document.getElementById('input-supermercato').value = negozio;
+          modalitaSupermercato = true;
+          btnSpesa.textContent = 'Ho finito!';
+          btnSpesa.classList.add('btn-active');
+          renderListaSpesa();
+          mostraToast(`🛒 Modalità spesa attiva per: ${negozio} (prodotti spuntati nascosti)`);
+        }
+        return;
       }
-      return;
-    }
 
-    let elencoNegozi = stores.map((s, i) => `${i + 1}. ${s}`).join('\n');
-    let scelta = prompt(`Scegli il supermercato:\n\n${elencoNegozi}\n\nInserisci il numero o il nome del negozio:`, stores[0]);
-    
-    if (scelta === null) return;
-
-    let negozioScelto = scelta.trim();
-    if (!isNaN(scelta) && Number(scelta) > 0 && Number(scelta) <= stores.length) {
-      negozioScelto = stores[Number(scelta) - 1];
-    }
-
-    document.getElementById('input-supermercato').value = negozioScelto;
-    modalitaSupermercato = !modalitaSupermercato; // Attiva o inverte lo stato
-
-    const btn = document.getElementById('btn-sono-al-supermercato');
-    if (modalitaSupermercato) {
-      btn.classList.add('btn-active');
-      mostraToast(`🛒 Modalità spesa attiva per: ${negozioScelto} (prodotti spuntati nascosti)`);
+      dropdownSpesa.innerHTML = '<option value="" disabled selected>Seleziona negozio...</option>' + 
+        stores.map(s => `<option value="${s}">${s}</option>`).join('');
+      
+      dropdownSpesa.classList.toggle('nascosto');
     } else {
-      btn.classList.remove('btn-active');
+      // Fine spesa: ripristina la visualizzazione completa
+      modalitaSupermercato = false;
+      btnSpesa.textContent = '🛒 Sono al supermercato';
+      btnSpesa.classList.remove('btn-active');
+      dropdownSpesa.classList.add('nascosto');
+      renderListaSpesa();
       mostraToast('Modalità spesa disattivata (mostrati tutti i prodotti)');
     }
+  });
 
+  dropdownSpesa.addEventListener('change', function() {
+    const negozioScelto = this.value;
+    if (!negozioScelto) return;
+
+    document.getElementById('input-supermercato').value = negozioScelto;
+    modalitaSupermercato = true;
+    btnSpesa.textContent = 'Ho finito!';
+    btnSpesa.classList.add('btn-active');
+    dropdownSpesa.classList.add('nascosto');
     renderListaSpesa();
+    mostraToast(`🛒 Modalità spesa attiva per: ${negozioScelto} (prodotti spuntati nascosti)`);
+  });
+
+  // Chiudi il menu a tendina se si clicca altrove nella pagina
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.supermercato-dropdown-wrapper')) {
+      dropdownSpesa.classList.add('nascosto');
+    }
   });
 
   document.getElementById('btn-ordine-corsie').addEventListener('click', apriPannelloOrdine);
@@ -515,7 +532,6 @@ function renderListaSpesa() {
       .filter(function (x) { return x.item.categoria === cat.id; })
       .filter(function (x) { return !filtroRicerca || x.item.prodotto.toLowerCase().indexOf(filtroRicerca) !== -1 || (x.item.marca || '').toLowerCase().indexOf(filtroRicerca) !== -1; })
       .filter(function (x) {
-        // Se la modalità supermercato è attiva, nasconde i prodotti già spuntati
         if (modalitaSupermercato && x.item.spuntato) return false;
         return true;
       });

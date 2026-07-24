@@ -131,10 +131,19 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .prezzo-offerta { color: var(--verde); font-weight: 700; }
 
 /* ---------- Azioni Rapide & Pannelli Corsie/Base ---------- */
-.azioni-rapide { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordo); }
+.azioni-rapide { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--bordo); }
 .btn-small { padding: 8px 12px; font-size: 12px; border-radius: 8px; }
 .pannello { margin-bottom: 20px; border-left: 4px solid var(--accento); }
 .nascosto { display: none !important; }
+
+/* Menu a tendina per scelta supermercato da azione rapida */
+.supermercato-dropdown-wrapper { position: relative; display: inline-block; }
+.dropdown-supermercato {
+  position: absolute; left: 0; top: 100%; margin-top: 6px; z-index: 50;
+  background: var(--bg-elevata); color: var(--testo); border: 1px solid var(--bordo);
+  padding: 8px; border-radius: var(--radius-sm); font-size: 13px; width: 210px;
+  box-shadow: var(--ombra-card);
+}
 
 .ordine-riga, .base-riga { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg-elevata); border: 1px solid var(--bordo); border-radius: var(--radius-sm); margin-bottom: 8px; font-size: 14px; }
 .base-riga { justify-content: flex-start; gap: 12px; }
