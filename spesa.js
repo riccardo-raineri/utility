@@ -1,6 +1,3 @@
-/* ============================================================================
-   LISTA DELLA SPESA 2.0 - Stile Scontrino (Frontend)
-   ============================================================================ */
 const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxmtXY1qGdTLYOo-vElncFxXg2FtGxYIhrmOdQQsJpBt44FUSYwILZtIGvRUN0UUD0y/exec';
 
 const CATEGORIE = [
@@ -26,11 +23,9 @@ let ordineCorrente = [];
 let indiceInModifica = null;  
 let filtroRicerca = '';       
 let modalitaSupermercato = false; 
-let isPreferitoInForm = false; // Stato per la stella nel form
+let isPreferitoInForm = false; 
 
-/* ----------------------------------------------------------------------- *
- *  COMUNICAZIONE COL BACKEND & LOADER
- * ----------------------------------------------------------------------- */
+/* Comunicazione Backend */
 function mostraCaricamento(attiva) {
   const indicator = document.getElementById('sync-indicator');
   if (!indicator) return;
@@ -39,11 +34,7 @@ function mostraCaricamento(attiva) {
     requestAnimationFrame(() => indicator.classList.add('visibile'));
   } else {
     indicator.classList.remove('visibile');
-    setTimeout(() => {
-      if (!indicator.classList.contains('visibile')) {
-        indicator.classList.add('nascosto');
-      }
-    }, 200);
+    setTimeout(() => { if (!indicator.classList.contains('visibile')) indicator.classList.add('nascosto'); }, 200);
   }
 }
 
@@ -53,7 +44,7 @@ async function chiamaBackend(action, extraParams) {
     const params = new URLSearchParams(Object.assign({ action: action }, extraParams || {}));
     const res = await fetch(WEBAPP_URL + '?' + params.toString());
     const json = await res.json();
-    if (!json.ok) throw new Error(json.errore || 'Errore sconosciuto dal backend');
+    if (!json.ok) throw new Error(json.errore || 'Errore dal backend');
     return json;
   } finally {
     mostraCaricamento(false);
@@ -67,7 +58,7 @@ async function caricaDati() {
     stato.ordini = json.ordini || {};
     renderTutto();
   } catch (err) {
-    mostraToast('Errore nel caricamento: ' + err.message);
+    mostraToast('Errore caricamento: ' + err.message);
   }
 }
 
@@ -75,9 +66,7 @@ async function sincronizzaLista() {
   await chiamaBackend('aggiornaLista', { data: JSON.stringify(stato.lista) });
 }
 
-/* ----------------------------------------------------------------------- *
- *  AVVIO E COLLEGAMENTO EVENTI
- * ----------------------------------------------------------------------- */
+/* Inizializzazione Eventi */
 document.addEventListener('DOMContentLoaded', function () {
   inizializzaTema();
   popolaSelectCategorie();
@@ -101,7 +90,7 @@ function collegaEventi() {
   document.getElementById('input-prezzo-offerta').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-unita').addEventListener('change', aggiornaAnteprimaProdotto);
 
-  // Tasto stella preferito nel Form
+  // Toggle Stella Preferito nel Form
   const btnStellaForm = document.getElementById('btn-toggle-base-form');
   btnStellaForm.addEventListener('click', function() {
     isPreferitoInForm = !isPreferitoInForm;
@@ -120,9 +109,7 @@ function collegaEventi() {
       renderListaSpesa();
     }
   });
-  document.getElementById('input-supermercato-nuovo').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') confermaNuovoSupermercato();
-  });
+
   document.getElementById('input-supermercato-nuovo').addEventListener('blur', confermaNuovoSupermercato);
 
   document.getElementById('ricerca-prodotto').addEventListener('input', function () {
@@ -142,7 +129,7 @@ function collegaEventi() {
       const stores = [...new Set([...daOrdini, ...daLista].filter(Boolean))].sort();
 
       if (stores.length === 0) {
-        const nuovoNegozio = prompt('Nessun supermercato registrato. Inserisci il nome del negozio in cui ti trovi:');
+        const nuovoNegozio = prompt('Inserisci il nome del supermercato in cui ti trovi:');
         if (nuovoNegozio && nuovoNegozio.trim()) {
           const negozio = nuovoNegozio.trim();
           document.getElementById('input-supermercato').value = negozio;
@@ -150,7 +137,7 @@ function collegaEventi() {
           btnSpesa.textContent = 'Ho finito!';
           btnSpesa.classList.add('btn-active');
           renderListaSpesa();
-          mostraToast(`🛒 Modalità spesa attiva per: ${negozio}`);
+          mostraToast(`🛒 Spesa attiva per: ${negozio}`);
         }
         return;
       }
@@ -173,7 +160,6 @@ function collegaEventi() {
     const item = e.target.closest('.dropdown-item-supermercato');
     if (!item) return;
     const negozioScelto = item.dataset.negozio;
-    if (!negozioScelto) return;
 
     document.getElementById('input-supermercato').value = negozioScelto;
     modalitaSupermercato = true;
@@ -181,7 +167,7 @@ function collegaEventi() {
     btnSpesa.classList.add('btn-active');
     dropdownSpesa.classList.add('nascosto');
     renderListaSpesa();
-    mostraToast(`🛒 Modalità spesa attiva per: ${negozioScelto}`);
+    mostraToast(`🛒 Spesa attiva per: ${negozioScelto}`);
   });
 
   document.addEventListener('click', function(e) {
@@ -195,21 +181,9 @@ function collegaEventi() {
     document.getElementById('pannello-ordine').classList.add('nascosto');
   });
   document.getElementById('btn-salva-ordine').addEventListener('click', salvaOrdineCorsie);
-  document.getElementById('ordine-lista').addEventListener('click', function (e) {
-    const btn = e.target.closest('.freccia');
-    if (!btn) return;
-    spostaCategoria(Number(btn.dataset.indice), Number(btn.dataset.dir));
-  });
-  document.getElementById('ordine-modello').addEventListener('change', function () {
-    const modello = MODELLI_SUPERMERCATO[this.value] || MODELLI_SUPERMERCATO.generico;
-    ordineCorrente = modello.slice();
-    renderPannelloOrdine();
-  });
 }
 
-/* ----------------------------------------------------------------------- *
- *  TEMA
- * ----------------------------------------------------------------------- */
+/* Tema */
 function inizializzaTema() {
   const salvato = localStorage.getItem('spesa-tema') || 'dark';
   document.documentElement.setAttribute('data-theme', salvato);
@@ -222,22 +196,18 @@ function cambiaTema() {
   localStorage.setItem('spesa-tema', nuovo);
 }
 
-/* ----------------------------------------------------------------------- *
- *  SELECT E CATEGORIE
- * ----------------------------------------------------------------------- */
+/* Select & Calcoli */
 function popolaSelectSupermercato() {
   const select = document.getElementById('input-supermercato');
   const valorePrecedente = select.value;
-
   const daOrdini = Object.keys(stato.ordini || {});
-  const daLista = stato.lista.map(function (i) { return i.supermercato; });
+  const daLista = stato.lista.map(i => i.supermercato);
   const elenco = [...new Set([...daOrdini, ...daLista].filter(Boolean))].sort();
 
-  select.innerHTML = elenco.map(function (s) {
-    return '<option value="' + s + '">' + s + '</option>';
-  }).join('') + '<option value="__nuovo__">+ Nuovo supermercato...</option>';
+  select.innerHTML = elenco.map(s => `<option value="${s}">${s}</option>`).join('') + 
+                     '<option value="__nuovo__">+ Nuovo supermercato...</option>';
 
-  if (valorePrecedente && elenco.indexOf(valorePrecedente) !== -1) {
+  if (valorePrecedente && elenco.includes(valorePrecedente)) {
     select.value = valorePrecedente;
   } else if (elenco.length > 0) {
     select.value = elenco[0];
@@ -257,13 +227,10 @@ function confermaNuovoSupermercato() {
   if (!nome) { inputNuovo.classList.add('nascosto'); return; }
 
   const select = document.getElementById('input-supermercato');
-  const giaPresente = [...select.options].some(function (o) { return o.value === nome; });
-  if (!giaPresente) {
-    const opzione = document.createElement('option');
-    opzione.value = nome;
-    opzione.textContent = nome;
-    select.insertBefore(opzione, select.querySelector('option[value="__nuovo__"]'));
-  }
+  const opzione = document.createElement('option');
+  opzione.value = nome;
+  opzione.textContent = nome;
+  select.insertBefore(opzione, select.querySelector('option[value="__nuovo__"]'));
   select.value = nome;
   inputNuovo.classList.add('nascosto');
   renderListaSpesa();
@@ -271,9 +238,7 @@ function confermaNuovoSupermercato() {
 
 function popolaSelectCategorie() {
   const select = document.getElementById('input-categoria');
-  select.innerHTML = CATEGORIE.map(function (c) {
-    return '<option value="' + c.id + '">' + c.icona + ' ' + c.id + '</option>';
-  }).join('');
+  select.innerHTML = CATEGORIE.map(c => `<option value="${c.id}">${c.icona} ${c.id}</option>`).join('');
 }
 
 function calcolaPrezzoKg(peso, unita, prezzo) {
@@ -291,14 +256,10 @@ function aggiornaAnteprimaProdotto() {
   const prezzoAttivo = !isNaN(prezzoOfferta) && prezzoOfferta > 0 ? prezzoOfferta : prezzo;
 
   if (!peso || isNaN(prezzoAttivo)) { hint.textContent = ''; return; }
-  
-  const prezzoKg = calcolaPrezzoKg(peso, unita, prezzoAttivo);
-  hint.textContent = '€/kg: ' + prezzoKg.toFixed(2);
+  hint.textContent = '€/kg: ' + calcolaPrezzoKg(peso, unita, prezzoAttivo).toFixed(2);
 }
 
-/* ----------------------------------------------------------------------- *
- *  AGGIUNTA E MODIFICA PRODOTTI
- * ----------------------------------------------------------------------- */
+/* Gestione Aggiunta e Modifica */
 async function aggiungiProdottoALista() {
   const nomeRaw = document.getElementById('input-prodotto').value.trim();
   const nome = nomeRaw ? nomeRaw.charAt(0).toUpperCase() + nomeRaw.slice(1) : '';
@@ -314,7 +275,7 @@ async function aggiungiProdottoALista() {
   const prezzoRilevante = hasOfferta ? prezzoOfferta : prezzo;
 
   if (!nome || !peso || isNaN(prezzoRilevante)) {
-    mostraToast('Inserisci almeno prodotto, peso e un prezzo valido');
+    mostraToast('Inserisci almeno prodotto, peso e prezzo');
     return;
   }
 
@@ -336,7 +297,7 @@ async function aggiungiProdottoALista() {
   }
 
   renderListaSpesa();
-  try { await sincronizzaLista(); } catch (err) { mostraToast('Non sincronizzato: ' + err.message); }
+  try { await sincronizzaLista(); } catch (err) { mostraToast('Errore sincronizzazione: ' + err.message); }
 }
 
 function modificaProdottoInLista(indice) {
@@ -360,16 +321,10 @@ function modificaProdottoInLista(indice) {
   btnStellaForm.textContent = isPreferitoInForm ? '★' : '☆';
   btnStellaForm.style.color = isPreferitoInForm ? 'var(--accento)' : '';
 
-  const selectSuper = document.getElementById('input-supermercato');
-  if ([...selectSuper.options].some(function (o) { return o.value === item.supermercato; })) {
-    selectSuper.value = item.supermercato;
-  }
-
   indiceInModifica = indice;
   document.getElementById('btn-aggiungi').textContent = '✓ Salva modifiche';
   document.getElementById('btn-annulla-modifica').classList.remove('nascosto');
   aggiornaAnteprimaProdotto();
-  document.getElementById('input-prodotto').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function annullaModifica() {
@@ -392,56 +347,40 @@ function resetForm() {
   btnStellaForm.style.color = '';
 }
 
-/* ----------------------------------------------------------------------- *
- *  RENDER LISTA SPESA & SWIPE
- * ----------------------------------------------------------------------- */
-function ordineCategorieAttuale() {
-  const supermercato = supermercatoSelezionato();
-  const personalizzato = stato.ordini && stato.ordini[supermercato];
-  const tutteLeCategorie = CATEGORIE.map(function (c) { return c.id; });
-  if (personalizzato && personalizzato.length) {
-    const mancanti = tutteLeCategorie.filter(function (id) { return personalizzato.indexOf(id) === -1; });
-    return personalizzato.concat(mancanti);
-  }
-  return tutteLeCategorie;
-}
-
+/* Rendering della Lista e Stella Preferiti */
 function renderListaSpesa() {
   const contenitore = document.getElementById('lista-categorie');
   contenitore.innerHTML = '';
 
-  ordineCategorieAttuale().forEach(function (catId) {
-    const cat = CATEGORIE.find(function (c) { return c.id === catId; }) || { id: catId, icona: '' };
+  const supermercato = supermercatoSelezionato();
+  const personalizzato = stato.ordini && stato.ordini[supermercato];
+  const tutteLeCategorie = CATEGORIE.map(c => c.id);
+  const ordineCorsie = (personalizzato && personalizzato.length) 
+    ? personalizzato.concat(tutteLeCategorie.filter(id => !personalizzato.includes(id)))
+    : tutteLeCategorie;
+
+  ordineCorsie.forEach(catId => {
+    const cat = CATEGORIE.find(c => c.id === catId) || { id: catId, icona: '' };
     const items = stato.lista
-      .map(function (item, indiceReale) { return { item: item, indiceReale: indiceReale }; })
-      .filter(function (x) { return x.item.categoria === cat.id; })
-      .filter(function (x) { return !filtroRicerca || x.item.prodotto.toLowerCase().indexOf(filtroRicerca) !== -1 || (x.item.marca || '').toLowerCase().indexOf(filtroRicerca) !== -1; })
-      .filter(function (x) {
-        if (modalitaSupermercato && x.item.spuntato) return false;
-        return true;
-      });
+      .map((item, indiceReale) => ({ item: item, indiceReale: indiceReale }))
+      .filter(x => x.item.categoria === cat.id)
+      .filter(x => !filtroRicerca || x.item.prodotto.toLowerCase().includes(filtroRicerca) || (x.item.marca || '').toLowerCase().includes(filtroRicerca))
+      .filter(x => !(modalitaSupermercato && x.item.spuntato));
 
     if (items.length === 0) return;
 
     const blocco = document.createElement('div');
     blocco.className = 'categoria-blocco';
-    blocco.innerHTML = '<div class="categoria-titolo">' + cat.icona + ' ' + cat.id + '</div>';
+    blocco.innerHTML = `<div class="categoria-titolo">${cat.icona} ${cat.id}</div>`;
 
-    items.forEach(function (x) { blocco.appendChild(creaRigaProdotto(x.item, x.indiceReale)); });
+    items.forEach(x => { blocco.appendChild(creaRigaProdotto(x.item, x.indiceReale)); });
     contenitore.appendChild(blocco);
   });
-
-  if (filtroRicerca && contenitore.innerHTML === '') {
-    contenitore.innerHTML = '<p class="hint">Nessun prodotto trovato per "' + filtroRicerca + '"</p>';
-  }
 }
 
 function creaRigaProdotto(item, indice) {
   const wrapper = document.createElement('div');
   wrapper.className = 'prodotto-riga-wrapper';
-
-  const sfondoDestra = document.createElement('div'); sfondoDestra.className = 'swipe-azione swipe-destra'; sfondoDestra.textContent = '✓';
-  const sfondoSinistra = document.createElement('div'); sfondoSinistra.className = 'swipe-azione swipe-sinistra'; sfondoSinistra.textContent = '🗑';
 
   const riga = document.createElement('div');
   riga.className = 'prodotto-riga' + (item.spuntato ? ' spuntato' : '');
@@ -449,10 +388,11 @@ function creaRigaProdotto(item, indice) {
   const checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
   checkbox.checked = item.spuntato;
-  checkbox.addEventListener('change', function () { toggleSpuntato(indice); });
+  checkbox.addEventListener('change', () => toggleSpuntato(indice));
 
-  // Pulsante stella Preferito
+  // PULSANTE STELLA PREFERITI FUNZIONANTE NELLA LISTA
   const btnPref = document.createElement('button');
+  btnPref.type = 'button';
   btnPref.className = 'preferito-toggle' + (item.preferito ? ' attivo' : '');
   btnPref.textContent = item.preferito ? '★' : '☆';
   btnPref.title = item.preferito ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti';
@@ -472,139 +412,96 @@ function creaRigaProdotto(item, indice) {
   const nomeDiv = document.createElement('div');
   nomeDiv.className = 'prodotto-nome';
   nomeDiv.appendChild(btnPref);
-  nomeDiv.appendChild(document.createTextNode(item.prodotto));
+  nomeDiv.appendChild(document.createTextNode(' ' + item.prodotto));
 
   info.appendChild(nomeDiv);
-  info.innerHTML += '<div class="prodotto-dettaglio">' + dettagli.join(' • ') + '</div>';
+  info.innerHTML += `<div class="prodotto-dettaglio">${dettagli.join(' • ')}</div>`;
 
-  // Gestione grafica del prezzo (Prezzo normale vs Prezzo Scontato in Verde con Barrato)
+  // Prezzo Normale o Scontato
   const prezzo = document.createElement('div');
   prezzo.className = 'prodotto-prezzo';
   if (item.inOfferta && item.prezzoOriginale) {
-    prezzo.innerHTML = '<span class="prezzo-originale">€ ' + Number(item.prezzoOriginale).toFixed(2) + '</span> ' +
-                       '<span class="prezzo-offerta">€ ' + Number(item.prezzo).toFixed(2) + '</span>';
+    prezzo.innerHTML = `<span class="prezzo-originale">€ ${Number(item.prezzoOriginale).toFixed(2)}</span> ` +
+                       `<span class="prezzo-offerta">€ ${Number(item.prezzo).toFixed(2)}</span>`;
   } else {
     prezzo.textContent = '€ ' + Number(item.prezzo).toFixed(2);
   }
 
   const modifica = document.createElement('button');
-  modifica.className = 'riga-modifica'; modifica.textContent = '✏'; modifica.title = 'Modifica prodotto';
-  modifica.addEventListener('click', function () { modificaProdottoInLista(indice); });
+  modifica.className = 'riga-modifica'; modifica.textContent = '✏';
+  modifica.addEventListener('click', () => modificaProdottoInLista(indice));
 
   const elimina = document.createElement('button');
-  elimina.className = 'riga-elimina'; elimina.textContent = '✕'; elimina.title = 'Rimuovi dalla lista';
-  elimina.addEventListener('click', function () { eliminaDaLista(indice); });
+  elimina.className = 'riga-elimina'; elimina.textContent = '✕';
+  elimina.addEventListener('click', () => eliminaDaLista(indice));
 
-  riga.appendChild(checkbox); riga.appendChild(info); riga.appendChild(prezzo); riga.appendChild(modifica); riga.appendChild(elimina);
-  wrapper.appendChild(sfondoDestra); wrapper.appendChild(sfondoSinistra); wrapper.appendChild(riga);
-
-  abilitaSwipe(riga, indice);
+  riga.appendChild(checkbox); 
+  riga.appendChild(info); 
+  riga.appendChild(prezzo); 
+  riga.appendChild(modifica); 
+  riga.appendChild(elimina);
+  
+  wrapper.appendChild(riga);
   return wrapper;
 }
 
-function abilitaSwipe(riga, indice) {
-  let startX = 0, startY = 0, deltaX = 0, tracciando = false, orizzontale = null;
-  const SOGLIA = 70;
-
-  riga.addEventListener('touchstart', function (e) {
-    const t = e.touches[0]; startX = t.clientX; startY = t.clientY; deltaX = 0; tracciando = true; orizzontale = null;
-    riga.style.transition = 'none';
-  }, { passive: true });
-
-  riga.addEventListener('touchmove', function (e) {
-    if (!tracciando) return;
-    const dx = e.touches[0].clientX - startX; const dy = e.touches[0].clientY - startY;
-    if (orizzontale === null) orizzontale = Math.abs(dx) > Math.abs(dy);
-    if (!orizzontale) return;
-    deltaX = dx; riga.style.transform = 'translateX(' + deltaX + 'px)';
-  }, { passive: true });
-
-  riga.addEventListener('touchend', function () {
-    if (!tracciando) return;
-    tracciando = false; riga.style.transition = 'transform .2s ease';
-    if (orizzontale && deltaX > SOGLIA) {
-      if (navigator.vibrate) navigator.vibrate([40]);
-      riga.style.transform = 'translateX(0)';
-      toggleSpuntato(indice);
-    } else if (orizzontale && deltaX < -SOGLIA) {
-      if (navigator.vibrate) navigator.vibrate([40]);
-      riga.style.transform = 'translateX(-100%)';
-      setTimeout(function () { eliminaDaLista(indice); }, 180);
-    } else {
-      riga.style.transform = 'translateX(0)';
-    }
-  });
-}
-
+// Azione al click della Stella Preferiti nella lista
 async function togglePreferitoInLista(indice) {
   stato.lista[indice].preferito = !stato.lista[indice].preferito;
   renderListaSpesa();
-  try { await sincronizzaLista(); } catch (err) { mostraToast('Non sincronizzato: ' + err.message); }
+  try { 
+    await sincronizzaLista(); 
+  } catch (err) { 
+    mostraToast('Errore sincronizzazione: ' + err.message); 
+  }
 }
 
 async function toggleSpuntato(indice) {
   stato.lista[indice].spuntato = !stato.lista[indice].spuntato;
   renderListaSpesa();
-  try { await sincronizzaLista(); } catch (err) { mostraToast('Non sincronizzato: ' + err.message); }
+  try { await sincronizzaLista(); } catch (err) { mostraToast('Errore sincronizzazione: ' + err.message); }
 }
 
 async function eliminaDaLista(indice) {
   if (indiceInModifica === indice) annullaModifica();
   stato.lista.splice(indice, 1);
   renderListaSpesa();
-  try { await sincronizzaLista(); } catch (err) { mostraToast('Non sincronizzato: ' + err.message); }
+  try { await sincronizzaLista(); } catch (err) { mostraToast('Errore sincronizzazione: ' + err.message); }
 }
 
-/* ----------------------------------------------------------------------- *
- *  ORDINE CORSIE
- * ----------------------------------------------------------------------- */
+/* Pannello Corsie */
 function apriPannelloOrdine() {
   const supermercato = supermercatoSelezionato();
   if (!supermercato) { mostraToast('Seleziona prima un supermercato'); return; }
 
   document.getElementById('ordine-supermercato-nome').textContent = supermercato;
-  document.getElementById('ordine-modello').value = 'generico';
-
   const salvato = stato.ordini && stato.ordini[supermercato];
   ordineCorrente = (salvato && salvato.length) ? salvato.slice() : MODELLI_SUPERMERCATO.generico.slice();
-  CATEGORIE.forEach(function (c) { if (ordineCorrente.indexOf(c.id) === -1) ordineCorrente.push(c.id); });
-
   renderPannelloOrdine();
   document.getElementById('pannello-ordine').classList.remove('nascosto');
 }
 
 function renderPannelloOrdine() {
   const cont = document.getElementById('ordine-lista');
-  cont.innerHTML = ordineCorrente.map(function (catId, indice) {
-    const cat = CATEGORIE.find(function (c) { return c.id === catId; });
-    return '<div class="ordine-riga">' + '<span>' + (cat ? cat.icona : '') + ' ' + catId + '</span>' +
-      '<span class="ordine-frecce">' +
-      '<button class="freccia" data-indice="' + indice + '" data-dir="-1"' + (indice === 0 ? ' disabled' : '') + '>↑</button>' +
-      '<button class="freccia" data-indice="' + indice + '" data-dir="1"' + (indice === ordineCorrente.length - 1 ? ' disabled' : '') + '>↓</button>' +
-      '</span></div>';
+  cont.innerHTML = ordineCorrente.map((catId, idx) => {
+    const cat = CATEGORIE.find(c => c.id === catId);
+    return `<div class="ordine-riga">
+      <span>${cat ? cat.icona : ''} ${catId}</span>
+    </div>`;
   }).join('');
-}
-
-function spostaCategoria(indice, dir) {
-  const nuovoIndice = indice + dir;
-  if (nuovoIndice < 0 || nuovoIndice >= ordineCorrente.length) return;
-  const tmp = ordineCorrente[indice]; ordineCorrente[indice] = ordineCorrente[nuovoIndice]; ordineCorrente[nuovoIndice] = tmp;
-  renderPannelloOrdine();
 }
 
 async function salvaOrdineCorsie() {
   const supermercato = supermercatoSelezionato();
   try {
     const json = await chiamaBackend('salvaOrdine', { data: JSON.stringify({ supermercato: supermercato, ordine: ordineCorrente }) });
-    stato.ordini = json.ordini; renderListaSpesa();
+    stato.ordini = json.ordini; 
+    renderListaSpesa();
     document.getElementById('pannello-ordine').classList.add('nascosto');
-    mostraToast('Ordine corsie salvato per ' + supermercato);
+    mostraToast('Ordine corsie salvato');
   } catch (err) { mostraToast('Errore: ' + err.message); }
 }
 
-/* ----------------------------------------------------------------------- *
- *  VARIE E TOAST
- * ----------------------------------------------------------------------- */
 function renderTutto() {
   popolaSelectSupermercato();
   renderListaSpesa();
@@ -613,6 +510,8 @@ function renderTutto() {
 let toastTimer = null;
 function mostraToast(messaggio) {
   const toast = document.getElementById('toast');
-  toast.textContent = messaggio; toast.classList.add('visibile');
-  clearTimeout(toastTimer); toastTimer = setTimeout(function () { toast.classList.remove('visibile'); }, 3000);
+  toast.textContent = messaggio; 
+  toast.classList.add('visibile');
+  clearTimeout(toastTimer); 
+  toastTimer = setTimeout(() => toast.classList.remove('visibile'), 3000);
 }

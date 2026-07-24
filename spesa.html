@@ -1,152 +1,154 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lista della Spesa 2.0</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lista della Spesa 2.0</title>
 
-<!-- Font: Space Grotesk (display), IBM Plex Mono (scontrino/prezzi), Inter (corpo) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-<link rel="stylesheet" href="spesa.css">
+  <link rel="stylesheet" href="spesa.css">
 </head>
 <body>
 
-<!-- Indicatore di sincronizzazione non invasivo -->
-<div id="sync-indicator" class="sync-indicator nascosto">
-  <div class="spinner"></div>
-  <span>Sincronizzazione...</span>
-</div>
+  <!-- Indicatore di sincronizzazione -->
+  <div id="sync-indicator" class="sync-indicator nascosto">
+    <div class="spinner"></div>
+    <span>Sincronizzazione...</span>
+  </div>
 
-<header class="topbar">
-  <h1 class="logo">Lista della Spesa <span class="logo-accent">2.0</span></h1>
-  <button id="theme-toggle" class="icon-btn" title="Cambia tema" aria-label="Cambia tema">&#9728;</button>
-</header>
+  <header class="topbar">
+    <h1 class="logo">Lista della Spesa <span class="logo-accent">2.0</span></h1>
+    <button id="theme-toggle" class="icon-btn" title="Cambia tema" aria-label="Cambia tema">&#9728;</button>
+  </header>
 
-<main id="app">
-  <!-- =================== VISTA: SPESA =================== -->
-  <section id="view-spesa" class="view active">
+  <main id="app">
+    <section id="view-spesa" class="view active">
 
-    <div class="card form-card">
-      <!-- Riga 1 del Form: Supermercato, Prodotto, Marca -->
-      <div class="form-grid-row">
-        <label>
-          Supermercato
-          <div class="input-with-add">
-            <select id="input-supermercato"></select>
-            <input type="text" id="input-supermercato-nuovo" class="nascosto" placeholder="Nuovo supermercato">
-          </div>
-        </label>
-        <label>
-          Prodotto
-          <div style="display: flex; gap: 6px;">
-            <input type="text" id="input-prodotto" placeholder="es. Fusilli Barilla..." style="flex: 1;">
-            <button type="button" id="btn-toggle-base-form" class="icon-btn" title="Aggiungi / Rimuovi dai preferiti" style="width: 42px; height: 42px; flex-shrink: 0;">☆</button>
-          </div>
-        </label>
-        <label>
-          Marca (opz.)
-          <input type="text" id="input-marca" placeholder="es. Rummo">
-        </label>
-      </div>
+      <div class="card form-card">
+        <!-- Riga 1: Supermercato, Prodotto (con tasto stella), Marca -->
+        <div class="form-grid-row">
+          <label>
+            Supermercato
+            <div class="input-with-add">
+              <select id="input-supermercato"></select>
+              <input type="text" id="input-supermercato-nuovo" class="nascosto" placeholder="Nuovo supermercato">
+            </div>
+          </label>
 
-      <!-- Riga 2 del Form: Categoria, Peso, Prezzo Pieno, Prezzo Offerta -->
-      <div class="form-grid-row form-grid-4col">
-        <label>
-          Categoria
-          <select id="input-categoria"></select>
-        </label>
-        <label>
-          Peso
-          <div class="input-with-unit">
-            <input type="number" id="input-peso" step="0.001" min="0" placeholder="0" inputmode="numeric" pattern="[0-9]*">
-            <select id="input-unita">
-              <option value="g" selected>g</option>
-              <option value="kg">kg</option>
-              <option value="l">l</option>
-              <option value="ml">ml</option>
-              <option value="pz.">pz.</option>
-              <option value="m">m</option>
-            </select>
-          </div>
-        </label>
-        <label>
-          Prezzo Pieno &euro;
-          <input type="number" id="input-prezzo" step="0.01" min="0" placeholder="0.00" inputmode="numeric" pattern="[0-9]*">
-        </label>
-        <label class="field-offerta">
-          <span>In Offerta &euro; <span class="badge-offerta">🏷️ Offerta</span></span>
-          <input type="number" id="input-prezzo-offerta" step="0.01" min="0" placeholder="0.00" inputmode="numeric" pattern="[0-9]*">
-        </label>
-      </div>
+          <label>
+            Prodotto
+            <div style="display: flex; gap: 6px;">
+              <input type="text" id="input-prodotto" placeholder="es. Fusilli Barilla..." style="flex: 1;">
+              <button type="button" id="btn-toggle-base-form" class="icon-btn" title="Aggiungi / Rimuovi dai preferiti" style="width: 42px; height: 42px; flex-shrink: 0;">☆</button>
+            </div>
+          </label>
 
-      <div id="hint-prezzo" class="hint"></div>
-
-      <div class="form-azioni">
-        <button id="btn-aggiungi" class="btn btn-primary">+ Aggiungi alla lista</button>
-        <button id="btn-annulla-modifica" class="btn btn-ghost nascosto">Annulla</button>
-      </div>
-
-      <div class="azioni-rapide">
-        <!-- Tasto con menu a tendina personalizzato integrato per la scelta del supermercato -->
-        <div class="supermercato-dropdown-wrapper">
-          <button id="btn-sono-al-supermercato" class="btn btn-primary btn-small">🛒 Sono al supermercato</button>
-          <div id="dropdown-supermercato-spesa" class="dropdown-supermercato nascosto"></div>
+          <label>
+            Marca (opz.)
+            <input type="text" id="input-marca" placeholder="es. Rummo">
+          </label>
         </div>
-        <button id="btn-ordine-corsie" class="btn btn-ghost btn-small">&#8597; Ordina corsie</button>
+
+        <!-- Riga 2: Categoria, Peso, Prezzo Pieno, Prezzo Offerta -->
+        <div class="form-grid-row form-grid-4col">
+          <label>
+            Categoria
+            <select id="input-categoria"></select>
+          </label>
+
+          <label>
+            Peso / Quantità
+            <div class="input-with-unit">
+              <input type="number" id="input-peso" step="0.001" min="0" placeholder="0" inputmode="numeric">
+              <select id="input-unita">
+                <option value="g" selected>g</option>
+                <option value="kg">kg</option>
+                <option value="l">l</option>
+                <option value="ml">ml</option>
+                <option value="pz.">pz.</option>
+                <option value="m">m</option>
+              </select>
+            </div>
+          </label>
+
+          <label>
+            Prezzo Pieno €
+            <input type="number" id="input-prezzo" step="0.01" min="0" placeholder="0.00" inputmode="numeric">
+          </label>
+
+          <label class="field-offerta">
+            <span>In Offerta € <span class="badge-offerta">🏷️ Offerta</span></span>
+            <input type="number" id="input-prezzo-offerta" step="0.01" min="0" placeholder="0.00" inputmode="numeric">
+          </label>
+        </div>
+
+        <div id="hint-prezzo" class="hint"></div>
+
+        <div class="form-azioni">
+          <button id="btn-aggiungi" class="btn btn-primary">+ Aggiungi alla lista</button>
+          <button id="btn-annulla-modifica" class="btn btn-ghost nascosto">Annulla</button>
+        </div>
+
+        <div class="azioni-rapide">
+          <div class="supermercato-dropdown-wrapper">
+            <button id="btn-sono-al-supermercato" class="btn btn-primary btn-small">🛒 Sono al supermercato</button>
+            <div id="dropdown-supermercato-spesa" class="dropdown-supermercato nascosto"></div>
+          </div>
+          <button id="btn-ordine-corsie" class="btn btn-ghost btn-small">&#8597; Ordina corsie</button>
+        </div>
       </div>
-    </div>
 
-    <!-- Pannello Ordine Corsie -->
-    <div id="pannello-ordine" class="card pannello nascosto">
-      <h3>Ordine corsie &mdash; <span id="ordine-supermercato-nome"></span></h3>
-      <p class="hint">Personalizza il percorso per questo punto vendita usando le frecce.</p>
-      <label>
-        Modello iniziale
-        <select id="ordine-modello">
-          <option value="generico">Generico</option>
-          <option value="esselunga">Esselunga</option>
-          <option value="conad">Conad</option>
-          <option value="coop">Coop</option>
-          <option value="lidl">Lidl</option>
-          <option value="dm">DM</option>
-          <option value="carrefour">Carrefour</option>
-        </select>
-      </label>
-      <div id="ordine-lista" style="margin-top: 12px;"></div>
-      <div class="scontrino-azioni" style="display: flex; gap: 10px; margin-top: 15px;">
-        <button id="btn-chiudi-ordine" class="btn btn-ghost">Chiudi</button>
-        <button id="btn-salva-ordine" class="btn btn-primary">Salva ordine</button>
+      <!-- Pannello Ordine Corsie -->
+      <div id="pannello-ordine" class="card pannello nascosto">
+        <h3>Ordine corsie &mdash; <span id="ordine-supermercato-nome"></span></h3>
+        <p class="hint">Personalizza il percorso per questo punto vendita usando le frecce.</p>
+        <label>
+          Modello iniziale
+          <select id="ordine-modello">
+            <option value="generico">Generico</option>
+            <option value="esselunga">Esselunga</option>
+            <option value="conad">Conad</option>
+            <option value="coop">Coop</option>
+            <option value="lidl">Lidl</option>
+            <option value="dm">DM</option>
+            <option value="carrefour">Carrefour</option>
+          </select>
+        </label>
+        <div id="ordine-lista" style="margin-top: 12px;"></div>
+        <div class="scontrino-azioni" style="display: flex; gap: 10px; margin-top: 15px;">
+          <button id="btn-chiudi-ordine" class="btn btn-ghost">Chiudi</button>
+          <button id="btn-salva-ordine" class="btn btn-primary">Salva ordine</button>
+        </div>
       </div>
-    </div>
 
-    <!-- Barra di Ricerca -->
-    <div class="filtri-barra">
-      <input type="text" id="ricerca-prodotto" class="input-ricerca" placeholder="&#128269; Cerca un prodotto nella lista...">
-    </div>
-
-    <p class="hint suggerimento-swipe">&#128161; Sei da mobile?: scorri a destra per spuntare, a sinistra per rimuovere.</p>
-
-    <!-- EFFETTO SCONTRINO - Avvolge l'intera lista -->
-    <div class="lista-scontrino">
-      <div class="lista-header">
-        <div id="data-scontrino">--/--/---- --:--</div>
+      <!-- Barra di Ricerca -->
+      <div class="filtri-barra">
+        <input type="text" id="ricerca-prodotto" class="input-ricerca" placeholder="🔍 Cerca un prodotto nella lista...">
       </div>
-      
-      <div id="lista-categorie"></div>
-      
-      <div class="lista-footer">
-        <div class="barcode">||| | ||| || || | || || |</div>
-        <div class="barcode-numeri">0019 4820 5928</div>
+
+      <p class="hint suggerimento-swipe">💡 Sei da mobile?: scorri a destra per spuntare, a sinistra per rimuovere.</p>
+
+      <!-- Effetto Scontrino della Lista -->
+      <div class="lista-scontrino">
+        <div class="lista-header">
+          <div id="data-scontrino">--/--/---- --:--</div>
+        </div>
+        
+        <div id="lista-categorie"></div>
+        
+        <div class="lista-footer">
+          <div class="barcode">||| | ||| || || | || || |</div>
+          <div class="barcode-numeri">0019 4820 5928</div>
+        </div>
       </div>
-    </div>
 
-  </section>
-</main>
+    </section>
+  </main>
 
-<div id="toast" class="toast"></div>
+  <div id="toast" class="toast"></div>
 
-<script src="spesa.js"></script>
+  <script src="spesa.js"></script>
 </body>
 </html>
