@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Sfondo Dark coerente con l'app -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#181d24"/>
+      <stop offset="100%" stop-color="#0f1216"/>
+    </linearGradient>
+
+    <!-- Gradiente Accento Ambra/Arancio -->
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+
+    <!-- Ombra morbida per profondità -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Sfondo Quadrato Pieno (Obbligatorio per Apple Touch Icon) -->
+  <rect width="512" height="512" fill="url(#bgGrad)"/>
+
+  <!-- Bagliore di sfondo leggero -->
+  <circle cx="256" cy="270" r="170" fill="#f59e0b" opacity="0.08" />
+
+  <!-- Gruppo Icona Busta della Spesa + Lista -->
+  <g filter="url(#dropShadow)" transform="translate(0, 10)">
+    <!-- Sagoma Busta Spesa -->
+    <path d="M150 200 L362 200 L346 420 C346 433.255 335.255 444 322 444 L190 444 C176.745 444 166 433.255 166 420 Z" 
+          fill="none" stroke="url(#accentGrad)" stroke-width="26" stroke-linejoin="round" stroke-linecap="round"/>
+    
+    <!-- Manico della busta -->
+    <path d="M206 200 V150 C206 122.386 228.386 100 256 100 C283.614 100 306 122.386 306 150 V200" 
+          fill="none" stroke="url(#accentGrad)" stroke-width="26" stroke-linecap="round"/>
+
+    <!-- Righe della Lista (Scontrino/Check) -->
+    <line x1="215" y1="265" x2="305" y2="265" stroke="#f3f4f6" stroke-width="18" stroke-linecap="round" opacity="0.9"/>
+    <line x1="215" y1="320" x2="305" y2="320" stroke="#f3f4f6" stroke-width="18" stroke-linecap="round" opacity="0.9"/>
+    <line x1="215" y1="375" x2="275" y2="375" stroke="#f3f4f6" stroke-width="18" stroke-linecap="round" opacity="0.9"/>
+
+    <!-- Bullet verdi / spunte spesa -->
+    <circle cx="188" cy="265" r="9" fill="#10b981"/>
+    <circle cx="188" cy="320" r="9" fill="#10b981"/>
+    <circle cx="188" cy="375" r="9" fill="#f59e0b"/>
+  </g>
+
+  <!-- Badge "2.0" in alto a destra -->
+  <g filter="url(#dropShadow)" transform="translate(325, 55)">
+    <rect width="135" height="56" rx="28" fill="url(#accentGrad)" />
+    <text x="67.5" y="38" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="800" fill="#0f1216" text-anchor="middle" letter-spacing="-0.5px">2.0</text>
+  </g>
+</svg>
