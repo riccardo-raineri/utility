@@ -9,9 +9,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-<!-- Chart.js per gli andamenti dei prezzi e le statistiche -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
-
 <link rel="stylesheet" href="spesa.css">
 </head>
 <body>
@@ -28,21 +25,12 @@
 </div>
 
 <header class="topbar">
-  <a href="dashboard.html" class="back-link" title="Torna alla dashboard">&larr;</a>
   <h1 class="logo">Lista della Spesa <span class="logo-accent">2.0</span></h1>
   <button id="theme-toggle" class="icon-btn" title="Cambia tema" aria-label="Cambia tema">&#9728;</button>
 </header>
 
-<nav class="tabs" id="tabs">
-  <button class="tab-btn active" data-view="spesa">&#128722; Spesa</button>
-  <button class="tab-btn" data-view="storico">&#128200; Storico</button>
-  <button class="tab-btn" data-view="confronto">&#9878;&#65039; Confronto</button>
-  <button class="tab-btn" data-view="statistiche">&#128202; Statistiche</button>
-</nav>
-
 <main id="app">
-
-  <!-- =================== VISTA: SPESA (checklist corrente) =================== -->
+  <!-- =================== VISTA: SPESA =================== -->
   <section id="view-spesa" class="view active">
 
     <div class="card form-card">
@@ -57,7 +45,7 @@
         </label>
         <label>
           Prodotto
-          <input list="prodotti-list" id="input-prodotto" placeholder="es. Fusilli">
+          <input list="prodotti-list" id="input-prodotto" placeholder="es. Fusilli (inizia a digitare...)">
           <datalist id="prodotti-list"></datalist>
         </label>
         <label>
@@ -78,11 +66,12 @@
           <div class="input-with-unit">
             <input type="number" id="input-peso" step="0.001" min="0" placeholder="0" inputmode="numeric" pattern="[0-9]*">
             <select id="input-unita">
+              <option value="g" selected>g</option>
               <option value="kg">kg</option>
-              <option value="g">g</option>
               <option value="l">l</option>
               <option value="ml">ml</option>
-              <option value="pz">pz</option>
+              <option value="pz.">pz.</option>
+              <option value="m">m</option>
             </select>
           </div>
         </label>
@@ -97,6 +86,9 @@
       </div>
 
       <div id="hint-prezzo" class="hint"></div>
+      
+      <!-- Contenitore Smart Chips per i prezzi per supermercato -->
+      <div id="prezzi-noti-container" class="prezzi-noti-container nascosto"></div>
 
       <div class="form-azioni">
         <button id="btn-aggiungi" class="btn btn-primary">+ Aggiungi alla lista</button>
@@ -110,10 +102,10 @@
       </div>
     </div>
 
+    <!-- Pannelli nascosti -->
     <div id="pannello-ordine" class="card pannello nascosto">
       <h3>Ordine corsie &mdash; <span id="ordine-supermercato-nome"></span></h3>
       <p class="hint">Personalizza il percorso per questo punto vendita usando le frecce.</p>
-
       <label>
         Modello iniziale
         <select id="ordine-modello">
@@ -126,7 +118,6 @@
           <option value="carrefour">Carrefour</option>
         </select>
       </label>
-
       <div id="ordine-lista" style="margin-top: 12px;"></div>
       <div class="scontrino-azioni">
         <button id="btn-chiudi-ordine" class="btn btn-ghost">Chiudi</button>
@@ -166,70 +157,6 @@
     </div>
 
   </section>
-
-  <!-- =================== VISTA: STORICO =================== -->
-  <section id="view-storico" class="view">
-    <div class="card">
-      <label>
-        Seleziona Prodotto
-        <select id="storico-select-prodotto"></select>
-      </label>
-    </div>
-
-    <div class="card">
-      <canvas id="chart-storico" height="120"></canvas>
-    </div>
-
-    <div class="card" style="overflow-x: auto;">
-      <table class="tabella" id="tabella-storico">
-        <thead>
-          <tr><th>Data</th><th>Marca</th><th>Supermercato</th><th>Peso</th><th>Prezzo</th><th>&euro;/kg</th><th></th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- =================== VISTA: CONFRONTO SUPERMERCATI =================== -->
-  <section id="view-confronto" class="view">
-    <div class="card">
-      <label>
-        Seleziona Prodotto
-        <select id="confronto-select-prodotto"></select>
-      </label>
-    </div>
-    <div class="card" style="overflow-x: auto;">
-      <table class="tabella" id="tabella-confronto">
-        <thead>
-          <tr><th>Supermercato</th><th>Marca</th><th>&euro;/kg piu&ugrave; recente</th><th>Data</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- =================== VISTA: STATISTICHE =================== -->
-  <section id="view-statistiche" class="view">
-    <div class="card stat-riepilogo">
-      <div>
-        <span class="stat-label">Speso questo mese</span>
-        <span class="stat-valore" id="stat-mese-totale">&euro; 0,00</span>
-      </div>
-      <div>
-        <span class="stat-label">Categoria principale</span>
-        <span class="stat-valore" id="stat-top-categoria">&mdash;</span>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Spesa per categoria (mese corrente)</h3>
-      <canvas id="chart-categorie" height="160"></canvas>
-    </div>
-    <div class="card">
-      <h3>Andamento spesa ultimi mesi</h3>
-      <canvas id="chart-mensile" height="140"></canvas>
-    </div>
-  </section>
-
 </main>
 
 <div id="toast" class="toast"></div>
