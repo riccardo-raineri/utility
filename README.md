@@ -1,4 +1,4 @@
-# 🛠️ Web Tools Suite
+# 🛠️ MY TOOLBOX Dashboard
 
 Una raccolta completa, moderna e modulare di strumenti web utility, calcolatrici, tool di produttività, fotografia e intrattenimento, sviluppati con un'interfaccia pulita, responsive e dotata di supporto nativo per Dark/Light Mode.
 
@@ -7,7 +7,7 @@ Una raccolta completa, moderna e modulare di strumenti web utility, calcolatrici
 ## 🚀 Elenco Completo dei Tool
 
 ### 💰 Finanza, Lavoro & Spesa
-*   **Cedolino +**: Gestione avanzata delle buste paga, estrazione dati da PDF tramite OCR/PDF.js, grafici diandamento e storico dettagliato.
+*   **Cedolino +**: Gestione avanzata delle buste paga, estrazione dati da PDF tramite OCR/PDF.js, grafici di andamento e storico dettagliato.
 *   **Costo Carburante**: Calcolo rapido dei costi di viaggio in base ai consumi e al prezzo del carburante.
 *   **Calcola Sconto**: Strumento immediato per calcolare sconti, prezzi finali e risparmio effettivo.
 *   **Lista della Spesa 2.0**: Gestione intelligente e condivisa della spesa quotidiana.
@@ -25,7 +25,7 @@ Una raccolta completa, moderna e modulare di strumenti web utility, calcolatrici
 *   **Pomodoro Timer**: Timer di produttività basato sulla tecnica Pomodoro per gestire il tempo di lavoro e pause.
 
 ### 📷 Fotografia & Outdoor
-*   **Esposimetro**: Strumento di supporto per calcolari i parametri di esposizione fotografica.
+*   **Esposimetro**: Strumento di supporto per calcolare i parametri di esposizione fotografica.
 *   **Aspect Ratio**: Calcolatore di proporzioni e risoluzioni per immagini e video.
 *   **Distanza Fulmine**: Calcolo della distanza di un temporale basato sul tempo tra lampo e tuono.
 
@@ -44,9 +44,3 @@ Il progetto è sviluppato con tecnologie web moderne, senza la necessità di com
 *   **Librerie esterne**: Chart.js (per le dashboard e i grafici), PDF.js (per l'analisi dei documenti), Lucide Icons.
 
 ---
-
-## ⚙️ Installazione e Utilizzo
-
-1. Clora il repository:
-   ```bash
-   git clone [https://github.com/tuo-username/web-tools-suite.git](https://github.com/tuo-username/web-tools-suite.git)
