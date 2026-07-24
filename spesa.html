@@ -45,7 +45,10 @@
         </label>
         <label>
           Prodotto
-          <input list="prodotti-list" id="input-prodotto" placeholder="es. Fusilli (inizia a digitare...)">
+          <div style="display: flex; gap: 6px;">
+            <input list="prodotti-list" id="input-prodotto" placeholder="es. Fusilli (inizia a digitare...)" style="flex: 1;">
+            <button type="button" id="btn-toggle-base-form" class="icon-btn" title="Aggiungi / Rimuovi dai prodotti base" style="width: 42px; height: 42px; flex-shrink: 0;">☆</button>
+          </div>
           <datalist id="prodotti-list"></datalist>
         </label>
         <label>
@@ -96,6 +99,7 @@
       </div>
 
       <div class="azioni-rapide">
+        <button id="btn-sono-al-supermercato" class="btn btn-primary btn-small">🛒 Sono al supermercato</button>
         <button id="btn-ordine-corsie" class="btn btn-ghost btn-small">&#8597; Ordina corsie</button>
         <button id="btn-prodotti-base" class="btn btn-ghost btn-small">&#9733; Prodotti base</button>
         <button id="btn-aggiungi-base" class="btn btn-ghost btn-small">+ Aggiungi base</button>
@@ -119,7 +123,7 @@
         </select>
       </label>
       <div id="ordine-lista" style="margin-top: 12px;"></div>
-      <div class="scontrino-azioni">
+      <div class="scontrino-azioni" style="display: flex; gap: 10px; margin-top: 15px;">
         <button id="btn-chiudi-ordine" class="btn btn-ghost">Chiudi</button>
         <button id="btn-salva-ordine" class="btn btn-primary">Salva ordine</button>
       </div>
@@ -129,12 +133,15 @@
       <h3>Prodotti base (riordino rapido)</h3>
       <p class="hint">Segna con la stella i prodotti ricorrenti della spesa settimanale.</p>
       <div id="base-lista" style="margin-top: 12px;"></div>
-      <div class="scontrino-azioni">
+      <div class="scontrino-azioni" style="display: flex; gap: 10px; margin-top: 15px;">
         <button id="btn-chiudi-base" class="btn btn-ghost">Chiudi</button>
       </div>
     </div>
 
-    <input type="text" id="ricerca-prodotto" class="input-ricerca" placeholder="&#128269; Cerca un prodotto nella lista...">
+    <!-- Barra di Ricerca -->
+    <div class="filtri-barra">
+      <input type="text" id="ricerca-prodotto" class="input-ricerca" placeholder="&#128269; Cerca un prodotto nella lista...">
+    </div>
 
     <p class="hint suggerimento-swipe">&#128161; Sei da mobile?: scorri a destra per spuntare, a sinistra per rimuovere.</p>
 

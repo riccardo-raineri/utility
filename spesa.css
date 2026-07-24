@@ -104,11 +104,14 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
 .btn-ghost { background: var(--bg-elevata); border: 1px solid var(--bordo); color: var(--testo); }
 .btn-ghost:hover { background: var(--bordo); color: var(--testo); }
+.btn-active { border-color: var(--accento) !important; background: rgba(245, 158, 11, 0.1) !important; color: var(--accento) !important; }
 
 .input-with-add { display: flex; gap: 8px; }
 .input-with-add select, .input-with-add input { flex: 1; min-width: 0; }
 .form-azioni { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
-.input-ricerca { width: 100%; margin-bottom: 6px; padding: 12px 16px; font-size: 14px; background: var(--bg-card); border-radius: var(--radius); }
+.input-ricerca { width: 100%; margin-bottom: 0; padding: 12px 16px; font-size: 14px; background: var(--bg-card); border-radius: var(--radius); }
+
+.filtri-barra { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; }
 
 /* ---------- Smart Chips Prezzi ---------- */
 .prezzi-noti-container { margin-bottom: 14px; background: var(--bg-elevata); padding: 12px; border-radius: var(--radius-sm); border: 1px dashed var(--bordo); }
@@ -135,7 +138,8 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .freccia { background: var(--bg-card); border: 1px solid var(--bordo); color: var(--testo); border-radius: 6px; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
 .freccia:hover:not(:disabled) { background: var(--accento); color: var(--accento-testo); border-color: transparent; }
 .freccia:disabled { opacity: 0.3; cursor: default; }
-.stella { background: none; border: none; font-size: 20px; color: var(--accento); cursor: pointer; padding: 0; line-height: 1; transition: transform .15s; }
+.stella { background: none; border: none; font-size: 20px; color: var(--testo-attenuato); cursor: pointer; padding: 0; line-height: 1; transition: transform .15s; }
+.stella.attiva { color: var(--accento); }
 .stella:hover { transform: scale(1.2); }
 
 .suggerimento-swipe { display: none; font-size: 11px; color: var(--testo-attenuato); text-align: center; margin-bottom: 10px; font-family: var(--font-mono); }
@@ -172,7 +176,7 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
   margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--bordo); text-align: center;
 }
 .totale-riga {
-  display: none !important; /* Rimosso come richiesto */
+  display: none !important;
 }
 .barcode {
   font-family: monospace; font-size: 28px; letter-spacing: 2px; color: var(--testo-attenuato); opacity: 0.5; user-select: none; line-height: 1;
@@ -192,17 +196,15 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .prodotto-riga {
   display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: 10px;
   padding: 12px 4px; 
-  background: var(--bg-elevata); /* SFONDO SOLIDO: Nasconde i tasti swipe ai lati */
+  background: var(--bg-elevata);
   border: none; border-bottom: 1px dashed var(--bordo); border-radius: 0;
-  position: relative; z-index: 2; /* Mette la riga sopra ai tasti nascosti */
+  position: relative; z-index: 2;
   touch-action: pan-y; transition: background .25s;
 }
-/* Rimuovi la linea tratteggiata per l'ultimo elemento di ogni categoria */
 .categoria-blocco:last-child .prodotto-riga-wrapper:last-child .prodotto-riga { border-bottom: none; }
 
 .prodotto-riga input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accento); cursor: pointer; }
 
-/* SPUNTATO: Mantiene lo sfondo pieno solido (evita trasparenze) ma attenua i testi e sbarra */
 .prodotto-riga.spuntato { 
   background: var(--bg-elevata); 
   color: var(--testo-attenuato);

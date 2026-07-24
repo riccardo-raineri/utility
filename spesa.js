@@ -25,6 +25,7 @@ let stato = { prodotti: [], rilevazioni: [], lista: [], ordini: {} };
 let ordineCorrente = [];      
 let indiceInModifica = null;  
 let filtroRicerca = '';       
+let modalitaSupermercato = false; // Stato attivo/disattivato della modalità supermercato (nasconde i prodotti spuntati)
 
 /* ----------------------------------------------------------------------- *
  *  COMUNICAZIONE COL BACKEND & LOADER
@@ -74,7 +75,6 @@ document.addEventListener('DOMContentLoaded', function () {
   collegaEventi();
   caricaDati();
   
-  // Imposta data e ora nello scontrino
   const elData = document.getElementById('data-scontrino');
   if (elData) {
     const oggi = new Date();
@@ -92,6 +92,30 @@ function collegaEventi() {
   document.getElementById('input-prezzo').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-prezzo-offerta').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-unita').addEventListener('change', aggiornaAnteprimaProdotto);
+
+  // Pulsante stella rapido nel form
+  document.getElementById('btn-toggle-base-form').addEventListener('click', async function() {
+    const nomeInput = document.getElementById('input-prodotto').value.trim();
+    if (!nomeInput) {
+      mostraToast('Inserisci prima il nome di un prodotto');
+      return;
+    }
+    let prodTrovato = stato.prodotti.find(p => p.nome.toLowerCase() === nomeInput.toLowerCase());
+    if (!prodTrovato) {
+      const cat = document.getElementById('input-categoria').value;
+      const unita = document.getElementById('input-unita').value;
+      const marca = document.getElementById('input-marca').value.trim();
+      try {
+        const json = await chiamaBackend('toggleBase', { nome: nomeInput });
+        stato.prodotti = json.prodotti;
+      } catch(e) {
+        stato.prodotti.push({ nome: nomeInput, categoria: cat, unita: unita, marca: marca, base: true });
+      }
+    } else {
+      await toggleBaseProdotto(prodTrovato.nome);
+    }
+    aggiornaStatoStellaForm(nomeInput);
+  });
 
   document.getElementById('input-supermercato').addEventListener('change', function () {
     const inputNuovo = document.getElementById('input-supermercato-nuovo');
@@ -111,6 +135,50 @@ function collegaEventi() {
 
   document.getElementById('ricerca-prodotto').addEventListener('input', function () {
     filtroRicerca = this.value.trim().toLowerCase();
+    renderListaSpesa();
+  });
+
+  // Tasto integrato "Sono al supermercato": sceglie il negozio e attiva il filtro per nascondere i prodotti spuntati
+  document.getElementById('btn-sono-al-supermercato').addEventListener('click', function() {
+    const daRilevazioni = stato.rilevazioni.map(r => r.supermercato);
+    const daOrdini = Object.keys(stato.ordini || {});
+    const daLista = stato.lista.map(i => i.supermercato);
+    const stores = [...new Set([...daRilevazioni, ...daOrdini, ...daLista].filter(Boolean))].sort();
+
+    if (stores.length === 0) {
+      const nuovoNegozio = prompt('Nessun supermercato registrato. Inserisci il nome del negozio in cui ti trovi:');
+      if (nuovoNegozio && nuovoNegozio.trim()) {
+        document.getElementById('input-supermercato').value = nuovoNegozio.trim();
+        modalitaSupermercato = true;
+        document.getElementById('btn-sono-al-supermercato').classList.add('btn-active');
+        renderListaSpesa();
+        mostraToast(`Modalità supermercato attiva: ${nuovoNegozio.trim()} (filtrati prodotti spuntati)`);
+      }
+      return;
+    }
+
+    let elencoNegozi = stores.map((s, i) => `${i + 1}. ${s}`).join('\n');
+    let scelta = prompt(`Scegli il supermercato:\n\n${elencoNegozi}\n\nInserisci il numero o il nome del negozio:`, stores[0]);
+    
+    if (scelta === null) return;
+
+    let negozioScelto = scelta.trim();
+    if (!isNaN(scelta) && Number(scelta) > 0 && Number(scelta) <= stores.length) {
+      negozioScelto = stores[Number(scelta) - 1];
+    }
+
+    document.getElementById('input-supermercato').value = negozioScelto;
+    modalitaSupermercato = !modalitaSupermercato; // Attiva o inverte lo stato
+
+    const btn = document.getElementById('btn-sono-al-supermercato');
+    if (modalitaSupermercato) {
+      btn.classList.add('btn-active');
+      mostraToast(`🛒 Modalità spesa attiva per: ${negozioScelto} (prodotti spuntati nascosti)`);
+    } else {
+      btn.classList.remove('btn-active');
+      mostraToast('Modalità spesa disattivata (mostrati tutti i prodotti)');
+    }
+
     renderListaSpesa();
   });
 
@@ -233,9 +301,23 @@ function ultimaRilevazione(nomeProdotto) {
 /* ----------------------------------------------------------------------- *
  *  PREZZI RAPIDI & FORM
  * ----------------------------------------------------------------------- */
+function aggiornaStatoStellaForm(nomeProdotto) {
+  const btnStella = document.getElementById('btn-toggle-base-form');
+  const noto = stato.prodotti.find(p => p.nome.toLowerCase() === nomeProdotto.toLowerCase());
+  if (noto && noto.base) {
+    btnStella.textContent = '★';
+    btnStella.style.color = 'var(--accento)';
+  } else {
+    btnStella.textContent = '☆';
+    btnStella.style.color = '';
+  }
+}
+
 function aggiornaAnteprimaProdotto() {
   const nome = document.getElementById('input-prodotto').value.trim();
   const hint = document.getElementById('hint-prezzo');
+
+  aggiornaStatoStellaForm(nome);
 
   const noto = stato.prodotti.find(function (p) { return p.nome.toLowerCase() === nome.toLowerCase(); });
   if (noto) {
@@ -349,6 +431,7 @@ async function aggiungiProdottoALista() {
     document.getElementById('input-prezzo-offerta').value = '';
     document.getElementById('hint-prezzo').textContent = '';
     document.getElementById('prezzi-noti-container').classList.add('nascosto');
+    aggiornaStatoStellaForm('');
   }
 
   renderListaSpesa();
@@ -394,6 +477,7 @@ function annullaModifica() {
   document.getElementById('input-prezzo-offerta').value = '';
   document.getElementById('hint-prezzo').textContent = '';
   document.getElementById('prezzi-noti-container').classList.add('nascosto');
+  aggiornaStatoStellaForm('');
 }
 
 /* ----------------------------------------------------------------------- *
@@ -419,7 +503,12 @@ function renderListaSpesa() {
     const items = stato.lista
       .map(function (item, indiceReale) { return { item: item, indiceReale: indiceReale }; })
       .filter(function (x) { return x.item.categoria === cat.id; })
-      .filter(function (x) { return !filtroRicerca || x.item.prodotto.toLowerCase().indexOf(filtroRicerca) !== -1 || (x.item.marca || '').toLowerCase().indexOf(filtroRicerca) !== -1; });
+      .filter(function (x) { return !filtroRicerca || x.item.prodotto.toLowerCase().indexOf(filtroRicerca) !== -1 || (x.item.marca || '').toLowerCase().indexOf(filtroRicerca) !== -1; })
+      .filter(function (x) {
+        // Se la modalità supermercato è attiva, nasconde i prodotti già spuntati
+        if (modalitaSupermercato && x.item.spuntato) return false;
+        return true;
+      });
 
     if (items.length === 0) return;
 
@@ -604,7 +693,9 @@ function apriPannelloBase() {
 async function toggleBaseProdotto(nome) {
   try {
     const json = await chiamaBackend('toggleBase', { nome: nome });
-    stato.prodotti = json.prodotti; apriPannelloBase();
+    stato.prodotti = json.prodotti; 
+    apriPannelloBase();
+    aggiornaStatoStellaForm(document.getElementById('input-prodotto').value.trim());
   } catch (err) { mostraToast('Errore: ' + err.message); }
 }
 
