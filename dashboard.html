@@ -67,12 +67,12 @@
                         <i data-lucide="gamepad-2"></i>
                         <span>Svago</span>
                     </button>
-					 <!-- Pulsante per aprire il pannello laterale preferiti -->
-                <button class="favorites-toggle-btn" id="openFavoritesDrawer">
-                    <i data-lucide="star"></i>
-                    <span>Preferiti</span>
-                    <span class="favorites-badge-count" id="favCountBadge">0</span>
-                </button>
+                    <!-- Pulsante per aprire il pannello laterale preferiti -->
+                    <button class="favorites-toggle-btn" id="openFavoritesDrawer">
+                        <i data-lucide="star"></i>
+                        <span>Preferiti</span>
+                        <span class="favorites-badge-count" id="favCountBadge">0</span>
+                    </button>
                 </nav>
             </div>
 
@@ -91,378 +91,419 @@
         </header>
 
         <!-- =========================================================
-             GRIGLIA STRUMENTI
+             CONTENUTO PRINCIPALE
              ========================================================= -->
         <main class="main-content">
-            <div class="tools-grid" id="toolsGrid">
 
-                <!-- Calcola Sconto -->
-                <a href="calcolasconto.html" class="tool-card" data-category="finanza" data-tool-id="calcolasconto">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="percent"></i>
+            <!-- APPLICAZIONI IN EVIDENZA -->
+            <section class="tools-section flagship-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i data-lucide="sparkles" class="section-title-icon"></i>
+                        In Evidenza
+                    </h2>
+                    <span class="section-tag">Più usati</span>
+                </div>
+                
+                <div class="tools-grid flagship-grid">
+                    
+                   <!-- Calcola Sconto -->
+                    <a href="calcolasconto.html" class="tool-card" data-category="finanza" data-tool-id="calcolasconto">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="percent"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Finanza</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('calcolasconto', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
                             </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Finanza</span>
-                                <button class="fav-btn" onclick="toggleFavorite('calcolasconto', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
+                            <h3 class="card-title">Calcola Sconto</h3>
+                            <p class="card-desc">Inserisci prezzo, sconto e quantità: scopri subito quanto risparmi e il totale netto.</p>
                         </div>
-                        <h3 class="card-title">Calcola Sconto</h3>
-                        <p class="card-desc">Inserisci prezzo, sconto e quantità: scopri subito quanto risparmi e il totale netto.</p>
-                    </div>
-                </a>
+                    </a>
 
-                <!-- Costo Carburante -->
-                <a href="calcolaviaggio.html" class="tool-card" data-category="viaggi" data-tool-id="calcolaviaggio">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="fuel"></i>
+                   <!-- Costo Carburante -->
+                    <a href="calcolaviaggio.html" class="tool-card" data-category="viaggi" data-tool-id="calcolaviaggio">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="fuel"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Viaggi</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('calcolaviaggio', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
                             </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Viaggi</span>
-                                <button class="fav-btn" onclick="toggleFavorite('calcolaviaggio', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
+                            <h3 class="card-title">Costo Carburante</h3>
+                            <p class="card-desc">Calcola litri e spesa di viaggio, con opzione andata/ritorno e divisione costi tra passeggeri.</p>
                         </div>
-                        <h3 class="card-title">Costo Carburante</h3>
-                        <p class="card-desc">Calcola litri e spesa di viaggio, con opzione andata/ritorno e divisione costi tra passeggeri.</p>
-                    </div>
-                </a>
+                    </a>
 
-                <!-- Data Sharing -->
-                <a href="datasharing.html" class="tool-card" data-category="utilita" data-tool-id="datasharing">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="cloud-upload"></i>
+                    <!-- Data Sharing -->
+                    <a href="datasharing.html" class="tool-card" data-category="utilita" data-tool-id="datasharing">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="cloud-upload"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Utilità</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('datasharing', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
                             </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Utilità</span>
-                                <button class="fav-btn" onclick="toggleFavorite('datasharing', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
+                            <h3 class="card-title">Data Sharing P2P</h3>
+                            <p class="card-desc">Scambia messaggi, file e dati direttamente dal browser in modo locale, rapido e sicuro.</p>
                         </div>
-                        <h3 class="card-title">Data Sharing P2P</h3>
-                        <p class="card-desc">Scambia messaggi, file e dati direttamente dal browser in modo locale, rapido e sicuro.</p>
-                    </div>
-                </a>
+                    </a>
 
-                <!-- PDF Tool -->
-                <a href="pdftool.html" class="tool-card" data-category="utilita" data-tool-id="pdftool">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="file-cog"></i>
+                    <!-- PDF Tool -->
+                    <a href="pdftool.html" class="tool-card" data-category="utilita" data-tool-id="pdftool">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="file-cog"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Utilità</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('pdftool', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
                             </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Utilità</span>
-                                <button class="fav-btn" onclick="toggleFavorite('pdftool', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
+                            <h3 class="card-title">PDF Tool</h3>
+                            <p class="card-desc">Convertitore e gestore di PDF completo lato client.</p>
                         </div>
-                        <h3 class="card-title">PDF Tool</h3>
-                        <p class="card-desc">Convertitore di PDF completo</p>
-                    </div>
-                </a>
+                    </a>
+                </div>
+            </section>
 
-                <!-- Convertitore Immagini -->
-                <a href="convertitoreimmagini.html" class="tool-card" data-category="utilita" data-tool-id="convertitoreimmagini">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="image"></i>
-                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Utilità</span>
-                                <button class="fav-btn" onclick="toggleFavorite('convertitoreimmagini', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Convertitore Immagini</h3>
-                        <p class="card-desc">Converti rapidamente formati grafici JPG, PNG, WebP e GIF con ottimizzazione visiva.</p>
-                    </div>
-                </a>
+            <!-- SEZIONE 2: ALTRI STRUMENTI & UTILITY -->
+            <section class="tools-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i data-lucide="layout-grid" class="section-title-icon"></i>
+                        Tutti i tools
+                    </h2>
+                </div>
 
-                <!-- Convertitore Universale -->
-                <a href="convertitore.html" class="tool-card" data-category="utilita" data-tool-id="convertitore">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="arrow-left-right"></i>
-                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Utilità</span>
-                                <button class="fav-btn" onclick="toggleFavorite('convertitore', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Convertitore Universale</h3>
-                        <p class="card-desc">Converti lunghezze, pesi, temperature, valute e altro in tempo reale con calcolo immediato.</p>
-                    </div>
-                </a>
+                <div class="tools-grid" id="toolsGrid">
 
-                <!-- Esposimetro -->
-                <a href="esposizione.html" class="tool-card" data-category="cinema" data-tool-id="esposizione">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="camera"></i>
+                    <!-- Convertitore Immagini -->
+                    <a href="convertitoreimmagini.html" class="tool-card" data-category="utilita" data-tool-id="convertitoreimmagini">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="image"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Utilità</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('convertitoreimmagini', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
                             </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Cinema</span>
-                                <button class="fav-btn" onclick="toggleFavorite('esposizione', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
+                            <h3 class="card-title">Convertitore Immagini</h3>
+                            <p class="card-desc">Converti rapidamente formati grafici JPG, PNG, WebP e GIF con ottimizzazione visiva.</p>
                         </div>
-                        <h3 class="card-title">Esposimetro</h3>
-                        <p class="card-desc">Calcola il tempo di esposizione fotografica ottimale compensando filtri ND e astrofotografia.</p>
-                    </div>
-                </a>
+                    </a>
+
+                    <!-- Convertitore Universale -->
+                    <a href="convertitore.html" class="tool-card" data-category="utilita" data-tool-id="convertitore">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="arrow-left-right"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Utilità</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('convertitore', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Convertitore Universale</h3>
+                            <p class="card-desc">Converti lunghezze, pesi, temperature, valute e altro in tempo reale con calcolo immediato.</p>
+                        </div>
+                    </a>
+
+                    <!-- Esposimetro -->
+                    <a href="esposizione.html" class="tool-card" data-category="cinema" data-tool-id="esposizione">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="camera"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Cinema</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('esposizione', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Esposimetro</h3>
+                            <p class="card-desc">Calcola il tempo di esposizione fotografica ottimale compensando filtri ND e astrofotografia.</p>
+                        </div>
+                    </a>
+                    
+                    <!-- Aspect Ratio -->
+                    <a href="aspectratio.html" class="tool-card" data-category="cinema" data-tool-id="aspectratio">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="scan"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Cinema</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('aspectratio', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Aspect Ratio</h3>
+                            <p class="card-desc">Calcola l'Aspect Ratio con un anteprima visiva in tempo reale.</p>
+                        </div>
+                    </a>
+
+                    <!-- QR-CODE Generator -->
+                    <a href="qrcode.html" class="tool-card" data-category="utilita" data-tool-id="qrcode">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="qr-code"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Utilità</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('qrcode', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">QR-Code Generator</h3>
+                            <p class="card-desc">Genera codici QR personalizzati per link, testi, password Wi-Fi e biglietti da visita digitali.</p>
+                        </div>
+                    </a>
+
+                    <!-- Convertitore Colori -->
+                    <a href="convertitorecolori.html" class="tool-card" data-category="utilita" data-tool-id="convertitorecolori">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="palette"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Utilità</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('convertitorecolori', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Convertitore Colori</h3>
+                            <p class="card-desc">Conversione istantanea da codice HEX nei formati RGB, HSL e CMYK per grafica e sviluppo web.</p>
+                        </div>
+                    </a>
+
+                    <!-- Conteggio Parole -->
+                    <a href="contatoreparole.html" class="tool-card" data-category="svago" data-tool-id="contatoreparole">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="whole-word"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Svago</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('contatoreparole', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Conteggio Parole</h3>
+                            <p class="card-desc">Analisi del testo: conteggio parole, caratteri, stima tempo di lettura e densità keyword.</p>
+                        </div>
+                    </a>
+
+                    <!-- Test Digitazione -->
+                    <a href="testdigitazione.html" class="tool-card" data-category="svago" data-tool-id="testdigitazione">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="keyboard"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Svago</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('testdigitazione', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Test Digitazione</h3>
+                            <p class="card-desc">Metti alla prova velocità e accuratezza di digitazione con parole italiane casuali.</p>
+                        </div>
+                    </a>
+
+                    <!-- Distanza Fulmine -->
+                    <a href="distanzafulmine.html" class="tool-card" data-category="utilita" data-tool-id="distanzafulmine">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="cloud-lightning"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Utilità</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('distanzafulmine', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Distanza Fulmine</h3>
+                            <p class="card-desc">Stima la distanza esatta da un temporale misurando l'intervallo tra il lampo e il tuono.</p>
+                        </div>
+                    </a>
+
+                    <!-- Pomodoro Focus Timer -->
+                    <a href="pomodoro.html" class="tool-card" data-category="tempo" data-tool-id="pomodoro">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="timer"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Tempo</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('pomodoro', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Pomodoro Timer</h3>
+                            <p class="card-desc">25 minuti di lavoro e 5 di pausa con allarme audio per massimizzare la concentrazione.</p>
+                        </div>
+                    </a>
+
+                    <!-- Fusi Orari Globali -->
+                    <a href="timezone.html" class="tool-card" data-category="tempo" data-tool-id="timezone">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="globe"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Tempo</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('timezone', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Timezone - Fusi Orari</h3>
+                            <p class="card-desc">Convertitore visivo per monitorare l'orario simultaneo in tempo reale nelle città del mondo.</p>
+                        </div>
+                    </a>
+
+                    <!-- Film al Cinema -->
+                    <a href="cinema.html" class="tool-card" data-category="cinema" data-tool-id="cinema">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="clapperboard"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Cinema</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('cinema', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Film al Cinema</h3>
+                            <p class="card-desc">Sfoglia le pellicole in programmazione, guarda i trailer e individua le sale vicine.</p>
+                        </div>
+                    </a>
+
+                </div>
+            </section>
+			
+			
+			            <!-- PROGRAMMI FLAGSHIP -->
+            <section class="tools-section flagship-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <i data-lucide="sparkles" class="section-title-icon"></i>
+                        Flagship
+                    </h2>
+                    <span class="section-tag2">Flagship</span>
+                </div>
+                
+                <div class="tools-grid flagship-grid">
+					
 				
-				
-				 <!-- Aspect Ratio -->
-                <a href="aspectratio.html" class="tool-card" data-category="cinema" data-tool-id="aspectratio">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="scan"></i>
+					<!-- Spesa 2.0 -->
+                    <a href="spesa.html" class="tool-card flagship-card" data-category="finanza" data-tool-id="spesa">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="shopping-basket"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Finanza</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('spesa', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
                             </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Cinema</span>
-                                <button class="fav-btn" onclick="toggleFavorite('aspectratio', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
+                            <h3 class="card-title">Lista Spesa 2.0</h3>
+                            <p class="card-desc">Una lista della spesa smart ed interattiva per organizzare e coordinare i tuoi acquisti.</p>
                         </div>
-                        <h3 class="card-title">Aspect Ratio</h3>
-                        <p class="card-desc">Calcola l'Aspect Ratio con un anteprima in tempo reale.</p>
-                    </div>
-                </a>
+                    </a>
 
-                <!-- QR-CODE Generator -->
-                <a href="qrcode.html" class="tool-card" data-category="utilita" data-tool-id="qrcode">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="qr-code"></i>
+                    
+                    <!-- Cedolino+ -->
+                    <a href="cedolino.html" class="tool-card flagship-card" data-category="finanza" data-tool-id="cedolino">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="file-text"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Finanza</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('cedolino', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
                             </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Utilità</span>
-                                <button class="fav-btn" onclick="toggleFavorite('qrcode', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
+                            <h3 class="card-title">Cedolino+</h3>
+                            <p class="card-desc">Tieni traccia dei tuoi cedolini e visualizza il contenuto in modo semplice e chiaro.</p>
                         </div>
-                        <h3 class="card-title">QR-Code Generator</h3>
-                        <p class="card-desc">Genera codici QR personalizzati per link, testi, password Wi-Fi e biglietti da visita digitali.</p>
-                    </div>
-                </a>
+                    </a>
 
-                <!-- Convertitore Colori -->
-                <a href="convertitorecolori.html" class="tool-card" data-category="utilita" data-tool-id="convertitorecolori">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="palette"></i>
+                    
+                    <!-- Spotify Family Tracker -->
+                    <a href="spotify.html" class="tool-card flagship-card" data-category="finanza" data-tool-id="spotify">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <svg height="18px" width="18px" version="1.1" viewBox="0 0 168 168">
+                                        <path fill="currentColor" d="m83.996 0.277c-46.249 0-83.743 37.493-83.743 83.742 0 46.251 37.494 83.741 83.743 83.741 46.254 0 83.744-37.49 83.744-83.741 0-46.246-37.49-83.738-83.745-83.738l0.001-0.004zm38.404 120.78c-1.5 2.46-4.72 3.24-7.18 1.73-19.662-12.01-44.414-14.73-73.564-8.07-2.809 0.64-5.609-1.12-6.249-3.93-0.643-2.81 1.11-5.61 3.926-6.25 31.9-7.291 59.263-4.15 81.337 9.34 2.46 1.51 3.24 4.72 1.73 7.18zm10.25-22.805c-1.89 3.075-5.91 4.045-8.98 2.155-22.51-13.839-56.823-17.846-83.448-9.764-3.453 1.043-7.1-0.903-8.148-4.35-1.04-3.453 0.907-7.093 4.354-8.143 30.413-9.228 68.222-4.758 94.072 11.127 3.07 1.89 4.04 5.91 2.15 8.976v-0.001zm0.88-23.744c-26.99-16.031-71.52-17.505-97.289-9.684-4.138 1.255-8.514-1.081-9.768-5.219-1.254-4.14 1.08-8.513 5.221-9.771 29.581-8.98 78.756-7.245 109.83 11.202 3.73 2.209 4.95 7.016 2.74 10.733-2.2 3.722-7.02 4.949-10.73 2.739z"/>
+                                    </svg>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Finanza</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('spotify', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
                             </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Utilità</span>
-                                <button class="fav-btn" onclick="toggleFavorite('convertitorecolori', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
+                            <h3 class="card-title">Spotify Family Tracker</h3>
+                            <p class="card-desc">Storico dei pagamenti e gestione quote del piano Spotify Family.</p>
                         </div>
-                        <h3 class="card-title">Convertitore Colori</h3>
-                        <p class="card-desc">Conversione istantanea da codice HEX nei formati RGB, HSL e CMYK per grafica e sviluppo web.</p>
-                    </div>
-                </a>
+                    </a>
 
-                <!-- Conteggio Parole -->
-                <a href="contatoreparole.html" class="tool-card" data-category="svago" data-tool-id="contatoreparole">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="whole-word"></i>
+                    <!-- Spia (Gioco) -->
+                    <a href="spia.html" class="tool-card flagship-card" data-category="svago" data-tool-id="spia">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="swords"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Svago</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('spia', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
                             </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Svago</span>
-                                <button class="fav-btn" onclick="toggleFavorite('contatoreparole', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
+                            <h3 class="card-title">Il Gioco della Spia</h3>
+                            <p class="card-desc">Il gioco della spia semplice, veloce, personalizzabile e senza pubblicità!</p>
                         </div>
-                        <h3 class="card-title">Conteggio Parole</h3>
-                        <p class="card-desc">Non solo parole e caratteri, ma anche una stima del tempo di lettura, numero di sillabe e densità delle parole chiave.</p>
-                    </div>
-                </a>
+                    </a>
 
-                <!-- Test Digitazione -->
-                <a href="testdigitazione.html" class="tool-card" data-category="svago" data-tool-id="testdigitazione">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="keyboard"></i>
-                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Svago</span>
-                                <button class="fav-btn" onclick="toggleFavorite('testdigitazione', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Test Digitazione</h3>
-                        <p class="card-desc">Metti alla prova velocità e accuratezza di digitazione con parole italiane generate casualmente.</p>
-                    </div>
-                </a>
+                </div>
+            </section>
 
-                <!-- Distanza Fulmine -->
-                <a href="distanzafulmine.html" class="tool-card" data-category="utilita" data-tool-id="distanzafulmine">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="cloud-lightning"></i>
-                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Utilità</span>
-                                <button class="fav-btn" onclick="toggleFavorite('distanzafulmine', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Distanza Fulmine</h3>
-                        <p class="card-desc">Stima la distanza esatta da un temporale misurando l'intervallo tra il lampo e il tuono.</p>
-                    </div>
-                </a>
-				
-				
-				 <!-- Spia (Gioco) -->
-                <a href="spia.html" class="tool-card" data-category="svago" data-tool-id="spia">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="swords"></i>
-                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Svago</span>
-                                <button class="fav-btn" onclick="toggleFavorite('spia', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Il Gioco della Spia</h3>
-                        <p class="card-desc">Finalmente un Gioco della Spia semplice e veloce da personalizzare e soprattutto senza pubblicità!</p>
-                    </div>
-                </a>
-
-                <!-- Pomodoro Focus Timer -->
-                <a href="pomodoro.html" class="tool-card" data-category="tempo" data-tool-id="pomodoro">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="timer"></i>
-                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Tempo</span>
-                                <button class="fav-btn" onclick="toggleFavorite('pomodoro', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Pomodoro Timer</h3>
-                        <p class="card-desc">25 minuti di lavoro e 5 di pausa con allarme audio per massimizzare la concentrazione.</p>
-                    </div>
-                </a>
-
-                <!-- Fusi Orari Globali -->
-                <a href="timezone.html" class="tool-card" data-category="tempo" data-tool-id="timezone">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="globe"></i>
-                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Tempo</span>
-                                <button class="fav-btn" onclick="toggleFavorite('timezone', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Timezone - Fusi Orari</h3>
-                        <p class="card-desc">Convertitore visivo per monitorare l'orario simultaneo in tempo reale nelle città del mondo.</p>
-                    </div>
-                </a>
-
-                <!-- Film al Cinema -->
-                <a href="cinema.html" class="tool-card" data-category="cinema" data-tool-id="cinema">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="clapperboard"></i>
-                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Cinema</span>
-                                <button class="fav-btn" onclick="toggleFavorite('cinema', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Film al Cinema</h3>
-                        <p class="card-desc">Sfoglia le pellicole in programmazione, guarda i trailer e individua le sale cinematografiche vicine.</p>
-                    </div>
-                </a>
-				
-				
-				<!-- Spotify Family Tracker -->
-                <a href="spotify.html" class="tool-card" data-category="finanza" data-tool-id="spotify">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-<svg height="50px" width="50px" version="1.1" viewBox="0 0 168 168">
- <path fill="#1ED760" d="m83.996 0.277c-46.249 0-83.743 37.493-83.743 83.742 0 46.251 37.494 83.741 83.743 83.741 46.254 0 83.744-37.49 83.744-83.741 0-46.246-37.49-83.738-83.745-83.738l0.001-0.004zm38.404 120.78c-1.5 2.46-4.72 3.24-7.18 1.73-19.662-12.01-44.414-14.73-73.564-8.07-2.809 0.64-5.609-1.12-6.249-3.93-0.643-2.81 1.11-5.61 3.926-6.25 31.9-7.291 59.263-4.15 81.337 9.34 2.46 1.51 3.24 4.72 1.73 7.18zm10.25-22.805c-1.89 3.075-5.91 4.045-8.98 2.155-22.51-13.839-56.823-17.846-83.448-9.764-3.453 1.043-7.1-0.903-8.148-4.35-1.04-3.453 0.907-7.093 4.354-8.143 30.413-9.228 68.222-4.758 94.072 11.127 3.07 1.89 4.04 5.91 2.15 8.976v-0.001zm0.88-23.744c-26.99-16.031-71.52-17.505-97.289-9.684-4.138 1.255-8.514-1.081-9.768-5.219-1.254-4.14 1.08-8.513 5.221-9.771 29.581-8.98 78.756-7.245 109.83 11.202 3.73 2.209 4.95 7.016 2.74 10.733-2.2 3.722-7.02 4.949-10.73 2.739z"/>
-</svg>                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Finanza</span>
-                                <button class="fav-btn" onclick="toggleFavorite('spotify', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Spotify Family Tracker</h3>
-                        <p class="card-desc">Storico dei pagamenti del piano Spotify Family</p>
-                    </div>
-                </a>
-				
-				
-				<!-- Cedolino+ -->
-                <a href="cedolino.html" class="tool-card" data-category="finanza" data-tool-id="cedolino">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="file-text"></i>
-                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Finanza</span>
-                                <button class="fav-btn" onclick="toggleFavorite('cedolino', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Cedolino+</h3>
-                        <p class="card-desc">Tieni traccia dei tuoi cedolini e visualizza il contenuto in modo semplice e chiaro.</p>
-                    </div>
-                </a>
-				
-				
-				<!-- Spesa 2.0 -->
-                <a href="spesa.html" class="tool-card" data-category="finanza" data-tool-id="spesa">
-                    <div class="card-glass-glow"></div>
-                    <div class="card-inner">
-                        <div class="card-header-top-row">
-                            <div class="card-icon-box">
-                                <i data-lucide="shopping-basket"></i>
-                            </div>
-                            <div class="card-header-right-group">
-                                <span class="category-badge">Finanza</span>
-                                <button class="fav-btn" onclick="toggleFavorite('spesa', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
-                            </div>
-                        </div>
-                        <h3 class="card-title">Lista Spesa 2.0</h3>
-                        <p class="card-desc">Una lista della spesa smart</p>
-                    </div>
-                </a>
-
-            </div>
         </main>
 
         <!-- Drawer Laterale dei Preferiti -->

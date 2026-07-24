@@ -316,8 +316,72 @@ body {
 
 .main-content {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
 }
 
+/* --- SEZIONI --- */
+.tools-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px;
+}
+
+.section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    letter-spacing: -0.01em;
+}
+
+.section-title-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--text-secondary);
+}
+
+.flagship-section .section-title-icon {
+    color: #FFC400;
+}
+
+.section-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(255, 196, 0, 0.12);
+    color: #FFC400;
+    border: 1px solid rgba(255, 196, 0, 0.25);
+}
+
+.section-tag2 {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(139, 92, 246, 0.12);
+    color: #8B5CF6;
+    border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+/* --- GRIGLIA --- */
 .tools-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -325,7 +389,7 @@ body {
     perspective: 1000px;
 }
 
-/* La card è ora un tag <a> nativo cliccabile */
+/* La card è un tag <a> nativo cliccabile */
 .tool-card {
     position: relative;
     background: var(--card-bg);
@@ -340,6 +404,23 @@ body {
     text-decoration: none;
     color: inherit;
     cursor: pointer;
+}
+
+/* Card in evidenza / Flagship */
+.tool-card.flagship-card {
+    background: linear-gradient(145deg, #161D2E 0%, #111625 100%);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.tool-card.flagship-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cat-color, #FFC400), transparent);
+    opacity: 0.8;
 }
 
 .card-glass-glow {
@@ -365,7 +446,7 @@ body {
 .card-inner {
     position: relative;
     z-index: 2;
-    padding: 14px 16px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -430,7 +511,7 @@ body {
 }
 
 .card-title {
-    font-size: 14px;
+    font-size: 14.5px;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.01em;
@@ -444,7 +525,7 @@ body {
     margin-bottom: 2px;
 }
 
-/* Pulsante preferiti con z-index alto per intercettare il click senza aprire la card */
+/* Pulsante preferiti */
 .fav-btn {
     position: relative;
     z-index: 10;
@@ -496,12 +577,12 @@ body {
 
 .no-results-box {
     display: none;
-    grid-column: 1 / -1;
     text-align: center;
     padding: 50px 20px;
     background: var(--card-bg);
     border: 1px dashed var(--border-subtle);
     border-radius: 16px;
+    margin-top: 10px;
 }
 
 .no-results-icon {
@@ -680,6 +761,7 @@ body {
     opacity: 0.4;
 }
 
+/* RESPONSIVE DESIGN */
 @media (max-width: 1200px) {
     .tools-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
