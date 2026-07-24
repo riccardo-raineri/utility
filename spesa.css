@@ -1,5 +1,5 @@
 /* ============================================================================
-   LISTA DELLA SPESA 2.0 - Scontrino Termico Rapido
+   LISTA DELLA SPESA 2.0 - Stile Scontrino
    ============================================================================ */
 
 :root {
@@ -141,37 +141,71 @@ input:focus, select:focus { outline: none; border-color: var(--accento); box-sha
 .suggerimento-swipe { display: none; font-size: 11px; color: var(--testo-attenuato); text-align: center; margin-bottom: 10px; font-family: var(--font-mono); }
 @media (pointer: coarse) { .suggerimento-swipe { display: block; } }
 
-/* ---------- Lista Spesa per Categoria ---------- */
-.categoria-blocco { margin-bottom: 16px; }
+/* ---------- EFFETTO SCONTRINO (LISTA DELLA SPESA) ---------- */
+.lista-scontrino {
+  background: var(--bg-elevata);
+  padding: 24px 20px;
+  margin: 40px 0;
+  position: relative;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.25));
+  font-family: var(--font-mono);
+  color: var(--testo);
+}
+.lista-scontrino::before {
+  content: ""; position: absolute; top: -12px; left: 0; right: 0; height: 12px;
+  background-image: linear-gradient(135deg, transparent 50%, var(--bg-elevata) 50%), linear-gradient(45deg, transparent 50%, var(--bg-elevata) 50%);
+  background-size: 16px 12px; background-repeat: repeat-x;
+}
+.lista-scontrino::after {
+  content: ""; position: absolute; bottom: -12px; left: 0; right: 0; height: 12px;
+  background-image: linear-gradient(135deg, var(--bg-elevata) 50%, transparent 50%), linear-gradient(45deg, var(--bg-elevata) 50%, transparent 50%);
+  background-size: 16px 12px; background-repeat: repeat-x;
+}
+.lista-header {
+  text-align: center; border-bottom: 2px dashed var(--bordo); padding-bottom: 16px; margin-bottom: 16px;
+}
+.lista-header h2 {
+  margin: 0 0 4px; font-family: var(--font-display); font-size: 20px; color: var(--testo); text-transform: uppercase; letter-spacing: 2px;
+}
+.lista-header div { font-size: 12px; color: var(--testo-attenuato); }
+.lista-footer {
+  margin-top: 16px; padding-top: 16px; border-top: 2px dashed var(--bordo); text-align: center;
+}
+.totale-riga {
+  display: flex; justify-content: space-between; font-size: 18px; font-weight: 700; color: var(--testo); margin-bottom: 16px;
+}
+.barcode {
+  font-family: monospace; font-size: 28px; letter-spacing: 2px; color: var(--testo-attenuato); opacity: 0.5; user-select: none; line-height: 1;
+}
+.barcode-numeri {
+  font-size: 11px; color: var(--testo-attenuato); letter-spacing: 4px; margin-top: 4px; opacity: 0.6;
+}
+
+/* ---------- Righe Prodotto (Stile Scontrino) ---------- */
+.categoria-blocco { margin-bottom: 0; }
 .categoria-titolo { display: flex; align-items: center; gap: 8px; font-family: var(--font-display); font-size: 12px; color: var(--accento); text-transform: uppercase; letter-spacing: 0.08em; margin: 16px 0 8px; padding-left: 4px; }
-.prodotto-riga-wrapper { position: relative; overflow: hidden; border-radius: var(--radius-sm); margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.prodotto-riga-wrapper { position: relative; overflow: hidden; margin-bottom: 0; box-shadow: none; }
 .swipe-azione { position: absolute; top: 0; bottom: 0; width: 80px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #fff; font-weight: bold; }
 .swipe-destra { left: 0; background: var(--verde); }
 .swipe-sinistra { right: 0; background: var(--rosso); }
 
-.prodotto-riga { display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: 12px; padding: 12px 14px; background: var(--bg-card); border: 1px solid var(--bordo); border-radius: var(--radius-sm); position: relative; touch-action: pan-y; transition: border-color .2s; }
-.prodotto-riga:hover { border-color: var(--testo-attenuato); }
+.prodotto-riga {
+  display: grid; grid-template-columns: auto 1fr auto auto auto; align-items: center; gap: 10px;
+  padding: 12px 4px; background: transparent; border: none; border-bottom: 1px dashed var(--bordo); border-radius: 0;
+  position: relative; touch-action: pan-y; transition: opacity .2s;
+}
+/* Rimuovi la linea tratteggiata per l'ultimo elemento di ogni categoria */
+.categoria-blocco:last-child .prodotto-riga-wrapper:last-child .prodotto-riga { border-bottom: none; }
+
 .prodotto-riga input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accento); cursor: pointer; }
-.prodotto-riga.spuntato { opacity: 0.45; background: var(--bg-elevata); }
+.prodotto-riga.spuntato { opacity: 0.4; background: transparent; }
 .prodotto-riga.spuntato .prodotto-nome { text-decoration: line-through; }
-.prodotto-nome { font-weight: 600; font-size: 14px; }
-.prodotto-dettaglio { font-family: var(--font-mono); font-size: 11px; color: var(--testo-attenuato); margin-top: 2px; }
+.prodotto-nome { font-weight: 600; font-size: 14px; font-family: var(--font-mono); }
+.prodotto-dettaglio { font-family: var(--font-mono); font-size: 11px; color: var(--testo-attenuato); margin-top: 4px; }
 .prodotto-prezzo { font-family: var(--font-mono); font-weight: 600; font-size: 14px; text-align: right; }
 .riga-elimina, .riga-modifica { background: none; border: none; color: var(--testo-attenuato); cursor: pointer; font-size: 16px; padding: 6px; border-radius: 6px; transition: all .15s; }
-.riga-modifica:hover { color: var(--accento); background: var(--bg-elevata); }
-.riga-elimina:hover { color: var(--rosso); background: var(--bg-elevata); }
-
-/* ---------- Scontrino Fiscale ---------- */
-.scontrino { background: var(--bg-elevata); border: 1px dashed var(--accento); border-radius: var(--radius) var(--radius) 0 0; padding: 20px; font-family: var(--font-mono); position: relative; margin-top: 24px; box-shadow: 0 -10px 30px rgba(0,0,0,0.2); }
-.scontrino::before { content: "★ TICKET FISCALE SPESA 2.0 ★"; display: block; text-align: center; font-size: 10px; letter-spacing: 2px; color: var(--accento); margin-bottom: 12px; opacity: 0.8; border-bottom: 1px dashed var(--bordo); padding-bottom: 8px; }
-.scontrino::after { content: ""; position: absolute; left: 0; right: 0; bottom: -12px; height: 12px; background-image: linear-gradient(135deg, var(--bg) 50%, transparent 50%), linear-gradient(45deg, var(--bg) 50%, transparent 50%); background-size: 16px 16px; background-position: bottom left, bottom left; background-repeat: repeat-x; }
-.scontrino-riga { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px dashed var(--bordo); font-size: 13px; }
-.scontrino-riga:first-of-type { border-top: none; }
-.scontrino-totale { font-size: 18px; font-weight: 600; color: var(--accento); margin-top: 6px; padding-top: 8px; border-top: 2px solid var(--accento) !important; }
-.scontrino-sub { font-size: 11px; color: var(--testo-attenuato); border-top: none; padding-top: 2px; }
-.barcode-container { text-align: center; margin: 16px 0 8px; letter-spacing: 3px; font-size: 18px; color: var(--testo-attenuato); opacity: 0.6; font-family: monospace; user-select: none; }
-.scontrino-azioni { display: flex; gap: 12px; margin-top: 16px; }
-.scontrino-azioni .btn { flex: 1; }
+.riga-modifica:hover { color: var(--accento); background: var(--bg-card); }
+.riga-elimina:hover { color: var(--rosso); background: var(--bg-card); }
 
 /* ---------- Toast di Notifica ---------- */
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--bg-elevata); border: 1px solid var(--accento); color: var(--testo); padding: 12px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,0.3); opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s ease; z-index: 1000; display: flex; align-items: center; gap: 8px; }

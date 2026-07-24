@@ -1,5 +1,5 @@
 /* ============================================================================
-   LISTA DELLA SPESA 2.0 - Frontend Rapido
+   LISTA DELLA SPESA 2.0 - Stile Scontrino (Frontend)
    ============================================================================ */
 const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbxmtXY1qGdTLYOo-vElncFxXg2FtGxYIhrmOdQQsJpBt44FUSYwILZtIGvRUN0UUD0y/exec';
 
@@ -73,14 +73,19 @@ document.addEventListener('DOMContentLoaded', function () {
   popolaSelectCategorie();
   collegaEventi();
   caricaDati();
+  
+  // Imposta data e ora nello scontrino
+  const elData = document.getElementById('data-scontrino');
+  if (elData) {
+    const oggi = new Date();
+    elData.textContent = oggi.toLocaleDateString('it-IT') + ' - ' + oggi.toLocaleTimeString('it-IT', {hour: '2-digit', minute:'2-digit'});
+  }
 });
 
 function collegaEventi() {
   document.getElementById('theme-toggle').addEventListener('click', cambiaTema);
   document.getElementById('btn-aggiungi').addEventListener('click', aggiungiProdottoALista);
   document.getElementById('btn-annulla-modifica').addEventListener('click', annullaModifica);
-  document.getElementById('btn-registra').addEventListener('click', registraSpesaOdierna);
-  document.getElementById('btn-svuota').addEventListener('click', svuotaListaCorrente);
 
   document.getElementById('input-prodotto').addEventListener('input', aggiornaAnteprimaProdotto);
   document.getElementById('input-peso').addEventListener('input', aggiornaAnteprimaProdotto);
@@ -429,6 +434,7 @@ function renderListaSpesa() {
   if (filtroRicerca && contenitore.innerHTML === '') {
     contenitore.innerHTML = '<p class="hint">Nessun prodotto trovato per "' + filtroRicerca + '"</p>';
   }
+  
   aggiornaScontrino();
 }
 
@@ -531,32 +537,9 @@ async function eliminaDaLista(indice) {
 function aggiornaScontrino() {
   const spuntati = stato.lista.filter(function (i) { return i.spuntato; });
   const totale = spuntati.reduce(function (somma, i) { return somma + Number(i.prezzo); }, 0);
-  document.getElementById('totale-carrello').textContent = '€ ' + totale.toFixed(2);
-  document.getElementById('conteggio-spuntati').textContent = spuntati.length + ' di ' + stato.lista.length + ' prodotti nel carrello';
-}
-
-async function svuotaListaCorrente() {
-  if (stato.lista.length === 0) return;
-  if (!confirm('Svuotare tutta la lista della spesa corrente?')) return;
-  try {
-    const json = await chiamaBackend('svuotaLista');
-    stato.lista = json.lista;
-    renderListaSpesa();
-    mostraToast('Lista svuotata');
-  } catch (err) { mostraToast('Errore: ' + err.message); }
-}
-
-async function registraSpesaOdierna() {
-  const spuntati = stato.lista.filter(function (i) { return i.spuntato; });
-  if (spuntati.length === 0) { mostraToast('Spunta almeno un prodotto prima di registrare la spesa'); return; }
-  if (!confirm('Registrare ' + spuntati.length + ' prodotti nello storico prezzi e svuotare la lista?')) return;
-
-  try {
-    const json = await chiamaBackend('registraSpesa', { data: JSON.stringify(spuntati) });
-    stato.prodotti = json.prodotti; stato.rilevazioni = json.rilevazioni; stato.lista = json.lista; stato.ordini = json.ordini || stato.ordini;
-    renderTutto();
-    mostraToast('Spesa registrata nello storico');
-  } catch (err) { mostraToast('Errore: ' + err.message); }
+  
+  const elTotale = document.getElementById('totale-carrello');
+  if (elTotale) elTotale.textContent = '€ ' + totale.toFixed(2);
 }
 
 /* ----------------------------------------------------------------------- *

@@ -138,21 +138,22 @@
 
     <p class="hint suggerimento-swipe">&#128161; Sei da mobile?: scorri a destra per spuntare, a sinistra per rimuovere.</p>
 
-    <div id="lista-categorie"></div>
-
-    <div class="scontrino" id="scontrino">
-      <div class="scontrino-riga scontrino-sub">
-        <span id="conteggio-spuntati">0 prodotti spuntati</span>
-        <span>CASSA 01</span>
+    <!-- EFFETTO SCONTRINO - Avvolge l'intera lista -->
+    <div class="lista-scontrino">
+      <div class="lista-header">
+        <h2>Spesa 2.0</h2>
+        <div id="data-scontrino">--/--/---- --:--</div>
       </div>
-      <div class="scontrino-riga scontrino-totale">
-        <span>TOTALE CARRELLO</span>
-        <span id="totale-carrello">&euro; 0,00</span>
-      </div>
-      <div class="barcode-container">||| | ||| || || | || || |</div>
-      <div class="scontrino-azioni">
-        <button id="btn-svuota" class="btn btn-ghost">Svuota lista</button>
-        <button id="btn-registra" class="btn btn-primary">Registra spesa oggi</button>
+      
+      <div id="lista-categorie"></div>
+      
+      <div class="lista-footer">
+        <div class="totale-riga">
+          <span>TOTALE CARRELLO</span>
+          <span id="totale-carrello">&euro; 0,00</span>
+        </div>
+        <div class="barcode">||| | ||| || || | || || |</div>
+        <div class="barcode-numeri">0019 4820 5928</div>
       </div>
     </div>
 
