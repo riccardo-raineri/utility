@@ -65,7 +65,7 @@ body {
 }
 
 /* ---------------------------------------------------------------------
-   Contenitore e intestazione
+   Contenitore e Intestazione
    --------------------------------------------------------------------- */
 
 .page {
@@ -134,7 +134,7 @@ body {
 }
 
 /* ---------------------------------------------------------------------
-   Switch tema
+   Switch Tema
    --------------------------------------------------------------------- */
 
 .theme-toggle {
@@ -157,7 +157,7 @@ body {
 }
 
 /* ---------------------------------------------------------------------
-   Pannello di ricerca
+   Pannello di Ricerca
    --------------------------------------------------------------------- */
 
 .panel {
@@ -332,6 +332,56 @@ button:focus-visible {
 }
 
 /* ---------------------------------------------------------------------
+   Loghi Marca & Bottone Navigazione
+   --------------------------------------------------------------------- */
+
+.brand-box {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+.brand-img {
+  max-width: 82%;
+  max-height: 82%;
+  object-fit: contain;
+}
+.brand-fallback {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #1a1f27;
+  letter-spacing: -0.02em;
+}
+
+.btn-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.btn-nav:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #08201a;
+}
+
+/* ---------------------------------------------------------------------
    Mappa
    --------------------------------------------------------------------- */
 
@@ -364,21 +414,26 @@ button:focus-visible {
   font-size: 0.85rem;
   line-height: 1.4;
 }
+.popup-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
 .popup-title {
   font-weight: 700;
   font-size: 0.95rem;
-  margin-bottom: 4px;
 }
 .popup-price {
   font-family: "IBM Plex Mono", monospace;
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--amber);
-  margin-top: 6px;
+  margin: 6px 0;
 }
 
 /* ---------------------------------------------------------------------
-   Stato caricamento / errore
+   Stato Caricamento / Errore
    --------------------------------------------------------------------- */
 
 .state-message {
@@ -421,6 +476,12 @@ button:focus-visible {
   gap: 20px;
   flex-wrap: wrap;
 }
+.best-result-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
 .best-result .label {
   font-size: 0.72rem;
   text-transform: uppercase;
@@ -439,11 +500,17 @@ button:focus-visible {
 .best-result .station-meta {
   color: var(--muted);
   font-size: 0.85rem;
-  margin-top: 4px;
+  margin-top: 6px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
+}
+.best-result .price-box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
 }
 .best-result .price-display {
   font-size: 2.6rem;
@@ -477,7 +544,7 @@ button:focus-visible {
 
 .result-row {
   display: grid;
-  grid-template-columns: 32px 1fr auto;
+  grid-template-columns: 24px 36px 1fr auto;
   align-items: center;
   gap: 14px;
   background: var(--panel);
@@ -489,6 +556,7 @@ button:focus-visible {
   color: var(--muted);
   font-size: 0.85rem;
   text-align: center;
+  font-weight: 500;
 }
 .result-row .name {
   font-weight: 600;
@@ -497,7 +565,7 @@ button:focus-visible {
 .result-row .meta {
   color: var(--muted);
   font-size: 0.8rem;
-  margin-top: 2px;
+  margin-top: 3px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -505,6 +573,10 @@ button:focus-visible {
 }
 .result-row .price-col {
   text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 }
 .result-row .price {
   font-size: 1.15rem;
@@ -513,7 +585,6 @@ button:focus-visible {
 .result-row .delta {
   display: block;
   font-size: 0.74rem;
-  margin-top: 2px;
 }
 .badge-self {
   display: inline-block;
@@ -546,7 +617,9 @@ button:focus-visible {
   .search-fields { grid-template-columns: 1fr; }
   .search-fields.geo { grid-template-columns: 1fr; }
   .best-result { flex-direction: column; align-items: flex-start; }
+  .best-result .price-box { align-items: flex-start; margin-top: 8px; }
   .best-result .price-display { font-size: 2.1rem; }
-  .result-row { grid-template-columns: 24px 1fr auto; padding: 10px 12px; }
+  .result-row { grid-template-columns: 20px 36px 1fr; gap: 10px; padding: 12px; }
+  .result-row .price-col { grid-column: 3; align-items: flex-start; margin-top: 4px; }
   #map { height: 280px; }
 }

@@ -25,7 +25,64 @@ const stato = {
 };
 
 // -------------------------------------------------------------------------
-// Utility
+// Helper Marchi / Loghi e Navigazione
+// -------------------------------------------------------------------------
+
+function getBrandLogoHtml(bandiera) {
+  const nomeMarca = (bandiera || "Pompe Bianche").trim();
+  const bUpper = nomeMarca.toUpperCase();
+  
+  let logoUrl = null;
+  if (bUpper.includes("ENI") || bUpper.includes("AGIP")) {
+    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/e/e6/Eni_Logo.svg";
+  } else if (bUpper.includes("Q8") || bUpper.includes("KUWAIT")) {
+    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/d/d3/Q8_logo.svg";
+  } else if (bUpper.includes("ESSO")) {
+    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/0/03/Esso-logo.svg";
+  } else if (bUpper.includes("IP") || bUpper.includes("ITALIANA PETROLI")) {
+    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/3/30/Italiana_Petroli_logo.svg";
+  } else if (bUpper.includes("TAMOIL")) {
+    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/a/a2/Tamoil_logo.svg";
+  } else if (bUpper.includes("REPSOL")) {
+    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/0/0f/Repsol_logo.svg";
+  } else if (bUpper.includes("BEYFIN")) {
+    logoUrl = "https://upload.wikimedia.org/wikipedia/it/1/12/Logo_Beyfin.png";
+  } else if (bUpper.includes("ENERCOOP") || bUpper.includes("COOP")) {
+    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/1/13/Coop_logo.svg";
+  } else if (bUpper.includes("COSTANTIN")) {
+    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Costantin_Logo.png/320px-Costantin_Logo.png";
+  }
+
+  // Genera iniziali per il fallback se il logo fallisce o non esiste
+  const parole = nomeMarca.split(" ").filter(Boolean);
+  const iniziali = parole.length >= 2 
+    ? (parole[0][0] + parole[1][0]).toUpperCase()
+    : nomeMarca.substring(0, 2).toUpperCase();
+
+  if (logoUrl) {
+    return `
+      <div class="brand-box" title="${escapeHTML(nomeMarca)}">
+        <img src="${logoUrl}" class="brand-img" alt="${escapeHTML(nomeMarca)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" />
+        <span class="brand-fallback" style="display:none;">${escapeHTML(iniziali)}</span>
+      </div>`;
+  }
+
+  return `
+    <div class="brand-box" title="${escapeHTML(nomeMarca)}">
+      <span class="brand-fallback">${escapeHTML(iniziali)}</span>
+    </div>`;
+}
+
+function getNavUrl(imp) {
+  if (imp.lat && imp.lon) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${imp.lat},${imp.lon}`;
+  }
+  const indirizzoCompleto = `${imp.indirizzo}, ${imp.comune} ${imp.provincia}`;
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(indirizzoCompleto)}`;
+}
+
+// -------------------------------------------------------------------------
+// Utility Generali
 // -------------------------------------------------------------------------
 
 function slugRegione(nome) {
@@ -71,7 +128,7 @@ async function caricaRegione(nomeRegione) {
 }
 
 // -------------------------------------------------------------------------
-// Avvio pagina
+// Avvio Pagina
 // -------------------------------------------------------------------------
 
 async function avvia() {
@@ -159,7 +216,6 @@ function mostraStatoIniziale() {
 
 function inizializzaMappa() {
   if (typeof L === "undefined") return;
-  // Centro iniziale sull'Italia
   stato.map = L.map('map').setView([41.9028, 12.4964], 6);
   stato.markersGroup = L.layerGroup().addTo(stato.map);
 }
@@ -206,10 +262,20 @@ function aggiornaMappa(elenco) {
 
     const marker = L.marker([lat, lon]);
     const popupContent = `
-      <div class="popup-title">${escapeHTML(imp.bandiera)} · ${escapeHTML(imp.nome)}</div>
+      <div class="popup-header">
+        ${getBrandLogoHtml(imp.bandiera)}
+        <div>
+          <div class="popup-title">${escapeHTML(imp.bandiera)} · ${escapeHTML(imp.nome)}</div>
+          <div style="font-size: 0.78rem; opacity:0.8;">${imp.prezzoInfo.self ? "Self-Service" : "Servito"}</div>
+        </div>
+      </div>
       <div>${escapeHTML(imp.indirizzo)}, ${escapeHTML(imp.comune)}</div>
-      <div style="margin-top:4px; font-size: 0.78rem; opacity:0.8;">${imp.prezzoInfo.self ? "Self-Service" : "Servito"}</div>
       <div class="popup-price">€ ${formattaPrezzo(imp.prezzoInfo.prezzo)}/l</div>
+      <div style="margin-top: 8px;">
+        <a href="${getNavUrl(imp)}" target="_blank" rel="noopener" class="btn-nav">
+          <i data-lucide="navigation"></i> Naviga
+        </a>
+      </div>
     `;
     marker.bindPopup(popupContent);
     stato.markersGroup.addLayer(marker);
@@ -534,7 +600,10 @@ function renderMiglioreRisultato(imp) {
     <div class="best-result">
       <div>
         <div class="label"><i data-lucide="award"></i> Prezzo più basso trovato</div>
-        <div class="station-name">${escapeHTML(imp.bandiera)} · ${escapeHTML(imp.nome)}</div>
+        <div class="best-result-header">
+          ${getBrandLogoHtml(imp.bandiera)}
+          <div class="station-name">${escapeHTML(imp.bandiera)} · ${escapeHTML(imp.nome)}</div>
+        </div>
         <div class="station-meta">
           <i data-lucide="map-pin"></i> ${escapeHTML(imp.indirizzo)}, ${escapeHTML(imp.comune)} (${imp.provincia})
           ${imp.distanzaKm !== undefined ? ` · <i data-lucide="navigation"></i> ${imp.distanzaKm.toFixed(1)} km` : ""}
@@ -542,7 +611,12 @@ function renderMiglioreRisultato(imp) {
         </div>
         ${renderDelta(imp)}
       </div>
-      <div class="price-display">${formattaPrezzo(imp.prezzoInfo.prezzo)}<span class="unit">€/l</span></div>
+      <div class="price-box">
+        <div class="price-display">${formattaPrezzo(imp.prezzoInfo.prezzo)}<span class="unit">€/l</span></div>
+        <a href="${getNavUrl(imp)}" target="_blank" rel="noopener" class="btn-nav">
+          <i data-lucide="navigation"></i> Naviga
+        </a>
+      </div>
     </div>`;
 }
 
@@ -550,6 +624,7 @@ function renderRigaRisultato(imp, posizione) {
   return `
     <div class="result-row">
       <div class="rank">${posizione}</div>
+      ${getBrandLogoHtml(imp.bandiera)}
       <div>
         <div class="name">${escapeHTML(imp.bandiera)} · ${escapeHTML(imp.nome)}</div>
         <div class="meta">
@@ -561,6 +636,9 @@ function renderRigaRisultato(imp, posizione) {
       <div class="price-col">
         <span class="price num">${formattaPrezzo(imp.prezzoInfo.prezzo)} €</span>
         ${renderDelta(imp)}
+        <a href="${getNavUrl(imp)}" target="_blank" rel="noopener" class="btn-nav" style="margin-top:2px;">
+          <i data-lucide="navigation"></i> Naviga
+        </a>
       </div>
     </div>`;
 }
