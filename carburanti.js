@@ -18,59 +18,57 @@ const stato = {
   filtroSelf: "tutti",         // "tutti" | "self" | "servito"
   ordinamento: "prezzo",       // "prezzo" | "distanza"
 
-  // Mappa Leaflet
+  // Mappa Leaflet & Tile Layers
   map: null,
   markersGroup: null,
-  tileLayer: null
+  baseLayers: {},
+  currentBaseLayerName: "Scuro"
 };
 
 // -------------------------------------------------------------------------
-// Helper Marchi / Loghi e Navigazione
+// Helper Brand Box & Navigazione
 // -------------------------------------------------------------------------
 
 function getBrandLogoHtml(bandiera) {
   const nomeMarca = (bandiera || "Pompe Bianche").trim();
   const bUpper = nomeMarca.toUpperCase();
   
-  let logoUrl = null;
+  let classeBrand = "brand-default";
+  let etichetta = nomeMarca.substring(0, 3).toUpperCase();
+
   if (bUpper.includes("ENI") || bUpper.includes("AGIP")) {
-    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/e/e6/Eni_Logo.svg";
+    classeBrand = "brand-eni";
+    etichetta = "eni";
   } else if (bUpper.includes("Q8") || bUpper.includes("KUWAIT")) {
-    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/d/d3/Q8_logo.svg";
+    classeBrand = "brand-q8";
+    etichetta = "Q8";
   } else if (bUpper.includes("ESSO")) {
-    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/0/03/Esso-logo.svg";
+    classeBrand = "brand-esso";
+    etichetta = "Esso";
   } else if (bUpper.includes("IP") || bUpper.includes("ITALIANA PETROLI")) {
-    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/3/30/Italiana_Petroli_logo.svg";
+    classeBrand = "brand-ip";
+    etichetta = "IP";
   } else if (bUpper.includes("TAMOIL")) {
-    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/a/a2/Tamoil_logo.svg";
-  } else if (bUpper.includes("REPSOL")) {
-    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/0/0f/Repsol_logo.svg";
-  } else if (bUpper.includes("BEYFIN")) {
-    logoUrl = "https://upload.wikimedia.org/wikipedia/it/1/12/Logo_Beyfin.png";
+    classeBrand = "brand-tamoil";
+    etichetta = "Tamoil";
   } else if (bUpper.includes("ENERCOOP") || bUpper.includes("COOP")) {
-    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/1/13/Coop_logo.svg";
-  } else if (bUpper.includes("COSTANTIN")) {
-    logoUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Costantin_Logo.png/320px-Costantin_Logo.png";
+    classeBrand = "brand-coop";
+    etichetta = "Coop";
+  } else if (bUpper.includes("BEYFIN")) {
+    classeBrand = "brand-beyfin";
+    etichetta = "Beyfin";
+  } else if (bUpper.includes("REPSOL")) {
+    classeBrand = "brand-repsol";
+    etichetta = "Repsol";
+  } else {
+    // Genera 2 iniziali per distributori indipendenti o minori
+    const parole = nomeMarca.split(" ").filter(Boolean);
+    etichetta = parole.length >= 2 
+      ? (parole[0][0] + parole[1][0]).toUpperCase()
+      : nomeMarca.substring(0, 2).toUpperCase();
   }
 
-  // Genera iniziali per il fallback se il logo fallisce o non esiste
-  const parole = nomeMarca.split(" ").filter(Boolean);
-  const iniziali = parole.length >= 2 
-    ? (parole[0][0] + parole[1][0]).toUpperCase()
-    : nomeMarca.substring(0, 2).toUpperCase();
-
-  if (logoUrl) {
-    return `
-      <div class="brand-box" title="${escapeHTML(nomeMarca)}">
-        <img src="${logoUrl}" class="brand-img" alt="${escapeHTML(nomeMarca)}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';" />
-        <span class="brand-fallback" style="display:none;">${escapeHTML(iniziali)}</span>
-      </div>`;
-  }
-
-  return `
-    <div class="brand-box" title="${escapeHTML(nomeMarca)}">
-      <span class="brand-fallback">${escapeHTML(iniziali)}</span>
-    </div>`;
+  return `<div class="brand-box ${classeBrand}" title="${escapeHTML(nomeMarca)}">${escapeHTML(etichetta)}</div>`;
 }
 
 function getNavUrl(imp) {
@@ -211,30 +209,42 @@ function mostraStatoIniziale() {
 }
 
 // -------------------------------------------------------------------------
-// Gestione Mappa (Leaflet.js)
+// Gestione Mappa (Leaflet.js) + Stili + Satellite
 // -------------------------------------------------------------------------
 
 function inizializzaMappa() {
   if (typeof L === "undefined") return;
+
+  // Inizializza Mappa
   stato.map = L.map('map').setView([41.9028, 12.4964], 6);
+
+  // Definizione Stili Mappa
+  stato.baseLayers = {
+    "🌙 Scuro": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap &copy; CARTO'
+    }),
+    "☀️ Chiaro": L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap &copy; CARTO'
+    }),
+    "🗺️ Mappa": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap'
+    }),
+    "🛰️ Satellite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      maxZoom: 18,
+      attribution: 'Tiles &copy; Esri'
+    })
+  };
+
+  // Imposta Layer di default
+  stato.baseLayers["🌙 Scuro"].addTo(stato.map);
+
+  // Aggiungi selettore livelli in alto a destra
+  L.control.layers(stato.baseLayers, null, { position: 'topright' }).addTo(stato.map);
+
   stato.markersGroup = L.layerGroup().addTo(stato.map);
-}
-
-function aggiornaTileMappa() {
-  if (!stato.map) return;
-
-  if (stato.tileLayer) {
-    stato.map.removeLayer(stato.tileLayer);
-  }
-  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
-  const urlTile = isDark
-    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
-
-  stato.tileLayer = L.tileLayer(urlTile, {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
-  }).addTo(stato.map);
 }
 
 function aggiornaMappa(elenco) {
@@ -271,7 +281,7 @@ function aggiornaMappa(elenco) {
       </div>
       <div>${escapeHTML(imp.indirizzo)}, ${escapeHTML(imp.comune)}</div>
       <div class="popup-price">€ ${formattaPrezzo(imp.prezzoInfo.prezzo)}/l</div>
-      <div style="margin-top: 8px;">
+      <div style="margin-top: 10px;">
         <a href="${getNavUrl(imp)}" target="_blank" rel="noopener" class="btn-nav">
           <i data-lucide="navigation"></i> Naviga
         </a>
@@ -673,7 +683,6 @@ function applicaTema(tema) {
     iconBox.innerHTML = tema === "dark" ? '<i data-lucide="moon"></i>' : '<i data-lucide="sun"></i>';
     if (window.lucide) lucide.createIcons();
   }
-  aggiornaTileMappa();
 }
 
 // -------------------------------------------------------------------------
