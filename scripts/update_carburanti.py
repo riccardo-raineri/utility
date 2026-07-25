@@ -76,7 +76,7 @@ URL_PREZZI = "https://www.mimit.gov.it/images/exportCSV/prezzo_alle_8.csv"
 # Cartella di output relativa alla root del repository.
 # Se nel tuo repo il toolbox vive in un percorso diverso da "utility/",
 # aggiorna questa riga (e il fetch() dentro carburanti.js).
-OUTPUT_DIR = Path("utility/data/carburanti")
+OUTPUT_DIR = Path("data/carburanti")
 
 # Un finto User-Agent da browser: alcuni siti della PA rispondono 403
 # alle richieste con lo User-Agent di default di urllib/python-requests.
