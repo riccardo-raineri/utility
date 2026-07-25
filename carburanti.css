@@ -1,0 +1,536 @@
+/* =========================================================================
+   carburanti.css
+   -------------------------------------------------------------------------
+   Stile della pagina "Prezzi Carburanti". Segue lo stesso approccio delle
+   altre pagine del toolbox: tema scuro di default (con switch verso il
+   tema chiaro), niente foto, solo pattern di sfondo generati via CSS.
+
+   Palette (definita come variabili così è facile ritoccarla in un posto
+   solo):
+     - sfondo/pannelli: grigio-blu molto scuro
+     - accento primario: verde-acqua ("risparmio")
+     - accento secondario: ambra (richiama le vecchie spie/display delle
+       pompe di benzina, usato per il prezzo migliore e i badge)
+   ========================================================================= */
+
+:root {
+  /* --- Tema scuro (default) --- */
+  --bg: #12151a;
+  --bg-pattern-line: rgba(255, 255, 255, 0.035);
+  --panel: #1a1f27;
+  --panel-2: #20262f;
+  --border: #2a323d;
+  --text: #e7ecf1;
+  --muted: #8b96a3;
+  --accent: #45c9a5;
+  --accent-soft: rgba(69, 201, 165, 0.14);
+  --amber: #f2a340;
+  --amber-soft: rgba(242, 163, 64, 0.16);
+  --danger: #e2574c;
+  --danger-soft: rgba(226, 87, 76, 0.14);
+  --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  --radius: 14px;
+}
+
+html[data-theme="light"] {
+  --bg: #f3f1ec;
+  --bg-pattern-line: rgba(20, 20, 15, 0.05);
+  --panel: #ffffff;
+  --panel-2: #faf8f3;
+  --border: #ddd8cc;
+  --text: #1c2126;
+  --muted: #6b7280;
+  --accent: #1f9d7c;
+  --accent-soft: rgba(31, 157, 124, 0.1);
+  --amber: #c97e1c;
+  --amber-soft: rgba(201, 126, 28, 0.12);
+  --danger: #c23f36;
+  --danger-soft: rgba(194, 63, 54, 0.1);
+  --shadow: 0 12px 24px rgba(30, 25, 15, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  color: var(--text);
+  background-color: var(--bg);
+  /* Pattern di sfondo puramente CSS: una griglia sottile che richiama una
+     mappa stradale/plancia di controllo, senza usare nessuna immagine. */
+  background-image:
+    linear-gradient(var(--bg-pattern-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--bg-pattern-line) 1px, transparent 1px);
+  background-size: 42px 42px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.num {
+  font-family: "IBM Plex Mono", "Consolas", monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------
+   Contenitore e intestazione
+   --------------------------------------------------------------------- */
+
+.page {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.page-title h1 {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.page-subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+/* La piccola icona "lancetta di livello carburante": un semicerchio con
+   un ago che pende leggermente, il segno distintivo della pagina. Fatta
+   solo con bordi/rotazioni CSS, nessuna immagine esterna. */
+.gauge-icon {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--panel);
+  flex-shrink: 0;
+}
+.gauge-icon::before {
+  /* la lancetta */
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 11px;
+  background: var(--amber);
+  border-radius: 2px;
+  transform-origin: bottom center;
+  transform: translate(-50%, -100%) rotate(28deg);
+}
+.gauge-icon::after {
+  /* il perno centrale */
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--muted);
+  transform: translate(-50%, -50%);
+}
+
+.update-badge {
+  margin-top: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.update-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ---------------------------------------------------------------------
+   Switch tema chiaro/scuro
+   --------------------------------------------------------------------- */
+
+.theme-toggle {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.theme-toggle:hover {
+  transform: translateY(-1px);
+  background: var(--panel-2);
+}
+
+/* ---------------------------------------------------------------------
+   Pannello di ricerca
+   --------------------------------------------------------------------- */
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 22px;
+}
+
+.search-modes {
+  display: inline-flex;
+  padding: 4px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+.search-modes button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.search-modes button.active {
+  background: var(--accent);
+  color: #08201a;
+}
+
+.search-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.search-fields.geo {
+  grid-template-columns: 1fr auto;
+  align-items: end;
+}
+
+.field label {
+  display: block;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.field select,
+.field input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.92rem;
+}
+.field select:focus,
+.field input:focus,
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: #08201a;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn-primary:hover {
+  filter: brightness(1.06);
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.geo-status {
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.geo-status.error {
+  color: var(--danger);
+}
+
+/* Pillole per il tipo di carburante */
+.fuel-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.fuel-pill {
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+.fuel-pill.active {
+  border-color: var(--amber);
+  background: var(--amber-soft);
+  color: var(--amber);
+  font-weight: 700;
+}
+
+.sub-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.sub-filters .radio-group {
+  display: flex;
+  gap: 4px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px;
+}
+.sub-filters .radio-group button {
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 0.78rem;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.sub-filters .radio-group button.active {
+  background: var(--panel);
+  color: var(--text);
+}
+.sort-select {
+  font-size: 0.8rem;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sort-select select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.8rem;
+}
+
+/* ---------------------------------------------------------------------
+   Stato: caricamento / vuoto / errore
+   --------------------------------------------------------------------- */
+
+.state-message {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+.state-message.error {
+  color: var(--danger);
+  border-color: var(--danger-soft);
+}
+.spinner {
+  width: 22px;
+  height: 22px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+}
+
+/* ---------------------------------------------------------------------
+   Il "migliore prezzo": trattamento a display di pompa di benzina.
+   È l'unico elemento "scenografico" della pagina — il resto resta piatto
+   e leggibile di proposito.
+   --------------------------------------------------------------------- */
+
+.best-result {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--amber-soft);
+  border-radius: var(--radius);
+  padding: 22px;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.best-result .label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--amber);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.best-result .station-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.best-result .station-meta {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+.best-result .price-display {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--amber);
+  text-shadow: 0 0 18px var(--amber-soft);
+  line-height: 1;
+  white-space: nowrap;
+}
+.best-result .price-display .unit {
+  font-size: 1rem;
+  color: var(--muted);
+  font-weight: 500;
+  margin-left: 4px;
+}
+.best-result .delta {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 0.78rem;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.delta.below { background: var(--accent-soft); color: var(--accent); }
+.delta.above { background: var(--danger-soft); color: var(--danger); }
+
+/* ---------------------------------------------------------------------
+   Elenco risultati
+   --------------------------------------------------------------------- */
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.result-row {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+}
+.result-row .rank {
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.result-row .name {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.result-row .meta {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 2px;
+}
+.result-row .price-col {
+  text-align: right;
+}
+.result-row .price {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+.result-row .delta {
+  display: block;
+  font-size: 0.74rem;
+  margin-top: 2px;
+}
+.badge-self {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  margin-left: 6px;
+}
+
+.results-footer {
+  margin-top: 14px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.source-note {
+  margin-top: 40px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.source-note a {
+  color: var(--accent);
+}
+
+@media (max-width: 640px) {
+  .search-fields { grid-template-columns: 1fr; }
+  .search-fields.geo { grid-template-columns: 1fr; }
+  .best-result { flex-direction: column; align-items: flex-start; }
+  .best-result .price-display { font-size: 2.1rem; }
+  .result-row { grid-template-columns: 24px 1fr auto; padding: 10px 12px; }
+}

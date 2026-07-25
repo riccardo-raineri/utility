@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prezzi Carburanti — Toolbox</title>
+<meta name="description" content="Cerca i distributori di carburante in Italia e confronta i prezzi, con dati ufficiali del MIMIT aggiornati ogni giorno." />
+
+<!-- Font: Space Grotesk per titoli/UI, IBM Plex Mono per i numeri (prezzi) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="carburanti.css" />
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ============================== HEADER ============================== -->
+  <header class="page-header">
+    <div class="page-title">
+      <div class="gauge-icon" aria-hidden="true"></div>
+      <div>
+        <h1>Prezzi Carburanti</h1>
+        <p class="page-subtitle">Cerca un distributore e confronta i prezzi in tempo reale</p>
+        <div class="update-badge">
+          <span class="dot"></span>
+          <span id="update-text">Aggiornamento dati in corso…</span>
+        </div>
+      </div>
+    </div>
+    <button class="theme-toggle" id="theme-toggle" title="Cambia tema" aria-label="Cambia tema chiaro/scuro">🌙</button>
+  </header>
+
+  <!-- ============================== RICERCA ============================== -->
+  <section class="panel">
+
+    <div class="search-modes" role="tablist" aria-label="Modalità di ricerca">
+      <button type="button" class="active" data-mode="zona" role="tab" aria-selected="true">Per zona</button>
+      <button type="button" data-mode="geo" role="tab" aria-selected="false">Vicino a me</button>
+    </div>
+
+    <!-- Ricerca per zona: regione -> provincia -> comune -->
+    <div class="search-fields" id="fields-zona">
+      <div class="field">
+        <label for="select-regione">Regione</label>
+        <select id="select-regione">
+          <option value="">Tutte</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="select-provincia">Provincia</label>
+        <select id="select-provincia">
+          <option value="">Tutte</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="input-comune">Comune</label>
+        <input type="text" id="input-comune" placeholder="Es. Bologna" list="lista-comuni" autocomplete="off" />
+        <datalist id="lista-comuni"></datalist>
+      </div>
+    </div>
+
+    <!-- Ricerca vicino a me: geolocalizzazione + raggio -->
+    <div class="search-fields geo" id="fields-geo" style="display:none;">
+      <div class="field">
+        <label for="select-raggio">Raggio di ricerca</label>
+        <select id="select-raggio">
+          <option value="5">5 km</option>
+          <option value="10" selected>10 km</option>
+          <option value="20">20 km</option>
+          <option value="50">50 km</option>
+        </select>
+      </div>
+      <button type="button" class="btn-primary" id="btn-geo">📍 Usa la mia posizione</button>
+    </div>
+    <p class="geo-status" id="geo-status"></p>
+
+    <!-- Tipo di carburante: le opzioni vengono popolate in base ai dati disponibili -->
+    <div class="fuel-pills" id="fuel-pills"></div>
+
+    <div class="sub-filters">
+      <div class="radio-group" id="self-filter">
+        <button type="button" data-self="tutti" class="active">Tutti</button>
+        <button type="button" data-self="self">Self</button>
+        <button type="button" data-self="servito">Servito</button>
+      </div>
+      <label class="sort-select">
+        Ordina per
+        <select id="select-ordina">
+          <option value="prezzo">Prezzo</option>
+          <option value="distanza" id="opt-distanza" disabled>Distanza</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  <!-- ============================== RISULTATI ============================== -->
+  <section id="results-area">
+    <div class="state-message" id="state-message">
+      <div class="spinner" aria-hidden="true"></div>
+      Carico l'elenco delle regioni…
+    </div>
+  </section>
+
+  <p class="source-note">
+    Dati ufficiali pubblicati dal
+    <a href="https://www.mimit.gov.it/it/prezzo-medio-carburanti/regioni" target="_blank" rel="noopener">MIMIT — Osservatorio Prezzi Carburanti</a>,
+    aggiornati automaticamente una volta al giorno.
+  </p>
+
+</div>
+
+<script src="carburanti.js"></script>
+</body>
+</html>
