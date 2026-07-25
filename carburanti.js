@@ -75,10 +75,10 @@ async function caricaRegione(nomeRegione) {
 // -------------------------------------------------------------------------
 
 async function avvia() {
-  impostaTemaIniziale();
   collegaEventi();
   renderPillCarburanti();
   inizializzaMappa();
+  impostaTemaIniziale();
 
   try {
     stato.manifest = await fetchJSON(`${DATA_BASE}manifest.json`);
@@ -92,7 +92,7 @@ async function avvia() {
       "Non riesco a scaricare l'elenco delle regioni. Controlla che i file in data/carburanti/ siano presenti."
     );
   } finally {
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
   }
 }
 
@@ -158,13 +158,15 @@ function mostraStatoIniziale() {
 // -------------------------------------------------------------------------
 
 function inizializzaMappa() {
+  if (typeof L === "undefined") return;
   // Centro iniziale sull'Italia
   stato.map = L.map('map').setView([41.9028, 12.4964], 6);
   stato.markersGroup = L.layerGroup().addTo(stato.map);
-  aggiornaTileMappa();
 }
 
 function aggiornaTileMappa() {
+  if (!stato.map) return;
+
   if (stato.tileLayer) {
     stato.map.removeLayer(stato.tileLayer);
   }
@@ -180,6 +182,8 @@ function aggiornaTileMappa() {
 }
 
 function aggiornaMappa(elenco) {
+  if (!stato.map) return;
+
   const mapSection = document.getElementById("map-section");
   stato.markersGroup.clearLayers();
 
@@ -191,7 +195,7 @@ function aggiornaMappa(elenco) {
   }
 
   mapSection.style.display = "block";
-  stato.map.invalidateSize(); // Forza il ricalcolo delle dimensioni del div della mappa
+  stato.map.invalidateSize();
 
   const bounds = [];
 
@@ -499,7 +503,6 @@ function renderizzaRisultati(elenco) {
     return;
   }
 
-  // Aggiorna marker e vista sulla mappa
   aggiornaMappa(elenco);
 
   const [primo, ...resto] = elenco;
@@ -515,7 +518,7 @@ function renderizzaRisultati(elenco) {
       ${elenco.length > LIMITE_RISULTATI_MOSTRATI ? ` · ne mostro i primi ${LIMITE_RISULTATI_MOSTRATI}` : ""}
     </p>`;
 
-  lucide.createIcons();
+  if (window.lucide) lucide.createIcons();
 }
 
 function renderDelta(imp) {
@@ -587,10 +590,10 @@ function cambiaTema() {
 
 function applicaTema(tema) {
   document.documentElement.setAttribute("data-theme", tema);
-  const themeIcon = document.getElementById("theme-icon");
-  if (themeIcon) {
-    themeIcon.setAttribute("data-lucide", tema === "dark" ? "moon" : "sun");
-    lucide.createIcons();
+  const iconBox = document.getElementById("theme-icon-box");
+  if (iconBox) {
+    iconBox.innerHTML = tema === "dark" ? '<i data-lucide="moon"></i>' : '<i data-lucide="sun"></i>';
+    if (window.lucide) lucide.createIcons();
   }
   aggiornaTileMappa();
 }

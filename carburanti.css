@@ -56,8 +56,8 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* Stili generali Lucide icons inline */
-[data-lucide] {
+/* Dimensioni uniformi icone Lucide */
+[data-lucide], .lucide {
   width: 1.1em;
   height: 1.1em;
   vertical-align: -0.15em;
@@ -105,17 +105,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: 1px solid var(--border);
   background: var(--panel);
   color: var(--amber);
   flex-shrink: 0;
 }
-.gauge-icon-box [data-lucide] {
-  width: 22px;
-  height: 22px;
+.gauge-icon-box [data-lucide], .gauge-icon-box .lucide {
+  width: 20px;
+  height: 20px;
 }
 
 .update-badge {
@@ -352,7 +352,6 @@ button:focus-visible {
   z-index: 1;
 }
 
-/* Personalizzazione popup Leaflet */
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
   background: var(--panel) !important;
   color: var(--text) !important;
@@ -379,7 +378,7 @@ button:focus-visible {
 }
 
 /* ---------------------------------------------------------------------
-   Stato: caricamento / vuoto / errore
+   Stato caricamento / errore
    --------------------------------------------------------------------- */
 
 .state-message {
@@ -407,7 +406,7 @@ button:focus-visible {
 }
 
 /* ---------------------------------------------------------------------
-   Migliore prezzo e Risultati
+   Risultati
    --------------------------------------------------------------------- */
 
 .best-result {
