@@ -1,18 +1,3 @@
-/* =========================================================================
-   carburanti.css
-   -------------------------------------------------------------------------
-   Stile della pagina "Prezzi Carburanti". Segue lo stesso approccio delle
-   altre pagine del toolbox: tema scuro di default (con switch verso il
-   tema chiaro), niente foto, solo pattern di sfondo generati via CSS.
-
-   Palette (definita come variabili così è facile ritoccarla in un posto
-   solo):
-     - sfondo/pannelli: grigio-blu molto scuro
-     - accento primario: verde-acqua ("risparmio")
-     - accento secondario: ambra (richiama le vecchie spie/display delle
-       pompe di benzina, usato per il prezzo migliore e i badge)
-   ========================================================================= */
-
 :root {
   /* --- Tema scuro (default) --- */
   --bg: #12151a;
@@ -59,8 +44,6 @@ body {
   font-family: "Space Grotesk", "Segoe UI", sans-serif;
   color: var(--text);
   background-color: var(--bg);
-  /* Pattern di sfondo puramente CSS: una griglia sottile che richiama una
-     mappa stradale/plancia di controllo, senza usare nessuna immagine. */
   background-image:
     linear-gradient(var(--bg-pattern-line) 1px, transparent 1px),
     linear-gradient(90deg, var(--bg-pattern-line) 1px, transparent 1px);
@@ -71,6 +54,14 @@ body {
 .num {
   font-family: "IBM Plex Mono", "Consolas", monospace;
   font-variant-numeric: tabular-nums;
+}
+
+/* Stili generali Lucide icons inline */
+[data-lucide] {
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: -0.15em;
+  stroke-width: 2px;
 }
 
 /* ---------------------------------------------------------------------
@@ -110,42 +101,21 @@ body {
   font-size: 0.92rem;
 }
 
-/* La piccola icona "lancetta di livello carburante": un semicerchio con
-   un ago che pende leggermente, il segno distintivo della pagina. Fatta
-   solo con bordi/rotazioni CSS, nessuna immagine esterna. */
-.gauge-icon {
-  position: relative;
-  width: 34px;
-  height: 34px;
+.gauge-icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  border: 2px solid var(--border);
+  border: 1px solid var(--border);
   background: var(--panel);
+  color: var(--amber);
   flex-shrink: 0;
 }
-.gauge-icon::before {
-  /* la lancetta */
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 2px;
-  height: 11px;
-  background: var(--amber);
-  border-radius: 2px;
-  transform-origin: bottom center;
-  transform: translate(-50%, -100%) rotate(28deg);
-}
-.gauge-icon::after {
-  /* il perno centrale */
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--muted);
-  transform: translate(-50%, -50%);
+.gauge-icon-box [data-lucide] {
+  width: 22px;
+  height: 22px;
 }
 
 .update-badge {
@@ -164,7 +134,7 @@ body {
 }
 
 /* ---------------------------------------------------------------------
-   Switch tema chiaro/scuro
+   Switch tema
    --------------------------------------------------------------------- */
 
 .theme-toggle {
@@ -179,7 +149,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.05rem;
   transition: background 0.15s ease, transform 0.15s ease;
 }
 .theme-toggle:hover {
@@ -218,6 +187,9 @@ body {
   padding: 8px 16px;
   border-radius: 999px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: background 0.15s ease, color 0.15s ease;
 }
 .search-modes button.active {
@@ -272,23 +244,19 @@ button:focus-visible {
   font-size: 0.9rem;
   cursor: pointer;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
-.btn-primary:hover {
-  filter: brightness(1.06);
-}
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: default;
-}
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-primary:disabled { opacity: 0.6; cursor: default; }
 
 .geo-status {
   margin-top: 10px;
   font-size: 0.82rem;
   color: var(--muted);
 }
-.geo-status.error {
-  color: var(--danger);
-}
+.geo-status.error { color: var(--danger); }
 
 /* Pillole per il tipo di carburante */
 .fuel-pills {
@@ -364,6 +332,53 @@ button:focus-visible {
 }
 
 /* ---------------------------------------------------------------------
+   Mappa
+   --------------------------------------------------------------------- */
+
+.map-panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 8px;
+  margin-bottom: 22px;
+  overflow: hidden;
+}
+
+#map {
+  width: 100%;
+  height: 380px;
+  border-radius: calc(var(--radius) - 4px);
+  z-index: 1;
+}
+
+/* Personalizzazione popup Leaflet */
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: var(--panel) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.leaflet-popup-content {
+  margin: 12px 14px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+.popup-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+.popup-price {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--amber);
+  margin-top: 6px;
+}
+
+/* ---------------------------------------------------------------------
    Stato: caricamento / vuoto / errore
    --------------------------------------------------------------------- */
 
@@ -390,14 +405,9 @@ button:focus-visible {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
-@media (prefers-reduced-motion: reduce) {
-  .spinner { animation: none; }
-}
 
 /* ---------------------------------------------------------------------
-   Il "migliore prezzo": trattamento a display di pompa di benzina.
-   È l'unico elemento "scenografico" della pagina — il resto resta piatto
-   e leggibile di proposito.
+   Migliore prezzo e Risultati
    --------------------------------------------------------------------- */
 
 .best-result {
@@ -419,6 +429,9 @@ button:focus-visible {
   color: var(--amber);
   font-weight: 700;
   margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 .best-result .station-name {
   font-weight: 700;
@@ -427,7 +440,11 @@ button:focus-visible {
 .best-result .station-meta {
   color: var(--muted);
   font-size: 0.85rem;
-  margin-top: 2px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 .best-result .price-display {
   font-size: 2.6rem;
@@ -452,10 +469,6 @@ button:focus-visible {
 }
 .delta.below { background: var(--accent-soft); color: var(--accent); }
 .delta.above { background: var(--danger-soft); color: var(--danger); }
-
-/* ---------------------------------------------------------------------
-   Elenco risultati
-   --------------------------------------------------------------------- */
 
 .results-list {
   display: flex;
@@ -486,6 +499,10 @@ button:focus-visible {
   color: var(--muted);
   font-size: 0.8rem;
   margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 .result-row .price-col {
   text-align: right;
@@ -507,7 +524,6 @@ button:focus-visible {
   background: var(--panel-2);
   border: 1px solid var(--border);
   color: var(--muted);
-  margin-left: 6px;
 }
 
 .results-footer {
@@ -533,4 +549,5 @@ button:focus-visible {
   .best-result { flex-direction: column; align-items: flex-start; }
   .best-result .price-display { font-size: 2.1rem; }
   .result-row { grid-template-columns: 24px 1fr auto; padding: 10px 12px; }
+  #map { height: 280px; }
 }

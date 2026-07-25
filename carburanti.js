@@ -1,65 +1,39 @@
-/* =========================================================================
-   carburanti.js
-   -------------------------------------------------------------------------
-   Logica della pagina "Prezzi Carburanti".
-
-   I dati arrivano da file JSON generati quotidianamente dalla GitHub Action
-   (vedi scripts/update_carburanti.py), NON dal sito del MIMIT direttamente:
-   il browser scarica solo file dallo stesso dominio del sito, quindi non
-   c'è nessun problema di CORS.
-
-   File letti (percorsi relativi a questa pagina):
-     data/carburanti/manifest.json         -> elenco regioni/province + data aggiornamento
-     data/carburanti/stazioni-geo.json      -> tutti gli impianti (solo posizione), per "vicino a me"
-     data/carburanti/prezzi/<regione>.json  -> impianti + prezzi di una singola regione
-
-   Se sposti la cartella dei dati, aggiorna DATA_BASE qui sotto (deve
-   corrispondere a OUTPUT_DIR dentro update_carburanti.py).
-   ========================================================================= */
-
 const DATA_BASE = "data/carburanti/";
-
-// Elenco "canonico" dei carburanti mostrati come filtro, nell'ordine in
-// cui vogliamo che compaiano i pulsanti. Se un carburante non ha prezzi
-// nella zona selezionata, il pulsante resta comunque visibile ma la
-// ricerca restituirà semplicemente zero risultati per quel carburante.
 const CARBURANTI = ["Benzina", "Gasolio", "GPL", "Metano", "Benzina Premium", "Gasolio Premium"];
 
-// -------------------------------------------------------------------------
 // Stato dell'applicazione
-// -------------------------------------------------------------------------
-
 const stato = {
   manifest: null,
-  // Cache dei file JSON già scaricati, per non richiederli due volte
-  // nella stessa sessione di navigazione.
-  cacheRegioni: new Map(),     // slugRegione -> dati regione
-  stazioniGeo: null,           // popolato al primo uso della ricerca "vicino a me"
+  cacheRegioni: new Map(),
+  stazioniGeo: null,
 
   modalita: "zona",            // "zona" | "geo"
   regione: "",
   provincia: "",
   comune: "",
   raggioKm: 10,
-  posizioneUtente: null,       // {lat, lon} dopo la geolocalizzazione
+  posizioneUtente: null,       // {lat, lon}
 
   carburante: "Benzina",
   filtroSelf: "tutti",         // "tutti" | "self" | "servito"
   ordinamento: "prezzo",       // "prezzo" | "distanza"
+
+  // Mappa Leaflet
+  map: null,
+  markersGroup: null,
+  tileLayer: null
 };
 
 // -------------------------------------------------------------------------
 // Utility
 // -------------------------------------------------------------------------
 
-/** Deve produrre lo stesso slug generato da _slug() in update_carburanti.py */
 function slugRegione(nome) {
   return nome.toLowerCase().replaceAll("'", "-").replaceAll(" ", "-");
 }
 
-/** Distanza in km tra due coordinate (formula dell'emisenoverso) */
 function distanzaKm(lat1, lon1, lat2, lon2) {
-  const R = 6371; // raggio medio della Terra in km
+  const R = 6371;
   const toRad = (deg) => (deg * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
@@ -74,7 +48,6 @@ function formattaPrezzo(valore) {
 }
 
 function formattaData(iso) {
-  // "2026-07-25" -> "25/07/2026"
   const [y, m, d] = iso.split("-");
   return `${d}/${m}/${y}`;
 }
@@ -87,7 +60,6 @@ async function fetchJSON(percorso) {
   return risposta.json();
 }
 
-/** Scarica (con cache in memoria) il file JSON di una regione */
 async function caricaRegione(nomeRegione) {
   const slug = slugRegione(nomeRegione);
   if (stato.cacheRegioni.has(slug)) {
@@ -99,13 +71,14 @@ async function caricaRegione(nomeRegione) {
 }
 
 // -------------------------------------------------------------------------
-// Avvio pagina: carica il manifest e popola i filtri
+// Avvio pagina
 // -------------------------------------------------------------------------
 
 async function avvia() {
   impostaTemaIniziale();
   collegaEventi();
   renderPillCarburanti();
+  inizializzaMappa();
 
   try {
     stato.manifest = await fetchJSON(`${DATA_BASE}manifest.json`);
@@ -116,8 +89,10 @@ async function avvia() {
   } catch (errore) {
     console.error(errore);
     mostraErrore(
-      "Non riesco a scaricare l'elenco delle regioni. Controlla che i file in data/carburanti/ siano stati pubblicati (la GitHub Action deve aver girato almeno una volta)."
+      "Non riesco a scaricare l'elenco delle regioni. Controlla che i file in data/carburanti/ siano presenti."
     );
+  } finally {
+    lucide.createIcons();
   }
 }
 
@@ -130,7 +105,7 @@ function popolaRegioni(manifest) {
     selectRegione.appendChild(opt);
   });
 
-  aggiornaOpzioniProvincia(); // inizialmente mostra tutte le province
+  aggiornaOpzioniProvincia();
 }
 
 function aggiornaOpzioniProvincia() {
@@ -169,6 +144,7 @@ function renderPillCarburanti() {
 }
 
 function mostraStatoIniziale() {
+  document.getElementById("map-section").style.display = "none";
   const area = document.getElementById("results-area");
   area.innerHTML = `
     <div class="state-message">
@@ -178,11 +154,73 @@ function mostraStatoIniziale() {
 }
 
 // -------------------------------------------------------------------------
-// Gestione eventi UI
+// Gestione Mappa (Leaflet.js)
+// -------------------------------------------------------------------------
+
+function inizializzaMappa() {
+  // Centro iniziale sull'Italia
+  stato.map = L.map('map').setView([41.9028, 12.4964], 6);
+  stato.markersGroup = L.layerGroup().addTo(stato.map);
+  aggiornaTileMappa();
+}
+
+function aggiornaTileMappa() {
+  if (stato.tileLayer) {
+    stato.map.removeLayer(stato.tileLayer);
+  }
+  const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+  const urlTile = isDark
+    ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png';
+
+  stato.tileLayer = L.tileLayer(urlTile, {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+  }).addTo(stato.map);
+}
+
+function aggiornaMappa(elenco) {
+  const mapSection = document.getElementById("map-section");
+  stato.markersGroup.clearLayers();
+
+  const impiantiConCoordinate = elenco.filter(i => i.lat && i.lon);
+
+  if (impiantiConCoordinate.length === 0) {
+    mapSection.style.display = "none";
+    return;
+  }
+
+  mapSection.style.display = "block";
+  stato.map.invalidateSize(); // Forza il ricalcolo delle dimensioni del div della mappa
+
+  const bounds = [];
+
+  impiantiConCoordinate.forEach((imp) => {
+    const lat = Number(imp.lat);
+    const lon = Number(imp.lon);
+    bounds.push([lat, lon]);
+
+    const marker = L.marker([lat, lon]);
+    const popupContent = `
+      <div class="popup-title">${escapeHTML(imp.bandiera)} · ${escapeHTML(imp.nome)}</div>
+      <div>${escapeHTML(imp.indirizzo)}, ${escapeHTML(imp.comune)}</div>
+      <div style="margin-top:4px; font-size: 0.78rem; opacity:0.8;">${imp.prezzoInfo.self ? "Self-Service" : "Servito"}</div>
+      <div class="popup-price">€ ${formattaPrezzo(imp.prezzoInfo.prezzo)}/l</div>
+    `;
+    marker.bindPopup(popupContent);
+    stato.markersGroup.addLayer(marker);
+  });
+
+  if (bounds.length > 0) {
+    stato.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 14 });
+  }
+}
+
+// -------------------------------------------------------------------------
+// Gestione Eventi UI
 // -------------------------------------------------------------------------
 
 function collegaEventi() {
-  // Switch tra "Per zona" e "Vicino a me"
   document.querySelectorAll(".search-modes button").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".search-modes button").forEach((b) => {
@@ -216,10 +254,9 @@ function collegaEventi() {
     });
   });
 
-  // Ricerca per zona: regione/provincia/comune
   document.getElementById("select-regione").addEventListener("change", () => {
     stato.regione = document.getElementById("select-regione").value;
-    stato.provincia = ""; // reset provincia quando cambia la regione
+    stato.provincia = "";
     document.getElementById("select-provincia").value = "";
     aggiornaOpzioniProvincia();
     aggiornaRicercaZona();
@@ -227,8 +264,6 @@ function collegaEventi() {
 
   document.getElementById("select-provincia").addEventListener("change", () => {
     stato.provincia = document.getElementById("select-provincia").value;
-    // Se la provincia scelta appartiene a una regione diversa da quella
-    // eventualmente selezionata, allineiamo la regione di conseguenza.
     if (stato.provincia) {
       const info = stato.manifest.province.find((p) => p.sigla === stato.provincia);
       if (info && info.regione !== stato.regione) {
@@ -245,17 +280,15 @@ function collegaEventi() {
     timerComune = setTimeout(() => {
       stato.comune = document.getElementById("input-comune").value.trim();
       aggiornaRicercaZona();
-    }, 350); // piccolo debounce mentre l'utente digita
+    }, 350);
   });
 
-  // Ricerca vicino a me
   document.getElementById("select-raggio").addEventListener("change", (e) => {
     stato.raggioKm = Number(e.target.value);
     if (stato.posizioneUtente) eseguiRicerca();
   });
   document.getElementById("btn-geo").addEventListener("click", richiediPosizione);
 
-  // Filtro self/servito
   document.querySelectorAll("#self-filter button").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll("#self-filter button").forEach((b) => b.classList.remove("active"));
@@ -265,19 +298,14 @@ function collegaEventi() {
     });
   });
 
-  // Ordinamento
   document.getElementById("select-ordina").addEventListener("change", (e) => {
     stato.ordinamento = e.target.value;
     eseguiRicerca();
   });
 
-  // Tema chiaro/scuro
   document.getElementById("theme-toggle").addEventListener("click", cambiaTema);
 }
 
-/** In modalità "per zona": avvia la ricerca solo se l'utente ha già
- * selezionato almeno un criterio, per evitare di scaricare tutte le
- * regioni d'Italia ad ogni piccola modifica involontaria. */
 function aggiornaRicercaZona() {
   if (stato.regione || stato.provincia || stato.comune) {
     eseguiRicerca();
@@ -314,8 +342,7 @@ function richiediPosizione() {
     (errore) => {
       statusEl.classList.add("error");
       if (errore.code === errore.PERMISSION_DENIED) {
-        statusEl.textContent =
-          "Permesso negato. Per usare questa ricerca devi consentire l'accesso alla posizione dal browser.";
+        statusEl.textContent = "Permesso negato. Consenti l'accesso alla posizione nel tuo browser.";
       } else {
         statusEl.textContent = "Non riesco a determinare la tua posizione. Riprova.";
       }
@@ -338,7 +365,7 @@ async function eseguiRicerca() {
     }
   } catch (errore) {
     console.error(errore);
-    mostraErrore("Qualcosa è andato storto durante il caricamento dei dati. Riprova tra poco.");
+    mostraErrore("Qualcosa è andato storto durante il caricamento dei dati.");
   }
 }
 
@@ -351,9 +378,6 @@ async function eseguiRicercaZonaEffettiva() {
     const info = stato.manifest.province.find((p) => p.sigla === stato.provincia);
     regioniDaCaricare = info ? [info.regione] : [];
   } else {
-    // Nessuna regione/provincia scelta ma è stato digitato un comune:
-    // cerchiamo in tutta Italia (i file, una volta scaricati, restano
-    // in cache per il resto della sessione).
     regioniDaCaricare = stato.manifest.regioni;
   }
 
@@ -380,7 +404,7 @@ async function eseguiRicercaZonaEffettiva() {
 
 async function eseguiRicercaGeo() {
   if (!stato.posizioneUtente) {
-    mostraMessaggio("Premi \"Usa la mia posizione\" per cercare i distributori più vicini a te.");
+    mostraMessaggio("Premi \"Usa la mia posizione\" per cercare i distributori più vicini.");
     return;
   }
 
@@ -395,13 +419,10 @@ async function eseguiRicercaGeo() {
     .sort((a, b) => a.distanzaKm - b.distanzaKm);
 
   if (vicine.length === 0) {
-    mostraMessaggio(
-      `Nessun distributore trovato entro ${stato.raggioKm} km. Prova ad aumentare il raggio di ricerca.`
-    );
+    mostraMessaggio(`Nessun distributore trovato entro ${stato.raggioKm} km. Prova ad aumentare il raggio.`);
     return;
   }
 
-  // Carichiamo solo le regioni effettivamente coinvolte dai risultati vicini.
   const regioniCoinvolte = [...new Set(vicine.map((s) => s.regione))];
   const datiRegioni = await Promise.all(regioniCoinvolte.map(caricaRegione));
 
@@ -414,14 +435,13 @@ async function eseguiRicercaGeo() {
   const impianti = vicine
     .map((s) => {
       const dettagli = impiantiPerId.get(s.id);
-      return dettagli ? { ...dettagli, distanzaKm: s.distanzaKm } : null;
+      return dettagli ? { ...dettagli, lat: s.lat, lon: s.lon, distanzaKm: s.distanzaKm } : null;
     })
     .filter(Boolean);
 
   renderizzaRisultati(filtraEOrdina(impianti));
 }
 
-/** Applica filtro carburante + self/servito, e ordina secondo lo stato corrente */
 function filtraEOrdina(impianti) {
   let elenco = impianti
     .map((imp) => {
@@ -450,6 +470,7 @@ function filtraEOrdina(impianti) {
 // -------------------------------------------------------------------------
 
 function mostraCaricamento() {
+  document.getElementById("map-section").style.display = "none";
   const area = document.getElementById("results-area");
   area.innerHTML = `
     <div class="state-message">
@@ -459,10 +480,12 @@ function mostraCaricamento() {
 }
 
 function mostraMessaggio(testo) {
+  document.getElementById("map-section").style.display = "none";
   document.getElementById("results-area").innerHTML = `<div class="state-message">${testo}</div>`;
 }
 
 function mostraErrore(testo) {
+  document.getElementById("map-section").style.display = "none";
   document.getElementById("results-area").innerHTML = `<div class="state-message error">${testo}</div>`;
 }
 
@@ -472,11 +495,12 @@ function renderizzaRisultati(elenco) {
   const area = document.getElementById("results-area");
 
   if (elenco.length === 0) {
-    mostraMessaggio(
-      `Nessun distributore trovato con ${stato.carburante} per questa zona/filtro. Prova ad allargare la ricerca.`
-    );
+    mostraMessaggio(`Nessun distributore trovato con ${stato.carburante} per questa zona/filtro.`);
     return;
   }
+
+  // Aggiorna marker e vista sulla mappa
+  aggiornaMappa(elenco);
 
   const [primo, ...resto] = elenco;
   const daMostrare = resto.slice(0, LIMITE_RISULTATI_MOSTRATI - 1);
@@ -490,6 +514,8 @@ function renderizzaRisultati(elenco) {
       ${elenco.length} distributori trovati con ${stato.carburante}
       ${elenco.length > LIMITE_RISULTATI_MOSTRATI ? ` · ne mostro i primi ${LIMITE_RISULTATI_MOSTRATI}` : ""}
     </p>`;
+
+  lucide.createIcons();
 }
 
 function renderDelta(imp) {
@@ -497,18 +523,18 @@ function renderDelta(imp) {
   const diff = imp.prezzoInfo.prezzo - imp.mediaRegionale;
   const classe = diff <= 0 ? "below" : "above";
   const segno = diff <= 0 ? "" : "+";
-  return `<span class="delta ${classe}">${segno}${formattaPrezzo(diff)} € vs media regionale</span>`;
+  return `<span class="delta ${classe}">${segno}${formattaPrezzo(diff)} € vs media</span>`;
 }
 
 function renderMiglioreRisultato(imp) {
   return `
     <div class="best-result">
       <div>
-        <div class="label">Prezzo più basso trovato</div>
+        <div class="label"><i data-lucide="award"></i> Prezzo più basso trovato</div>
         <div class="station-name">${escapeHTML(imp.bandiera)} · ${escapeHTML(imp.nome)}</div>
         <div class="station-meta">
-          ${escapeHTML(imp.indirizzo)}, ${escapeHTML(imp.comune)} (${imp.provincia})
-          ${imp.distanzaKm !== undefined ? ` · a ${imp.distanzaKm.toFixed(1)} km` : ""}
+          <i data-lucide="map-pin"></i> ${escapeHTML(imp.indirizzo)}, ${escapeHTML(imp.comune)} (${imp.provincia})
+          ${imp.distanzaKm !== undefined ? ` · <i data-lucide="navigation"></i> ${imp.distanzaKm.toFixed(1)} km` : ""}
           <span class="badge-self">${imp.prezzoInfo.self ? "Self" : "Servito"}</span>
         </div>
         ${renderDelta(imp)}
@@ -524,8 +550,8 @@ function renderRigaRisultato(imp, posizione) {
       <div>
         <div class="name">${escapeHTML(imp.bandiera)} · ${escapeHTML(imp.nome)}</div>
         <div class="meta">
-          ${escapeHTML(imp.indirizzo)}, ${escapeHTML(imp.comune)} (${imp.provincia})
-          ${imp.distanzaKm !== undefined ? ` · a ${imp.distanzaKm.toFixed(1)} km` : ""}
+          <i data-lucide="map-pin"></i> ${escapeHTML(imp.indirizzo)}, ${escapeHTML(imp.comune)} (${imp.provincia})
+          ${imp.distanzaKm !== undefined ? ` · <i data-lucide="navigation"></i> ${imp.distanzaKm.toFixed(1)} km` : ""}
           <span class="badge-self">${imp.prezzoInfo.self ? "Self" : "Servito"}</span>
         </div>
       </div>
@@ -536,9 +562,6 @@ function renderRigaRisultato(imp, posizione) {
     </div>`;
 }
 
-/** Piccola protezione contro l'iniezione di HTML: i dati vengono dal MIMIT
- * e non dovrebbero contenere markup, ma meglio non fidarsi mai di dati
- * esterni quando li si inserisce nella pagina. */
 function escapeHTML(testo) {
   const div = document.createElement("div");
   div.textContent = testo ?? "";
@@ -546,8 +569,7 @@ function escapeHTML(testo) {
 }
 
 // -------------------------------------------------------------------------
-// Tema chiaro/scuro (persistito in localStorage, coerente con le altre
-// pagine del toolbox: scuro di default)
+// Tema Chiaro / Scuro
 // -------------------------------------------------------------------------
 
 function impostaTemaIniziale() {
@@ -565,7 +587,12 @@ function cambiaTema() {
 
 function applicaTema(tema) {
   document.documentElement.setAttribute("data-theme", tema);
-  document.getElementById("theme-toggle").textContent = tema === "dark" ? "🌙" : "☀️";
+  const themeIcon = document.getElementById("theme-icon");
+  if (themeIcon) {
+    themeIcon.setAttribute("data-lucide", tema === "dark" ? "moon" : "sun");
+    lucide.createIcons();
+  }
+  aggiornaTileMappa();
 }
 
 // -------------------------------------------------------------------------
