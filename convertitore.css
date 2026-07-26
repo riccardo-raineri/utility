@@ -290,7 +290,7 @@ select:focus, input:focus {
     align-items: center;
 }
 
-input[type="number"] {
+input[type="text"] {
     flex: 2;
     font-size: 18px;
     font-weight: 700;

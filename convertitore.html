@@ -83,7 +83,7 @@
 
                 <!-- Primo Blocco Input -->
                 <div class="input-row">
-                    <input type="numeric" inputmode="decimal" pattern="[0-9.,]*" id="input1" placeholder="0" oninput="calculate(1)">
+                    <input type="text" inputmode="decimal" pattern="[0-9.,]*" id="input1" placeholder="0" oninput="calculate(1)">
                     <select class="unit-select" id="unit1" onchange="calculate(1)"></select>
                     <button type="button" class="copy-btn copy-feedback" id="copy1" onclick="copyValue(1)" title="Copia valore">
                         <i data-lucide="copy"></i>
@@ -97,7 +97,7 @@
 
                 <!-- Secondo Blocco Input -->
                 <div class="input-row">
-                    <input type="numeric" inputmode="decimal" pattern="[0-9.,]*" id="input2" placeholder="0" oninput="calculate(2)">
+                    <input type="text" inputmode="decimal" pattern="[0-9.,]*" id="input2" placeholder="0" oninput="calculate(2)">
                     <select class="unit-select" id="unit2" onchange="calculate(1)"></select>
                     <button type="button" class="copy-btn copy-feedback" id="copy2" onclick="copyValue(2)" title="Copia valore">
                         <i data-lucide="copy"></i>
@@ -295,34 +295,40 @@
             if (to.includes("Kelvin")) return celsius + 273.15;
         }
 
-        function calculate(source) {
-            const cat = getActiveCategory();
-            const val1 = document.getElementById('input1').value;
-            const val2 = document.getElementById('input2').value;
-            const u1 = document.getElementById('unit1').value;
-            const u2 = document.getElementById('unit2').value;
+function calculate(source) {
+    const cat = getActiveCategory();
+    
+    // Normalizza l'input sostituendo la virgola con il punto
+    const rawVal1 = document.getElementById('input1').value.replace(',', '.');
+    const rawVal2 = document.getElementById('input2').value.replace(',', '.');
+    
+    const u1 = document.getElementById('unit1').value;
+    const u2 = document.getElementById('unit2').value;
 
-            if (source === 1 && val1 === '') { document.getElementById('input2').value = ''; return; }
-            if (source === 2 && val2 === '') { document.getElementById('input1').value = ''; return; }
+    if (source === 1 && rawVal1 === '') { document.getElementById('input2').value = ''; return; }
+    if (source === 2 && rawVal2 === '') { document.getElementById('input1').value = ''; return; }
 
-            let result;
+    let result;
 
-            if (cat === "temperatura") {
-                let v = parseFloat(source === 1 ? val1 : val2);
-                result = source === 1 ? calcTemp(v, u1, u2) : calcTemp(v, u2, u1);
-            } else {
-                const r1 = conversionData[cat][u1];
-                const r2 = conversionData[cat][u2];
+    if (cat === "temperatura") {
+        let v = parseFloat(source === 1 ? rawVal1 : rawVal2);
+        if (isNaN(v)) return;
+        result = source === 1 ? calcTemp(v, u1, u2) : calcTemp(v, u2, u1);
+    } else {
+        const r1 = conversionData[cat][u1];
+        const r2 = conversionData[cat][u2];
 
-                if (r1 === "loading" || r2 === "loading") return;
+        if (r1 === "loading" || r2 === "loading") return;
 
-                let v = parseFloat(source === 1 ? val1 : val2);
-                result = source === 1 ? (v * r1) / r2 : (v * r2) / r1;
-            }
+        let v = parseFloat(source === 1 ? rawVal1 : rawVal2);
+        if (isNaN(v)) return;
+        result = source === 1 ? (v * r1) / r2 : (v * r2) / r1;
+    }
 
-            let target = source === 1 ? 'input2' : 'input1';
-            document.getElementById(target).value = parseFloat(result.toFixed(5));
-        }
+    let target = source === 1 ? 'input2' : 'input1';
+    // Mostra il risultato usando la virgola come separatore decimale
+    document.getElementById(target).value = parseFloat(result.toFixed(5)).toString().replace('.', ',');
+}
 
         /* -----------------------------------------------------------------
            COPIA NEGLI APPUNTI

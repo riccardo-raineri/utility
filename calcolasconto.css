@@ -292,7 +292,7 @@ label {
     pointer-events: none;
 }
 
-input[type="number"] {
+input[type="text"] {
     width: 100%;
     padding: 12px 14px;
     background: var(--bg-base);
@@ -310,7 +310,7 @@ input[type="number"] {
     padding-left: 32px;
 }
 
-input[type="number"]:focus {
+input[type="text"]:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
 }

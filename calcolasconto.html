@@ -66,7 +66,7 @@
                         <label for="price">Prezzo di Listino (€)</label>
                         <div class="input-wrapper">
                             <span class="input-prefix">€</span>
-                            <input type="numeric" pattern="[0-9]*" id="price" placeholder="0.00" min="0" step="0.01" autofocus>
+                            <input type="text" inputmode="decimal" pattern="[0-9.,]*" id="price" placeholder="0.00" min="0" step="0.01" autofocus>
                         </div>
                     </div>
 
@@ -75,13 +75,13 @@
                             <label for="discount">Sconto (%)</label>
                             <div class="input-wrapper">
                                 <span class="input-prefix">%</span>
-                                <input type="numeric" pattern="[0-9.,]*" id="discount" placeholder="0" min="0" max="100">
+                                <input type="text" inputmode="decimal" pattern="[0-9.,]*" id="discount" placeholder="0" min="0" max="100">
                             </div>
                         </div>
                         <div class="input-group">
                             <label for="quantity">Quantità</label>
                             <div class="input-wrapper">
-                                <input type="numeric" inputmode="decimal" pattern="[0-9.,]*" id="quantity" placeholder="1" min="1" step="1" value="1">
+                                <input type="text" inputmode="decimal" pattern="[0-9.,]*" id="quantity" placeholder="1" min="1" step="1" value="1">
                             </div>
                         </div>
                     </div>
@@ -175,27 +175,32 @@
            CALCOLO E LOGICA APPLICATIVA
            ----------------------------------------------------------------- */
         function calculateDiscount() {
-            const price = parseFloat(document.getElementById('price').value);
-            const discount = parseFloat(document.getElementById('discount').value);
-            const quantity = parseInt(document.getElementById('quantity').value) || 1;
+    // Sostituisce la virgola con il punto prima del parsing numerico
+    const rawPrice = document.getElementById('price').value.replace(',', '.');
+    const rawDiscount = document.getElementById('discount').value.replace(',', '.');
+    const rawQuantity = document.getElementById('quantity').value.replace(',', '.');
 
-            if (isNaN(price) || isNaN(discount) || price < 0 || discount < 0) return;
+    const price = parseFloat(rawPrice);
+    const discount = parseFloat(rawDiscount);
+    const quantity = parseInt(rawQuantity) || 1;
 
-            const savedPerUnit = price * (discount / 100);
-            const finalPerUnit = price - savedPerUnit;
-            const savedTotal = savedPerUnit * quantity;
-            const finalTotal = finalPerUnit * quantity;
+    if (isNaN(price) || isNaN(discount) || price < 0 || discount < 0) return;
 
-            document.getElementById('saved-unit').innerText = savedPerUnit.toFixed(2);
-            document.getElementById('saved-total').innerText = savedTotal.toFixed(2);
-            document.getElementById('final-price').innerText = finalTotal.toFixed(2);
+    const savedPerUnit = price * (discount / 100);
+    const finalPerUnit = price - savedPerUnit;
+    const savedTotal = savedPerUnit * quantity;
+    const finalTotal = finalPerUnit * quantity;
 
-            const clampedDiscount = Math.min(Math.max(discount, 0), 100);
-            document.getElementById('savings-bar').style.width = clampedDiscount + '%';
-            document.getElementById('savings-bar-label').innerText = clampedDiscount.toFixed(0) + '%';
+    document.getElementById('saved-unit').innerText = savedPerUnit.toFixed(2).replace('.', ',');
+    document.getElementById('saved-total').innerText = savedTotal.toFixed(2).replace('.', ',');
+    document.getElementById('final-price').innerText = finalTotal.toFixed(2).replace('.', ',');
 
-            document.getElementById('result-box').style.display = 'flex';
-        }
+    const clampedDiscount = Math.min(Math.max(discount, 0), 100);
+    document.getElementById('savings-bar').style.width = clampedDiscount + '%';
+    document.getElementById('savings-bar-label').innerText = clampedDiscount.toFixed(0) + '%';
+
+    document.getElementById('result-box').style.display = 'flex';
+}
 
         function resetForm() {
             document.getElementById('price').value = '';
