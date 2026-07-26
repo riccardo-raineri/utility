@@ -82,6 +82,12 @@
                         <span>Preferiti</span>
                         <span class="favorites-badge-count" id="favCountBadge">0</span>
                     </button>
+					
+					<!-- Login -->
+					<button class="unlock-btn" id="unlockPrivateBtn" title="Mostra strumenti personali">
+						<i data-lucide="lock" id="unlockIcon"></i>
+						<span id="unlockBtnText">Area Riservata</span>
+					</button>
                 </nav>
             </div>
 
@@ -362,6 +368,26 @@
                             <p class="card-desc">Stima la distanza esatta da un temporale misurando l'intervallo tra il lampo e il tuono.</p>
                         </div>
                     </a>
+					
+					
+					<!-- Distanza Fulmine -->
+                    <a href="sole.html" class="tool-card" data-category="utilita" data-tool-id="sole">
+                        <div class="card-glass-glow"></div>
+                        <div class="card-inner">
+                            <div class="card-header-top-row">
+                                <div class="card-icon-box">
+                                    <i data-lucide="sun"></i>
+                                </div>
+                                <div class="card-header-right-group">
+                                    <span class="category-badge">Utilità</span>
+                                    <button class="fav-btn" onclick="toggleFavorite('sole', event)" title="Aggiungi ai preferiti"><i data-lucide="star"></i></button>
+                                </div>
+                            </div>
+                            <h3 class="card-title">Sole</h3>
+                            <p class="card-desc">Calcola la posizione del sole e le fasi lunari</p>
+                        </div>
+                    </a>
+
 
                     <!-- Pomodoro Focus Timer -->
                     <a href="pomodoro.html" class="tool-card" data-category="tempo" data-tool-id="pomodoro">
@@ -454,7 +480,7 @@
 					
 				
 					<!-- Spesa 2.0 -->
-                    <a href="spesa.html" class="tool-card flagship-card" data-category="finanza" data-tool-id="spesa">
+                    <a href="spesa.html" class="tool-card flagship-card is-private" data-category="finanza" data-tool-id="spesa">
                         <div class="card-glass-glow"></div>
                         <div class="card-inner">
                             <div class="card-header-top-row">
@@ -473,7 +499,7 @@
 
                     
                     <!-- Cedolino+ -->
-                    <a href="cedolino.html" class="tool-card flagship-card" data-category="finanza" data-tool-id="cedolino">
+                    <a href="cedolino.html" class="tool-card flagship-card is-private" data-category="finanza" data-tool-id="cedolino">
                         <div class="card-glass-glow"></div>
                         <div class="card-inner">
                             <div class="card-header-top-row">
@@ -492,7 +518,7 @@
 
                     
                     <!-- Spotify Family Tracker -->
-                    <a href="spotify.html" class="tool-card flagship-card" data-category="finanza" data-tool-id="spotify">
+                    <a href="spotify.html" class="tool-card flagship-card is-private" data-category="finanza" data-tool-id="spotify">
                         <div class="card-glass-glow"></div>
                         <div class="card-inner">
                             <div class="card-header-top-row">

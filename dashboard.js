@@ -234,3 +234,55 @@ function initSearchAndFilters() {
         }
     });
 }
+	
+	document.addEventListener('DOMContentLoaded', () => {
+    // ... le tue funzioni esistenti ...
+    initPrivateSection();
+});
+
+function initPrivateSection() {
+    const SECRET_PASSWORD = "0712"; // Imposta qui la tua password
+    const unlockBtn = document.getElementById('unlockPrivateBtn');
+    const unlockIcon = document.getElementById('unlockIcon');
+    const unlockText = document.getElementById('unlockBtnText');
+
+    if (!unlockBtn) return;
+
+    // Controllo se l'utente si è già autenticato durante la sessione attuale
+    if (sessionStorage.getItem('private_unlocked') === 'true') {
+        enablePrivateAccess();
+    }
+
+    unlockBtn.addEventListener('click', () => {
+        const isUnlocked = document.body.classList.contains('private-unlocked');
+
+        if (isUnlocked) {
+            // Se è già sbloccato, cliccando di nuovo blocca l'accesso
+            disablePrivateAccess();
+        } else {
+            // Chiede la password
+            const userInput = prompt("Inserisci la password per accedere all'area riservata:");
+            if (userInput === SECRET_PASSWORD) {
+                enablePrivateAccess();
+                sessionStorage.setItem('private_unlocked', 'true');
+            } else if (userInput !== null) {
+                alert("Password errata!");
+            }
+        }
+    });
+
+    function enablePrivateAccess() {
+        document.body.classList.add('private-unlocked');
+        if (unlockText) unlockText.textContent = "Area Riservata (Sbloccata)";
+        if (unlockIcon) unlockIcon.setAttribute('data-lucide', 'lock-keyhole-open');
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function disablePrivateAccess() {
+        document.body.classList.remove('private-unlocked');
+        sessionStorage.removeItem('private_unlocked');
+        if (unlockText) unlockText.textContent = "Area Riservata";
+        if (unlockIcon) unlockIcon.setAttribute('data-lucide', 'lock');
+        if (window.lucide) lucide.createIcons();
+    }
+}
