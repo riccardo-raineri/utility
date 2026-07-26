@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <!-- Sfondo Dark / Tech -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </linearGradient>
+
+    <!-- Gradiente Pompa (Blu Neón) -->
+    <linearGradient id="pumpGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#2563EB" />
+    </linearGradient>
+
+    <!-- Gradiente Display / Prezzo -->
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8" />
+      <stop offset="100%" stop-color="#06B6D4" />
+    </linearGradient>
+
+    <!-- Gradiente Verde Dati MIMIT -->
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10B981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+
+    <!-- Effetto Glow / Luce -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#38BDF8" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+  <!-- Sfondo Scurito Arrotondato -->
+  <rect x="5" y="5" width="90" height="90" rx="22" fill="url(#bgGrad)" />
+
+  <g transform="translate(3, 2)">
+    <!-- 1. CORPO DEL DISTRIBUTORE -->
+    <!-- Colonna Principale -->
+    <rect x="28" y="22" width="34" height="58" rx="7" fill="url(#pumpGrad)" />
+    
+    <!-- Base Distributore -->
+    <path d="M23 80 H67 C68.6 80 70 81.4 70 83 V83 C70 84.6 68.6 86 67 86 H23 C21.4 86 20 84.6 20 83 V83 C20 81.4 21.4 80 23 80 Z" fill="#334155" />
+
+    <!-- 2. DISPLAY DEL PREZZO (€) -->
+    <rect x="33" y="28" width="24" height="18" rx="4" fill="#0F172A" />
+    <!-- Simbolo Euro nel Display -->
+    <text x="45" y="41" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="800" font-size="12" fill="url(#cyanGrad)" text-anchor="middle">€</text>
+
+    <!-- 3. GRAFICO PREZZI (Sulla pancia del distributore) -->
+    <path d="M34 68 L40 62 L46 65 L56 55" stroke="url(#cyanGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#neonGlow)" />
+    <circle cx="56" cy="55" r="2" fill="#38BDF8" />
+
+    <!-- 4. CANNA E PISTOLA DEL DISTRIBUTORE -->
+    <!-- Tubo Flessibile -->
+    <path d="M62 34 H67 C71 34 74 37 74 41 V64 C74 68 71 71 67 71 H64" stroke="#64748B" stroke-width="3.5" stroke-linecap="round" fill="none" />
+    
+    <!-- Supporto / Aggancio Pistola -->
+    <rect x="61" y="46" width="3" height="8" rx="1" fill="#475569" />
+
+    <!-- Pistola Erogatrice -->
+    <path d="M64 48 H70 L75 42 V38 H71" stroke="url(#cyanGrad)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#neonGlow)" />
+
+    <!-- 5. BADGE VERDE DATI UFFICIALI MIMIT (In alto a destra) -->
+    <circle cx="74" cy="22" r="6" fill="#0F172A" />
+    <circle cx="74" cy="22" r="4.5" fill="url(#greenGrad)" />
+    <path d="M72.2 22 L73.5 23.3 L75.8 21" stroke="#FFFFFF" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+  </g>
+</svg>
