@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Speed Typing Test Pro</title>
-	<link rel="icon" type="image/svg+xml" href="favicon.svg">
-	<link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
 	
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -184,9 +184,10 @@
             document.getElementById('timer-display').textContent = seconds + 's';
         }
 
+        /* Genera un numero elevato di parole (es. 250) per evitare di esaurirle */
         function generateText() {
             let words = [];
-            for (let i = 0; i < 60; i++) {
+            for (let i = 0; i < 250; i++) {
                 const randIndex = Math.floor(Math.random() * sampleWords.length);
                 words.push(sampleWords[randIndex]);
             }
@@ -194,6 +195,7 @@
             
             const wordBox = document.getElementById('word-box');
             wordBox.innerHTML = "";
+            wordBox.scrollTop = 0;
             charElements = [];
 
             textToType.split("").forEach((char, index) => {
@@ -217,6 +219,8 @@
             totalTyped = typedText.length;
             correctTyped = 0;
 
+            let currentSpan = null;
+
             charElements.forEach((span, i) => {
                 span.classList.remove('current', 'correct', 'incorrect');
 
@@ -229,10 +233,57 @@
                     }
                 } else if (i === typedText.length) {
                     span.classList.add('current');
+                    currentSpan = span;
                 }
             });
 
+            // Se siamo alla fine del testo generato, estendiamo con nuove parole
+            if (typedText.length >= textToType.length - 20) {
+                appendMoreWords();
+            }
+
+            // AUTO-SCROLL: centra la riga attiva all'interno del word-box
+            if (currentSpan) {
+                const wordBox = document.getElementById('word-box');
+                const spanOffset = currentSpan.offsetTop - wordBox.offsetTop;
+                // Mantiene il carattere corrente circa a metà/seconda riga del box
+                const targetScroll = spanOffset - 35;
+                
+                if (targetScroll > 0) {
+                    wordBox.scrollTo({
+                        top: targetScroll,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    wordBox.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
             updateStats();
+        }
+
+        /* Aggiunge ulteriori parole se l'utente è vicino alla fine */
+        function appendMoreWords() {
+            let additionalWords = [];
+            for (let i = 0; i < 50; i++) {
+                const randIndex = Math.floor(Math.random() * sampleWords.length);
+                additionalWords.push(sampleWords[randIndex]);
+            }
+            const newText = " " + additionalWords.join(" ");
+            const wordBox = document.getElementById('word-box');
+
+            newText.split("").forEach((char) => {
+                const span = document.createElement('span');
+                span.className = 'char';
+                span.textContent = char;
+                wordBox.appendChild(span);
+                charElements.push(span);
+            });
+
+            textToType += newText;
         }
 
         function startTimer() {
