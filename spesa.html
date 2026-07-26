@@ -73,7 +73,7 @@
           <label>
             Peso / Quantità
             <div class="input-with-unit">
-              <input type="number" id="input-peso" step="0.001" min="0" placeholder="0" inputmode="numeric">
+              <input type="text" inputmode="decimal" pattern="[0-9.,]*" id="input-peso" step="0.001" min="0" placeholder="0">
               <select id="input-unita">
                 <option value="g" selected>g</option>
                 <option value="kg">kg</option>
@@ -87,12 +87,12 @@
 
           <label>
             Prezzo Pieno €
-            <input type="number" id="input-prezzo" step="0.01" min="0" placeholder="0.00" inputmode="numeric">
+            <input type="text" inputmode="decimal" pattern="[0-9.,]*" id="input-prezzo" step="0.01" min="0" placeholder="0.00">
           </label>
 
           <label class="field-offerta">
             <span class="badge-offerta">🏷️ Prezzo in Offerta €</span>
-            <input type="number" id="input-prezzo-offerta" step="0.01" min="0" placeholder="0.00" inputmode="numeric">
+            <input type="text" inputmode="decimal" pattern="[0-9.,]*"  id="input-prezzo-offerta" step="0.01" min="0" placeholder="0.00">
           </label>
         </div>
 

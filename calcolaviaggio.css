@@ -270,12 +270,17 @@ body {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    flex: 1;
 }
 
 .input-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-wrap: wrap;
     gap: 12px;
+}
+
+.input-row > .input-group {
+    min-width: 130px;
 }
 
 label {
@@ -312,6 +317,7 @@ label {
     pointer-events: none;
 }
 
+input[type="text"],
 input[type="number"] {
     width: 100%;
     padding: 12px 14px;
@@ -331,19 +337,10 @@ input[type="number"] {
     padding-left: 38px;
 }
 
+input[type="text"]:focus,
 input[type="number"]:focus {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
-/* Rimuove freccette input numerici */
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-    -webkit-appearance: none;
-    margin: 0;
-}
-input[type=number] {
-    -moz-appearance: textfield;
 }
 
 /* Contenitore Switch Toggle Segmentato */

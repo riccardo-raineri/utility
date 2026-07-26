@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trip Computer — Calcolo Viaggio &amp; Carburante</title>
-	<link rel="icon" type="image/svg+xml" href="favicon.svg">
-	<link rel="apple-touch-icon" href="apple-touch-icon.png">
-	
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -66,33 +66,7 @@
                 <!-- Form Inputs -->
                 <div class="form-body">
                     
-                    <!-- Distanza -->
-                    <div class="input-group">
-                        <label for="distance">Distanza (km)</label>
-                        <div class="input-wrapper">
-                            <i data-lucide="milestone" class="input-icon"></i>
-                            <input type="number" id="distance" placeholder="es. 150 km" min="0" step="0.1"  inputmode="numeric" pattern="[0-9]*" autofocus>
-                        </div>
-                    </div>
-
-                    <!-- Row Consumo e Prezzo -->
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label for="consumption">Consumo (km/l)</label>
-                            <div class="input-wrapper">
-                                <input type="number" id="consumption" placeholder="18.5 km/l" min="0.1" step="0.1" inputmode="numeric" pattern="[0-9]*">
-                            </div>
-                        </div>
-                        <div class="input-group">
-                            <label for="price">Prezzo (€/l)</label>
-                            <div class="input-wrapper">
-                                <span class="input-prefix">€</span>
-                                <input type="number" id="price" placeholder="1.719" min="0" step="0.001" inputmode="numeric" pattern="[0-9]*">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Tipo Viaggio (Toggle Segmentato) -->
+                    <!-- 1. Tipo Viaggio (Spostato in cima) -->
                     <div class="input-group">
                         <label>Tipologia Viaggio</label>
                         <div class="toggle-container">
@@ -105,12 +79,47 @@
                         </div>
                     </div>
 
-                    <!-- Numero Passeggeri -->
+                    <!-- 2. Distanza -->
+                    <div class="input-group">
+                        <label for="distance">Distanza solo andata (km)</label>
+                        <div class="input-wrapper">
+                            <i data-lucide="milestone" class="input-icon"></i>
+                            <input type="text" id="distance" placeholder="es. 150" inputmode="decimal" pattern="[0-9.,]*" autofocus>
+                        </div>
+                    </div>
+
+                    <!-- 3. Consumo (Andata / Ritorno) e Prezzo -->
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="consumption" id="label-consumption">Consumo (km/l)</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="consumption" placeholder="18.5" inputmode="decimal" pattern="[0-9.,]*">
+                            </div>
+                        </div>
+
+                        <!-- Campo dinamico Consumo Ritorno -->
+                        <div class="input-group" id="group-consumption-return" style="display: none;">
+                            <label for="consumption-return">Consumo ritorno (km/l)</label>
+                            <div class="input-wrapper">
+                                <input type="text" id="consumption-return" placeholder="18.5" inputmode="decimal" pattern="[0-9.,]*">
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label for="price">Prezzo (€/l)</label>
+                            <div class="input-wrapper">
+                                <span class="input-prefix">€</span>
+                                <input type="text" id="price" placeholder="1.719" inputmode="decimal" pattern="[0-9.,]*">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Numero Passeggeri -->
                     <div class="input-group">
                         <label for="passengers">Passeggeri (per dividere la spesa)</label>
                         <div class="input-wrapper">
                             <i data-lucide="users" class="input-icon"></i>
-                            <input type="number" id="passengers" placeholder="1" min="1" step="1" value="1" inputmode="numeric" pattern="[0-9]*">
+                            <input type="text" id="passengers" placeholder="1" value="1" inputmode="numeric" pattern="[0-9]*">
                         </div>
                     </div>
 
@@ -129,6 +138,14 @@
 
                 <!-- Output Risultati -->
                 <div class="result" id="output">
+                    <div class="result-row">
+                        <span class="label">Km totali percorsi</span>
+                        <span class="value"><span id="total-distance">0</span> km</span>
+                    </div>
+                    <div class="result-row">
+                        <span class="label">Consumo medio</span>
+                        <span class="value"><span id="avg-consumption">0.0</span> km/l</span>
+                    </div>
                     <div class="result-row">
                         <span class="label">Litri necessari</span>
                         <span class="value"><span id="liters">0.0</span> L</span>
@@ -194,33 +211,74 @@
         }
 
         /* -----------------------------------------------------------------
+           UTILITY DI PARSING NUMERICO (SUPPORTO VIRGOLA E PUNTO)
+           ----------------------------------------------------------------- */
+        function parseNum(value) {
+            if (!value) return NaN;
+            const normalized = value.toString().trim().replace(',', '.');
+            return parseFloat(normalized);
+        }
+
+        /* -----------------------------------------------------------------
            LOGICA DEL TRIP COMPUTER
            ----------------------------------------------------------------- */
         function setTripType(roundTrip) {
             isRoundTrip = roundTrip;
             document.getElementById('btn-solo-andata').classList.toggle('active', !roundTrip);
             document.getElementById('btn-andata-ritorno').classList.toggle('active', roundTrip);
+
+            const returnGroup = document.getElementById('group-consumption-return');
+            const mainLabel = document.getElementById('label-consumption');
+
+            if (roundTrip) {
+                returnGroup.style.display = 'flex';
+                mainLabel.innerText = 'Consumo andata (km/l)';
+            } else {
+                returnGroup.style.display = 'none';
+                mainLabel.innerText = 'Consumo (km/l)';
+            }
         }
 
         function calculateTrip() {
-            const distanceInput = parseFloat(document.getElementById('distance').value);
-            const consumption = parseFloat(document.getElementById('consumption').value);
-            const price = parseFloat(document.getElementById('price').value);
+            const distOneWay = parseNum(document.getElementById('distance').value);
+            const consOutbound = parseNum(document.getElementById('consumption').value);
+            const price = parseNum(document.getElementById('price').value);
             const passengers = parseInt(document.getElementById('passengers').value) || 1;
 
-            if (isNaN(distanceInput) || isNaN(consumption) || isNaN(price) || distanceInput <= 0 || consumption <= 0 || price <= 0) return;
+            if (isNaN(distOneWay) || isNaN(consOutbound) || isNaN(price) || distOneWay <= 0 || consOutbound <= 0 || price <= 0) {
+                return;
+            }
 
-            const distance = isRoundTrip ? distanceInput * 2 : distanceInput;
-            const litersNeeded = distance / consumption;
+            let totalKm = distOneWay;
+            let litersNeeded = distOneWay / consOutbound;
+            let avgConsumption = consOutbound;
+
+            if (isRoundTrip) {
+                totalKm = distOneWay * 2;
+                let consReturn = parseNum(document.getElementById('consumption-return').value);
+                
+                // Se il consumo di ritorno non è specificato, si usa lo stesso dell'andata
+                if (isNaN(consReturn) || consReturn <= 0) {
+                    consReturn = consOutbound;
+                }
+
+                const litersReturn = distOneWay / consReturn;
+                litersNeeded += litersReturn;
+                avgConsumption = totalKm / litersNeeded;
+            }
+
             const totalCost = litersNeeded * price;
 
-            document.getElementById('liters').innerText = litersNeeded.toFixed(1);
-            document.getElementById('cost').innerText = totalCost.toFixed(2);
+            // Aggiornamento interfaccia risultati
+            document.getElementById('total-distance').innerText = totalKm.toLocaleString('it-IT');
+            document.getElementById('avg-consumption').innerText = avgConsumption.toFixed(1).replace('.', ',');
+            document.getElementById('liters').innerText = litersNeeded.toFixed(1).replace('.', ',');
+            document.getElementById('cost').innerText = totalCost.toFixed(2).replace('.', ',');
 
             const perPersonCard = document.getElementById('per-person');
             if (passengers > 1) {
                 const perPerson = totalCost / passengers;
-                document.getElementById('cost-per-person').innerText = perPerson.toFixed(2);
+                document.getElementById('cost-per-person').innerText = perPerson.toFixed(2).replace('.', ',');
                 perPersonCard.style.display = 'flex';
             } else {
                 perPersonCard.style.display = 'none';
@@ -232,8 +290,9 @@
         function resetForm() {
             document.getElementById('distance').value = '';
             document.getElementById('consumption').value = '';
+            document.getElementById('consumption-return').value = '';
             document.getElementById('price').value = '';
-            document.getElementById('passengers').value = 1;
+            document.getElementById('passengers').value = '1';
             setTripType(false);
             document.getElementById('output').style.display = 'none';
         }

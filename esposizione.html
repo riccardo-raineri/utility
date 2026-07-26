@@ -76,11 +76,11 @@
                     </div>
                     <div class="input-row">
                         <label for="eq-aperture-old">Apertura attuale (f/)</label>
-                        <input type="number" step="0.1" id="eq-aperture-old" value="2.8" inputmode="numeric" pattern="[0-9]*" oninput="calculate()">
+                        <input type="text" step="0.1" id="eq-aperture-old" value="2.8" inputmode="decimal" pattern="[0-9.,]*" oninput="calculate()">
                     </div>
                     <div class="input-row">
                         <label for="eq-aperture-new">Nuova Apertura (f/)</label>
-                        <input type="number" step="0.1" id="eq-aperture-new" value="8.0" inputmode="numeric" pattern="[0-9]*" oninput="calculate()">
+                        <input type="text" step="0.1" id="eq-aperture-new" value="8.0" inputmode="decimal" pattern="[0-9.,]*" oninput="calculate()">
                     </div>
                 </div>
 
@@ -301,51 +301,56 @@
             }
         }
 
-        function calculate() {
-            let resultStr = "---";
-            const activeTab = document.querySelector('.form-section.active').id;
+function calculate() {
+    let resultStr = "---";
+    const activeTab = document.querySelector('.form-section.active').id;
 
-            if (activeTab === 'eq') {
-                const shutterStr = document.getElementById('eq-shutter').value;
-                const fOld = parseFloat(document.getElementById('eq-aperture-old').value);
-                const fNew = parseFloat(document.getElementById('eq-aperture-new').value);
-                
-                const baseSeconds = parseShutter(shutterStr);
-                if (baseSeconds > 0 && fOld > 0 && fNew > 0) {
-                    const factor = Math.pow(fNew / fOld, 2);
-                    const newSeconds = baseSeconds * factor;
-                    resultStr = formatShutter(newSeconds);
-                } else {
-                    resultStr = "Errore input";
-                }
-            } 
-            else if (activeTab === 'nd') {
-                const shutterStr = document.getElementById('nd-shutter').value;
-                const stops = parseInt(document.getElementById('nd-stops').value) || 0;
-                
-                const baseSeconds = parseShutter(shutterStr);
-                if (baseSeconds > 0) {
-                    const newSeconds = baseSeconds * Math.pow(2, stops);
-                    resultStr = formatShutter(newSeconds);
-                } else {
-                    resultStr = "Errore input";
-                }
-            }
-            else if (activeTab === 'astro') {
-                const focal = parseInt(document.getElementById('astro-focal').value);
-                const cropFactor = parseFloat(document.getElementById('astro-sensor').value) || 1.0;
-                
-                if (focal > 0) {
-                    const effectiveFocal = focal * cropFactor;
-                    const time = 500 / effectiveFocal;
-                    resultStr = Math.floor(time) + "s";
-                } else {
-                    resultStr = "Errore focale";
-                }
-            }
-
-            document.getElementById('result').innerText = resultStr;
+    if (activeTab === 'eq') {
+        const shutterStr = document.getElementById('eq-shutter').value;
+        
+        // Normalizza le stringhe sostituendo la virgola con il punto
+        const rawFOld = document.getElementById('eq-aperture-old').value.replace(',', '.');
+        const rawFNew = document.getElementById('eq-aperture-new').value.replace(',', '.');
+        
+        const fOld = parseFloat(rawFOld);
+        const fNew = parseFloat(rawFNew);
+        
+        const baseSeconds = parseShutter(shutterStr);
+        if (baseSeconds > 0 && fOld > 0 && fNew > 0) {
+            const factor = Math.pow(fNew / fOld, 2);
+            const newSeconds = baseSeconds * factor;
+            resultStr = formatShutter(newSeconds);
+        } else {
+            resultStr = "Errore input";
         }
+    } 
+    else if (activeTab === 'nd') {
+        const shutterStr = document.getElementById('nd-shutter').value;
+        const stops = parseInt(document.getElementById('nd-stops').value) || 0;
+        
+        const baseSeconds = parseShutter(shutterStr);
+        if (baseSeconds > 0) {
+            const newSeconds = baseSeconds * Math.pow(2, stops);
+            resultStr = formatShutter(newSeconds);
+        } else {
+            resultStr = "Errore input";
+        }
+    }
+    else if (activeTab === 'astro') {
+        const focal = parseInt(document.getElementById('astro-focal').value);
+        const cropFactor = parseFloat(document.getElementById('astro-sensor').value) || 1.0;
+        
+        if (focal > 0) {
+            const effectiveFocal = focal * cropFactor;
+            const time = 500 / effectiveFocal;
+            resultStr = Math.floor(time) + "s";
+        } else {
+            resultStr = "Errore focale";
+        }
+    }
+
+    document.getElementById('result').innerText = resultStr;
+}
     </script>
 </body>
 </html>
