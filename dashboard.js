@@ -261,7 +261,7 @@ function initPrivateSection() {
             disablePrivateAccess();
         } else {
             // Chiede la password
-            const userInput = prompt("Inserisci la password per accedere all'area riservata:");
+            const userInput = prompt("Inserisci la password per effettuare il Login:");
             if (userInput === SECRET_PASSWORD) {
                 enablePrivateAccess();
                 sessionStorage.setItem('private_unlocked', 'true');
@@ -273,7 +273,7 @@ function initPrivateSection() {
 
     function enablePrivateAccess() {
         document.body.classList.add('private-unlocked');
-        if (unlockText) unlockText.textContent = "Area Riservata (Sbloccata)";
+        if (unlockText) unlockText.textContent = "Login effettuato";
         if (unlockIcon) unlockIcon.setAttribute('data-lucide', 'lock-keyhole-open');
         if (window.lucide) lucide.createIcons();
     }
