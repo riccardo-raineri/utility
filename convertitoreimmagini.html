@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convertitore Immagini</title>
-	<link rel="icon" type="image/svg+xml" href="favicon.svg">
-	<link rel="apple-touch-icon" href="apple-touch-icon.png">
-	
+    <title>Convertitore Multiformato Avanzato</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,12 +15,16 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- Librerie esterne per formati speciali (HEIC, PDF, DOCX) -->
+    <script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
     <!-- Foglio di Stile -->
     <link rel="stylesheet" href="convertitoreimmagini.css">
 </head>
 <body>
 
-    <!-- Canvas di Sfondo -->
     <div class="bg-canvas">
         <div class="bg-grid-pattern"></div>
     </div>
@@ -40,7 +44,7 @@
                     <i data-lucide="moon" class="icon-moon"></i>
                 </button>
                 <span class="tool-badge">
-                    <i data-lucide="image"></i>
+                    <i data-lucide="file-type"></i>
                     Convertitore Immagini
                 </span>
             </div>
@@ -52,11 +56,11 @@
                 
                 <div class="card-header">
                     <div class="icon">
-                        <i data-lucide="image-up"></i>
+                        <i data-lucide="file-output"></i>
                     </div>
                     <div class="title-group">
                         <h2>Convertitore Immagini</h2>
-                        <p>Converti, ridimensiona e ottimizza le tue immagini</p>
+                        <p>Converti tra Immagini, PDF, HEIC, SVG, ICO e Documenti</p>
                     </div>
                 </div>
 
@@ -64,10 +68,11 @@
                 <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
                     <div class="drop-zone-content">
                         <i data-lucide="upload-cloud" class="upload-icon"></i>
-                        <p class="drop-title">Trascina qui l'immagine</p>
-                        <p class="drop-subtitle">oppure <span>sfoglia i file</span></p>
+                        <p class="drop-title">Trascina qui il file</p>
+                        <p class="drop-subtitle">Supporta PNG, JPG, WEBP, SVG, GIF, ICO, TIFF, PSD, HEIC, PDF, DOCX</p>
                     </div>
-                    <input type="file" id="file-input" accept="image/*" hidden onchange="handleFileSelect(event)">
+                    <!-- Accept esteso a tutti i formati supportati -->
+                    <input type="file" id="file-input" accept="image/*,.heic,.heif,.psd,.tiff,.tif,.pdf,.doc,.docx,.svg,.ico" hidden onchange="handleFileSelect(event)">
                 </div>
 
                 <!-- Preview File Caricato -->
@@ -79,7 +84,7 @@
                         <span class="file-name" id="file-name">nome_file.jpg</span>
                         <span class="file-meta" id="file-meta">1920×1080 • 1.2 MB</span>
                     </div>
-                    <button class="btn-remove" onclick="resetFile()" title="Rimuovi immagine" aria-label="Rimuovi immagine">
+                    <button class="btn-remove" onclick="resetFile()" title="Rimuovi file" aria-label="Rimuovi file">
                         <i data-lucide="x"></i>
                     </button>
                 </div>
@@ -90,15 +95,26 @@
                     <div class="input-group">
                         <label for="format-select">Formato di destinazione</label>
                         <select id="format-select" onchange="toggleQualityControl()">
-                            <option value="image/png">PNG (.png)</option>
-                            <option value="image/jpeg">JPG / JPEG (.jpg)</option>
-                            <option value="image/webp">WEBP (.webp)</option>
-                            <option value="image/avif">AVIF (.avif)</option>
+                            <optgroup label="Formati Immagine Standard">
+                                <option value="image/png">PNG (.png)</option>
+                                <option value="image/jpeg">JPG / JPEG (.jpg)</option>
+                                <option value="image/webp">WEBP (.webp)</option>
+                                <option value="image/avif">AVIF (.avif)</option>
+                                <option value="image/gif">GIF (.gif)</option>
+                            </optgroup>
+                            <optgroup label="Formati Speciali & Icone">
+                                <option value="image/x-icon">ICO / Favicon (.ico)</option>
+                                <option value="image/svg+xml">SVG Vector Graphic (.svg)</option>
+                                <option value="image/tiff">TIFF (.tiff)</option>
+                            </optgroup>
+                            <optgroup label="Documenti">
+                                <option value="application/pdf">Documento PDF (.pdf)</option>
+                            </optgroup>
                         </select>
                     </div>
 
                     <!-- Opzioni di Ridimensionamento -->
-                    <div class="input-group">
+                    <div class="input-group" id="resize-group">
                         <label>Ridimensiona Dimensioni (PX)</label>
                         <div class="resize-grid">
                             <div>
@@ -125,7 +141,7 @@
 
                     <button class="btn-primary" id="btn-convert" onclick="processConversion()">
                         <i data-lucide="zap"></i>
-                        Elabora Immagine
+                        Elabora e Converti File
                     </button>
                 </div>
 
@@ -166,224 +182,20 @@
 
                     <button class="btn-success" id="btn-download" onclick="downloadFile()">
                         <i data-lucide="download"></i>
-                        Scarica Immagine
+                        Scarica File Convertito
                     </button>
                 </div>
 
             </div>
         </main>
 
-        <!-- Footer -->
         <footer class="app-footer">
             <span>Creative Utility Toolbox — Riccardo Raineri</span>
         </footer>
 
     </div>
 
-    <!-- Script Logico e Tema -->
-    <script>
-        let loadedImage = null;
-        let originalFile = null;
-        let originalFileName = "";
-        let convertedBlob = null;
-        let convertedUrl = null;
-        let aspectRatio = 1;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            applyStoredTheme();
-            refreshIcons();
-        });
-
-        function refreshIcons() {
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        }
-
-        /* -----------------------------------------------------------------
-           GESTIONE TEMA (DEFAULT DARK / OPTIONAL LIGHT)
-           ----------------------------------------------------------------- */
-        function applyStoredTheme() {
-            const stored = localStorage.getItem('toolbox_theme');
-            if (stored === 'light') {
-                document.body.setAttribute('data-theme', 'light');
-            } else {
-                document.body.removeAttribute('data-theme');
-            }
-        }
-
-        function toggleTheme() {
-            const body = document.body;
-            const isLight = body.getAttribute('data-theme') === 'light';
-
-            if (isLight) {
-                body.removeAttribute('data-theme');
-                localStorage.setItem('toolbox_theme', 'dark');
-            } else {
-                body.setAttribute('data-theme', 'light');
-                localStorage.setItem('toolbox_theme', 'light');
-            }
-        }
-
-        /* -----------------------------------------------------------------
-           GESTIONE DRAG & DROP E CARICAMENTO FILE
-           ----------------------------------------------------------------- */
-        const dropZone = document.getElementById('drop-zone');
-        ['dragenter', 'dragover'].forEach(name => dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); }));
-        ['dragleave', 'drop'].forEach(name => dropZone.addEventListener(name, (e) => { e.preventDefault(); dropZone.classList.remove('drag-over'); }));
-        dropZone.addEventListener('drop', (e) => { if (e.dataTransfer.files.length) processFile(e.dataTransfer.files[0]); });
-
-        function handleFileSelect(e) { if (e.target.files.length) processFile(e.target.files[0]); }
-
-        function processFile(file) {
-            originalFile = file;
-            originalFileName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    loadedImage = img;
-                    aspectRatio = img.width / img.height;
-                    
-                    document.getElementById('preview-img').src = e.target.result;
-                    document.getElementById('file-name').textContent = file.name;
-                    document.getElementById('file-meta').textContent = `${img.width}×${img.height} px • ${formatBytes(file.size)}`;
-
-                    document.getElementById('resize-width').value = img.width;
-                    document.getElementById('resize-height').value = img.height;
-
-                    document.getElementById('drop-zone').style.display = 'none';
-                    document.getElementById('file-preview').style.display = 'flex';
-                    document.getElementById('options-group').style.display = 'block';
-
-                    toggleQualityControl();
-                    hideResults();
-                    refreshIcons();
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        /* -----------------------------------------------------------------
-           RIDIMENSIONAMENTO & OPZIONI
-           ----------------------------------------------------------------- */
-        function handleDimensionChange(type) {
-            if (!document.getElementById('keep-aspect').checked || !aspectRatio) return;
-            const wInput = document.getElementById('resize-width');
-            const hInput = document.getElementById('resize-height');
-
-            if (type === 'width' && wInput.value) {
-                hInput.value = Math.round(wInput.value / aspectRatio);
-            } else if (type === 'height' && hInput.value) {
-                wInput.value = Math.round(hInput.value * aspectRatio);
-            }
-        }
-
-        function toggleQualityControl() {
-            const format = document.getElementById('format-select').value;
-            document.getElementById('quality-group').style.display = (format === 'image/jpeg' || format === 'image/webp' || format === 'image/avif') ? 'block' : 'none';
-            hideResults();
-        }
-
-        function updateQualityText(val) { document.getElementById('quality-value').textContent = val + '%'; }
-
-        /* -----------------------------------------------------------------
-           SLIDER DI COMPARAZIONE PRIMA/DOPO
-           ----------------------------------------------------------------- */
-        function updateSliderPosition(value) {
-            const wrapper = document.getElementById('slider-before-wrapper');
-            const handle = document.getElementById('slider-handle');
-            const container = document.getElementById('slider-container');
-            const beforeImg = document.getElementById('compare-before-img');
-            wrapper.style.width = value + '%';
-            handle.style.left = value + '%';
-            if (container) beforeImg.style.width = container.offsetWidth + 'px';
-        }
-
-        /* -----------------------------------------------------------------
-           ELABORAZIONE E CONVERSIONE IMMAGINE
-           ----------------------------------------------------------------- */
-        function processConversion() {
-            if (!loadedImage) return;
-
-            const format = document.getElementById('format-select').value;
-            const quality = parseFloat(document.getElementById('quality-range').value) / 100;
-            const targetWidth = parseInt(document.getElementById('resize-width').value) || loadedImage.width;
-            const targetHeight = parseInt(document.getElementById('resize-height').value) || loadedImage.height;
-
-            const canvas = document.createElement('canvas');
-            canvas.width = targetWidth;
-            canvas.height = targetHeight;
-            const ctx = canvas.getContext('2d');
-
-            if (format === 'image/jpeg') {
-                ctx.fillStyle = '#FFFFFF';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
-
-            ctx.drawImage(loadedImage, 0, 0, targetWidth, targetHeight);
-
-            canvas.toBlob((blob) => {
-                if (!blob) return alert("Formato non supportato dal tuo browser.");
-
-                if (convertedUrl) URL.revokeObjectURL(convertedUrl);
-                convertedBlob = blob;
-                convertedUrl = URL.createObjectURL(blob);
-
-                document.getElementById('compare-before-img').src = document.getElementById('preview-img').src;
-                document.getElementById('compare-after-img').src = convertedUrl;
-
-                const origBytes = originalFile.size;
-                const newBytes = blob.size;
-                const diffPerc = (((newBytes - origBytes) / origBytes) * 100).toFixed(1);
-
-                document.getElementById('stat-orig-size').textContent = formatBytes(origBytes);
-                document.getElementById('stat-new-size').textContent = formatBytes(newBytes);
-
-                const diffElem = document.getElementById('stat-diff-perc');
-                diffElem.textContent = (diffPerc > 0 ? '+' : '') + diffPerc + '%';
-                diffElem.style.color = diffPerc <= 0 ? 'var(--color-success)' : 'var(--color-danger)';
-
-                document.getElementById('result-section').style.display = 'block';
-                refreshIcons();
-                setTimeout(() => updateSliderPosition(50), 50);
-            }, format, quality);
-        }
-
-        /* -----------------------------------------------------------------
-           DOWNLOAD & UTILITY
-           ----------------------------------------------------------------- */
-        function downloadFile() {
-            if (!convertedUrl) return;
-            const format = document.getElementById('format-select').value;
-            const extMap = { 'image/png': 'png', 'image/jpeg': 'jpg', 'image/webp': 'webp', 'image/avif': 'avif' };
-            const link = document.createElement('a');
-            link.download = `${originalFileName}_convertito.${extMap[format] || 'png'}`;
-            link.href = convertedUrl;
-            link.click();
-        }
-
-        function hideResults() { document.getElementById('result-section').style.display = 'none'; }
-
-        function resetFile() {
-            loadedImage = null;
-            originalFile = null;
-            if (convertedUrl) URL.revokeObjectURL(convertedUrl);
-            convertedUrl = null;
-
-            document.getElementById('file-input').value = "";
-            document.getElementById('drop-zone').style.display = 'block';
-            document.getElementById('file-preview').style.display = 'none';
-            document.getElementById('options-group').style.display = 'none';
-            hideResults();
-        }
-
-        function formatBytes(bytes) {
-            if (bytes === 0) return '0 Byte';
-            const k = 1024, sizes = ['Byte', 'KB', 'MB', 'GB'], i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-    </script>
+    <!-- Script di Conversione -->
+    <script src="convertitoreimmagini.js"></script>
 </body>
 </html>
