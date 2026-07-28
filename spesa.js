@@ -40,15 +40,18 @@ function mostraCaricamento(attiva) {
 
 async function chiamaBackend(action, dataObj = null) {
   try {
+    mostraCaricamento(true);
     let url = `${WEBAPP_URL}?action=${action}`;
     let opzioni = { method: 'GET' };
 
-    // Se dobbiamo salvare dei dati (aggiornaLista o salvaOrdine), usiamo il POST
-    if (dataObj) {
+    // Se salviamo dati (aggiornaLista o salvaOrdine), inviamo la POST nel body
+    if (dataObj !== null) {
       opzioni = {
         method: 'POST',
-        mode: 'cors',
-        body: JSON.stringify(dataObj) // I dati viaggiano sicuri nel body
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8' // Previene errori CORS preflight su Google Apps Script
+        },
+        body: typeof dataObj === 'string' ? dataObj : JSON.stringify(dataObj)
       };
     }
 
@@ -61,29 +64,57 @@ async function chiamaBackend(action, dataObj = null) {
   } catch (errore) {
     console.error("Errore durante la chiamata al backend:", errore);
     throw errore;
+  } finally {
+    mostraCaricamento(false);
   }
 }
 
 async function caricaDati() {
   try {
     const json = await chiamaBackend('dati');
-    stato.lista = json.lista || [];
-    stato.ordini = json.ordini || {};
-    renderTutto();
+    if (json && json.ok) {
+      stato.lista = json.lista || [];
+      stato.ordini = json.ordini || {};
+      renderTutto();
+    } else {
+      mostraToast('Errore caricamento: ' + (json ? json.errore : 'Risposta non valida'));
+    }
   } catch (err) {
     mostraToast('Errore caricamento: ' + err.message);
   }
 }
 
-async function sincronizzaLista() {
-  // ... il tuo codice per recuperare l'array dei prodotti ...
-  const listaProdotti = ottenereArrayProdotti(); 
+// Converte gli oggetti nello stato locale in un formato pulito
+function ottenereArrayProdotti() {
+  if (!stato.lista || !Array.isArray(stato.lista)) return [];
 
-  // CORRETTO: Passa 'aggiornaLista' e l'array pulito separatamente
-  const risultato = await chiamaBackend('aggiornaLista', listaProdotti);
-  
-  if (risultato && risultato.ok) {
-    console.log("Lista salvata su Google Fogli!");
+  return stato.lista.map(item => ({
+    prodotto: item.prodotto || '',
+    marca: item.marca || '',
+    categoria: item.categoria || 'Altro',
+    unita: item.unita || 'g',
+    peso: Number(item.peso) || 0,
+    prezzo: Number(item.prezzo) || 0,
+    prezzoOriginale: item.prezzoOriginale ? Number(item.prezzoOriginale) : null,
+    inOfferta: Boolean(item.inOfferta),
+    supermercato: item.supermercato || '',
+    spuntato: Boolean(item.spuntato),
+    preferito: Boolean(item.preferito)
+  }));
+}
+
+async function sincronizzaLista() {
+  try {
+    const listaProdotti = ottenereArrayProdotti(); 
+    const risultato = await chiamaBackend('aggiornaLista', listaProdotti);
+    
+    if (risultato && risultato.ok) {
+      console.log("Lista salvata con successo su Google Fogli!");
+    } else {
+      mostraToast('Errore salvataggio: ' + (risultato ? risultato.errore : 'Sconosciuto'));
+    }
+  } catch (err) {
+    mostraToast('Errore sincronizzazione: ' + err.message);
   }
 }
 
@@ -113,11 +144,13 @@ function collegaEventi() {
 
   // Toggle Stella Preferito nel Form
   const btnStellaForm = document.getElementById('btn-toggle-base-form');
-  btnStellaForm.addEventListener('click', function() {
-    isPreferitoInForm = !isPreferitoInForm;
-    btnStellaForm.textContent = isPreferitoInForm ? '★' : '☆';
-    btnStellaForm.style.color = isPreferitoInForm ? 'var(--accento)' : '';
-  });
+  if (btnStellaForm) {
+    btnStellaForm.addEventListener('click', function() {
+      isPreferitoInForm = !isPreferitoInForm;
+      btnStellaForm.textContent = isPreferitoInForm ? '★' : '☆';
+      btnStellaForm.style.color = isPreferitoInForm ? 'var(--accento)' : '';
+    });
+  }
 
   document.getElementById('input-supermercato').addEventListener('change', function () {
     const inputNuovo = document.getElementById('input-supermercato-nuovo');
@@ -150,7 +183,7 @@ function collegaEventi() {
       const stores = [...new Set([...daOrdini, ...daLista].filter(Boolean))].sort();
 
       if (stores.length === 0) {
-        const nuovoNegozio = prompt('In quale supermercato di trovi?');
+        const nuovoNegozio = prompt('In quale supermercato ti trovi?');
         if (nuovoNegozio && nuovoNegozio.trim()) {
           const negozio = nuovoNegozio.trim();
           document.getElementById('input-supermercato').value = negozio;
@@ -339,8 +372,10 @@ function modificaProdottoInLista(indice) {
 
   isPreferitoInForm = !!item.preferito;
   const btnStellaForm = document.getElementById('btn-toggle-base-form');
-  btnStellaForm.textContent = isPreferitoInForm ? '★' : '☆';
-  btnStellaForm.style.color = isPreferitoInForm ? 'var(--accento)' : '';
+  if (btnStellaForm) {
+    btnStellaForm.textContent = isPreferitoInForm ? '★' : '☆';
+    btnStellaForm.style.color = isPreferitoInForm ? 'var(--accento)' : '';
+  }
 
   indiceInModifica = indice;
   document.getElementById('btn-aggiungi').textContent = '✓ Salva modifiche';
@@ -364,13 +399,16 @@ function resetForm() {
   document.getElementById('hint-prezzo').textContent = '';
   isPreferitoInForm = false;
   const btnStellaForm = document.getElementById('btn-toggle-base-form');
-  btnStellaForm.textContent = '☆';
-  btnStellaForm.style.color = '';
+  if (btnStellaForm) {
+    btnStellaForm.textContent = '☆';
+    btnStellaForm.style.color = '';
+  }
 }
 
 /* Rendering della Lista e Stella Preferiti */
 function renderListaSpesa() {
   const contenitore = document.getElementById('lista-categorie');
+  if (!contenitore) return;
   contenitore.innerHTML = '';
 
   const supermercato = supermercatoSelezionato();
@@ -411,7 +449,7 @@ function creaRigaProdotto(item, indice) {
   checkbox.checked = item.spuntato;
   checkbox.addEventListener('change', () => toggleSpuntato(indice));
 
-  // PULSANTE STELLA PREFERITI FUNZIONANTE NELLA LISTA
+  // Stella Preferiti nella lista
   const btnPref = document.createElement('button');
   btnPref.type = 'button';
   btnPref.className = 'preferito-toggle' + (item.preferito ? ' attivo' : '');
@@ -466,7 +504,7 @@ function creaRigaProdotto(item, indice) {
   return wrapper;
 }
 
-// Azione al click della Stella Preferiti nella lista
+// Stella Preferiti nella lista
 async function togglePreferitoInLista(indice) {
   stato.lista[indice].preferito = !stato.lista[indice].preferito;
   renderListaSpesa();
@@ -504,7 +542,8 @@ function apriPannelloOrdine() {
 
 function renderPannelloOrdine() {
   const cont = document.getElementById('ordine-lista');
-  cont.innerHTML = ordineCorrente.map((catId, idx) => {
+  if (!cont) return;
+  cont.innerHTML = ordineCorrente.map((catId) => {
     const cat = CATEGORIE.find(c => c.id === catId);
     return `<div class="ordine-riga">
       <span>${cat ? cat.icona : ''} ${catId}</span>
@@ -514,13 +553,22 @@ function renderPannelloOrdine() {
 
 async function salvaOrdineCorsie() {
   const supermercato = supermercatoSelezionato();
+  if (!supermercato) return;
+
   try {
-    const json = await chiamaBackend('salvaOrdine', { data: JSON.stringify({ supermercato: supermercato, ordine: ordineCorrente }) });
-    stato.ordini = json.ordini; 
-    renderListaSpesa();
-    document.getElementById('pannello-ordine').classList.add('nascosto');
-    mostraToast('Ordine corsie salvato');
-  } catch (err) { mostraToast('Errore: ' + err.message); }
+    const payload = { supermercato: supermercato, ordine: ordineCorrente };
+    const json = await chiamaBackend('salvaOrdine', payload);
+    if (json && json.ok) {
+      stato.ordini = json.ordini || {}; 
+      renderListaSpesa();
+      document.getElementById('pannello-ordine').classList.add('nascosto');
+      mostraToast('Ordine corsie salvato');
+    } else {
+      mostraToast('Errore salvataggio corsie: ' + (json ? json.errore : 'Errore sconosciuto'));
+    }
+  } catch (err) { 
+    mostraToast('Errore: ' + err.message); 
+  }
 }
 
 function renderTutto() {
@@ -531,6 +579,7 @@ function renderTutto() {
 let toastTimer = null;
 function mostraToast(messaggio) {
   const toast = document.getElementById('toast');
+  if (!toast) return;
   toast.textContent = messaggio; 
   toast.classList.add('visibile');
   clearTimeout(toastTimer); 
