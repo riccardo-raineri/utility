@@ -38,16 +38,29 @@ function mostraCaricamento(attiva) {
   }
 }
 
-async function chiamaBackend(action, extraParams) {
-  mostraCaricamento(true);
+async function chiamaBackend(action, dataObj = null) {
   try {
-    const params = new URLSearchParams(Object.assign({ action: action }, extraParams || {}));
-    const res = await fetch(WEBAPP_URL + '?' + params.toString());
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.errore || 'Errore dal backend');
-    return json;
-  } finally {
-    mostraCaricamento(false);
+    let url = `${WEBAPP_URL}?action=${action}`;
+    let opzioni = { method: 'GET' };
+
+    // Se dobbiamo salvare dei dati (aggiornaLista o salvaOrdine), usiamo il POST
+    if (dataObj) {
+      opzioni = {
+        method: 'POST',
+        mode: 'cors',
+        body: JSON.stringify(dataObj) // I dati viaggiano sicuri nel body
+      };
+    }
+
+    const response = await fetch(url, opzioni);
+    if (!response.ok) {
+      throw new Error(`Errore Server: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (errore) {
+    console.error("Errore durante la chiamata al backend:", errore);
+    throw errore;
   }
 }
 
@@ -63,7 +76,15 @@ async function caricaDati() {
 }
 
 async function sincronizzaLista() {
-  await chiamaBackend('aggiornaLista', { data: JSON.stringify(stato.lista) });
+  // ... il tuo codice per recuperare l'array dei prodotti ...
+  const listaProdotti = ottenereArrayProdotti(); 
+
+  // CORRETTO: Passa 'aggiornaLista' e l'array pulito separatamente
+  const risultato = await chiamaBackend('aggiornaLista', listaProdotti);
+  
+  if (risultato && risultato.ok) {
+    console.log("Lista salvata su Google Fogli!");
+  }
 }
 
 /* Inizializzazione Eventi */
