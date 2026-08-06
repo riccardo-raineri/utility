@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pepe Handmade | Artigianato, Cucito & Workshop | Bologna</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="pepe2.css">
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="#" class="nav-logo">
+      <img src="img/pepe_logo.png" alt="Pepe Handmade">
+    </a>
+    <ul class="nav-links">
+      <li><a href="#chi-siamo">Chi siamo</a></li>
+      <li><a href="#catalogo">Catalogo</a></li>
+      <li><a href="#personalizzati">Su Commissione</a></li>
+      <li><a href="#workshop">Workshop</a></li>
+      <li><a href="#contatti" class="nav-btn">Contatti</a></li>
+    </ul>
+    <button class="menu-toggle" aria-label="Apri menu"><span></span><span></span></button>
+  </div>
+</nav>
+
+<!-- HERO SECTION -->
+<header class="hero">
+  <div class="hero-backdrop"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🌿 Laboratorio Artigianale · Bologna</div>
+    <h1 class="hero-title">Stoffe lavorate a mano, <em>colori & idee uniche.</em></h1>
+    <p class="hero-subtitle">Accessori sartoriali dipinti e cuciti a mano con cura per i dettagli. Scopri il catalogo, personalizza la tua idea o crea insieme a noi nei workshop.</p>
+    <div class="hero-actions">
+      <a href="#catalogo" class="btn btn-primary">Esplora il Catalogo →</a>
+      <a href="#workshop" class="btn btn-outline">Scopri i Workshop</a>
+    </div>
+  </div>
+</header>
+
+<!-- CHI SIAMO SECTION -->
+<section id="chi-siamo" class="section chi-section">
+  <div class="container chi-grid">
+    <div class="chi-media reveal">
+      <div class="frame-decorative">
+        <img src="img/chisiamo.jpg" alt="Eva e Dario – Pepe Handmade" class="chi-img">
+      </div>
+    </div>
+    <div class="chi-content reveal">
+      <span class="section-tag">Chi Siamo</span>
+      <h2 class="section-title">Ciao, siamo <em>Eva e Dario!</em></h2>
+      <p class="lead-txt">Le mani e i colori dietro Pepe Handmade.<br>Nel nostro laboratorio lavoriamo le stoffe a mano, attenti a ogni singolo dettaglio, per creare accessori belli e utili: cover book, porta Kindle, portaoggetti e tanto altro.</p>
+      
+      <div class="info-card-group">
+        <div class="info-card">
+          <div class="info-card-icon">🎨</div>
+          <div>
+            <h4>I Workshop Creativi</h4>
+            <p>Organizziamo incontri dove ti assistiamo passo dopo passo per dipingere, personalizzare e trasformare i nostri prodotti in qualcosa di unico… fatto da te!</p>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="info-card-icon">📍</div>
+          <div>
+            <h4>Dove trovarci</h4>
+            <p>Piano piano stiamo costruendo la nostra piccola realtà. Ci trovi nel nostro shop online, ma anche ai market e agli eventi di Bologna.<br>Segui il nostro profilo Instagram per scoprire le prossime date e i nuovi arrivi!</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chi-links">
+        <a href="https://instagram.com/pepe_handmadee" target="_blank" rel="noopener" class="btn btn-primary">📸 Seguici su Instagram</a>
+        <a href="https://linktr.ee/pepehandmade" target="_blank" rel="noopener" class="btn btn-ghost">🔗 Linktree</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATALOGO SECTION -->
+<section id="catalogo" class="section cat-section">
+  <div class="container">
+    <div class="section-header text-center reveal">
+      <span class="section-tag">Catalogo</span>
+      <h2 class="section-title">I nostri <em>must have</em></h2>
+      <p class="section-desc">Tutti i nostri prodotti artigianali, cuciti e dipinti a mano. Scegli il tuo modello preferito, seleziona la fantasia e personalizzalo come vuoi.</p>
+    </div>
+
+    <!-- Griglia Catalogo Dinamica -->
+    <div class="cat-grid" id="full-catalogo-grid">
+      <!-- I prodotti vengono caricati da pepe.js -->
+    </div>
+
+    <div class="cat-banner reveal">
+      <div class="cat-banner-icon">🛍️</div>
+      <div class="cat-banner-text">
+        <p><strong>Ogni prodotto è fatto a mano con cura, quindi ci vuole un po' di tempo per realizzarlo.</strong><br>Vuoi personalizzarlo con un disegno o una dedica? Scrivici in DM! Trovi tutto nel nostro catalogo online.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SU COMMISSIONE SECTION -->
+<section id="personalizzati" class="section pers-section">
+  <div class="container pers-grid">
+    <div class="pers-info reveal">
+      <span class="section-tag">Su Commissione</span>
+      <h2 class="section-title">Il tuo articolo, <em>come lo vuoi tu.</em></h2>
+      <p class="lead-txt">Ogni prodotto è personalizzabile: disegni, dediche o iniziali. Dicci cosa vuoi e noi saremo felici di realizzarlo!</p>
+
+      <div class="process-steps">
+        <div class="process-step">
+          <div class="step-num">01</div>
+          <div class="step-body">
+            <h4>Scrivici in DM o su WhatsApp</h4>
+            <p>Raccontaci cosa vorresti: tipo di articolo, tema, misura, se è un regalo o per te.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">02</div>
+          <div class="step-body">
+            <h4>Scegliamo insieme</h4>
+            <p>Ti mostriamo le fantasie disponibili e definiamo ogni dettaglio del progetto.</p>
+          </div>
+        </div>
+        <div class="process-step">
+          <div class="step-num">03</div>
+          <div class="step-body">
+            <h4>Realizziamo il tuo pezzo</h4>
+            <p>Lo creiamo a mano, con cura. Ci vorrà un po' di tempo — ma sarà davvero tuo.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pers-box-card reveal">
+      <h3 class="pers-box-title">Cosa possiamo creare per te</h3>
+      <p class="pers-box-sub">Tutti i prodotti sono personalizzabili. Portaci la tua idea e la trasformiamo in realtà.</p>
+      <ul class="pers-list">
+        <li>Porta PC con illustrazione custom</li>
+        <li>Cover Book nel tuo tessuto preferito</li>
+        <li>Porta Libro con disegno personalizzato</li>
+        <li>Portafoglio o porta occhiali con dedica</li>
+        <li>Porta Kindle personalizzato</li>
+        <li>Set coordinati come idea regalo</li>
+      </ul>
+      <div class="pers-note">🌿 Ogni articolo è fatto a mano: i tempi di realizzazione variano. Scrivici per saperne di più!</div>
+      <div class="pers-actions">
+        <a href="https://wa.me/?text=Ciao!%20Vi%20scrivo%20per%20info%20su%20un%20articolo%20personalizzato%20Pepe%20Handmade" target="_blank" rel="noopener" class="btn btn-primary btn-block">💬 Scrivici su WhatsApp</a>
+        <a href="https://instagram.com/pepe_handmadee" target="_blank" rel="noopener" class="btn btn-outline btn-block">📸 DM su Instagram</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKSHOP SECTION -->
+<section id="workshop" class="section ws-section">
+  <div class="container">
+    <div class="ws-header reveal">
+      <div>
+        <span class="section-tag tag-light">Workshop</span>
+        <h2 class="section-title text-light">Non è solo un workshop.<br><em>È tempo per te.</em></h2>
+      </div>
+      <a href="#ws-prenota" class="btn btn-light-outline">Prenota il tuo posto</a>
+    </div>
+
+    <div class="ws-cards-grid">
+      <div class="ws-card ws-featured reveal">
+        <div class="ws-badge">⭐ Il più amato</div>
+        <div class="ws-icon">🎨</div>
+        <h3 class="ws-card-title">Workshop di Pittura</h3>
+        <p class="ws-card-desc">Dipingi i nostri articoli su un tema a scelta — Disney, Harry Potter, o quello che vuoi. Ogni mese organizziamo workshop aperti a tutti!</p>
+      </div>
+
+      <div class="ws-card reveal">
+        <div class="ws-badge">Su prenotazione</div>
+        <div class="ws-icon">🏠</div>
+        <h3 class="ws-card-title">Workshop Privato</h3>
+        <p class="ws-card-desc">Per un compleanno, un addio al nubilato o un'occasione speciale. Scrivici in DM: sarà un piacere realizzarlo!</p>
+      </div>
+
+      <div class="ws-card reveal">
+        <div class="ws-badge">Su richiesta</div>
+        <div class="ws-icon">✨</div>
+        <h3 class="ws-card-title">Tema Personalizzato</h3>
+        <p class="ws-card-desc">Hai in mente qualcosa di speciale? Raccontaci il tuo tema e creiamo un workshop cucito su misura per te e il tuo gruppo.</p>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <a href="https://instagram.com/pepe_handmadee" target="_blank" rel="noopener" class="btn btn-light">Seguici per le prossime date →</a>
+    </div>
+
+    <!-- FORM WORKSHOP -->
+    <div class="ws-form-card reveal" id="ws-prenota">
+      <h3 class="ws-form-title">Prenota il tuo posto</h3>
+      <p class="ws-form-sub">Compila il modulo: riceverai subito una mail di riepilogo della tua richiesta.</p>
+      
+      <form id="workshop-form">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label for="ws-evento">Quale workshop ti interessa?</label>
+            <select id="ws-evento" required>
+              <option value="" disabled selected>Scegli data e luogo...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="ws-nome">Nome e Cognome</label>
+            <input type="text" id="ws-nome" placeholder="Il tuo nome completo" required>
+          </div>
+          <div class="form-group">
+            <label for="ws-persone">Per quante persone stai prenotando?</label>
+            <select id="ws-persone" required>
+              <option value="" disabled selected>Scegli...</option>
+              <option value="Solo io">Solo io</option>
+              <option value="2 persone">2 persone</option>
+              <option value="3 persone">3 persone</option>
+              <option value="4 persone">4 persone</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="ws-email">Email</label>
+            <input type="email" id="ws-email" placeholder="latua@email.com" required>
+          </div>
+          <div class="form-group full-width">
+            <label for="ws-note">Note (allergie / richieste / info)</label>
+            <textarea id="ws-note" rows="3" placeholder="Scrivi qui eventuali note..."></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-light btn-block mt-3">Invia richiesta di partecipazione</button>
+      </form>
+      <div class="ws-confirm" id="ws-confirm"></div>
+      <div class="ws-error" id="ws-error">Non è stato possibile inviare la richiesta. Riprova o scrivici direttamente su Instagram/WhatsApp.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTATTI SECTION -->
+<section id="contatti" class="section ct-section">
+  <div class="container ct-container">
+    <div class="text-center reveal">
+      <h2 class="ct-title">Parliamo <em>insieme.</em></h2>
+      <p class="ct-sub">Scrivici per info su workshop, commissioni o per sapere cosa stiamo creando. Siamo felici di sentirti!</p>
+    </div>
+
+    <div class="ct-grid reveal">
+      <a href="https://instagram.com/pepe_handmadee" target="_blank" rel="noopener" class="ct-card">
+        <div class="ct-icon">📸</div>
+        <div class="ct-label">Instagram</div>
+        <div class="ct-val">@pepe_handmadee</div>
+      </a>
+      <a href="https://wa.me/?text=Ciao!%20Vi%20scrivo%20per%20info%20Pepe%20Handmade" target="_blank" rel="noopener" class="ct-card">
+        <div class="ct-icon">💬</div>
+        <div class="ct-label">WhatsApp</div>
+        <div class="ct-val">Scrivi un messaggio</div>
+      </a>
+      <a href="https://linktr.ee/pepehandmade" target="_blank" rel="noopener" class="ct-card">
+        <div class="ct-icon">🔗</div>
+        <div class="ct-label">Linktree</div>
+        <div class="ct-val">Catalogo &amp; link utili</div>
+      </a>
+      <a href="https://instagram.com/pepe_handmadee" target="_blank" rel="noopener" class="ct-card">
+        <div class="ct-icon">📍</div>
+        <div class="ct-label">Market &amp; eventi</div>
+        <div class="ct-val">Bologna — segui il profilo</div>
+      </a>
+    </div>
+
+    <div class="ct-cta-box reveal">
+      <h3>Hai un'idea <em>speciale?</em></h3>
+      <p>Se non trovi quello che cerchi nel catalogo, possiamo crearlo su misura per te.</p>
+      <a href="#personalizzati" class="btn btn-primary">Scopri il servizio Su Commissione →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container ft-content">
+    <div class="ft-brand">
+      <img src="img/pepe_logo.png" alt="Pepe Handmade" class="ft-logo">
+      <span class="ft-brand-title">PEPE.</span>
+    </div>
+    <div class="ft-meta">Artigianato &amp; Workshop · Bologna · @pepe_handmadee</div>
+  </div>
+</footer>
+
+<!-- MODALE ACQUISTO PRODOTTO -->
+<div class="product-modal-overlay" id="product-modal-overlay">
+  <div class="product-modal">
+    <button class="product-modal-close" id="product-modal-close" aria-label="Chiudi">&times;</button>
+    <div class="product-modal-photo">
+      <img id="modal-img" src="" alt="">
+    </div>
+    <div class="product-modal-body">
+      <h3 class="product-modal-name" id="modal-name"></h3>
+      <p class="product-modal-desc" id="modal-desc"></p>
+      <div class="product-modal-price" id="modal-price"></div>
+
+      <div class="form-group">
+        <label class="variant-label" for="modal-variant">Scegli il tessuto</label>
+        <select id="modal-variant"></select>
+      </div>
+
+      <button type="button" class="personalize-toggle" id="personalize-toggle">✏️ Vuoi personalizzarlo con un disegno o una dedica? Clicca qui</button>
+      
+      <div class="personalize-panel" id="personalize-panel">
+        <div class="form-group">
+          <label class="variant-label" for="personalize-text">Descrivi cosa desideri</label>
+          <textarea id="personalize-text" placeholder="Es. dedica 'Per Marco', disegno di una montagna..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="variant-label" for="personalize-file">Allega un'immagine di riferimento (facoltativo)</label>
+          <div class="file-row">
+            <input type="file" id="personalize-file" accept="image/*">
+            <img id="personalize-preview" class="personalize-preview" alt="Anteprima riferimento">
+          </div>
+        </div>
+        <p class="personalize-hint">Invieremo la tua richiesta di personalizzazione al laboratorio: ti ricontatteremo per confermare i dettagli prima della lavorazione. Il pagamento del prodotto base si effettua comunque subito con PayPal qui sotto.</p>
+      </div>
+
+      <div class="product-modal-sent" id="product-modal-sent">✅ Richiesta di personalizzazione inviata! Ti ricontatteremo per confermare i dettagli.</div>
+
+      <form class="paypal-buy-form" id="paypal-buy-form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+        <input type="hidden" name="cmd" value="_xclick">
+        <input type="hidden" name="business" value="TUA-EMAIL-PAYPAL@business.com">
+        <input type="hidden" name="currency_code" value="EUR">
+        <input type="hidden" name="item_name" id="modal-item-name" value="">
+        <input type="hidden" name="amount" id="modal-item-amount" value="">
+        <button type="submit" class="btn btn-primary btn-block">🛒 Acquista con PayPal</button>
+      </form>
+      <p class="product-modal-note">Verrai reindirizzato a PayPal per completare il pagamento in sicurezza.</p>
+    </div>
+  </div>
+</div>
+
+<script src="pepe2.js"></script>
+</body>
+</html>
