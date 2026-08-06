@@ -29,7 +29,7 @@ const PRODOTTI = {
     desc: "Morbida, colorata, personalizzabile. Dipinta a mano e disponibile in tantissime fantasie. Con laccio per chiusura.",
     price: 24,
     variants: [
-      { label: 'Fantasia floreale', img: 'https://images.unsplash.com/photo-1596496181848-3091d4878b24?auto=format&fit=crop&w=600&q=80' },
+      { label: 'Fantasia floreale', img: 'img/porta_libro_pers_fiori' },
       { label: 'A righe blu', img: 'https://images.unsplash.com/photo-1620574387735-3624d75b2dbc?auto=format&fit=crop&w=600&q=80' },
       { label: 'A pois', img: 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?auto=format&fit=crop&w=600&q=80' },
       { label: 'Su misura / dipinta a mano', img: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80' }
