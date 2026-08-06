@@ -27,7 +27,7 @@ const PRODOTTI = {
     price: 19,
     features: ['3 Taglie', 'Adattabile', 'Dipinta a mano'],
     variants: [
-      { label: 'Tinta unita mustard', img: 'https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=600&q=80' },
+      { label: 'Tinta unita mustard', img: 'https://riccardo-raineri.github.io/utility/pepe/img/cover_book.jpg' },
       { label: 'Denim grezzo', img: 'https://images.unsplash.com/photo-1604176424472-9d7122c0b8b1?auto=format&fit=crop&w=600&q=80' },
       { label: 'Su misura / dipinta a mano', img: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80' }
     ]
@@ -38,7 +38,7 @@ const PRODOTTI = {
     price: 38,
     features: ['5 Pezzi', 'Coordinati', 'Cuciti a mano'],
     variants: [
-      { label: 'Set verde salvia', img: 'https://images.unsplash.com/photo-1591076482161-42ce6da69f67?auto=format&fit=crop&w=600&q=80' },
+      { label: 'Set verde salvia', img: 'https://riccardo-raineri.github.io/utility/pepe/img/set.jpg' },
       { label: 'Set terracotta', img: 'https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=600&q=80' },
       { label: 'Set fantasia geometrica', img: 'https://images.unsplash.com/photo-1588702545922-09ac29037013?auto=format&fit=crop&w=600&q=80' }
     ]
@@ -49,7 +49,7 @@ const PRODOTTI = {
     price: 16,
     features: ['Imbottita', 'Su misura', 'Antiurto'],
     variants: [
-      { label: 'Velluto a coste', img: 'https://images.unsplash.com/photo-1584985429111-a837c724775d?auto=format&fit=crop&w=600&q=80' },
+      { label: 'Velluto a coste', img: 'https://riccardo-raineri.github.io/utility/pepe/img/porta_kindle.png' },
       { label: 'Fantasia floreale', img: 'https://images.unsplash.com/photo-1463171515643-952cee54d42a?auto=format&fit=crop&w=600&q=80' },
       { label: 'Su misura / dipinta a mano', img: 'https://images.unsplash.com/photo-1596496181848-3091d4878b24?auto=format&fit=crop&w=600&q=80' }
     ]
@@ -60,7 +60,7 @@ const PRODOTTI = {
     price: 18,
     features: ['Chiusura Zip', 'Foderata', 'Lavabile'],
     variants: [
-      { label: 'Fantasia limoni', img: 'https://images.unsplash.com/photo-1620574387735-3624d75b2dbc?auto=format&fit=crop&w=600&q=80' },
+      { label: 'Fantasia limoni', img: 'https://riccardo-raineri.github.io/utility/pepe/img/mini_sacca_oggetti.jpg' },
       { label: 'Geometrica vintage', img: 'https://images.unsplash.com/photo-1588702545922-09ac29037013?auto=format&fit=crop&w=600&q=80' },
       { label: 'Tinta unita', img: 'https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=600&q=80' }
     ]
@@ -72,6 +72,18 @@ const PRODOTTI = {
     features: ['Cotone 100%', 'Extra forte', 'Dipinta a mano'],
     variants: [
       { label: 'Disegno minimal', img: 'https://images.unsplash.com/photo-1597514210408-fb7c92b23616?auto=format&fit=crop&w=600&q=80' },
+      { label: 'Illustrazione floreale', img: 'https://images.unsplash.com/photo-1596496181848-3091d4878b24?auto=format&fit=crop&w=600&q=80' },
+      { label: 'Personalizzata', img: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80' }
+    ]
+  },
+	
+	'porta-tabacco': {
+    name: 'Porta Tabacco,
+    desc: "Pochete porta tabacco con taschino per le cartine e laccetto porta accendino",
+    price: 26,
+    features: ['Cotone 100%', 'Extra forte', 'Dipinta a mano'],
+    variants: [
+      { label: 'Disegno minimal', img: 'https://riccardo-raineri.github.io/utility/pepe/img/porta_tabacco.jpg' },
       { label: 'Illustrazione floreale', img: 'https://images.unsplash.com/photo-1596496181848-3091d4878b24?auto=format&fit=crop&w=600&q=80' },
       { label: 'Personalizzata', img: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=600&q=80' }
     ]
