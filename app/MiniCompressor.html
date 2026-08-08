@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MiniCompressor — conversione e compressione immagini per Mac, tutta in locale</title>
+<meta name="description" content="MiniCompressor converte e comprime le tue immagini direttamente sul Mac, senza caricare nulla online. Batch, watermark, profili colore, otto formati.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14131c;
+    --paper:#f6f5fa;
+    --paper-raised:#ffffff;
+    --indigo:#5b4fec;
+    --indigo-deep:#2e2499;
+    --mist:#e8e5f7;
+    --graphite:#6e6e79;
+    --line: rgba(20,19,28,0.09);
+    --radius-s: 10px;
+    --radius-m: 18px;
+    --radius-l: 28px;
+    --maxw: 1120px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk', 'Inter', sans-serif;
+    font-weight:600;
+    letter-spacing:-0.01em;
+    margin:0;
+  }
+  .mono{ font-family:'IBM Plex Mono', monospace; }
+  a{ color:inherit; text-decoration:none; }
+  img{ max-width:100%; display:block; }
+
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 28px; }
+  section{ padding:96px 0; }
+  @media (max-width:720px){ section{ padding:64px 0; } .wrap{ padding:0 20px; } }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter: blur(14px) saturate(1.4);
+    background: rgba(246,245,250,0.78);
+    border-bottom:1px solid var(--line);
+  }
+  .nav .wrap{ display:flex; align-items:center; justify-content:space-between; height:66px; }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:600; font-size:17px; font-family:'Space Grotesk'; }
+  .brand-mark{
+    width:30px; height:30px; border-radius:9px;
+    background: linear-gradient(155deg, var(--indigo), var(--indigo-deep));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 3px 10px rgba(91,79,236,0.35);
+  }
+  .brand-mark svg{ width:16px; height:16px; }
+  .nav-links{ display:flex; align-items:center; gap:32px; }
+  .nav-links a{ font-size:14.5px; color:var(--graphite); font-weight:500; transition:color .15s; }
+  .nav-links a:hover{ color:var(--ink); }
+  .nav-cta{
+    background:var(--ink); color:#fff !important; padding:9px 18px;
+    border-radius:100px; font-size:14px; font-weight:600;
+    transition: transform .15s, background .15s;
+  }
+  .nav-cta:hover{ background:var(--indigo-deep); transform:translateY(-1px); }
+  .nav-mobile-hide{ display:flex; }
+  @media (max-width:720px){ .nav-mobile-hide{ display:none; } }
+
+  /* ---------- HERO ---------- */
+  .hero{ padding-top:88px; padding-bottom:40px; }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono'; font-size:12.5px; font-weight:500;
+    color:var(--indigo-deep); background:var(--mist);
+    padding:6px 13px; border-radius:100px; margin-bottom:22px;
+  }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--indigo); }
+  .hero h1{
+    font-size:clamp(38px, 5.6vw, 64px);
+    line-height:1.04;
+    max-width:15ch;
+  }
+  .hero h1 em{ font-style:normal; color:var(--indigo); }
+  .hero-sub{
+    margin-top:22px; font-size:18px; color:var(--graphite); max-width:44ch;
+  }
+  .hero-actions{ display:flex; gap:14px; margin-top:34px; flex-wrap:wrap; }
+  .btn{
+    display:inline-flex; align-items:center; gap:9px;
+    padding:14px 24px; border-radius:100px; font-weight:600; font-size:15px;
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary{
+    background: linear-gradient(155deg, var(--indigo), var(--indigo-deep));
+    color:#fff; box-shadow: 0 8px 20px rgba(91,79,236,0.35);
+  }
+  .btn-primary:hover{ transform:translateY(-2px); box-shadow: 0 12px 26px rgba(91,79,236,0.42); }
+  .btn-ghost{
+    background:transparent; color:var(--ink); border:1.5px solid var(--line);
+  }
+  .btn-ghost:hover{ border-color:var(--ink); }
+
+  /* ---------- DEMO ---------- */
+  .demo-shell{
+    margin-top:56px; border-radius:var(--radius-l);
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    box-shadow: 0 30px 70px -30px rgba(20,19,28,0.18);
+    padding:22px 22px 26px;
+  }
+  .demo-frame{
+    position:relative; border-radius:var(--radius-m); overflow:hidden;
+    aspect-ratio: 16/8.4; user-select:none; touch-action:none;
+    cursor: ew-resize;
+  }
+  .demo-frame svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .layer-after{ position:absolute; inset:0; overflow:hidden; }
+  .demo-handle{
+    position:absolute; top:0; bottom:0; width:0;
+    border-right:2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.06);
+    pointer-events:none;
+  }
+  .demo-handle::after{
+    content:""; position:absolute; top:50%; left:50%;
+    width:38px; height:38px; margin:-19px 0 0 -19px;
+    background:#fff; border-radius:50%;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2314131c' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 7l-5 5 5 5M16 7l5 5-5 5'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:center;
+  }
+  .demo-tag{
+    position:absolute; top:14px; font-family:'IBM Plex Mono'; font-size:11.5px;
+    font-weight:600; padding:5px 11px; border-radius:100px; letter-spacing:0.02em;
+    background:rgba(20,19,28,0.55); color:#fff; backdrop-filter: blur(6px);
+  }
+  .tag-before{ left:14px; }
+  .tag-after{ right:14px; }
+
+  .demo-readout{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top:18px; padding:0 6px; flex-wrap:wrap; gap:10px;
+  }
+  .demo-stat{ font-family:'IBM Plex Mono'; font-size:14px; color:var(--graphite); }
+  .demo-stat b{ color:var(--ink); font-weight:600; }
+  .demo-savings{
+    font-family:'IBM Plex Mono'; font-weight:600; font-size:14px;
+    color:var(--indigo-deep); background:var(--mist);
+    padding:6px 13px; border-radius:100px;
+  }
+
+  .format-row{
+    display:flex; gap:9px; flex-wrap:wrap; margin-top:30px;
+  }
+  .format-pill{
+    font-family:'IBM Plex Mono'; font-size:12px; font-weight:500;
+    color:var(--graphite); border:1px solid var(--line);
+    padding:6px 13px; border-radius:100px; background:var(--paper-raised);
+  }
+
+  /* ---------- FEATURES ---------- */
+  .section-head{ max-width:600px; margin-bottom:50px; }
+  .section-head .eyebrow{ margin-bottom:16px; }
+  .section-head h2{ font-size:clamp(28px,3.4vw,38px); }
+  .section-head p{ margin-top:14px; color:var(--graphite); font-size:16.5px; }
+
+  .grid{
+    display:grid; grid-template-columns:repeat(3, 1fr); gap:18px;
+  }
+  @media (max-width:900px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:600px){ .grid{ grid-template-columns:1fr; } }
+
+  .card{
+    background:var(--paper-raised); border:1px solid var(--line);
+    border-radius:var(--radius-m); padding:26px 24px;
+    transition: transform .18s ease, box-shadow .18s ease;
+  }
+  .card:hover{ transform:translateY(-3px); box-shadow: 0 20px 40px -24px rgba(20,19,28,0.22); }
+  .card-icon{
+    width:38px; height:38px; border-radius:11px; margin-bottom:18px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--mist); color:var(--indigo-deep);
+  }
+  .card-icon svg{ width:19px; height:19px; }
+  .card h3{ font-size:16.5px; margin-bottom:8px; }
+  .card p{ font-size:14.5px; color:var(--graphite); margin:0; }
+
+  /* ---------- COME FUNZIONA ---------- */
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:32px; }
+  @media (max-width:800px){ .steps{ grid-template-columns:1fr; gap:36px; } }
+  .step-num{
+    font-family:'IBM Plex Mono'; font-size:13px; font-weight:600;
+    color:var(--indigo); margin-bottom:14px; display:block;
+  }
+  .step h3{ font-size:19px; margin-bottom:9px; }
+  .step p{ color:var(--graphite); font-size:15px; margin:0; max-width:34ch; }
+
+  /* ---------- DOWNLOAD ---------- */
+  .download-panel{
+    background: linear-gradient(155deg, var(--ink), #201f2b);
+    border-radius: var(--radius-l);
+    padding:56px 48px;
+    color:#fff;
+    display:flex; align-items:center; justify-content:space-between; gap:40px;
+  }
+  @media (max-width:800px){ .download-panel{ flex-direction:column; align-items:flex-start; padding:40px 28px; } }
+  .download-panel h2{ font-size:clamp(26px,3.2vw,34px); color:#fff; max-width:16ch; }
+  .download-panel p{ color:rgba(255,255,255,0.65); margin-top:12px; font-size:15.5px; max-width:38ch; }
+  .download-meta{
+    display:flex; gap:22px; margin-top:24px; flex-wrap:wrap;
+  }
+  .download-meta div{ font-family:'IBM Plex Mono'; font-size:12.5px; color:rgba(255,255,255,0.55); }
+  .download-meta b{ display:block; color:#fff; font-size:14px; margin-bottom:3px; font-weight:600; }
+  .download-cta{ display:flex; flex-direction:column; align-items:flex-start; gap:12px; flex-shrink:0; }
+  .btn-download{
+    background:#fff; color:var(--ink) !important;
+    padding:15px 28px; border-radius:100px; font-weight:700; font-size:15.5px;
+    display:inline-flex; align-items:center; gap:10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    transition: transform .15s;
+  }
+  .btn-download:hover{ transform:translateY(-2px); }
+  .trust-note{
+    font-family:'IBM Plex Mono'; font-size:11.5px; color:rgba(255,255,255,0.45);
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer{ padding:40px 0 60px; border-top:1px solid var(--line); }
+  footer .wrap{ display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:14px; }
+  footer p{ margin:0; font-size:13.5px; color:var(--graphite); }
+  .footer-links{ display:flex; gap:22px; }
+  .footer-links a{ font-size:13.5px; color:var(--graphite); }
+  .footer-links a:hover{ color:var(--ink); }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ transition:none !important; animation:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4l-4 8h5l-4 8"/></svg>
+      </span>
+      MiniCompressor
+    </div>
+    <div class="nav-links nav-mobile-hide">
+      <a href="#funzionalita">Funzionalità</a>
+      <a href="#come-funziona">Come funziona</a>
+      <a href="#formati">Formati</a>
+      <a href="#download" class="nav-cta">Scarica per Mac</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>Per macOS 14 Sonoma e successivi</span>
+    <h1>Le tue foto, <em>più leggere</em>. Senza lasciare il Mac.</h1>
+    <p class="hero-sub">MiniCompressor converte e comprime immagini in batch, con watermark, profili colore e otto formati in uscita — tutta l'elaborazione resta in locale, nessun upload, nessun account.</p>
+    <div class="hero-actions">
+      <a href="#download" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0l-5-5m5 5l5-5M5 21h14"/></svg>
+        Scarica per Mac
+      </a>
+      <a href="#funzionalita" class="btn btn-ghost">Vedi le funzionalità</a>
+    </div>
+
+    <div class="demo-shell">
+      <div class="demo-frame" id="demoFrame">
+        <svg viewBox="0 0 800 420" preserveAspectRatio="xMidYMid slice">
+          <defs>
+            <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2e2499"/>
+              <stop offset="55%" stop-color="#5b4fec"/>
+              <stop offset="100%" stop-color="#8f86f5"/>
+            </linearGradient>
+            <linearGradient id="hillGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#1b1730"/>
+              <stop offset="100%" stop-color="#14131c"/>
+            </linearGradient>
+            <filter id="grain">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="noise" seed="7"/>
+              <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.9 0.9 0.9 0 0" result="alphaNoise"/>
+              <feComposite in="alphaNoise" in2="SourceGraphic" operator="in" result="grain"/>
+              <feBlend in="SourceGraphic" in2="grain" mode="overlay"/>
+              <feColorMatrix type="saturate" values="0.7"/>
+            </filter>
+          </defs>
+          <rect width="800" height="420" fill="url(#skyGrad)" filter="url(#grain)"/>
+          <circle cx="620" cy="120" r="70" fill="#f6f5fa" opacity="0.9" filter="url(#grain)"/>
+          <path d="M0 320 L120 230 L230 300 L340 210 L460 290 L600 200 L720 280 L800 240 L800 420 L0 420 Z" fill="url(#hillGrad)" filter="url(#grain)"/>
+        </svg>
+
+        <div class="layer-after" id="layerAfter">
+          <svg viewBox="0 0 800 420" preserveAspectRatio="xMidYMid slice" style="position:absolute; inset:0; width:100%; height:100%;">
+            <defs>
+              <linearGradient id="skyGrad2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#2e2499"/>
+                <stop offset="55%" stop-color="#5b4fec"/>
+                <stop offset="100%" stop-color="#8f86f5"/>
+              </linearGradient>
+              <linearGradient id="hillGrad2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1b1730"/>
+                <stop offset="100%" stop-color="#14131c"/>
+              </linearGradient>
+            </defs>
+            <rect width="800" height="420" fill="url(#skyGrad2)"/>
+            <circle cx="620" cy="120" r="70" fill="#f6f5fa"/>
+            <path d="M0 320 L120 230 L230 300 L340 210 L460 290 L600 200 L720 280 L800 240 L800 420 L0 420 Z" fill="url(#hillGrad2)"/>
+          </svg>
+        </div>
+
+        <span class="demo-tag tag-before">ORIGINALE</span>
+        <span class="demo-tag tag-after">MINICOMPRESSOR</span>
+        <div class="demo-handle" id="demoHandle"></div>
+      </div>
+
+      <div class="demo-readout">
+        <div class="demo-stat">Peso attuale: <b class="mono" id="statSize">4.8 MB</b></div>
+        <div class="demo-savings" id="statSavings">-0% di peso</div>
+      </div>
+    </div>
+
+    <div class="format-row">
+      <span class="format-pill">JPG</span>
+      <span class="format-pill">PNG</span>
+      <span class="format-pill">HEIC</span>
+      <span class="format-pill">WEBP</span>
+      <span class="format-pill">TIFF</span>
+      <span class="format-pill">PDF</span>
+      <span class="format-pill">GIF</span>
+      <span class="format-pill">BMP</span>
+    </div>
+  </div>
+</header>
+
+<section id="funzionalita">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span>Funzionalità</span>
+      <h2>Tutto quello che serve, niente che serva un abbonamento.</h2>
+      <p>Ogni funzione lavora sul file originale sul tuo disco: niente cloud, niente coda di caricamento, niente limiti mensili.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+        <h3>Conversione in batch</h3>
+        <p>Trascina decine di immagini insieme: MiniCompressor le elabora tutte con le stesse impostazioni, in una volta.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></div>
+        <h3>Watermark personalizzato</h3>
+        <p>Testo, posizione, opacità e dimensione a tua scelta — applicato a ogni immagine della coda in automatico.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/></svg></div>
+        <h3>Profili colore</h3>
+        <p>sRGB, Display P3 o scala di grigi: converti lo spazio colore senza aprire un editor a parte.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></div>
+        <h3>Rimozione metadati</h3>
+        <p>Un tocco per togliere EXIF e coordinate GPS prima di condividere una foto — utile più spesso di quanto pensi.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg></div>
+        <h3>Preset salvabili</h3>
+        <p>Salva una combinazione di formato, qualità e watermark con un nome e richiamala quando serve, in un clic.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h10M4 17h13"/></svg></div>
+        <h3>Rinomina in batch</h3>
+        <p>Un pattern con numerazione automatica per rinominare i file in export, senza toccare gli originali.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="come-funziona">
+  <div class="wrap">
+    <div class="section-head">
+      <span class="eyebrow"><span class="dot"></span>Come funziona</span>
+      <h2>Tre passaggi, zero attese.</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="step-num">01</span>
+        <h3>Trascina le immagini</h3>
+        <p>Una o cento alla volta, direttamente dal Finder alla finestra dell'app.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">02</span>
+        <h3>Personalizza l'export</h3>
+        <p>Formato, qualità, dimensione, watermark: vedi il risultato in tempo reale con lo slider prima/dopo.</p>
+      </div>
+      <div class="step">
+        <span class="step-num">03</span>
+        <h3>Esporta tutto</h3>
+        <p>Scegli la cartella una volta: MiniCompressor elabora la coda e apre il Finder a lavoro finito.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="wrap">
+    <div class="download-panel">
+      <div>
+        <h2>Portalo sul tuo Mac in un minuto.</h2>
+        <p>Firmato con Developer ID e notarizzato da Apple: nessun avviso di Gatekeeper, nessuna configurazione da sbloccare.</p>
+        <div class="download-meta">
+          <div><b>Versione 1.0</b>macOS 14+</div>
+          <div><b>≈ 9 MB</b>Download</div>
+          <div><b>Apple Silicon & Intel</b>Universal</div>
+        </div>
+      </div>
+      <div class="download-cta">
+        <a href="./downloads/MiniCompressor.dmg" class="btn-download">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#14131c" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0l-5-5m5 5l5-5M5 21h14"/></svg>
+          Scarica il .dmg
+        </a>
+        <span class="trust-note">SHA-256 pubblicato nelle note di rilascio</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="formati">
+  <div class="wrap">
+    <div class="section-head" style="margin-bottom:0;">
+      <span class="eyebrow"><span class="dot"></span>Formati supportati</span>
+      <h2>Otto formati in entrata e in uscita.</h2>
+      <p>JPG, PNG, HEIC, WEBP, TIFF, PDF, GIF e BMP — converti da uno qualsiasi verso qualsiasi altro.</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>MiniCompressor — realizzato a Bologna.</p>
+    <div class="footer-links">
+      <a href="#funzionalita">Funzionalità</a>
+      <a href="#download">Download</a>
+      <a href="mailto:hello@example.com">Contatti</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const frame = document.getElementById('demoFrame');
+  const after = document.getElementById('layerAfter');
+  const handle = document.getElementById('demoHandle');
+  const statSize = document.getElementById('statSize');
+  const statSavings = document.getElementById('statSavings');
+
+  const ORIGINAL_MB = 4.8;
+  const COMPRESSED_MB = 0.62;
+
+  function setPosition(percent){
+    percent = Math.min(100, Math.max(0, percent));
+    after.style.clipPath = 'inset(0 0 0 ' + percent + '%)';
+    handle.style.left = percent + '%';
+
+    const revealed = (100 - percent) / 100; // quanta parte "compressa" è visibile
+    const currentMB = ORIGINAL_MB - (ORIGINAL_MB - COMPRESSED_MB) * revealed;
+    const savingsPct = Math.round((1 - currentMB / ORIGINAL_MB) * 100);
+
+    statSize.textContent = currentMB >= 1
+      ? currentMB.toFixed(1) + ' MB'
+      : Math.round(currentMB * 1000) + ' KB';
+    statSavings.textContent = '-' + savingsPct + '% di peso';
+  }
+
+  function percentFromEvent(clientX){
+    const rect = frame.getBoundingClientRect();
+    return ((clientX - rect.left) / rect.width) * 100;
+  }
+
+  let dragging = false;
+
+  frame.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    setPosition(percentFromEvent(e.clientX));
+    frame.setPointerCapture(e.pointerId);
+  });
+  frame.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    setPosition(percentFromEvent(e.clientX));
+  });
+  frame.addEventListener('pointerup', () => dragging = false);
+  frame.addEventListener('pointercancel', () => dragging = false);
+
+  // Posizione iniziale: leggero reveal per far capire subito che è interattivo
+  setPosition(58);
+
+  // Piccola sequenza d'ingresso, disattivata se l'utente preferisce meno movimento
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!prefersReducedMotion) {
+    let start = null;
+    function introStep(ts){
+      if (start === null) start = ts;
+      const t = Math.min(1, (ts - start) / 900);
+      setPosition(58 - t * 18);
+      if (t < 1) requestAnimationFrame(introStep);
+    }
+    requestAnimationFrame(introStep);
+  }
+})();
+</script>
+
+</body>
+</html>
