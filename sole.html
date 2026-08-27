@@ -20,6 +20,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <!-- Lucide Icons -->
 <script src="https://unpkg.com/lucide@latest"></script>
+<!-- Three.js per la vista 3D del cielo -->
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <style>
   /* ============================================================
      TOKEN DI DESIGN — PALETTE CELESTE PROFONDA & GLASS
@@ -238,6 +240,58 @@
 
   svg#chart { width:100%; height:auto; display:block; }
 
+  /* VISTA 3D */
+  .scene3d-wrap{
+    position: relative;
+    width: 100%;
+    height: 360px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    background: radial-gradient(circle at 50% 30%, rgba(90,130,247,0.08), transparent 70%);
+    touch-action: none;
+    cursor: grab;
+  }
+  .scene3d-wrap:active{ cursor: grabbing; }
+  .scene3d-wrap canvas{ display:block; width:100%; height:100%; }
+  .scene3d-fallback{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    text-align:center; font-size:.75rem; color:var(--text-muted); padding: 20px;
+  }
+  .scene3d-controls{ display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .scene3d-controls button{ display:inline-flex; align-items:center; gap:6px; }
+
+  /* BADGE FASE LUCE */
+  .light-badge{
+    display:inline-flex; align-items:center; gap:8px;
+    background: var(--sky-panel-2); border:1px solid var(--line-muted);
+    border-radius: 20px; padding: 6px 14px; font-size: .74rem; font-weight:700;
+    margin-bottom: 14px;
+  }
+  body.light .light-badge{ background: var(--day-panel-2); border-color: var(--day-line); }
+  .light-badge .dot{ width:8px; height:8px; border-radius:50%; background: var(--sun-gold); flex-shrink:0; }
+
+  /* SLIDER TEMPORALE */
+  .time-slider-row{ display:flex; align-items:center; gap:10px; width:100%; }
+  .time-slider-row input[type="range"]{
+    flex:1; -webkit-appearance:none; appearance:none; background:transparent; cursor:pointer; padding:0;
+  }
+  .time-slider-row input[type="range"]::-webkit-slider-runnable-track{
+    height:4px; border-radius:4px; background: linear-gradient(90deg, var(--blue-hour), var(--sun-gold) 25%, var(--sun-gold) 75%, var(--blue-hour));
+  }
+  .time-slider-row input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background: var(--text-main); border:2px solid var(--sun-gold); margin-top:-6px; cursor:pointer;
+  }
+  body.light .time-slider-row input[type="range"]::-webkit-slider-thumb{ background: var(--day-panel); }
+  .time-slider-row input[type="range"]::-moz-range-track{
+    height:4px; border-radius:4px; background: linear-gradient(90deg, var(--blue-hour), var(--sun-gold) 25%, var(--sun-gold) 75%, var(--blue-hour));
+  }
+  .time-slider-row input[type="range"]::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%; background: var(--text-main); border:2px solid var(--sun-gold); cursor:pointer;
+  }
+  #sliderTimeLabel{ font-weight:700; min-width:48px; text-align:center; }
+  #playBtn{ padding: 5px 10px; }
+
   /* GRID LAYOUT */
   .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
   .row { display:flex; justify-content:space-between; align-items:center; font-size:.76rem; padding:6px 0; border-bottom:1px dashed var(--line-muted); gap:8px; }
@@ -312,12 +366,38 @@
       <input type="datetime-local" id="timePicker">
       <button id="resetTimeBtn">Ora Attuale</button>
     </div>
+
+    <div class="control-group time-slider-row">
+      <button id="playBtn" title="Avanza automaticamente nel tempo" aria-label="Avvia/ferma l'avanzamento automatico">
+        <i data-lucide="play" class="i-icon" id="playIcon" style="width:12px;height:12px;"></i>
+      </button>
+      <input type="range" id="timeSlider" min="0" max="1439" step="1" value="720" aria-label="Scorri l'ora del giorno selezionato">
+      <span id="sliderTimeLabel">00:00</span>
+      <select id="speedSelect" title="Velocità di avanzamento">
+        <option value="10">10 min/s</option>
+        <option value="30" selected>30 min/s</option>
+        <option value="120">2 h/s</option>
+        <option value="720">12 h/s</option>
+      </select>
+    </div>
   </div>
 
+  <div class="light-badge"><span class="dot" id="lightBadgeDot"></span><span id="lightBadgeText">—</span></div>
+
   <div class="card">
-    <h2><i data-lucide="compass" class="i-icon"></i> Astrolabio</h2>
-    <svg id="dial" viewBox="0 0 300 300" role="img" aria-label="Diagramma della cupola celeste con posizione e traiettoria di sole e luna"></svg>
-    <div class="dial-caption">centro = zenit · bordo = orizzonte · linea continua = sole · tratteggiata = luna</div>
+    <h2><i data-lucide="globe-2" class="i-icon"></i> Cupola celeste 3D</h2>
+    <div class="scene3d-wrap" id="scene3dWrap">
+      <div class="scene3d-fallback" id="scene3dFallback" style="display:none;">
+        Visualizzazione 3D non disponibile: verifica la connessione (richiede Three.js da CDN).
+      </div>
+    </div>
+    <div class="dial-caption">trascina per ruotare la vista · rotella/pinch per zoomare · linea piena = percorso del sole · tratteggiata = percorso della luna</div>
+    <div class="scene3d-controls">
+      <button id="viewNorthBtn"><i data-lucide="compass" class="i-icon" style="width:14px;height:14px;"></i> Vista nord</button>
+      <button id="lookSunBtn"><i data-lucide="sun" class="i-icon" style="width:14px;height:14px;"></i> Guarda il sole</button>
+      <button id="lookMoonBtn"><i data-lucide="moon" class="i-icon" style="width:14px;height:14px;"></i> Guarda la luna</button>
+      <button id="autoRotateBtn"><i data-lucide="refresh-cw" class="i-icon" style="width:14px;height:14px;"></i> Auto-rotazione</button>
+    </div>
   </div>
 
   <div class="card">
@@ -600,70 +680,256 @@ function moonIconSVG(phase){
 }
 
 /* ============================================================
-   RENDER ASTROLABIO & GRAFICO
+   VISTA 3D DELLA CUPOLA CELESTE (Three.js)
+   Stesso sistema di riferimento del vecchio astrolabio 2D:
+   azimut 0=nord crescente in senso orario. Nord -> -Z, Est -> +X.
+   Ogni bottone di navigazione (nord/sole/luna) ricalcola la
+   camera a partire dalla STESSA funzione azAltTo3D usata per
+   posizionare gli oggetti, quindi restano sempre coerenti tra
+   loro anche se la convenzione assoluta è arbitraria.
    ============================================================ */
-const dialSvg = document.getElementById('dial');
-const CX = 150, CY = 150, R = 120;
-
-function polarToXY(azRad, altDeg){
-  const r = R * (1 - altDeg/90);
-  const x = CX + r * Math.sin(azRad);
-  const y = CY - r * Math.cos(azRad);
-  return {x,y};
-}
-
-function buildStaticDial(){
-  let svg = '';
-  [0, 30, 60].forEach(alt=>{
-    const rr = R * (1 - alt/90);
-    svg += `<circle class="ring" cx="${CX}" cy="${CY}" r="${rr}"/>`;
-  });
-  svg += `<text class="alt-label" x="${CX+4}" y="${CY-R+12}">0°</text>`;
-  svg += `<text class="alt-label" x="${CX+4}" y="${CY-R*0.667+12}">30°</text>`;
-  svg += `<text class="alt-label" x="${CX+4}" y="${CY-R*0.333+12}">60°</text>`;
-  svg += `<text class="compass-label" x="${CX}" y="${CY-R-8}" text-anchor="middle">N</text>`;
-  svg += `<text class="compass-label" x="${CX+R+16}" y="${CY+5}" text-anchor="middle">E</text>`;
-  svg += `<text class="compass-label" x="${CX}" y="${CY+R+20}" text-anchor="middle">S</text>`;
-  svg += `<text class="compass-label" x="${CX-R-16}" y="${CY+5}" text-anchor="middle">O</text>`;
-  return svg;
-}
-
 function altColor(altDeg){
   if(altDeg >= 6) return 'rgba(243, 186, 87, 0.35)';
   if(altDeg >= -6) return 'rgba(243, 186, 87, 0.85)';
   if(altDeg >= -12) return 'rgba(90, 130, 247, 0.7)';
   return 'rgba(124, 136, 179, 0.25)';
 }
+function altColorHex(altDeg){
+  if(altDeg >= 6) return 0xf3ba57;
+  if(altDeg >= -6) return 0xffaa55;
+  if(altDeg >= -12) return 0x5a82f7;
+  return 0x3a4470;
+}
 
-function buildDayPath(lat, lng, dateRef){
+const R3 = 4; // raggio della cupola nella scena 3D
+function azAltTo3D(azRad, altDeg, radius){
+  const altRad = altDeg * RAD;
+  return {
+    x: radius * Math.cos(altRad) * Math.sin(azRad),
+    y: radius * Math.sin(altRad),
+    z: -radius * Math.cos(altRad) * Math.cos(azRad)
+  };
+}
+
+const THEME_3D = {
+  dark:  { bg:null, dome:0x3a4470, ring:0x3a4470, ground:0x131a3a, groundOp:0.22 },
+  light: { bg:null, dome:0x9fb8d9, ring:0x9fb8d9, ground:0xdfebfa, groundOp:0.35 }
+};
+
+let has3D = false, scene, camera, renderer, wrap3D;
+let domeMesh, groundMesh, sunMesh, sunGlow, moonMesh, moonGlow, sunPathLine, moonPathLine;
+let camTheta = 0.7, camPhi = 1.0, camDist = R3 * 2.3;
+let isDragging = false, lastX = 0, lastY = 0, autoRotateEnabled = true;
+let builtPathForDay = null;
+
+function makeTextSprite(text){
+  const cv = document.createElement('canvas');
+  cv.width = 64; cv.height = 64;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = 'rgba(238,241,251,0.85)';
+  ctx.font = 'bold 34px Space Mono, monospace';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 32, 34);
+  const tex = new THREE.CanvasTexture(cv);
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
+  const spr = new THREE.Sprite(mat);
+  spr.scale.set(0.55, 0.55, 1);
+  return spr;
+}
+
+function makeGlowSprite(hexColor, size){
+  const cv = document.createElement('canvas');
+  cv.width = 128; cv.height = 128;
+  const ctx = cv.getContext('2d');
+  const grad = ctx.createRadialGradient(64,64,0,64,64,64);
+  const c = '#' + hexColor.toString(16).padStart(6,'0');
+  grad.addColorStop(0, c);
+  grad.addColorStop(0.35, c);
+  grad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,128,128);
+  const tex = new THREE.CanvasTexture(cv);
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent:true, blending: THREE.AdditiveBlending, depthWrite:false });
+  const spr = new THREE.Sprite(mat);
+  spr.scale.set(size,size,1);
+  return spr;
+}
+
+function init3D(){
+  wrap3D = document.getElementById('scene3dWrap');
+  if(typeof THREE === 'undefined'){
+    document.getElementById('scene3dFallback').style.display = 'flex';
+    has3D = false;
+    return;
+  }
+  try{
+    scene = new THREE.Scene();
+    const w = wrap3D.clientWidth || 300, h = wrap3D.clientHeight || 360;
+    camera = new THREE.PerspectiveCamera(48, w/h, 0.1, 100);
+    renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 2));
+    renderer.setSize(w, h);
+    wrap3D.appendChild(renderer.domElement);
+
+    domeMesh = new THREE.Mesh(
+      new THREE.SphereGeometry(R3, 32, 16, 0, Math.PI*2, 0, Math.PI/2),
+      new THREE.MeshBasicMaterial({ color: THEME_3D.dark.dome, wireframe:true, transparent:true, opacity:0.35 })
+    );
+    scene.add(domeMesh);
+
+    groundMesh = new THREE.Mesh(
+      new THREE.CircleGeometry(R3, 48),
+      new THREE.MeshBasicMaterial({ color: THEME_3D.dark.ground, transparent:true, opacity: THEME_3D.dark.groundOp, side: THREE.DoubleSide })
+    );
+    groundMesh.rotation.x = -Math.PI/2;
+    scene.add(groundMesh);
+
+    // anelli di altitudine (30°, 60°) + orizzonte, coerenti col vecchio astrolabio
+    [0, 30, 60].forEach(altDeg=>{
+      const pts = [];
+      for(let d=0; d<=360; d+=6){ const p = azAltTo3D(d*RAD, altDeg, R3); pts.push(new THREE.Vector3(p.x, p.y+0.005, p.z)); }
+      const geo = new THREE.BufferGeometry().setFromPoints(pts);
+      const mat = new THREE.LineBasicMaterial({ color: THEME_3D.dark.ring, transparent:true, opacity: altDeg===0?0.5:0.25 });
+      scene.add(new THREE.LineLoop(geo, mat));
+    });
+
+    // etichette cardinali
+    [[0,'N'],[90,'E'],[180,'S'],[270,'O']].forEach(([deg,label])=>{
+      const p = azAltTo3D(deg*RAD, 2, R3*1.1);
+      const spr = makeTextSprite(label);
+      spr.position.set(p.x, p.y+0.1, p.z);
+      scene.add(spr);
+    });
+
+    sunMesh = new THREE.Mesh(new THREE.SphereGeometry(0.16,16,16), new THREE.MeshBasicMaterial({ color:0xf3ba57, transparent:true }));
+    sunGlow = makeGlowSprite(0xf3ba57, 1.1);
+    moonMesh = new THREE.Mesh(new THREE.SphereGeometry(0.12,16,16), new THREE.MeshBasicMaterial({ color:0xd2dff5, transparent:true }));
+    moonGlow = makeGlowSprite(0xd2dff5, 0.6);
+    scene.add(sunMesh, sunGlow, moonMesh, moonGlow);
+
+    sunPathLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ vertexColors:true, transparent:true, opacity:0.9 }));
+    moonPathLine = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineDashedMaterial({ color:0x8b93b8, dashSize:0.09, gapSize:0.06, transparent:true, opacity:0.55 }));
+    scene.add(sunPathLine, moonPathLine);
+
+    // interazione: trascina per ruotare, rotella/pinch per zoomare
+    wrap3D.addEventListener('pointerdown', e=>{ isDragging=true; lastX=e.clientX; lastY=e.clientY; try{wrap3D.setPointerCapture(e.pointerId);}catch(_e){} });
+    wrap3D.addEventListener('pointermove', e=>{
+      if(!isDragging) return;
+      const dx = e.clientX-lastX, dy = e.clientY-lastY;
+      lastX = e.clientX; lastY = e.clientY;
+      camTheta -= dx*0.006;
+      camPhi = Math.min(1.5, Math.max(0.15, camPhi - dy*0.006));
+    });
+    ['pointerup','pointerleave','pointercancel'].forEach(evt=> wrap3D.addEventListener(evt, ()=>{ isDragging=false; }));
+    wrap3D.addEventListener('wheel', e=>{
+      e.preventDefault();
+      camDist = Math.min(R3*4, Math.max(R3*1.3, camDist + e.deltaY*0.003));
+    }, { passive:false });
+
+    new ResizeObserver(entries=>{
+      const { width, height } = entries[0].contentRect;
+      if(width>0 && height>0 && camera && renderer){
+        camera.aspect = width/height;
+        camera.updateProjectionMatrix();
+        renderer.setSize(width, height, false);
+      }
+    }).observe(wrap3D);
+
+    has3D = true;
+    updateScene3DTheme();
+    animate3D();
+  }catch(err){
+    console.error('Errore inizializzazione 3D', err);
+    document.getElementById('scene3dFallback').style.display = 'flex';
+    has3D = false;
+  }
+}
+
+function updateScene3DTheme(){
+  if(!has3D) return;
+  const t = document.body.classList.contains('light') ? THEME_3D.light : THEME_3D.dark;
+  domeMesh.material.color.setHex(t.dome);
+  groundMesh.material.color.setHex(t.ground);
+  groundMesh.material.opacity = t.groundOp;
+}
+
+function updateCameraFromSpherical(){
+  camera.position.set(
+    camDist * Math.sin(camPhi) * Math.sin(camTheta),
+    camDist * Math.cos(camPhi),
+    camDist * Math.sin(camPhi) * Math.cos(camTheta)
+  );
+  camera.lookAt(0,0,0);
+}
+
+function animate3D(){
+  requestAnimationFrame(animate3D);
+  if(!has3D) return;
+  if(!isDragging && autoRotateEnabled){ camTheta += 0.0015; }
+  updateCameraFromSpherical();
+  renderer.render(scene, camera);
+}
+
+function aimCameraAt(dir){
+  const phi = Math.acos(Math.min(1, Math.max(-1, -dir.y)));
+  const theta = Math.atan2(-dir.x, -dir.z);
+  camPhi = Math.min(1.5, Math.max(0.2, phi));
+  camTheta = theta;
+}
+
+function update3DBodies(sunPos, moonPos){
+  if(!has3D) return;
+  const sunAltDeg = sunPos.altitude/RAD, moonAltDeg = moonPos.altitude/RAD;
+  const sp = azAltTo3D(sunPos.azimuth, sunAltDeg, R3*0.94);
+  const mp = azAltTo3D(moonPos.azimuth, moonAltDeg, R3*0.94);
+  sunMesh.position.set(sp.x, sp.y, sp.z);
+  sunGlow.position.copy(sunMesh.position);
+  moonMesh.position.set(mp.x, mp.y, mp.z);
+  moonGlow.position.copy(moonMesh.position);
+
+  const sunBelow = sunAltDeg < 0, moonBelow = moonAltDeg < 0;
+  sunMesh.material.opacity = sunBelow ? 0.35 : 1;
+  sunGlow.visible = !sunBelow;
+  moonMesh.material.opacity = moonBelow ? 0.35 : 1;
+  moonGlow.visible = !moonBelow;
+}
+
+function rebuild3DDayPath(lat, lng, dateRef){
+  if(!has3D) return;
   const d0 = new Date(dateRef); d0.setHours(0,0,0,0);
-  let sunSegs = '', moonPts = [];
-  let prev = null;
+  const sunPos3 = [], sunCol = [], moonPos3 = [];
   for(let m = 0; m <= 1440; m += 8){
     const t = new Date(d0.getTime() + m*60000);
     const sp = getSunPosition(t, lat, lng);
     const altDeg = sp.altitude/RAD;
-    const xy = polarToXY(sp.azimuth, Math.max(altDeg,-90));
-    if(prev){
-      sunSegs += `<line x1="${prev.x}" y1="${prev.y}" x2="${xy.x}" y2="${xy.y}" stroke="${altColor(altDeg)}" stroke-width="3" stroke-linecap="round"/>`;
-    }
-    prev = xy;
+    const p = azAltTo3D(sp.azimuth, altDeg, R3*0.94);
+    sunPos3.push(p.x, p.y, p.z);
+    const col = new THREE.Color(altColorHex(altDeg));
+    sunCol.push(col.r, col.g, col.b);
     const mp = getMoonPosition(t, lat, lng);
-    const mxy = polarToXY(mp.azimuth, Math.max(mp.altitude/RAD,-90));
-    moonPts.push(`${mxy.x},${mxy.y}`);
+    const mAltDeg = mp.altitude/RAD;
+    const pm = azAltTo3D(mp.azimuth, mAltDeg, R3*0.94);
+    moonPos3.push(pm.x, pm.y, pm.z);
   }
-  const moonPath = `<polyline points="${moonPts.join(' ')}" fill="none" stroke="var(--moon-dim)" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.6"/>`;
-  return sunSegs + moonPath;
+  sunPathLine.geometry.dispose();
+  sunPathLine.geometry = new THREE.BufferGeometry();
+  sunPathLine.geometry.setAttribute('position', new THREE.Float32BufferAttribute(sunPos3, 3));
+  sunPathLine.geometry.setAttribute('color', new THREE.Float32BufferAttribute(sunCol, 3));
+
+  moonPathLine.geometry.dispose();
+  moonPathLine.geometry = new THREE.BufferGeometry();
+  moonPathLine.geometry.setAttribute('position', new THREE.Float32BufferAttribute(moonPos3, 3));
+  moonPathLine.geometry.computeBoundingSphere();
+  moonPathLine.computeLineDistances();
 }
 
-function updateDialBodies(sunPos, moonPos){
-  const sunXY = polarToXY(sunPos.azimuth, sunPos.altitude/RAD);
-  const moonXY = polarToXY(moonPos.azimuth, moonPos.altitude/RAD);
-  const sunBelow = sunPos.altitude < 0, moonBelow = moonPos.altitude < 0;
-  return `
-    <g class="${sunBelow?'below-horizon':''}"><circle class="sun-mark" cx="${sunXY.x}" cy="${sunXY.y}" r="9"/></g>
-    <g class="${moonBelow?'below-horizon':''}"><circle class="moon-mark" cx="${moonXY.x}" cy="${moonXY.y}" r="6"/></g>
-  `;
+function maybeRebuild3DPaths(lat, lng, now){
+  const key = now.toDateString() + '|' + lat.toFixed(2) + ',' + lng.toFixed(2);
+  if(key !== builtPathForDay){
+    rebuild3DDayPath(lat, lng, now);
+    builtPathForDay = key;
+  }
 }
 
 const chartSvg = document.getElementById('chart');
@@ -732,6 +998,18 @@ function fmtDays(d){
   return Math.round(d) + ' giorni';
 }
 
+function updateLightBadge(sunAltDeg){
+  const dot = document.getElementById('lightBadgeDot');
+  const txt = document.getElementById('lightBadgeText');
+  let label, color;
+  if(sunAltDeg >= 6){ label = 'Giorno pieno'; color = 'var(--sun-gold)'; }
+  else if(sunAltDeg >= -6){ label = 'Golden hour'; color = '#ffaa55'; }
+  else if(sunAltDeg >= -12){ label = 'Blue hour'; color = 'var(--blue-hour)'; }
+  else { label = 'Notte'; color = 'var(--moon-dim)'; }
+  dot.style.background = color;
+  txt.textContent = label;
+}
+
 let coords = { lat: 44.4949, lng: 11.3426 }; // Default: Bologna
 let customDateTime = null;
 
@@ -739,26 +1017,46 @@ function getActiveDate() {
   return customDateTime ? new Date(customDateTime) : new Date();
 }
 
-function render(){
-  const now = getActiveDate();
-  const { lat, lng } = coords;
-
+/* Aggiornamento "leggero": solo posizioni istantanee (poco costoso),
+   usato ad ogni movimento dello slider per restare fluido. Le
+   scansioni pesanti (alba/tramonto/crepuscoli/eclissi/stagione)
+   restano nel render() completo, richiamato con un debounce. */
+function updateLightweight(now, lat, lng){
   const sunPos = getSunPosition(now, lat, lng);
   const moonPos = getMoonPosition(now, lat, lng);
   const illum = getMoonIllumination(now);
+
+  update3DBodies(sunPos, moonPos);
+  updateLightBadge(sunPos.altitude/RAD);
+
+  document.getElementById('sunAlt').textContent = fmtDeg(sunPos.altitude);
+  document.getElementById('sunAz').textContent = azToCardinal(sunPos.azimuth);
+  document.getElementById('sunShadow').textContent = calculateShadow(sunPos.altitude);
+  document.getElementById('sunDec').textContent = fmtDeg(sunPos.dec);
+  document.getElementById('moonAlt').textContent = fmtDeg(moonPos.altitude);
+  document.getElementById('moonAz').textContent = azToCardinal(moonPos.azimuth);
+  document.getElementById('moonFrac').textContent = Math.round(illum.fraction*100) + '%';
+  document.getElementById('moonDist').textContent = Math.round(moonPos.distance).toLocaleString('it-IT') + ' km';
+  document.getElementById('moonPhaseName').textContent = moonPhaseName(illum.phase);
+  document.getElementById('moonIcon').innerHTML = moonIconSVG(illum.phase);
+
+  return { sunPos, moonPos, illum };
+}
+
+function render(){
+  const now = getActiveDate();
+  const { lat, lng } = coords;
+  const { sunPos, moonPos, illum } = updateLightweight(now, lat, lng);
+
   const scan = scanSunThresholds(now, lat, lng, [
     {key:'astro', value:-18},{key:'nautical', value:-12},{key:'civil', value:-6},
     {key:'horizon', value:-0.833},{key:'golden', value:6}
   ]);
   const moonTimes = getMoonRiseSet(now, lat, lng);
 
-  dialSvg.innerHTML = buildStaticDial() + buildDayPath(lat, lng, now) + updateDialBodies(sunPos, moonPos);
+  maybeRebuild3DPaths(lat, lng, now);
   chartSvg.innerHTML = buildChart(lat, lng, now);
 
-  document.getElementById('sunAlt').textContent = fmtDeg(sunPos.altitude);
-  document.getElementById('sunAz').textContent = azToCardinal(sunPos.azimuth);
-  document.getElementById('sunShadow').textContent = calculateShadow(sunPos.altitude);
-  document.getElementById('sunDec').textContent = fmtDeg(sunPos.dec);
   document.getElementById('sunRise').textContent = fmtTime(scan.results.horizon.rise);
   document.getElementById('sunNoon').textContent = fmtTime(scan.noon);
   document.getElementById('sunSet').textContent = fmtTime(scan.results.horizon.set);
@@ -792,14 +1090,8 @@ function render(){
   document.getElementById('civilTwilight').textContent = `${fmtTime(scan.results.civil.rise)} / ${fmtTime(scan.results.civil.set)}`;
   document.getElementById('astroTwilight').textContent = `${fmtTime(scan.results.astro.rise)} / ${fmtTime(scan.results.astro.set)}`;
 
-  document.getElementById('moonAlt').textContent = fmtDeg(moonPos.altitude);
-  document.getElementById('moonAz').textContent = azToCardinal(moonPos.azimuth);
-  document.getElementById('moonFrac').textContent = Math.round(illum.fraction*100) + '%';
-  document.getElementById('moonDist').textContent = Math.round(moonPos.distance).toLocaleString('it-IT') + ' km';
   document.getElementById('moonRise').textContent = fmtTime(moonTimes.rise);
   document.getElementById('moonSet').textContent = fmtTime(moonTimes.set);
-  document.getElementById('moonPhaseName').textContent = moonPhaseName(illum.phase);
-  document.getElementById('moonIcon').innerHTML = moonIconSVG(illum.phase);
 
   const nextFull = findNextSyzygy(now, 0.5);
   const nextNew = findNextSyzygy(now, 0);
@@ -858,13 +1150,16 @@ const timePicker = document.getElementById('timePicker');
 timePicker.addEventListener('change', (e)=>{
   if(e.target.value){
     customDateTime = new Date(e.target.value);
+    syncSliderWithDateTime();
     render();
   }
 });
 
 document.getElementById('resetTimeBtn').addEventListener('click', ()=>{
+  stopPlayback();
   customDateTime = null;
   timePicker.value = '';
+  syncSliderWithDateTime();
   render();
 });
 
@@ -876,26 +1171,133 @@ function syncPickerWithNow() {
   }
 }
 
+/* --- Slider di avanzamento temporale ------------------------ */
+const timeSlider = document.getElementById('timeSlider');
+const sliderTimeLabel = document.getElementById('sliderTimeLabel');
+const speedSelect = document.getElementById('speedSelect');
+const playBtn = document.getElementById('playBtn');
+const playIcon = document.getElementById('playIcon');
+let heavyRenderTimer = null;
+let playTimer = null;
+
+function minutesToHHMM(m){
+  const h = Math.floor(m/60)%24, mi = Math.round(m%60);
+  return `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`;
+}
+
+// Aggiorna lo slider in modo che rifletta l'orario di customDateTime
+// (o l'ora attuale se non c'è una data personalizzata), senza innescare eventi
+function syncSliderWithDateTime(){
+  const now = getActiveDate();
+  const minutes = now.getHours()*60 + now.getMinutes();
+  timeSlider.value = minutes;
+  sliderTimeLabel.textContent = minutesToHHMM(minutes);
+}
+
+function scheduleHeavyRender(){
+  clearTimeout(heavyRenderTimer);
+  heavyRenderTimer = setTimeout(render, 140);
+}
+
+timeSlider.addEventListener('input', (e)=>{
+  const minutes = Number(e.target.value);
+  sliderTimeLabel.textContent = minutesToHHMM(minutes);
+  const base = customDateTime ? new Date(customDateTime) : new Date();
+  base.setHours(0,0,0,0);
+  customDateTime = new Date(base.getTime() + minutes*60000);
+  updateLightweight(customDateTime, coords.lat, coords.lng); // aggiornamento immediato e leggero
+  scheduleHeavyRender(); // scansioni pesanti con un piccolo debounce
+});
+
+/* --- Riproduzione automatica del tempo ----------------------- */
+function stopPlayback(){
+  clearInterval(playTimer);
+  playTimer = null;
+  playIcon.setAttribute('data-lucide', 'play');
+  lucide.createIcons();
+}
+function startPlayback(){
+  if(!customDateTime) customDateTime = getActiveDate();
+  playIcon.setAttribute('data-lucide', 'pause');
+  lucide.createIcons();
+  const tickMs = 150;
+  playTimer = setInterval(()=>{
+    const speedMinPerSec = Number(speedSelect.value);
+    customDateTime = new Date(customDateTime.getTime() + speedMinPerSec*(tickMs/1000)*60000);
+    const minutesOfDay = ((customDateTime.getHours()*60 + customDateTime.getMinutes()) % 1440 + 1440) % 1440;
+    timeSlider.value = minutesOfDay;
+    sliderTimeLabel.textContent = minutesToHHMM(minutesOfDay);
+    updateLightweight(customDateTime, coords.lat, coords.lng);
+    scheduleHeavyRender();
+  }, tickMs);
+}
+playBtn.addEventListener('click', ()=>{
+  if(playTimer) stopPlayback(); else startPlayback();
+});
+
+/* --- Bottoni di navigazione della vista 3D -------------------- */
+document.getElementById('viewNorthBtn').addEventListener('click', ()=>{
+  autoRotateEnabled = false;
+  camTheta = 0; camPhi = 1.0;
+});
+document.getElementById('lookSunBtn').addEventListener('click', ()=>{
+  if(!has3D) return;
+  autoRotateEnabled = false;
+  const now = getActiveDate();
+  const sp = getSunPosition(now, coords.lat, coords.lng);
+  const dir = azAltTo3D(sp.azimuth, sp.altitude/RAD, 1);
+  aimCameraAt(new THREE.Vector3(dir.x, dir.y, dir.z));
+});
+document.getElementById('lookMoonBtn').addEventListener('click', ()=>{
+  if(!has3D) return;
+  autoRotateEnabled = false;
+  const now = getActiveDate();
+  const mp = getMoonPosition(now, coords.lat, coords.lng);
+  const dir = azAltTo3D(mp.azimuth, mp.altitude/RAD, 1);
+  aimCameraAt(new THREE.Vector3(dir.x, dir.y, dir.z));
+});
+document.getElementById('autoRotateBtn').addEventListener('click', (e)=>{
+  autoRotateEnabled = !autoRotateEnabled;
+  e.currentTarget.style.opacity = autoRotateEnabled ? '1' : '0.55';
+});
+
+/* --- Tema: persistenza in localStorage, coerente con gli altri
+       tool del toolbox (chiave `toolbox_theme`) ---------------- */
 const themeBtn = document.getElementById('themeToggle');
 const themeIcon = document.getElementById('themeIcon');
+
+function applyStoredTheme(){
+  let stored = null;
+  try{ stored = localStorage.getItem('toolbox_theme'); }catch(_e){}
+  if(stored === 'light'){
+    document.body.classList.add('light');
+    themeIcon.setAttribute('data-lucide', 'sun');
+  }
+}
 
 themeBtn.addEventListener('click', ()=>{
   document.body.classList.toggle('light');
   const isLight = document.body.classList.contains('light');
   themeIcon.setAttribute('data-lucide', isLight ? 'sun' : 'moon');
   lucide.createIcons();
+  try{ localStorage.setItem('toolbox_theme', isLight ? 'light' : 'dark'); }catch(_e){}
+  updateScene3DTheme();
   render();
 });
 
-// Inizializzazione Lucide e Avvio App
+// Inizializzazione: tema salvato, vista 3D, Lucide e avvio app
+applyStoredTheme();
+init3D();
 render();
 syncPickerWithNow();
+syncSliderWithDateTime();
 lucide.createIcons();
 
 setInterval(()=>{
   if(!customDateTime) {
     render();
     syncPickerWithNow();
+    syncSliderWithDateTime();
   }
 }, 30000);
 </script>
