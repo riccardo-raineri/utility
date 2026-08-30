@@ -295,6 +295,19 @@ function popolaSelectCategorie() {
   select.innerHTML = CATEGORIE.map(c => `<option value="${c.id}">${c.icona} ${c.id}</option>`).join('');
 }
 
+/**
+ * Converte in numero il testo digitato nei campi peso/prezzo, accettando sia
+ * la virgola che il punto come separatore decimale (es. "1,20" o "1.20"
+ * restituiscono entrambi 1.2). Va sempre usata al posto di parseFloat()
+ * diretto sui valori di questi input, altrimenti "1,20" verrebbe letto
+ * come 1 (parseFloat si ferma alla virgola).
+ */
+function numeroLocale(valoreStringa) {
+  if (valoreStringa === null || valoreStringa === undefined) return NaN;
+  const pulito = String(valoreStringa).trim().replace(',', '.');
+  return parseFloat(pulito);
+}
+
 function calcolaPrezzoKg(peso, unita, prezzo) {
   let pesoKg = peso;
   if (unita === 'g' || unita === 'ml') pesoKg = peso / 1000;
@@ -303,9 +316,9 @@ function calcolaPrezzoKg(peso, unita, prezzo) {
 
 function aggiornaAnteprimaProdotto() {
   const hint = document.getElementById('hint-prezzo');
-  const peso = parseFloat(document.getElementById('input-peso').value);
-  const prezzo = parseFloat(document.getElementById('input-prezzo').value);
-  const prezzoOfferta = parseFloat(document.getElementById('input-prezzo-offerta').value);
+  const peso = numeroLocale(document.getElementById('input-peso').value);
+  const prezzo = numeroLocale(document.getElementById('input-prezzo').value);
+  const prezzoOfferta = numeroLocale(document.getElementById('input-prezzo-offerta').value);
   const unita = document.getElementById('input-unita').value;
   const prezzoAttivo = !isNaN(prezzoOfferta) && prezzoOfferta > 0 ? prezzoOfferta : prezzo;
 
@@ -320,9 +333,9 @@ async function aggiungiProdottoALista() {
   const marca = document.getElementById('input-marca').value.trim();
   const categoria = document.getElementById('input-categoria').value;
   const unita = document.getElementById('input-unita').value;
-  const peso = parseFloat(document.getElementById('input-peso').value);
-  const prezzo = parseFloat(document.getElementById('input-prezzo').value);
-  const prezzoOfferta = parseFloat(document.getElementById('input-prezzo-offerta').value);
+  const peso = numeroLocale(document.getElementById('input-peso').value);
+  const prezzo = numeroLocale(document.getElementById('input-prezzo').value);
+  const prezzoOfferta = numeroLocale(document.getElementById('input-prezzo-offerta').value);
   const supermercato = supermercatoSelezionato() || 'Non specificato';
 
   const hasOfferta = !isNaN(prezzoOfferta) && prezzoOfferta > 0;
