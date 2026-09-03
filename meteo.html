@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meteo</title>
+    <!-- Importiamo i font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Icone Lucide.dev -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Colleghiamo il CSS -->
+    <link rel="stylesheet" href="meteo.css">
+</head>
+<body>
+
+    <!-- Pulsante per tornare alla Dashboard -->
+<a href="dashboard.html" class="dashboard-btn glass-card">
+    <i data-lucide="arrow-left"></i>
+    <span>Dashboard</span>
+</a>
+
+    <!-- Sfondo Dinamico -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <div id="loading">Ricerca Meteo...</div>
+
+    <main id="app-container" style="display: none;">
+        
+        <!-- SEZIONE HERO -->
+        <section class="hero">
+            <h2 class="location" id="loc-name">Localizzazione...</h2>
+            
+            <div class="temp-wrapper" id="3d-element">
+                <h1 class="temperature" id="temp-val">--°</h1>
+            </div>
+            
+            <div class="hero-info-group">
+                <div class="condition-wrapper">
+                    <i id="main-weather-icon" class="hero-icon" data-lucide="cloud"></i>
+                    <h3 class="condition" id="cond-text">--</h3>
+                </div>
+                <p class="feels-like">Percepita: <span id="feels-like-val">--°</span></p>
+            </div>
+
+            <div class="scroll-indicator">
+                <span>Dettagli</span>
+                <i data-lucide="arrow-down" class="arrow-down"></i>
+            </div>
+        </section>
+
+        <!-- SEZIONE DETTAGLI: Griglia metriche -->
+        <section class="details-grid">
+            <div class="glass-card detail-item">
+                <i data-lucide="wind" class="detail-icon"></i>
+                <span class="detail-label">Vento</span>
+                <span class="detail-value" id="wind-val">-- km/h</span>
+            </div>
+            <div class="glass-card detail-item">
+                <i data-lucide="droplets" class="detail-icon"></i>
+                <span class="detail-label">Umidità</span>
+                <span class="detail-value" id="hum-val">--%</span>
+            </div>
+            <div class="glass-card detail-item">
+                <i data-lucide="sun" class="detail-icon"></i>
+                <span class="detail-label">Indice UV</span>
+                <span class="detail-value" id="uv-val">--</span>
+            </div>
+            <div class="glass-card detail-item">
+                <i data-lucide="gauge" class="detail-icon"></i>
+                <span class="detail-label">Pressione</span>
+                <span class="detail-value" id="press-val">-- hPa</span>
+            </div>
+            <div class="glass-card detail-item">
+                <i data-lucide="sunrise" class="detail-icon"></i>
+                <span class="detail-label">Alba</span>
+                <span class="detail-value" id="sunrise-val">--:--</span>
+            </div>
+            <div class="glass-card detail-item">
+                <i data-lucide="sunset" class="detail-icon"></i>
+                <span class="detail-label">Tramonto</span>
+                <span class="detail-value" id="sunset-val">--:--</span>
+            </div>
+        </section>
+
+        <!-- SEZIONE ORARIA -->
+        <section class="forecast-section">
+            <h3 class="section-title">Oggi</h3>
+            <div class="hourly-container glass-card" id="hourly-container"></div>
+        </section>
+
+        <!-- SEZIONE GIORNALIERA -->
+        <section class="forecast-section">
+            <h3 class="section-title">Prossimi 7 giorni</h3>
+            <div class="daily-container glass-card" id="daily-container"></div>
+        </section>
+
+        <!-- FOOTER: Fonte e Aggiornamento Reale -->
+        <footer class="weather-footer glass-card">
+            <div class="footer-row">
+                <i data-lucide="database" class="footer-icon"></i>
+                <span>Fonte dati: <a href="https://open-meteo.com/" target="_blank">Open-Meteo (Modelli ECMWF/GFS)</a></span>
+            </div>
+            <div class="footer-row">
+                <i data-lucide="clock" class="footer-icon"></i>
+                <span id="update-time">Ultimo aggiornamento server: --</span>
+            </div>
+        </footer>
+<!-- FOOTER: Autore -->
+        <footer class="app-author-footer">
+            <span>Creative Utility Toolbox — Riccardo Raineri</span>
+        </footer>
+
+    </main>
+    </main>
+
+    <script src="meteo.js"></script>
+</body>
+</html>

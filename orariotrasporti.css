@@ -1,0 +1,34 @@
+/* Stili specifici per orariotrasporti */
+body {
+    background-color: #030712;
+    color: #f3f4f6;
+}
+
+.train-board-table {
+    font-family: monospace;
+}
+
+.train-board-table tr:hover {
+    background-color: rgba(24, 24, 27, 0.9);
+}
+
+#map {
+    background-color: #0f172a;
+    min-height: 320px;
+}
+
+/* Scrollbar personalizzata pulita */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #030712;
+}
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+}
