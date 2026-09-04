@@ -1,462 +1,219 @@
 <!DOCTYPE html>
-<html lang="it" class="dark">
+<html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Orario Trasporti - Hub Mobilità Intelligente</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .leaflet-container { background-color: #090d16 !important; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orario Trasporti · Hub Mobilità Urbana</title>
+<meta name="description" content="Bus in tempo reale, tabellone treni e pianificatore destinazioni in un unico strumento.">
+
+<!-- Font: Space Grotesk per testo/interfaccia, IBM Plex Mono per orari e dati numerici -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- Leaflet (mappa) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<!-- Icone -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<link rel="stylesheet" href="orariotrasporti.css">
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased">
+<body>
 
-    <!-- Header & Selettore Sezioni -->
-    <header class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-50 backdrop-blur">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20">
-                    <i data-lucide="compass" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold tracking-tight text-white">Orario Trasporti</h1>
-                    <p id="geo-indicator" class="text-xs text-slate-400 flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Geolocalizzazione attiva
-                    </p>
-                </div>
+<div class="app">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"><i data-lucide="compass"></i></span>
+      <div class="brand-text">
+        <h1>Orario Trasporti</h1>
+        <p class="status-line">
+          <span class="dot dot-ok" id="geoDot"></span>
+          <span id="geoStatus">Posizione rilevata</span>
+          <span class="status-sep">·</span>
+          <span id="liveClock" class="mono">--:--:--</span>
+        </p>
+      </div>
+    </div>
+
+    <nav class="mode-nav" role="tablist" aria-label="Sezioni dell'app">
+      <button class="mode-btn theme-bus is-active" data-section="bus" role="tab" aria-selected="true" aria-controls="section-bus" id="nav-bus">
+        <i data-lucide="bus" aria-hidden="true"></i><span>Bus &amp; Mappa</span>
+      </button>
+      <button class="mode-btn theme-train" data-section="train" role="tab" aria-selected="false" aria-controls="section-train" id="nav-train">
+        <i data-lucide="train-front" aria-hidden="true"></i><span>Stazione Treni</span>
+      </button>
+      <button class="mode-btn theme-planner" data-section="planner" role="tab" aria-selected="false" aria-controls="section-planner" id="nav-planner">
+        <i data-lucide="map-pinned" aria-hidden="true"></i><span>Dove Andare</span>
+      </button>
+    </nav>
+  </header>
+
+  <main>
+
+    <!-- ===================== SEZIONE BUS ===================== -->
+    <section id="section-bus" class="view theme-bus is-active" role="tabpanel" aria-labelledby="nav-bus">
+      <div class="bus-grid">
+
+        <!-- Colonna sinistra: fermata + lista linee + dettaglio -->
+        <div class="col-stack">
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <span class="eyebrow accent-bg">Fermata rilevata</span>
+                <h2 id="current-stop-name" class="card-title">Via Indipendenza (Mille)</h2>
+                <p class="muted small" id="stop-meta">3 linee attive · aggiornato alle <span class="mono" id="bus-updated-at">--:--</span></p>
+              </div>
+              <button class="icon-btn accent-ring" id="refreshBusBtn" aria-label="Aggiorna orari bus">
+                <i data-lucide="refresh-cw" aria-hidden="true"></i>
+              </button>
             </div>
 
-            <!-- Navigazione tra Sezioni -->
-            <nav class="flex items-center gap-1.5 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs font-medium">
-                <button onclick="switchSection('bus')" id="nav-bus" class="px-3.5 py-2 rounded-md transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-sm">
-                    <i data-lucide="bus" class="w-4 h-4"></i> Bus & Mappa Live
-                </button>
-                <button onclick="switchSection('train')" id="nav-train" class="px-3.5 py-2 rounded-md transition-all flex items-center gap-1.5 text-slate-400 hover:text-white">
-                    <i data-lucide="train" class="w-4 h-4"></i> Stazione Treni
-                </button>
-                <button onclick="switchSection('planner')" id="nav-planner" class="px-3.5 py-2 rounded-md transition-all flex items-center gap-1.5 text-slate-400 hover:text-white">
-                    <i data-lucide="map-pinned" class="w-4 h-4"></i> Destinazioni & Bus
-                </button>
-            </nav>
+            <div class="search-row">
+              <i data-lucide="search" aria-hidden="true"></i>
+              <input type="text" id="busSearch" placeholder="Filtra per linea o destinazione…" aria-label="Filtra linee bus">
+            </div>
+
+            <p class="hint"><i data-lucide="mouse-pointer-click" aria-hidden="true"></i> Seleziona una linea per vedere fermate, prossimi passaggi e percorso live sulla mappa.</p>
+
+            <ul id="bus-list-container" class="bus-list" aria-live="polite"></ul>
+          </div>
+
+          <div id="bus-route-panel" class="card is-hidden">
+            <div class="card-head border-b">
+              <h3 id="selected-bus-title" class="card-subtitle"><i data-lucide="route" aria-hidden="true"></i> Dettaglio linea</h3>
+              <button class="text-btn" id="closeBusRouteBtn">Chiudi</button>
+            </div>
+
+            <div class="next-passages">
+              <span class="label-xs">Prossimi passaggi</span>
+              <div id="next-passages-chips" class="chip-row"></div>
+            </div>
+
+            <div id="bus-stops-timeline" class="timeline" aria-live="polite"></div>
+          </div>
+
         </div>
-    </header>
 
-    <!-- CONTENITORE PRINCIPALE DELLE SEZIONI -->
-    <main class="max-w-7xl mx-auto w-full p-4 md:p-6 flex-grow space-y-6">
-
-        <!-- ================= SEZIONE 1: BUS & MAPPA LIVE ================= -->
-        <section id="section-bus" class="space-y-6">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                <!-- Lista Bus e Fermata Chiara -->
-                <div class="lg:col-span-5 space-y-4">
-                    <div class="bg-slate-900/70 border border-blue-900/40 rounded-xl p-5 shadow-xl backdrop-blur">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <span class="text-[11px] font-semibold text-blue-400 uppercase tracking-wider bg-blue-950/80 px-2.5 py-1 rounded border border-blue-800/50">Fermata Rilevata</span>
-                                <h2 id="current-stop-name" class="text-base font-bold text-white mt-1.5">Via Indipendenza (Mille)</h2>
-                            </div>
-                            <button onclick="refreshBusData()" class="p-2 text-blue-400 hover:bg-blue-950/50 rounded-lg border border-blue-900/30 transition-colors">
-                                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                            </button>
-                        </div>
-
-                        <p class="text-xs text-slate-400 mb-3">Clicca sul numero del bus per evidenziare il percorso e le fermate sulla mappa in tempo reale.</p>
-                        
-                        <div id="bus-list-container" class="space-y-2.5">
-                            <!-- Inserito via JS -->
-                        </div>
-                    </div>
-
-                    <!-- Dettaglio Fermate del Bus Selezionato -->
-                    <div id="bus-route-panel" class="bg-slate-900/70 border border-slate-800 rounded-xl p-5 shadow-xl hidden">
-                        <div class="flex justify-between items-center mb-3 border-b border-slate-800 pb-2">
-                            <h3 id="selected-bus-title" class="text-sm font-bold text-blue-400 flex items-center gap-2">
-                                <i data-lucide="route" class="w-4 h-4"></i> Dettaglio Linea
-                            </h3>
-                            <button onclick="closeBusRoute()" class="text-slate-400 hover:text-white text-xs">Chiudi</button>
-                        </div>
-                        <div id="bus-stops-timeline" class="space-y-3 max-h-56 overflow-y-auto pr-2">
-                            <!-- Timeline fermate -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Mappa Live Spostamento Bus -->
-                <div class="lg:col-span-7 flex flex-col">
-                    <div class="bg-slate-900/70 border border-slate-800 rounded-xl p-4 flex flex-col h-[520px] shadow-xl relative overflow-hidden">
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                                <i data-lucide="navigation" class="w-3.5 h-3.5 text-blue-400"></i> Monitoraggio Veicoli in Movimento
-                            </h3>
-                            <span class="text-[10px] bg-emerald-950 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Live GPS
-                            </span>
-                        </div>
-                        <div id="map" class="w-full flex-grow rounded-lg border border-slate-800 z-10"></div>
-                    </div>
-                </div>
-
+        <!-- Colonna destra: mappa live -->
+        <div class="col-stack">
+          <div class="card map-card">
+            <div class="card-head">
+              <h3 class="card-subtitle small-caps"><i data-lucide="navigation" aria-hidden="true"></i> Veicoli in movimento</h3>
+              <span class="badge badge-live"><span class="pulse-dot"></span> Live GPS</span>
             </div>
-        </section>
-
-        <!-- ================= SEZIONE 2: STAZIONE TRENI ================= -->
-        <section id="section-train" class="space-y-6 hidden">
-            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 shadow-2xl space-y-6">
-                <!-- Header Stazione & Filtro Arrivi/Partenze -->
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-zinc-800 pb-5">
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="px-2.5 py-0.5 text-[10px] bg-red-950 text-red-400 border border-red-900 font-bold uppercase rounded">Tabellone RFI</span>
-                            <h2 id="station-name-title" class="text-xl font-black tracking-tight text-white">BOLOGNA CENTRALE</h2>
-                        </div>
-                        <p class="text-xs text-zinc-400 mt-1">Stazione principale rilevata automaticamente dalla posizione GPS.</p>
-                    </div>
-
-                    <div class="flex items-center gap-2 w-full md:w-auto">
-                        <div class="bg-zinc-900 p-1 rounded-lg border border-zinc-800 flex text-xs font-medium w-full md:w-auto">
-                            <button onclick="setTrainMode('departures')" id="btn-dep" class="flex-1 md:flex-initial px-4 py-2 rounded-md bg-red-600 text-white transition-colors">Partenze</button>
-                            <button onclick="setTrainMode('arrivals')" id="btn-arr" class="flex-1 md:flex-initial px-4 py-2 rounded-md text-zinc-400 hover:text-white transition-colors">Arrivi</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Tabella Treni (Stile Stazione: Rosso, Verde, Bianco/Nero) -->
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm font-mono">
-                        <thead>
-                            <tr class="text-[11px] text-zinc-400 uppercase border-b border-zinc-800 bg-zinc-900/50">
-                                <th class="py-3 px-4">Treno</th>
-                                <th class="py-3 px-4">Orario</th>
-                                <th class="py-3 px-4">Destinazione / Provenienza</th>
-                                <th class="py-3 px-4">Binario</th>
-                                <th class="py-3 px-4 text-right">Stato in Tempo Reale</th>
-                            </tr>
-                        </thead>
-                        <tbody id="train-table-body" class="divide-y divide-zinc-900">
-                            <!-- Inserito via JS -->
-                        </tbody>
-                    </table>
-                </div>
+            <div id="map" role="img" aria-label="Mappa con posizione utente e veicoli in tempo reale"></div>
+            <div class="map-legend">
+              <span><i class="legend-dot legend-dot--user"></i> La tua posizione</span>
+              <span><i class="legend-dot legend-dot--vehicle"></i> Veicolo selezionato</span>
+              <span><i class="legend-line"></i> Percorso linea</span>
             </div>
-        </section>
+          </div>
+        </div>
 
-        <!-- ================= SEZIONE 3: PIANIFICATORE DESTINAZIONI BUS ================= -->
-        <section id="section-planner" class="space-y-6 hidden">
-            <div class="max-w-3xl mx-auto bg-slate-900/80 border border-slate-800 rounded-2xl p-6 md:p-8 shadow-xl space-y-6 backdrop-blur">
-                <div>
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <i data-lucide="map-pinned" class="w-5 h-5 text-amber-400"></i> Dove vuoi andare?
-                    </h2>
-                    <p class="text-xs text-slate-400 mt-1">Seleziona o cerca una destinazione urbana per ricevere il suggerimento immediato sul miglior bus da prendere.</p>
-                </div>
+      </div>
+    </section>
 
-                <div class="relative">
-                    <i data-lucide="search" class="w-5 h-5 absolute left-3.5 top-3.5 text-slate-400"></i>
-                    <input type="text" id="destination-input" placeholder="Es. Stazione Centrale, Fiera, Università, Ospedale Maggiore..." 
-                           oninput="filterDestinations(this.value)"
-                           class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400 transition-colors">
-                </div>
+    <!-- ===================== SEZIONE TRENI ===================== -->
+    <section id="section-train" class="view theme-train" role="tabpanel" aria-labelledby="nav-train">
+      <div class="card board-card">
 
-                <!-- Lista Suggerimenti Destinazioni -->
-                <div id="planner-results" class="space-y-3">
-                    <!-- Dinamico -->
-                </div>
+        <div class="board-head">
+          <div>
+            <div class="board-title-row">
+              <span class="eyebrow accent-bg">Tabellone RFI</span>
+              <span id="train-updated-badge" class="muted small mono">agg. <span id="train-updated-at">--:--:--</span></span>
             </div>
-        </section>
+            <h2 id="station-name-title" class="card-title">Bologna Centrale</h2>
+            <p class="muted small">Stazione rilevata automaticamente dalla posizione GPS · <span id="train-count">0</span> treni in tabellone</p>
+          </div>
 
-    </main>
+          <div class="board-controls">
+            <div class="segmented" role="group" aria-label="Modalità tabellone">
+              <button id="btn-dep" class="segmented-btn is-active">Partenze</button>
+              <button id="btn-arr" class="segmented-btn">Arrivi</button>
+            </div>
+            <div class="search-row search-row--compact">
+              <i data-lucide="search" aria-hidden="true"></i>
+              <input type="text" id="trainSearch" placeholder="Cerca treno o destinazione…" aria-label="Filtra treni">
+            </div>
+          </div>
+        </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-slate-900 py-4 text-center text-xs text-slate-500 bg-slate-950 mt-auto">
-        orariotrasporti &bull; Sistema Integrato di Mobilità Urbana
-    </footer>
+        <div id="train-alert" class="alert-banner is-hidden" role="alert">
+          <i data-lucide="triangle-alert" aria-hidden="true"></i>
+          <span id="train-alert-text"></span>
+        </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // Dati di Simulazione e Stato dell'Applicazione
-        let map;
-        let userMarker;
-        let vehicleMarker;
-        let routePolyline;
-        let activeBusInterval = null;
+        <div class="table-scroll">
+          <table class="board-table">
+            <thead>
+              <tr>
+                <th>Treno</th>
+                <th>Categoria</th>
+                <th>Orario</th>
+                <th>Destinazione / Provenienza</th>
+                <th>Binario</th>
+                <th class="align-right">Stato</th>
+              </tr>
+            </thead>
+            <tbody id="train-table-body" aria-live="polite"></tbody>
+          </table>
+        </div>
 
-        const mockBuses = [
-            { id: "25", name: "BUS 25", dest: "Doppio Arco / Corticella", time: "12:35", status: "In orario", delay: 0, latOffset: 0.0015, lngOffset: 0.001,
-              stops: [
-                  { name: "Via Rizzoli", time: "12:30" },
-                  { name: "Piazza Maggiore", time: "12:32" },
-                  { name: "Via Indipendenza (Fermata Attuale)", time: "12:35" },
-                  { name: "Autostazione", time: "12:38" },
-                  { name: "Corticella Capolinea", time: "12:46" }
-              ]
-            },
-            { id: "14", name: "BUS 14", dest: "San Lazzaro di Savena", time: "12:38", status: "+4 min", delay: 4, latOffset: -0.002, lngOffset: 0.0025,
-              stops: [
-                  { name: "Piazza dei Martiri", time: "12:34" },
-                  { name: "Via Indipendenza", time: "12:38" },
-                  { name: "Porta Maggiore", time: "12:43" },
-                  { name: "San Lazzaro Municipio", time: "12:52" }
-              ]
-            },
-            { id: "27", name: "BUS 27", dest: "Piazza XX Settembre - Pilastro", time: "12:42", status: "In orario", delay: 0, latOffset: 0.0025, lngOffset: -0.0015,
-              stops: [
-                  { name: "Stazione Centrale", time: "12:39" },
-                  { name: "Via Indipendenza", time: "12:42" },
-                  { name: "San Vitale", time: "12:47" },
-                  { name: "Pilastro", time: "12:58" }
-              ]
-            }
-        ];
+        <div class="board-footer">
+          <div class="legend-row">
+            <span><i class="legend-dot legend-dot--ok"></i> In orario</span>
+            <span><i class="legend-dot legend-dot--warn"></i> Ritardo lieve</span>
+            <span><i class="legend-dot legend-dot--danger"></i> Ritardo &gt; 15 min</span>
+            <span><i class="legend-dot legend-dot--changed"></i> Binario variato</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-        const mockTrainsDepartures = [
-            { code: "RV 2282", time: "12:40", dest: "VENEZIA SANTA LUCIA", bin: "4", status: "REGOLARE", type: "ok" },
-            { code: "FR 9514", time: "12:48", dest: "ROMA TERMINI - MILANO C.LE", timeDiff: "+10 min", bin: "7", status: "RITARDO +10'", type: "delay" },
-            { code: "REG 6520", time: "12:55", dest: "RIMINI - ANCONA", bin: "2", status: "REGOLARE", type: "ok" },
-            { code: "FA 8511", time: "13:02", dest: "FIRENZE S.M.N. - BOLZANO", bin: "5", status: "RITARDO +22'", type: "heavy" }
-        ];
+    <!-- ===================== SEZIONE PIANIFICATORE ===================== -->
+    <section id="section-planner" class="view theme-planner" role="tabpanel" aria-labelledby="nav-planner">
+      <div class="card planner-card">
+        <div>
+          <h2 class="card-title"><i data-lucide="map-pinned" aria-hidden="true"></i> Dove vuoi andare?</h2>
+          <p class="muted small">Cerca o filtra una destinazione urbana per il suggerimento immediato su bus, tempi di attesa e a piedi.</p>
+        </div>
 
-        const mockTrainsArrivals = [
-            { code: "FR 9608", time: "12:36", dest: "Da NAPOLI CENTRALE", bin: "6", status: "REGOLARE", type: "ok" },
-            { code: "RV 3311", time: "12:42", dest: "Da MILANO CENTRALE", bin: "3", status: "RITARDO +5'", type: "delay" },
-            { code: "FB 8850", time: "12:50", dest: "Da RAVENNA", bin: "1", status: "REGOLARE", type: "ok" }
-        ];
+        <div class="search-row">
+          <i data-lucide="search" aria-hidden="true"></i>
+          <input type="text" id="destination-input" placeholder="Es. Stazione Centrale, Fiera, Università, Ospedale…" aria-label="Cerca destinazione">
+        </div>
 
-        const destinationsDB = [
-            { name: "Stazione Centrale RFI", bus: "BUS 27", time: "8 min", walk: "2 min", details: "Passaggio ogni 6 min. Fermata a 100m." },
-            { name: "Università degli Studi (Via Zamboni)", bus: "BUS 25", time: "11 min", walk: "4 min", details: "Diretto senza cambi." },
-            { name: "Ospedale Maggiore", bus: "BUS 19 o 38", time: "18 min", walk: "3 min", details: "Linea ad alta frequenza." },
-            { name: "Centro Fieristico (BolognaFiere)", bus: "BUS 28", time: "15 min", walk: "5 min", details: "Servizio potenziato nei giorni feriali." }
-        ];
+        <div class="chip-filter-row" id="category-chips" role="group" aria-label="Filtra per categoria"></div>
 
-        // Inizializzazione applicazione
-        document.addEventListener("DOMContentLoaded", () => {
-            lucide.createIcons();
-            initMap(44.4949, 11.3426);
-            renderBusList();
-            renderTrainTable('departures');
-            renderDestinations(destinationsDB);
-        });
+        <div class="planner-toolbar">
+          <span class="muted small" id="planner-count">4 destinazioni</span>
+          <label class="sort-select-wrap">
+            <span class="muted small">Ordina per</span>
+            <select id="sort-select">
+              <option value="time">Tempo totale</option>
+              <option value="name">Nome (A-Z)</option>
+              <option value="favorites">Preferiti prima</option>
+            </select>
+          </label>
+        </div>
 
-        // Gestione sezioni
-        function switchSection(section) {
-            ['bus', 'train', 'planner'].forEach(s => {
-                document.getElementById(`section-${s}`).classList.add('hidden');
-                document.getElementById(`nav-${s}`).className = "px-3.5 py-2 rounded-md transition-all flex items-center gap-1.5 text-slate-400 hover:text-white";
-            });
+        <ul id="planner-results" class="planner-list" aria-live="polite"></ul>
+      </div>
+    </section>
 
-            document.getElementById(`section-${section}`).classList.remove('hidden');
-            const activeBtn = document.getElementById(`nav-${section}`);
-            
-            if(section === 'bus') activeBtn.className = "px-3.5 py-2 rounded-md transition-all flex items-center gap-1.5 bg-blue-600 text-white shadow-sm";
-            if(section === 'train') activeBtn.className = "px-3.5 py-2 rounded-md transition-all flex items-center gap-1.5 bg-red-600 text-white shadow-sm";
-            if(section === 'planner') activeBtn.className = "px-3.5 py-2 rounded-md transition-all flex items-center gap-1.5 bg-amber-600 text-white shadow-sm";
+  </main>
 
-            if(section === 'bus' && map) {
-                setTimeout(() => map.invalidateSize(), 200);
-            }
-        }
+  <footer class="app-footer">
+    orariotrasporti &bull; Sistema Integrato di Mobilità Urbana &bull; Dati mostrati a scopo dimostrativo
+  </footer>
+</div>
 
-        // Mappa Leaflet
-        function initMap(lat, lng) {
-            map = L.map('map', { zoomControl: false }).setView([lat, lng], 15);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; CARTO',
-                maxZoom: 19
-            }).addTo(map);
-
-            L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-            // Marker utente
-            userMarker = L.circleMarker([lat, lng], {
-                radius: 8, color: '#10b981', fillColor: '#10b981', fillOpacity: 0.9, weight: 2
-            }).addTo(map).bindPopup("<b>La tua posizione</b>");
-        }
-
-        // Render lista bus (Sezione Bus)
-        function renderBusList() {
-            const container = document.getElementById('bus-list-container');
-            container.innerHTML = mockBuses.map(bus => {
-                let statusColor = "text-emerald-400 bg-emerald-950/60 border-emerald-900/60";
-                if (bus.delay > 0) statusColor = "text-amber-400 bg-amber-950/60 border-amber-900/60";
-
-                return `
-                    <div onclick="selectBus('${bus.id}')" class="group bg-slate-950/70 border border-slate-800 hover:border-blue-500/60 p-3.5 rounded-xl cursor-pointer transition-all flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="bg-blue-600 group-hover:bg-blue-500 text-white font-black text-xs px-3 py-2 rounded-lg shadow transition-colors">
-                                ${bus.name}
-                            </div>
-                            <div>
-                                <h4 class="text-xs font-bold text-white group-hover:text-blue-400 transition-colors">${bus.dest}</h4>
-                                <p class="text-[11px] text-slate-400 mt-0.5">Arrivo previsto: <strong class="text-slate-200">${bus.time}</strong></p>
-                            </div>
-                        </div>
-                        <span class="text-[11px] px-2 py-0.5 rounded border ${statusColor}">${bus.status}</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Clic su un bus: mostra fermate e traccia percorso sulla mappa con movimento in tempo reale
-        function selectBus(busId) {
-            const bus = mockBuses.find(b => b.id === busId);
-            if (!bus) return;
-
-            // Mostra pannello laterale fermate
-            document.getElementById('bus-route-panel').classList.remove('hidden');
-            document.getElementById('selected-bus-title').innerHTML = `<i data-lucide="route" class="w-4 h-4 text-blue-400"></i> Percorso ${bus.name} &bull; ${bus.dest}`;
-            lucide.createIcons();
-
-            const timeline = document.getElementById('bus-stops-timeline');
-            timeline.innerHTML = bus.stops.map((stop, idx) => `
-                <div class="flex items-start gap-3 text-xs">
-                    <div class="flex flex-col items-center mt-1">
-                        <div class="w-2.5 h-2.5 rounded-full ${idx === 2 ? 'bg-blue-500 ring-4 ring-blue-500/20 animate-pulse' : 'bg-slate-700'}"></div>
-                        ${idx < bus.stops.length - 1 ? '<div class="w-0.5 h-6 bg-slate-800 my-0.5"></div>' : ''}
-                    </div>
-                    <div class="flex-grow flex justify-between items-center bg-slate-950/40 p-2 rounded border border-slate-800/60">
-                        <span class="${idx === 2 ? 'text-white font-bold' : 'text-slate-300'}">${stop.name}</span>
-                        <span class="text-slate-400 font-mono text-[11px]">${stop.time}</span>
-                    </div>
-                </div>
-            `).join('');
-
-            // Disegna percorso e veicolo in movimento sulla mappa
-            updateMapForBus(bus);
-        }
-
-        function closeBusRoute() {
-            document.getElementById('bus-route-panel').classList.add('hidden');
-            if (routePolyline) map.removeLayer(routePolyline);
-            if (vehicleMarker) map.removeLayer(vehicleMarker);
-            if (activeBusInterval) clearInterval(activeBusInterval);
-        }
-
-        function updateMapForBus(bus) {
-            if (routePolyline) map.removeLayer(routePolyline);
-            if (vehicleMarker) map.removeLayer(vehicleMarker);
-            if (activeBusInterval) clearInterval(activeBusInterval);
-
-            const centerLat = 44.4949;
-            const centerLng = 11.3426;
-
-            const routeCoords = [
-                [centerLat - 0.005, centerLng - 0.004],
-                [centerLat - 0.002, centerLng - 0.002],
-                [centerLat, centerLng],
-                [centerLat + bus.latOffset, centerLng + bus.lngOffset],
-                [centerLat + 0.006, centerLng + 0.005]
-            ];
-
-            // Traccia linea percorso
-            routePolyline = L.polyline(routeCoords, { color: '#3b82f6', weight: 4, opacity: 0.8, dashArray: '6, 6' }).addTo(map);
-            map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
-
-            // Posiziona il bus in movimento
-            let currentStep = 0;
-            vehicleMarker = L.circleMarker(routeCoords[currentStep], {
-                radius: 8, color: '#60a5fa', fillColor: '#3b82f6', fillOpacity: 1, weight: 3
-            }).addTo(map).bindPopup(`<b>${bus.name}</b><br>Direzione: ${bus.dest}`).openPopup();
-
-            // Animazione spostamento real-time simulata
-            activeBusInterval = setInterval(() => {
-                currentStep = (currentStep + 1) % routeCoords.length;
-                vehicleMarker.setLatLng(routeCoords[currentStep]);
-            }, 2500);
-        }
-
-        function refreshBusData() {
-            renderBusList();
-        }
-
-        // Sezione Treni (Stazione)
-        let currentTrainMode = 'departures';
-        function setTrainMode(mode) {
-            currentTrainMode = mode;
-            if (mode === 'departures') {
-                document.getElementById('btn-dep').className = "flex-1 md:flex-initial px-4 py-2 rounded-md bg-red-600 text-white transition-colors";
-                document.getElementById('btn-arr').className = "flex-1 md:flex-initial px-4 py-2 rounded-md text-zinc-400 hover:text-white transition-colors";
-            } else {
-                document.getElementById('btn-arr').className = "flex-1 md:flex-initial px-4 py-2 rounded-md bg-red-600 text-white transition-colors";
-                document.getElementById('btn-dep').className = "flex-1 md:flex-initial px-4 py-2 rounded-md text-zinc-400 hover:text-white transition-colors";
-            }
-            renderTrainTable(mode);
-        }
-
-        function renderTrainTable(mode) {
-            const tbody = document.getElementById('train-table-body');
-            const data = mode === 'departures' ? mockTrainsDepartures : mockTrainsArrivals;
-
-            tbody.innerHTML = data.map(train => {
-                let badgeStyle = "text-emerald-400 bg-emerald-950/60 border-emerald-900/60";
-                if (train.type === 'delay') badgeStyle = "text-amber-400 bg-amber-950/60 border-amber-900/60";
-                if (train.type === 'heavy') badgeStyle = "text-red-400 bg-red-950/60 border-red-900/60 animate-pulse font-bold";
-
-                return `
-                    <tr class="hover:bg-zinc-900/80 transition-colors border-b border-zinc-900">
-                        <td class="py-3.5 px-4 font-bold text-red-500">${train.code}</td>
-                        <td class="py-3.5 px-4 text-zinc-200">${train.time}</td>
-                        <td class="py-3.5 px-4 text-zinc-100 font-medium">${train.dest}</td>
-                        <td class="py-3.5 px-4 font-bold text-amber-300">Binario ${train.bin}</td>
-                        <td class="py-3.5 px-4 text-right">
-                            <span class="px-2.5 py-1 text-xs rounded border ${badgeStyle}">${train.status}</span>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Sezione Pianificatore Destinazioni
-        function renderDestinations(items) {
-            const container = document.getElementById('planner-results');
-            if (items.length === 0) {
-                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">Nessuna destinazione trovata.</p>`;
-                return;
-            }
-
-            container.innerHTML = items.map(item => `
-                <div class="bg-slate-950/70 border border-slate-800 p-4 rounded-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                        <h4 class="text-sm font-bold text-white flex items-center gap-2">
-                            <i data-lucide="map-pin" class="w-4 h-4 text-amber-400"></i> ${item.name}
-                        </h4>
-                        <p class="text-xs text-slate-400 mt-1">${item.details}</p>
-                    </div>
-                    <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
-                        <div class="text-right">
-                            <span class="text-xs font-bold text-blue-400 bg-blue-950 px-2.5 py-1 rounded border border-blue-900">${item.bus}</span>
-                            <span class="text-[11px] text-slate-400 block mt-0.5">Tempo stimato: ${item.time}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function filterDestinations(query) {
-            const q = query.toLowerCase();
-            const filtered = destinationsDB.filter(d => d.name.toLowerCase().includes(q));
-            renderDestinations(filtered);
-        }
-    </script>
+<!-- Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="orariotrasporti.js"></script>
 </body>
 </html>
