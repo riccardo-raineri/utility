@@ -12,16 +12,16 @@ const state = {
 };
 
 function initTheme() {
-  const saved = localStorage.getItem('cedolino_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', saved);
+  const saved = localStorage.getItem('cedolino_theme') || 'dark';
+  document.body.setAttribute('data-theme', saved);
   $('#iconSun').style.display = saved === 'dark' ? 'none' : 'block';
   $('#iconMoon').style.display = saved === 'dark' ? 'block' : 'none';
 }
 
 $('#themeToggle').addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
+  const current = document.body.getAttribute('data-theme');
   const next = current === 'dark' ? 'light' : 'dark';
-  document.documentElement.setAttribute('data-theme', next);
+  document.body.setAttribute('data-theme', next);
   localStorage.setItem('cedolino_theme', next);
   $('#iconSun').style.display = next === 'dark' ? 'none' : 'block';
   $('#iconMoon').style.display = next === 'dark' ? 'block' : 'none';
@@ -128,7 +128,7 @@ async function parseCedolinoWithAI(text) {
 function setStatus(msg, isError) {
   const el = $('#uploadStatus');
   el.textContent = msg;
-  el.style.color = isError ? 'var(--red)' : 'var(--text-muted)';
+  el.style.color = isError ? 'var(--accent-red)' : 'var(--text-secondary)';
 }
 
 async function extractTextFromPdf(file) {
@@ -222,6 +222,8 @@ $('#deleteDetail').addEventListener('click', async () => {
 async function loadCedolini() {
   if (!state.webAppUrl) return;
   const timeline = $('#timeline');
+  $('#loaderContainer').classList.remove('hidden');
+  timeline.innerHTML = '';
   try {
     const res = await fetch(apiUrl());
     const data = await res.json();
@@ -232,11 +234,18 @@ async function loadCedolini() {
     state.cedolini = data.sort((a, b) => (a.MeseAnno < b.MeseAnno ? 1 : -1));
     renderTimeline();
     renderStats();
+    renderChart();
   } catch (err) {
     console.error(err);
     timeline.innerHTML = '<p class="empty-state">Impossibile contattare la Web App. Controlla l\'URL nelle impostazioni.</p>';
+  } finally {
+    $('#loaderContainer').classList.add('hidden');
   }
 }
+
+$('#searchInput').addEventListener('input', (e) => {
+  renderTimeline(e.target.value.trim().toLowerCase());
+});
 
 function renderStats() {
   const row = $('#statsRow');
@@ -248,8 +257,11 @@ function renderStats() {
     if (!prev || a === '' || b === '') return '';
     const d = parseFloat(a) - parseFloat(b);
     if (isNaN(d) || d === 0) return '';
-    return `<span class="stat-delta ${d > 0 ? 'up' : 'down'}">${d > 0 ? '+' : ''}${d.toFixed(2)}</span>`;
+    return `<div class="stat-delta ${d > 0 ? 'up' : 'down'}"><i data-lucide="${d > 0 ? 'arrow-up-right' : 'arrow-down-right'}"></i>${d > 0 ? '+' : ''}${d.toFixed(2)} € vs mese prec.</div>`;
   };
+
+  const ultimi3 = state.cedolini.slice(0, 3).map((c) => parseFloat(c.Netto)).filter((n) => !isNaN(n));
+  const media3 = ultimi3.length ? ultimi3.reduce((a, b) => a + b, 0) / ultimi3.length : null;
 
   row.innerHTML = `
     <div class="stat-box">
@@ -265,16 +277,104 @@ function renderStats() {
       <div class="stat-label">ROL residuo</div>
       <div class="stat-value">${fmt(last.RolResiduo)} h</div>
     </div>
+    ${media3 !== null ? `
+    <div class="stat-box">
+      <div class="stat-label">Media netto (ultimi ${ultimi3.length} mesi)</div>
+      <div class="stat-value">€ ${fmt(media3)}</div>
+    </div>` : ''}
+  `;
+  refreshIcons();
+}
+
+// ---------- Grafico andamento netto ----------
+function renderChart() {
+  const card = $('#chartCard');
+  const container = $('#netChart');
+  const points = state.cedolini
+    .filter((c) => c.MeseAnno && c.Netto !== '' && !isNaN(parseFloat(c.Netto)))
+    .slice()
+    .sort((a, b) => (a.MeseAnno > b.MeseAnno ? 1 : -1));
+
+  if (points.length < 2) {
+    card.classList.add('hidden');
+    return;
+  }
+  card.classList.remove('hidden');
+
+  const W = 640, H = 180, PAD_X = 30, PAD_Y = 24;
+  const values = points.map((p) => parseFloat(p.Netto));
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  const stepX = (W - PAD_X * 2) / (points.length - 1);
+  const coords = values.map((v, i) => {
+    const x = PAD_X + i * stepX;
+    const y = H - PAD_Y - ((v - min) / range) * (H - PAD_Y * 2);
+    return [x, y];
+  });
+
+  const linePath = coords.map(([x, y], i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  const areaPath = `${linePath} L${coords[coords.length - 1][0].toFixed(1)},${H - PAD_Y} L${coords[0][0].toFixed(1)},${H - PAD_Y} Z`;
+
+  const dots = coords
+    .map(([x, y], i) => `<circle class="chart-dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5"><title>${monthLabel(points[i].MeseAnno)}: € ${fmt(values[i])}</title></circle>`)
+    .join('');
+
+  const labels = coords
+    .map(([x], i) => {
+      // mostra solo alcune etichette se ci sono troppi mesi, per non affollare
+      const showEvery = Math.ceil(points.length / 6);
+      if (i % showEvery !== 0 && i !== points.length - 1) return '';
+      const short = monthLabel(points[i].MeseAnno).slice(0, 3);
+      return `<text class="chart-label" x="${x.toFixed(1)}" y="${H - 6}" text-anchor="middle">${short}</text>`;
+    })
+    .join('');
+
+  const firstVal = `<text class="chart-value" x="${coords[0][0]}" y="${coords[0][1] - 10}" text-anchor="middle">€${Math.round(values[0])}</text>`;
+  const lastVal = `<text class="chart-value" x="${coords[coords.length - 1][0]}" y="${coords[coords.length - 1][1] - 10}" text-anchor="middle">€${Math.round(values[values.length - 1])}</text>`;
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="netChartGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" style="stop-color:var(--accent-red); stop-opacity:0.4" />
+          <stop offset="100%" style="stop-color:var(--accent-red); stop-opacity:0" />
+        </linearGradient>
+      </defs>
+      <line class="chart-grid" x1="${PAD_X}" y1="${H - PAD_Y}" x2="${W - PAD_X}" y2="${H - PAD_Y}" />
+      <path class="chart-area" d="${areaPath}" />
+      <path class="chart-line" d="${linePath}" />
+      ${dots}
+      ${firstVal}
+      ${lastVal}
+      ${labels}
+    </svg>
   `;
 }
 
-function renderTimeline() {
+function refreshIcons() {
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function renderTimeline(filter) {
   const timeline = $('#timeline');
   if (state.cedolini.length === 0) {
     timeline.innerHTML = '<p class="empty-state">Nessun cedolino salvato ancora. Caricane uno qui sopra per iniziare.</p>';
     return;
   }
-  timeline.innerHTML = state.cedolini
+
+  const q = (filter || '').toLowerCase();
+  const filtered = q
+    ? state.cedolini.filter((c) => monthLabel(c.MeseAnno).toLowerCase().includes(q) || (c.MeseAnno || '').includes(q))
+    : state.cedolini;
+
+  if (filtered.length === 0) {
+    timeline.innerHTML = '<p class="empty-state">Nessun cedolino trovato per questa ricerca.</p>';
+    return;
+  }
+
+  timeline.innerHTML = filtered
     .map(
       (c) => `
       <div class="stub" data-mese="${c.MeseAnno}">
@@ -312,7 +412,7 @@ function showDetail(mese) {
     ['NoteExtra', 'Note'],
   ];
   $('#detailContent').innerHTML = `
-    <h2 class="section-title">${monthLabel(c.MeseAnno)}</h2>
+    <h2 class="detail-title">${monthLabel(c.MeseAnno)}</h2>
     <div class="detail-grid">
       ${fields
         .map(
@@ -341,4 +441,5 @@ function fmt(v) {
 
 // ---------- Init ----------
 initTheme();
+refreshIcons();
 loadCedolini();
