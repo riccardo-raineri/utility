@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSpotlight();
     initSoft3DTilt();
     initSearchAndFilters();
+    initFiltersHamburger();
     initFavoritesDrawer();
 });
 
@@ -73,6 +74,40 @@ function initSoft3DTilt() {
         card.addEventListener('mouseleave', () => {
             card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
         });
+    });
+}
+
+/* =========================================================
+   HAMBURGER FILTRI (solo mobile)
+   ========================================================= */
+function initFiltersHamburger() {
+    const hamburgerBtn = document.getElementById('filtersHamburgerBtn');
+    const pillsPanel = document.getElementById('filterPillsPanel');
+    if (!hamburgerBtn || !pillsPanel) return;
+
+    // Apre/chiude il pannello dei filtri categoria
+    hamburgerBtn.addEventListener('click', () => {
+        const isOpen = pillsPanel.classList.toggle('is-open');
+        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    // Scelta una categoria, richiude subito il pannello: su mobile non ha
+    // senso lasciarlo aperto sopra ai risultati appena filtrati
+    pillsPanel.querySelectorAll('.filter-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+            pillsPanel.classList.remove('is-open');
+            hamburgerBtn.setAttribute('aria-expanded', 'false');
+        });
+    });
+
+    // Chiude il pannello anche cliccando fuori (sia dal pannello che dal bottone)
+    document.addEventListener('click', (e) => {
+        const clickedInsidePanel = pillsPanel.contains(e.target);
+        const clickedHamburger = hamburgerBtn.contains(e.target);
+        if (!clickedInsidePanel && !clickedHamburger) {
+            pillsPanel.classList.remove('is-open');
+            hamburgerBtn.setAttribute('aria-expanded', 'false');
+        }
     });
 }
 
@@ -177,7 +212,9 @@ function updateFavoritesUI() {
    ========================================================= */
 function initSearchAndFilters() {
     const searchInput = document.getElementById('searchInput');
-    const filterPills = document.querySelectorAll('.filter-pill');
+    // :not(.apps-link) esclude il link "Le mie apps": ha la stessa classe
+    // .filter-pill per lo stile, ma è un link vero e non una categoria da filtrare
+    const filterPills = document.querySelectorAll('.filter-pill:not(.apps-link)');
     const cards = document.querySelectorAll('#toolsGrid .tool-card');
     const noResults = document.getElementById('noResults');
 

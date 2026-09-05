@@ -198,6 +198,42 @@ body {
     gap: 8px;
 }
 
+/* Bottone hamburger: nascosto di default (desktop). Diventa visibile solo
+   sotto i 580px, dove sostituisce la riga di pill categoria (vedi media
+   query più in basso nel file). */
+.filters-hamburger-btn {
+    display: none;
+    align-items: center;
+    gap: 7px;
+    background: #131826;
+    border: 1px solid var(--border-subtle);
+    border-radius: 999px;
+    padding: 7px 15px;
+    color: var(--text-secondary);
+    font-family: var(--font-sans);
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+}
+
+.filters-hamburger-btn:hover {
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.filters-hamburger-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+/* Contenitore dei filtri categoria: su desktop è "trasparente" al layout
+   (display: contents), quindi le pill si comportano come se fossero
+   figlie dirette di .filters-container, esattamente come prima. */
+.filter-pills-group {
+    display: contents;
+}
+
 .filter-pill {
     display: inline-flex;
     align-items: center;
@@ -788,6 +824,47 @@ body {
         flex-direction: column;
         gap: 10px;
         text-align: center;
+    }
+
+    /* Da qui in giù: solo su mobile, le pill categoria (Tutti, Utilità,
+       Finanza...) spariscono dalla riga e finiscono dentro un pannello
+       a comparsa aperto dal bottone hamburger. Preferiti, Area Riservata
+       e Le mie apps restano visibili come prima, non fanno parte di
+       questo raggruppamento. */
+    .filters-container {
+        position: relative; /* ancora il pannello a comparsa proprio sotto la barra */
+    }
+
+    .filters-hamburger-btn {
+        display: inline-flex;
+    }
+
+    .filter-pills-group {
+        display: none; /* nascosto finché non si clicca l'hamburger */
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        padding: 12px;
+        z-index: 50;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .filter-pills-group.is-open {
+        display: flex;
+    }
+
+    /* Dentro il pannello mobile le pill occupano tutta la larghezza,
+       con il testo allineato a sinistra invece che centrato */
+    .filter-pills-group .filter-pill {
+        width: 100%;
+        justify-content: flex-start;
     }
 }
 

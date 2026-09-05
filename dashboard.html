@@ -48,34 +48,47 @@
         <header class="hero-header">
             <div class="hero-top">
                 <nav class="filters-container" id="filterBar">
-                    <button class="filter-pill active" data-filter="tutti">
-                        <i data-lucide="layout-grid"></i>
-                        <span>Tutti</span>
+                    <!-- Bottone hamburger: visibile solo da mobile (vedi media query
+                         in dashboard.css), apre/chiude il pannello dei filtri sotto -->
+                    <button class="filters-hamburger-btn" id="filtersHamburgerBtn" aria-expanded="false" aria-controls="filterPillsPanel">
+                        <i data-lucide="menu"></i>
+                        <span>Categorie</span>
                     </button>
-                    <button class="filter-pill" data-filter="utilita">
-                        <i data-lucide="wrench"></i>
-                        <span>Utilità</span>
-                    </button>
-                    <button class="filter-pill" data-filter="finanza">
-                        <i data-lucide="coins"></i>
-                        <span>Finanza</span>
-                    </button>
-                    <button class="filter-pill" data-filter="cinema">
-                        <i data-lucide="clapperboard"></i>
-                        <span>Cinema</span>
-                    </button>
-                    <button class="filter-pill" data-filter="viaggi">
-                        <i data-lucide="compass"></i>
-                        <span>Viaggi</span>
-                    </button>
-                    <button class="filter-pill" data-filter="tempo">
-                        <i data-lucide="timer"></i>
-                        <span>Tempo</span>
-                    </button>
-                    <button class="filter-pill" data-filter="svago">
-                        <i data-lucide="gamepad-2"></i>
-                        <span>Svago</span>
-                    </button>
+
+                    <!-- Filtri categoria: su desktop restano una riga di pill come
+                         prima; da mobile diventano un pannello a comparsa aperto
+                         dal bottone hamburger qui sopra -->
+                    <div class="filter-pills-group" id="filterPillsPanel">
+                        <button class="filter-pill active" data-filter="tutti">
+                            <i data-lucide="layout-grid"></i>
+                            <span>Tutti</span>
+                        </button>
+                        <button class="filter-pill" data-filter="utilita">
+                            <i data-lucide="wrench"></i>
+                            <span>Utilità</span>
+                        </button>
+                        <button class="filter-pill" data-filter="finanza">
+                            <i data-lucide="coins"></i>
+                            <span>Finanza</span>
+                        </button>
+                        <button class="filter-pill" data-filter="cinema">
+                            <i data-lucide="clapperboard"></i>
+                            <span>Cinema</span>
+                        </button>
+                        <button class="filter-pill" data-filter="viaggi">
+                            <i data-lucide="compass"></i>
+                            <span>Viaggi</span>
+                        </button>
+                        <button class="filter-pill" data-filter="tempo">
+                            <i data-lucide="timer"></i>
+                            <span>Tempo</span>
+                        </button>
+                        <button class="filter-pill" data-filter="svago">
+                            <i data-lucide="gamepad-2"></i>
+                            <span>Svago</span>
+                        </button>
+                    </div>
+
                     <!-- Pulsante per aprire il pannello laterale preferiti -->
                     <button class="favorites-toggle-btn" id="openFavoritesDrawer">
                         <i data-lucide="star"></i>
@@ -89,11 +102,11 @@
 						<span id="unlockBtnText">Area Riservata</span>
 					</button>
 					
-					<!-- Apps -->
-                    <button class="filter-pill" data-filter="apps">
+					<!-- Apps: link vero e proprio verso il sito delle app, non più un filtro -->
+                    <a class="filter-pill apps-link" href="https://riccardo-raineri.github.io/site/app.html">
                         <i data-lucide="square-arrow-out-up-right"></i>
                         <span>Le mie apps</span>
-                    </button>
+                    </a>
                 </nav>
             </div>
 
