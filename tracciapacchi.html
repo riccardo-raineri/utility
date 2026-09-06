@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tracciapacchi</title>
+<link rel="stylesheet" href="tracciapacchi.css">
+</head>
+<body>
+
+  <!-- Sfondo con pattern minimale, coerente con gli altri tool -->
+  <div class="bg-pattern" aria-hidden="true"></div>
+
+  <div class="page">
+
+    <header class="page-header">
+      <a href="dashboard.html" class="back-link">&larr; Dashboard</a>
+      <button id="theme-toggle" class="theme-toggle" title="Cambia tema" aria-label="Cambia tema">
+        <!-- Icona sole/luna, sostituita via JS in base al tema -->
+        <svg id="theme-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"></circle>
+          <line x1="12" y1="1" x2="12" y2="3"></line>
+          <line x1="12" y1="21" x2="12" y2="23"></line>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+          <line x1="1" y1="12" x2="3" y2="12"></line>
+          <line x1="21" y1="12" x2="23" y2="12"></line>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+      </button>
+    </header>
+
+    <main>
+      <h1>Tracciapacchi</h1>
+      <p class="subtitle">Tieni d'occhio i tuoi pacchi in arrivo, in un unico posto.</p>
+
+      <!-- Pannello impostazioni: URL del Cloudflare Worker, richiesto una sola volta -->
+      <section id="settings-panel" class="card settings-panel" hidden>
+        <h2>Configurazione</h2>
+        <p>Inserisci l'URL del tuo Cloudflare Worker (il proxy verso l'API Ship24).</p>
+        <div class="settings-row">
+          <input type="url" id="worker-url-input" placeholder="https://tracciapacchi.tuonome.workers.dev" autocomplete="off">
+          <button id="save-worker-url" class="btn btn-primary">Salva</button>
+        </div>
+      </section>
+
+      <!-- Form per aggiungere un nuovo pacco -->
+      <section class="card add-package">
+        <h2>Aggiungi un pacco</h2>
+        <form id="add-form" class="add-form">
+          <input type="text" id="input-label" placeholder="Nome pacco (opzionale)" autocomplete="off">
+          <input type="text" id="input-number" placeholder="Numero di tracking" autocomplete="off" required>
+          <button type="submit" class="btn btn-primary">Aggiungi</button>
+        </form>
+        <p id="add-error" class="error-message" hidden></p>
+      </section>
+
+      <!-- Lista dei pacchi tracciati -->
+      <section class="packages-section">
+        <div class="packages-header">
+          <h2>I tuoi pacchi <span id="packages-count" class="count-badge">0/5</span></h2>
+          <button id="refresh-all" class="btn btn-secondary">Aggiorna tutti</button>
+        </div>
+        <div id="packages-list" class="packages-list">
+          <!-- Le card dei pacchi vengono generate qui via JS -->
+        </div>
+        <p id="empty-state" class="empty-state">Nessun pacco tracciato al momento. Aggiungine uno qui sopra.</p>
+      </section>
+    </main>
+
+  </div>
+
+  <!-- Template di una card pacco, clonato via JS -->
+  <template id="package-card-template">
+    <article class="package-card">
+      <div class="package-card-header">
+        <div>
+          <h3 class="package-label"></h3>
+          <p class="package-number"></p>
+        </div>
+        <button class="remove-btn" title="Rimuovi pacco" aria-label="Rimuovi pacco">&times;</button>
+      </div>
+      <div class="package-status">
+        <span class="status-dot"></span>
+        <span class="status-text"></span>
+      </div>
+      <p class="status-detail"></p>
+      <div class="package-footer">
+        <span class="last-update"></span>
+        <button class="refresh-btn btn btn-small">Aggiorna</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="tracciapacchi.js"></script>
+</body>
+</html>

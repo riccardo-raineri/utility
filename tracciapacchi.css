@@ -1,0 +1,248 @@
+/* tracciapacchi.css
+   Stile minimale coerente con gli altri tool del toolbox:
+   tema chiaro/scuro via variabile CSS + classe sul body, pattern di sfondo generato in CSS. */
+
+:root {
+  --bg: #f7f7f8;
+  --surface: #ffffff;
+  --text: #1a1a1e;
+  --text-muted: #6b6b74;
+  --border: #e3e3e7;
+  --accent: #2f6fed;
+  --accent-contrast: #ffffff;
+  --success: #1f9d55;
+  --warning: #d68a1f;
+  --danger: #d64545;
+  --radius: 10px;
+}
+
+body.theme-dark {
+  --bg: #111114;
+  --surface: #1a1a1f;
+  --text: #f2f2f4;
+  --text-muted: #9a9aa4;
+  --border: #2c2c33;
+  --accent: #5b8def;
+  --accent-contrast: #0c0c0f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+/* Pattern di sfondo minimale, puntinato, coerente con lo stile degli altri tool */
+.bg-pattern {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.5;
+}
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.back-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+}
+.back-link:hover { color: var(--text); }
+
+.theme-toggle {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text);
+}
+
+h1 {
+  font-size: 28px;
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  margin: 0 0 24px;
+  font-size: 15px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 20px;
+}
+
+.card h2 {
+  font-size: 16px;
+  margin: 0 0 10px;
+}
+
+.settings-panel p { color: var(--text-muted); font-size: 13px; margin: 0 0 10px; }
+.settings-row { display: flex; gap: 8px; }
+
+input[type="text"], input[type="url"] {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+.add-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.add-form input#input-label { flex: 1 1 40%; }
+.add-form input#input-number { flex: 1 1 50%; }
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.btn-primary { background: var(--accent); color: var(--accent-contrast); }
+.btn-primary:hover { filter: brightness(1.05); }
+.btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+.btn-small { padding: 6px 12px; font-size: 13px; }
+
+.error-message {
+  color: var(--danger);
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+
+.packages-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.count-badge {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.packages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty-state {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  padding: 24px 0;
+}
+
+.package-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+}
+
+.package-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.package-label {
+  margin: 0;
+  font-size: 15px;
+}
+
+.package-number {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 6px;
+}
+.remove-btn:hover { color: var(--danger); }
+
+.package-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-muted);
+}
+.status-dot.status-transit { background: var(--accent); }
+.status-dot.status-delivered { background: var(--success); }
+.status-dot.status-exception { background: var(--danger); }
+.status-dot.status-pending { background: var(--warning); }
+
+.status-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.status-detail {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.package-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.last-update {
+  font-size: 12px;
+  color: var(--text-muted);
+}
