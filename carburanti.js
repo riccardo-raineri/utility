@@ -107,6 +107,48 @@ function formattaData(iso) {
   return `${d}/${m}/${y}`;
 }
 
+/** Trasforma la data di comunicazione del prezzo (dal CSV MIMIT, di solito
+ * nel formato "gg/mm/aaaa" a volte seguito da un orario) in un'etichetta
+ * relativa e leggibile: "oggi", "ieri", "3 giorni fa"... Oltre i 30 giorni
+ * mostriamo la data assoluta invece di un conteggio molto grande.
+ * Se il formato non viene riconosciuto, restituiamo il testo originale
+ * così com'è, piuttosto che nasconderlo. */
+function formattaAggiornamento(testoData) {
+  if (!testoData) return null;
+
+  const match = testoData.trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (!match) return { etichetta: testoData, giorniFa: null };
+
+  const [, gg, mm, aaaa] = match;
+  const data = new Date(Number(aaaa), Number(mm) - 1, Number(gg));
+  if (Number.isNaN(data.getTime())) return { etichetta: testoData, giorniFa: null };
+
+  const oggi = new Date();
+  oggi.setHours(0, 0, 0, 0);
+  data.setHours(0, 0, 0, 0);
+  const giorniFa = Math.round((oggi - data) / 86400000);
+
+  let etichetta;
+  if (giorniFa <= 0) etichetta = "oggi";
+  else if (giorniFa === 1) etichetta = "ieri";
+  else if (giorniFa < 30) etichetta = `${giorniFa} giorni fa`;
+  else etichetta = `il ${gg.padStart(2, "0")}/${mm.padStart(2, "0")}/${aaaa}`;
+
+  return { etichetta, giorniFa };
+}
+
+/** Piccolo badge HTML "Aggiornato: ..." da inserire accanto a un prezzo.
+ * Diventa ambra/rosso se il prezzo non viene comunicato da più di due
+ * settimane, per segnalare che potrebbe non essere più affidabile. */
+function renderBadgeAggiornamento(imp) {
+  const info = formattaAggiornamento(imp.prezzoInfo.comunicato);
+  if (!info) return "";
+  const stantio = info.giorniFa !== null && info.giorniFa > 14;
+  return `<span class="badge-update${stantio ? " stale" : ""}" title="Prezzo comunicato dal gestore il ${escapeHTML(imp.prezzoInfo.comunicato)}">
+    <i data-lucide="clock"></i> ${escapeHTML(info.etichetta)}
+  </span>`;
+}
+
 async function fetchJSON(percorso) {
   const risposta = await fetch(percorso, { cache: "no-cache" });
   if (!risposta.ok) {
@@ -618,6 +660,7 @@ function renderMiglioreRisultato(imp) {
           <i data-lucide="map-pin"></i> ${escapeHTML(imp.indirizzo)}, ${escapeHTML(imp.comune)} (${imp.provincia})
           ${imp.distanzaKm !== undefined ? ` · <i data-lucide="navigation"></i> ${imp.distanzaKm.toFixed(1)} km` : ""}
           <span class="badge-self">${imp.prezzoInfo.self ? "Self" : "Servito"}</span>
+          ${renderBadgeAggiornamento(imp)}
         </div>
         ${renderDelta(imp)}
       </div>
@@ -641,6 +684,7 @@ function renderRigaRisultato(imp, posizione) {
           <i data-lucide="map-pin"></i> ${escapeHTML(imp.indirizzo)}, ${escapeHTML(imp.comune)} (${imp.provincia})
           ${imp.distanzaKm !== undefined ? ` · <i data-lucide="navigation"></i> ${imp.distanzaKm.toFixed(1)} km` : ""}
           <span class="badge-self">${imp.prezzoInfo.self ? "Self" : "Servito"}</span>
+          ${renderBadgeAggiornamento(imp)}
         </div>
       </div>
       <div class="price-col">

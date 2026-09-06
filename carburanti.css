@@ -617,6 +617,30 @@ button:focus-visible {
   color: var(--muted);
 }
 
+/* Badge "aggiornato X giorni fa" accanto a ogni prezzo. La variante
+   ".stale" (prezzo comunicato da più di due settimane) si colora di
+   ambra/rosso per segnalare che il dato potrebbe non essere più affidabile. */
+.badge-update {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.7rem;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+.badge-update [data-lucide] {
+  width: 0.9em;
+  height: 0.9em;
+}
+.badge-update.stale {
+  background: var(--danger-soft);
+  border-color: var(--danger-soft);
+  color: var(--danger);
+}
+
 .results-footer {
   margin-top: 14px;
   text-align: center;
