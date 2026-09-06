@@ -54,7 +54,7 @@
 
       <!-- Form per aggiungere un nuovo pacco -->
       <section class="card add-package">
-        <h2><i data-lucide="plus-circle"></i> Aggiungi un pacco</h2>
+        <h2><i data-lucide="plus-circle"></i> Nuovo pacco</h2>
         <form id="add-form" class="add-form">
           <input type="text" id="input-label" placeholder="Nome pacco (opzionale)" autocomplete="off">
           <input type="text" id="input-number" placeholder="Numero di tracking" autocomplete="off" required>
@@ -94,7 +94,9 @@
             <div class="tracking-row">
               <span class="package-number"></span>
               <button class="copy-btn icon-btn-sm" title="Copia numero di tracking" aria-label="Copia numero di tracking">
-                <i data-lucide="copy"></i>
+                <i data-lucide="copy" class="icon-copy"></i>
+                <i data-lucide="check" class="icon-check"></i>
+                <span class="copy-tooltip">Copiato!</span>
               </button>
             </div>
           </div>

@@ -108,9 +108,22 @@ async function callWorker(payload) {
   return res.json();
 }
 
+// Ship24 rileva automaticamente il corriere dal formato del numero di tracking
+// e lo restituisce come courierCode (es. "poste-italiane", "gls-italy").
+// Qui lo trasformiamo in un nome leggibile ("Poste Italiane").
+function extractCourierName(shipment, tracker) {
+  let code = shipment?.courierCode ?? tracker?.courierCode;
+  if (Array.isArray(code)) code = code[0]; // un pacco può passare per più corrieri: mostriamo il principale
+  if (!code) return null;
+  return code
+    .toString()
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 // Estrae dallo schema di risposta Ship24 stato, corriere e cronologia eventi.
-// NB: alcuni nomi di campo (es. courierCode, service) vanno verificati contro
-// la risposta reale della tua API key, potrebbero cambiare leggermente.
+// NB: alcuni nomi di campo vanno verificati contro la risposta reale della tua
+// API key, potrebbero cambiare leggermente rispetto a questa versione.
 function parseShip24Result(data) {
   const tracking = data?.data?.trackings?.[0];
   if (!tracking) {
@@ -131,7 +144,7 @@ function parseShip24Result(data) {
     detail: lastEvent
       ? `${lastEvent.status}${lastEvent.location ? " · " + lastEvent.location : ""}`
       : "Nessun evento disponibile ancora",
-    courier: shipment.courierCode || shipment.originCourierName || shipment.courierName || null,
+    courier: extractCourierName(shipment, tracking.tracker) || shipment.courierName || null,
     events,
   };
 }
@@ -378,13 +391,10 @@ function renderPackages() {
     node.querySelector(".refresh-btn").addEventListener("click", () => refreshPackage(pkg.id));
     node.querySelector(".copy-btn").addEventListener("click", (ev) => {
       navigator.clipboard.writeText(pkg.number);
-      const icon = ev.currentTarget.querySelector("i");
-      icon.setAttribute("data-lucide", "check");
-      lucide.createIcons();
-      setTimeout(() => {
-        icon.setAttribute("data-lucide", "copy");
-        lucide.createIcons();
-      }, 1200);
+      const btn = ev.currentTarget;
+      btn.classList.add("copied");
+      clearTimeout(btn._copyTimeout);
+      btn._copyTimeout = setTimeout(() => btn.classList.remove("copied"), 1400);
     });
 
     packagesList.appendChild(node);
