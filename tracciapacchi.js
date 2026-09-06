@@ -1,15 +1,19 @@
 // tracciapacchi.js
 // Logica del tool: salva i pacchi in localStorage, chiama il Cloudflare Worker
-// (proxy verso Ship24) per registrare nuovi tracking e aggiornarne lo stato.
+// (proxy verso Ship24) per registrare nuovi tracking, aggiornarne lo stato
+// e mostrare la cronologia completa degli eventi.
 
 const THEME_KEY = "toolbox_theme";       // chiave condivisa con gli altri tool del toolbox
 const WORKER_KEY = "tracciapacchi_worker_url";
 const PACKAGES_KEY = "tracciapacchi_pacchi";
 const MAX_PACCHI = 5;                    // limite pensato per il piano gratuito Ship24
 
+// Ordine delle tappe principali usato dallo stepper visivo
+const MILESTONE_ORDER = ["info_received", "in_transit", "out_for_delivery", "delivered"];
+const EXCEPTION_STATUSES = ["exception", "failed_attempt", "return_to_sender"];
+
 // --- Riferimenti agli elementi della pagina ---
 const themeToggle = document.getElementById("theme-toggle");
-const themeIcon = document.getElementById("theme-icon");
 const settingsPanel = document.getElementById("settings-panel");
 const workerUrlInput = document.getElementById("worker-url-input");
 const saveWorkerUrlBtn = document.getElementById("save-worker-url");
@@ -22,6 +26,7 @@ const packagesCount = document.getElementById("packages-count");
 const emptyState = document.getElementById("empty-state");
 const refreshAllBtn = document.getElementById("refresh-all");
 const cardTemplate = document.getElementById("package-card-template");
+const statsRow = document.getElementById("stats-row");
 
 // ------------------------------------------------------------------
 // Tema chiaro/scuro (stesso pattern degli altri tool del toolbox)
@@ -67,7 +72,9 @@ saveWorkerUrlBtn.addEventListener("click", () => {
 
 // ------------------------------------------------------------------
 // Gestione pacchi salvati in localStorage
-// Struttura di ogni pacco: { id, label, number, trackerId, status, detail, lastUpdate }
+// Struttura di ogni pacco:
+// { id, label, number, trackerId, status, detail, courier, transitDays,
+//   events: [{status, location, datetime}], lastUpdate }
 // ------------------------------------------------------------------
 function getPackages() {
   try {
@@ -101,35 +108,53 @@ async function callWorker(payload) {
   return res.json();
 }
 
-// Estrae dallo schema di risposta Ship24 lo stato e l'ultimo evento utile
+// Estrae dallo schema di risposta Ship24 stato, corriere e cronologia eventi.
+// NB: alcuni nomi di campo (es. courierCode, service) vanno verificati contro
+// la risposta reale della tua API key, potrebbero cambiare leggermente.
 function parseShip24Result(data) {
   const tracking = data?.data?.trackings?.[0];
-  if (!tracking) return { status: "pending", detail: "In attesa di aggiornamenti", trackerId: null };
+  if (!tracking) {
+    return { status: "pending", detail: "In attesa di aggiornamenti", trackerId: null, courier: null, events: [] };
+  }
 
-  const milestone = tracking.shipment?.statusMilestone || "pending";
-  const events = tracking.events || [];
-  const lastEvent = events[0]; // Ship24 restituisce gli eventi dal più recente
+  const shipment = tracking.shipment || {};
+  const events = (tracking.events || []).map((e) => ({
+    status: e.status || "Aggiornamento",
+    location: e.location || "",
+    datetime: e.datetime || e.occurrenceDatetime || null,
+  }));
+  const lastEvent = events[0];
 
   return {
     trackerId: tracking.tracker?.trackerId || null,
-    status: milestone,
+    status: shipment.statusMilestone || "pending",
     detail: lastEvent
-      ? `${lastEvent.status || ""}${lastEvent.location ? " · " + lastEvent.location : ""}`
+      ? `${lastEvent.status}${lastEvent.location ? " · " + lastEvent.location : ""}`
       : "Nessun evento disponibile ancora",
+    courier: shipment.courierCode || shipment.originCourierName || shipment.courierName || null,
+    events,
   };
 }
 
-function statusToClass(status) {
-  if (status === "delivered") return "status-delivered";
-  if (["exception", "failed_attempt", "return_to_sender"].includes(status)) return "status-exception";
-  if (["info_received", "pending"].includes(status)) return "status-pending";
-  return "status-transit"; // in_transit, out_for_delivery, ecc.
+function statusToPillClass(status) {
+  if (status === "delivered") return "pill-delivered";
+  if (EXCEPTION_STATUSES.includes(status)) return "pill-exception";
+  if (["info_received", "pending"].includes(status)) return "";
+  return "pill-transit";
+}
+
+function statusToIcon(status) {
+  if (status === "delivered") return "check-circle-2";
+  if (EXCEPTION_STATUSES.includes(status)) return "alert-triangle";
+  if (status === "out_for_delivery") return "map-pin";
+  if (status === "in_transit") return "truck";
+  return "clock-3";
 }
 
 function statusToLabel(status) {
   const labels = {
     pending: "In attesa",
-    info_received: "Informazioni ricevute",
+    info_received: "Registrato",
     in_transit: "In transito",
     out_for_delivery: "In consegna",
     delivered: "Consegnato",
@@ -139,6 +164,17 @@ function statusToLabel(status) {
     available_for_pickup: "Pronto per il ritiro",
   };
   return labels[status] || "Stato sconosciuto";
+}
+
+// Calcola i giorni trascorsi dal primo evento registrato ad oggi (o alla consegna)
+function computeTransitDays(events, status) {
+  if (!events || events.length === 0) return null;
+  const dated = events.filter((e) => e.datetime);
+  if (dated.length === 0) return null;
+  const first = new Date(dated[dated.length - 1].datetime);
+  const end = status === "delivered" && dated[0].datetime ? new Date(dated[0].datetime) : new Date();
+  const days = Math.max(0, Math.round((end - first) / 86400000));
+  return days;
 }
 
 // ------------------------------------------------------------------
@@ -170,6 +206,9 @@ addForm.addEventListener("submit", async (e) => {
       trackerId: parsed.trackerId,
       status: parsed.status,
       detail: parsed.detail,
+      courier: parsed.courier,
+      events: parsed.events,
+      transitDays: computeTransitDays(parsed.events, parsed.status),
       lastUpdate: new Date().toISOString(),
     });
     savePackages(packages);
@@ -191,12 +230,18 @@ async function refreshPackage(id) {
   const pkg = packages.find((p) => p.id === id);
   if (!pkg || !pkg.trackerId) return;
 
+  const wasDelivered = pkg.status === "delivered";
+
   try {
     const data = await callWorker({ action: "results", trackerId: pkg.trackerId });
     const parsed = parseShip24Result(data);
     pkg.status = parsed.status;
     pkg.detail = parsed.detail;
+    pkg.courier = parsed.courier || pkg.courier;
+    pkg.events = parsed.events.length ? parsed.events : pkg.events;
+    pkg.transitDays = computeTransitDays(pkg.events, pkg.status);
     pkg.lastUpdate = new Date().toISOString();
+    pkg._justDelivered = !wasDelivered && pkg.status === "delivered"; // per l'evidenziazione una tantum
     savePackages(packages);
     renderPackages();
   } catch {
@@ -218,7 +263,7 @@ function removePackage(id) {
 }
 
 // ------------------------------------------------------------------
-// Rendering della lista pacchi
+// Rendering
 // ------------------------------------------------------------------
 function formatRelativeTime(isoString) {
   const diffMs = Date.now() - new Date(isoString).getTime();
@@ -231,26 +276,122 @@ function formatRelativeTime(isoString) {
   return `Aggiornato ${diffG} g fa`;
 }
 
+function formatEventDate(isoString) {
+  if (!isoString) return "";
+  const d = new Date(isoString);
+  if (isNaN(d)) return "";
+  return d.toLocaleString("it-IT", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+}
+
+function updateStatsRow(packages) {
+  const counts = { in_transit: 0, out_for_delivery: 0, delivered: 0 };
+  packages.forEach((p) => {
+    if (p.status === "in_transit") counts.in_transit++;
+    if (p.status === "out_for_delivery") counts.out_for_delivery++;
+    if (p.status === "delivered") counts.delivered++;
+  });
+  document.getElementById("stat-transit").textContent = counts.in_transit;
+  document.getElementById("stat-outfordelivery").textContent = counts.out_for_delivery;
+  document.getElementById("stat-delivered").textContent = counts.delivered;
+  statsRow.hidden = packages.length === 0;
+}
+
+function renderStepper(node, status) {
+  const stepper = node.querySelector(".stepper");
+  const isException = EXCEPTION_STATUSES.includes(status);
+  stepper.classList.toggle("stepper-exception", isException);
+
+  const currentIndex = isException ? -1 : MILESTONE_ORDER.indexOf(status);
+  stepper.querySelectorAll(".step").forEach((stepEl) => {
+    const stepName = stepEl.dataset.step;
+    const stepIndex = MILESTONE_ORDER.indexOf(stepName);
+    stepEl.classList.toggle("step-done", !isException && stepIndex <= currentIndex);
+    stepEl.classList.toggle("step-current", !isException && stepIndex === currentIndex);
+  });
+}
+
+function renderHistory(node, events) {
+  const list = node.querySelector(".history-list");
+  const toggleBtn = node.querySelector(".history-toggle");
+  const toggleText = node.querySelector(".history-toggle-text");
+  const wrap = node.querySelector(".history-wrap");
+
+  list.innerHTML = "";
+  if (!events || events.length === 0) {
+    toggleBtn.hidden = true;
+    return;
+  }
+  toggleBtn.hidden = false;
+  toggleText.textContent = `Mostra cronologia (${events.length} event${events.length === 1 ? "o" : "i"})`;
+
+  events.forEach((ev) => {
+    const li = document.createElement("li");
+    li.className = "history-item";
+    li.innerHTML = `<div class="h-status">${ev.status}</div><div class="h-meta">${[formatEventDate(ev.datetime), ev.location].filter(Boolean).join(" · ")}</div>`;
+    list.appendChild(li);
+  });
+
+  toggleBtn.addEventListener("click", () => {
+    const isOpen = wrap.classList.toggle("open");
+    toggleBtn.setAttribute("aria-expanded", String(isOpen));
+    toggleText.textContent = isOpen
+      ? "Nascondi cronologia"
+      : `Mostra cronologia (${events.length} event${events.length === 1 ? "o" : "i"})`;
+  });
+}
+
 function renderPackages() {
   const packages = getPackages();
   packagesList.innerHTML = "";
   packagesCount.textContent = `${packages.length}/${MAX_PACCHI}`;
   emptyState.hidden = packages.length > 0;
+  updateStatsRow(packages);
 
   packages.forEach((pkg) => {
     const node = cardTemplate.content.cloneNode(true);
+    const card = node.querySelector(".package-card");
+
     node.querySelector(".package-label").textContent = pkg.label;
     node.querySelector(".package-number").textContent = pkg.number;
-    node.querySelector(".status-dot").classList.add(statusToClass(pkg.status));
-    node.querySelector(".status-text").textContent = statusToLabel(pkg.status);
+
+    const pill = node.querySelector(".status-pill");
+    pill.classList.add(statusToPillClass(pkg.status));
+    pill.querySelector(".status-pill-icon").setAttribute("data-lucide", statusToIcon(pkg.status));
+    pill.querySelector(".status-text").textContent = statusToLabel(pkg.status);
+
+    node.querySelector(".courier-name").textContent = pkg.courier || "Corriere non identificato";
+    node.querySelector(".transit-days").textContent =
+      pkg.transitDays != null ? `${pkg.transitDays} giorn${pkg.transitDays === 1 ? "o" : "i"} in viaggio` : "In attesa di eventi";
+
     node.querySelector(".status-detail").textContent = pkg.detail || "";
     node.querySelector(".last-update").textContent = formatRelativeTime(pkg.lastUpdate);
 
+    renderStepper(node, pkg.status);
+    renderHistory(node, pkg.events);
+
+    if (pkg._justDelivered) {
+      card.classList.add("just-delivered");
+      pkg._justDelivered = false; // l'evidenziazione è una tantum, non va riproposta ai render successivi
+    }
+
     node.querySelector(".remove-btn").addEventListener("click", () => removePackage(pkg.id));
     node.querySelector(".refresh-btn").addEventListener("click", () => refreshPackage(pkg.id));
+    node.querySelector(".copy-btn").addEventListener("click", (ev) => {
+      navigator.clipboard.writeText(pkg.number);
+      const icon = ev.currentTarget.querySelector("i");
+      icon.setAttribute("data-lucide", "check");
+      lucide.createIcons();
+      setTimeout(() => {
+        icon.setAttribute("data-lucide", "copy");
+        lucide.createIcons();
+      }, 1200);
+    });
 
     packagesList.appendChild(node);
   });
+
+  // Ridisegna le icone Lucide per tutti i nodi appena inseriti nel DOM
+  if (window.lucide) lucide.createIcons();
 }
 
 // ------------------------------------------------------------------
@@ -259,3 +400,4 @@ function renderPackages() {
 initTheme();
 initSettings();
 renderPackages();
+if (window.lucide) lucide.createIcons();

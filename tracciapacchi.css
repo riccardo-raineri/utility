@@ -1,73 +1,93 @@
 /* tracciapacchi.css
-   Stile minimale coerente con gli altri tool del toolbox:
-   tema chiaro/scuro via variabile CSS + classe sul body, pattern di sfondo generato in CSS. */
+   Stile "centro di smistamento": palette calda da etichetta di spedizione,
+   accento arancione corriere, card a forma di talloncino con perforazione,
+   coerente con il tema chiaro/scuro condiviso dal toolbox. */
 
 :root {
-  --bg: #f7f7f8;
-  --surface: #ffffff;
-  --text: #1a1a1e;
-  --text-muted: #6b6b74;
-  --border: #e3e3e7;
-  --accent: #2f6fed;
-  --accent-contrast: #ffffff;
-  --success: #1f9d55;
-  --warning: #d68a1f;
-  --danger: #d64545;
-  --radius: 10px;
+  --bg: #FBF7F1;
+  --surface: #FFFFFF;
+  --ink: #221D17;
+  --ink-muted: #8A8175;
+  --border: #E7DDCE;
+  --accent: #F2600C;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #FDE7D6;
+  --success: #2E9E5B;
+  --success-soft: #DCF3E6;
+  --danger: #D6455B;
+  --danger-soft: #FBE1E5;
+  --pending: #B08A2E;
+  --pending-soft: #F5EBD3;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "IBM Plex Sans", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
 }
 
 body.theme-dark {
-  --bg: #111114;
-  --surface: #1a1a1f;
-  --text: #f2f2f4;
-  --text-muted: #9a9aa4;
-  --border: #2c2c33;
-  --accent: #5b8def;
-  --accent-contrast: #0c0c0f;
+  --bg: #14161A;
+  --surface: #1D2027;
+  --ink: #F3EFE8;
+  --ink-muted: #9B968C;
+  --border: #32363F;
+  --accent: #FF7A29;
+  --accent-ink: #1A1006;
+  --accent-soft: #3A2415;
+  --success: #4BC183;
+  --success-soft: #163326;
+  --danger: #E96B7D;
+  --danger-soft: #3A1E24;
+  --pending: #E0B75B;
+  --pending-soft: #34291A;
 }
 
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-body);
   background: var(--bg);
-  color: var(--text);
+  color: var(--ink);
   min-height: 100vh;
   transition: background 0.2s ease, color 0.2s ease;
 }
 
-/* Pattern di sfondo minimale, puntinato, coerente con lo stile degli altri tool */
 .bg-pattern {
   position: fixed;
   inset: 0;
   z-index: -1;
   background-image: radial-gradient(var(--border) 1px, transparent 1px);
-  background-size: 24px 24px;
-  opacity: 0.5;
+  background-size: 22px 22px;
+  opacity: 0.6;
 }
 
 .page {
-  max-width: 640px;
+  max-width: 680px;
   margin: 0 auto;
-  padding: 24px 20px 60px;
+  padding: 24px 20px 70px;
 }
 
+/* ---------- Header ---------- */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .back-link {
-  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ink-muted);
   text-decoration: none;
   font-size: 14px;
 }
-.back-link:hover { color: var(--text); }
+.back-link:hover { color: var(--ink); }
+.back-link i { width: 16px; height: 16px; }
 
-.theme-toggle {
+.icon-btn {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 50%;
@@ -77,20 +97,87 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--text);
+  color: var(--ink);
+}
+.icon-btn i { width: 18px; height: 18px; }
+.icon-btn .icon-moon { display: none; }
+body.theme-dark .icon-btn .icon-sun { display: none; }
+body.theme-dark .icon-btn .icon-moon { display: block; }
+
+.icon-btn-sm {
+  background: none;
+  border: none;
+  color: var(--ink-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+}
+.icon-btn-sm:hover { color: var(--ink); background: var(--bg); }
+.icon-btn-sm i { width: 15px; height: 15px; }
+
+/* ---------- Hero ---------- */
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
+.hero-badge {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius);
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-badge i { width: 26px; height: 26px; }
+
 h1 {
-  font-size: 28px;
-  margin: 0 0 4px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 700;
+  margin: 0 0 2px;
+  letter-spacing: -0.01em;
 }
 
 .subtitle {
-  color: var(--text-muted);
-  margin: 0 0 24px;
-  font-size: 15px;
+  color: var(--ink-muted);
+  margin: 0;
+  font-size: 14px;
 }
 
+/* ---------- Stats row ---------- */
+.stats-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+}
+.stat-chip i { width: 14px; height: 14px; }
+.stat-chip.stat-transit i { color: var(--accent); }
+.stat-chip.stat-outfordelivery i { color: var(--pending); }
+.stat-chip.stat-delivered i { color: var(--success); }
+
+/* ---------- Card generiche ---------- */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -100,20 +187,27 @@ h1 {
 }
 
 .card h2 {
-  font-size: 16px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
   margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
+.card h2 i { width: 16px; height: 16px; color: var(--accent); }
 
-.settings-panel p { color: var(--text-muted); font-size: 13px; margin: 0 0 10px; }
+.settings-panel p { color: var(--ink-muted); font-size: 13px; margin: 0 0 10px; }
 .settings-row { display: flex; gap: 8px; }
 
 input[type="text"], input[type="url"] {
   flex: 1;
   padding: 10px 12px;
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--bg);
-  color: var(--text);
+  color: var(--ink);
+  font-family: var(--font-body);
   font-size: 14px;
 }
 input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
@@ -128,16 +222,22 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 .btn {
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 10px 16px;
   font-size: 14px;
-  cursor: pointer;
   font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font-body);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-.btn-primary { background: var(--accent); color: var(--accent-contrast); }
+.btn i { width: 15px; height: 15px; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
 .btn-primary:hover { filter: brightness(1.05); }
-.btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+.btn-secondary { background: var(--bg); color: var(--ink); border: 1px solid var(--border); }
 .btn-small { padding: 6px 12px; font-size: 13px; }
+.btn-small i { width: 13px; height: 13px; }
 
 .error-message {
   color: var(--danger);
@@ -145,104 +245,291 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   margin: 8px 0 0;
 }
 
+/* ---------- Lista pacchi ---------- */
 .packages-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
 }
+.packages-header h2 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  margin: 0;
+}
 
 .count-badge {
-  color: var(--text-muted);
+  color: var(--ink-muted);
   font-weight: 400;
   font-size: 14px;
+  font-family: var(--font-body);
 }
 
 .packages-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .empty-state {
-  color: var(--text-muted);
-  font-size: 14px;
   text-align: center;
-  padding: 24px 0;
+  padding: 40px 20px;
+  color: var(--ink-muted);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
 }
+.empty-state i { width: 36px; height: 36px; opacity: 0.5; margin-bottom: 8px; }
+.empty-state p { margin: 6px 0 2px; font-weight: 500; color: var(--ink); }
+.empty-state span { font-size: 13px; }
 
+/* ---------- Card pacco: talloncino di spedizione ---------- */
 .package-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 16px 18px;
+  padding: 18px 20px 16px;
+  position: relative;
+  animation: card-in 0.25s ease;
 }
 
-.package-card-header {
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.package-card-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 10px;
 }
+
+.package-title {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.package-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+.package-icon i { width: 18px; height: 18px; }
 
 .package-label {
   margin: 0;
   font-size: 15px;
+  font-weight: 600;
+  font-family: var(--font-display);
+}
+
+.tracking-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
 }
 
 .package-number {
-  margin: 2px 0 0;
+  font-family: var(--font-mono);
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--ink-muted);
+  letter-spacing: 0.02em;
 }
 
-.remove-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 20px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 2px 6px;
-}
-.remove-btn:hover { color: var(--danger); }
-
-.package-status {
+.package-top-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
-.status-dot {
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--pending-soft);
+  color: var(--pending);
+  white-space: nowrap;
+}
+.status-pill i { width: 13px; height: 13px; }
+.status-pill.pill-transit { background: var(--accent-soft); color: var(--accent); }
+.status-pill.pill-delivered { background: var(--success-soft); color: var(--success); }
+.status-pill.pill-exception { background: var(--danger-soft); color: var(--danger); }
+
+/* Perforazione stile talloncino, con due "incavi" laterali */
+.perforation {
+  position: relative;
+  height: 1px;
+  margin: 16px -20px;
+  background-image: repeating-linear-gradient(to right, var(--border) 0 6px, transparent 6px 12px);
+}
+.perforation::before, .perforation::after {
+  content: "";
+  position: absolute;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  background: var(--bg);
+  border-radius: 50%;
+}
+.perforation::before { left: -7px; }
+.perforation::after { right: -7px; }
+
+.package-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+.meta-item i { width: 15px; height: 15px; color: var(--ink-muted); }
+
+.status-detail {
+  margin: 0 0 14px;
+  font-size: 13px;
+  color: var(--ink-muted);
+}
+
+/* ---------- Stepper ---------- */
+.stepper {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  width: 62px;
+}
+.step-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.step-dot i { width: 13px; height: 13px; }
+.step-label {
+  font-size: 10px;
+  color: var(--ink-muted);
+  text-align: center;
+  line-height: 1.2;
+}
+.step-line {
+  flex: 1 1 auto;
+  height: 2px;
+  background: var(--border);
+  margin-top: 12px;
+}
+.step.step-done .step-dot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.step.step-done .step-label { color: var(--ink); }
+.step.step-current .step-dot { box-shadow: 0 0 0 3px var(--accent-soft); }
+.stepper.stepper-exception .step-dot { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
+
+/* ---------- Cronologia collassabile ---------- */
+.history-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 0;
+  font-family: var(--font-body);
+}
+.history-toggle .chevron {
+  width: 14px;
+  height: 14px;
+  transition: transform 0.2s ease;
+}
+.history-toggle[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+.history-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.25s ease;
+}
+.history-wrap.open { grid-template-rows: 1fr; }
+.history-list {
+  overflow: hidden;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.history-wrap .history-list { padding-top: 6px; }
+
+.history-item {
+  position: relative;
+  padding: 0 0 14px 18px;
+  border-left: 2px solid var(--border);
+  margin-left: 5px;
+  font-size: 13px;
+}
+.history-item:last-child { border-left-color: transparent; padding-bottom: 0; }
+.history-item::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: 3px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--text-muted);
+  background: var(--accent);
 }
-.status-dot.status-transit { background: var(--accent); }
-.status-dot.status-delivered { background: var(--success); }
-.status-dot.status-exception { background: var(--danger); }
-.status-dot.status-pending { background: var(--warning); }
+.history-item .h-status { font-weight: 600; color: var(--ink); }
+.history-item .h-meta { color: var(--ink-muted); font-size: 12px; margin-top: 1px; }
 
-.status-text {
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.status-detail {
-  margin: 6px 0 0;
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
+/* ---------- Footer card ---------- */
 .package-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
 }
-
 .last-update {
   font-size: 12px;
-  color: var(--text-muted);
+  color: var(--ink-muted);
+}
+
+/* Card evidenziata quando il pacco risulta consegnato */
+.package-card.just-delivered {
+  border-color: var(--success);
+  box-shadow: 0 0 0 3px var(--success-soft);
+}
+
+@media (max-width: 480px) {
+  .step-label { display: none; }
+  .step { width: auto; }
 }

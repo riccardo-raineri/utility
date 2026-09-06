@@ -4,40 +4,47 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tracciapacchi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="tracciapacchi.css">
 </head>
 <body>
 
-  <!-- Sfondo con pattern minimale, coerente con gli altri tool -->
+  <!-- Sfondo con pattern minimale a puntini, coerente col resto del toolbox -->
   <div class="bg-pattern" aria-hidden="true"></div>
 
   <div class="page">
 
     <header class="page-header">
-      <a href="dashboard.html" class="back-link">&larr; Dashboard</a>
-      <button id="theme-toggle" class="theme-toggle" title="Cambia tema" aria-label="Cambia tema">
-        <!-- Icona sole/luna, sostituita via JS in base al tema -->
-        <svg id="theme-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="5"></circle>
-          <line x1="12" y1="1" x2="12" y2="3"></line>
-          <line x1="12" y1="21" x2="12" y2="23"></line>
-          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-          <line x1="1" y1="12" x2="3" y2="12"></line>
-          <line x1="21" y1="12" x2="23" y2="12"></line>
-          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
+      <a href="dashboard.html" class="back-link">
+        <i data-lucide="arrow-left"></i> Dashboard
+      </a>
+      <button id="theme-toggle" class="icon-btn" title="Cambia tema" aria-label="Cambia tema">
+        <i data-lucide="sun" class="icon-sun"></i>
+        <i data-lucide="moon" class="icon-moon"></i>
       </button>
     </header>
 
     <main>
-      <h1>Tracciapacchi</h1>
-      <p class="subtitle">Tieni d'occhio i tuoi pacchi in arrivo, in un unico posto.</p>
+      <div class="hero">
+        <div class="hero-badge"><i data-lucide="package"></i></div>
+        <div>
+          <h1>Tracciapacchi</h1>
+          <p class="subtitle">Il tuo centro di smistamento personale. Tutti i pacchi, un solo binario.</p>
+        </div>
+      </div>
+
+      <!-- Riepilogo rapido per stato -->
+      <div id="stats-row" class="stats-row" hidden>
+        <span class="stat-chip stat-transit"><i data-lucide="truck"></i><span id="stat-transit">0</span> in transito</span>
+        <span class="stat-chip stat-outfordelivery"><i data-lucide="map-pin"></i><span id="stat-outfordelivery">0</span> in consegna</span>
+        <span class="stat-chip stat-delivered"><i data-lucide="check-circle-2"></i><span id="stat-delivered">0</span> consegnati</span>
+      </div>
 
       <!-- Pannello impostazioni: URL del Cloudflare Worker, richiesto una sola volta -->
       <section id="settings-panel" class="card settings-panel" hidden>
-        <h2>Configurazione</h2>
+        <h2><i data-lucide="settings"></i> Configurazione</h2>
         <p>Inserisci l'URL del tuo Cloudflare Worker (il proxy verso l'API Ship24).</p>
         <div class="settings-row">
           <input type="url" id="worker-url-input" placeholder="https://tracciapacchi.tuonome.workers.dev" autocomplete="off">
@@ -47,11 +54,11 @@
 
       <!-- Form per aggiungere un nuovo pacco -->
       <section class="card add-package">
-        <h2>Aggiungi un pacco</h2>
+        <h2><i data-lucide="plus-circle"></i> Aggiungi un pacco</h2>
         <form id="add-form" class="add-form">
           <input type="text" id="input-label" placeholder="Nome pacco (opzionale)" autocomplete="off">
           <input type="text" id="input-number" placeholder="Numero di tracking" autocomplete="off" required>
-          <button type="submit" class="btn btn-primary">Aggiungi</button>
+          <button type="submit" class="btn btn-primary"><i data-lucide="plus"></i> Aggiungi</button>
         </form>
         <p id="add-error" class="error-message" hidden></p>
       </section>
@@ -60,12 +67,16 @@
       <section class="packages-section">
         <div class="packages-header">
           <h2>I tuoi pacchi <span id="packages-count" class="count-badge">0/5</span></h2>
-          <button id="refresh-all" class="btn btn-secondary">Aggiorna tutti</button>
+          <button id="refresh-all" class="btn btn-secondary"><i data-lucide="refresh-cw"></i> Aggiorna tutti</button>
         </div>
         <div id="packages-list" class="packages-list">
           <!-- Le card dei pacchi vengono generate qui via JS -->
         </div>
-        <p id="empty-state" class="empty-state">Nessun pacco tracciato al momento. Aggiungine uno qui sopra.</p>
+        <div id="empty-state" class="empty-state">
+          <i data-lucide="package-search"></i>
+          <p>Nessun pacco tracciato al momento.</p>
+          <span>Aggiungine uno dal modulo qui sopra: partirà subito il primo controllo.</span>
+        </div>
       </section>
     </main>
 
@@ -74,25 +85,66 @@
   <!-- Template di una card pacco, clonato via JS -->
   <template id="package-card-template">
     <article class="package-card">
-      <div class="package-card-header">
-        <div>
-          <h3 class="package-label"></h3>
-          <p class="package-number"></p>
+
+      <div class="package-card-top">
+        <div class="package-title">
+          <span class="package-icon"><i data-lucide="package"></i></span>
+          <div>
+            <h3 class="package-label"></h3>
+            <div class="tracking-row">
+              <span class="package-number"></span>
+              <button class="copy-btn icon-btn-sm" title="Copia numero di tracking" aria-label="Copia numero di tracking">
+                <i data-lucide="copy"></i>
+              </button>
+            </div>
+          </div>
         </div>
-        <button class="remove-btn" title="Rimuovi pacco" aria-label="Rimuovi pacco">&times;</button>
+        <div class="package-top-actions">
+          <span class="status-pill"><i class="status-pill-icon" data-lucide="clock-3"></i><span class="status-text"></span></span>
+          <button class="remove-btn icon-btn-sm" title="Rimuovi pacco" aria-label="Rimuovi pacco">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
       </div>
-      <div class="package-status">
-        <span class="status-dot"></span>
-        <span class="status-text"></span>
+
+      <div class="perforation" aria-hidden="true"></div>
+
+      <div class="package-meta">
+        <span class="meta-item courier-item"><i data-lucide="truck"></i><span class="courier-name"></span></span>
+        <span class="meta-item transit-item"><i data-lucide="calendar-clock"></i><span class="transit-days"></span></span>
       </div>
+
       <p class="status-detail"></p>
+
+      <!-- Stepper delle tappe principali della spedizione -->
+      <div class="stepper">
+        <div class="step" data-step="info_received"><span class="step-dot"><i data-lucide="file-text"></i></span><span class="step-label">Registrato</span></div>
+        <div class="step-line"></div>
+        <div class="step" data-step="in_transit"><span class="step-dot"><i data-lucide="truck"></i></span><span class="step-label">In transito</span></div>
+        <div class="step-line"></div>
+        <div class="step" data-step="out_for_delivery"><span class="step-dot"><i data-lucide="map-pin"></i></span><span class="step-label">In consegna</span></div>
+        <div class="step-line"></div>
+        <div class="step" data-step="delivered"><span class="step-dot"><i data-lucide="check-circle-2"></i></span><span class="step-label">Consegnato</span></div>
+      </div>
+
+      <!-- Cronologia eventi, collapsed di default -->
+      <button class="history-toggle" aria-expanded="false">
+        <i data-lucide="chevron-down" class="chevron"></i>
+        <span class="history-toggle-text">Mostra cronologia</span>
+      </button>
+      <div class="history-wrap">
+        <ul class="history-list"></ul>
+      </div>
+
       <div class="package-footer">
         <span class="last-update"></span>
-        <button class="refresh-btn btn btn-small">Aggiorna</button>
+        <button class="refresh-btn btn btn-small"><i data-lucide="refresh-cw"></i> Aggiorna</button>
       </div>
     </article>
   </template>
 
+  <!-- Libreria icone Lucide -->
+  <script src="https://unpkg.com/lucide@latest"></script>
   <script src="tracciapacchi.js"></script>
 </body>
 </html>
