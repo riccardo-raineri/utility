@@ -4,14 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tracciapacchi</title>
-	
-		<!-- Favicon classica e SVG per Browser -->
-  <link rel="icon" type="image/svg+xml" href="apple-touch-icon-5.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="pacchi.svg">
-	
-<!-- Icona per iPhone / iPad (Apple Touch Icon) -->
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon-5.png">
-	
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
@@ -50,14 +42,10 @@
         <span class="stat-chip stat-delivered"><i data-lucide="check-circle-2"></i><span id="stat-delivered">0</span> consegnati</span>
       </div>
 
-      <!-- Pannello impostazioni: URL del Cloudflare Worker, richiesto una sola volta -->
-      <section id="settings-panel" class="card settings-panel" hidden>
-        <h2><i data-lucide="settings"></i> Configurazione</h2>
-        <p>Inserisci l'URL del tuo Cloudflare Worker (il proxy verso l'API Ship24).</p>
-        <div class="settings-row">
-          <input type="url" id="worker-url-input" placeholder="https://tracciapacchi.tuonome.workers.dev" autocomplete="off">
-          <button id="save-worker-url" class="btn btn-primary">Salva</button>
-        </div>
+      <!-- Avviso di configurazione mancante: compare solo se le costanti in cima a tracciapacchi.js non sono state valorizzate -->
+      <section id="config-warning" class="card config-warning" hidden>
+        <h2><i data-lucide="alert-triangle"></i> Configurazione mancante</h2>
+        <p>Apri <code>tracciapacchi.js</code> e valorizza le costanti <code>SHIP24_WORKER_URL</code>, <code>APPS_SCRIPT_URL</code> e <code>APPS_SCRIPT_TOKEN</code> in cima al file.</p>
       </section>
 
       <!-- Form per aggiungere un nuovo pacco -->
@@ -77,10 +65,13 @@
           <h2>I tuoi pacchi <span id="packages-count" class="count-badge">0/5</span></h2>
           <button id="refresh-all" class="btn btn-secondary"><i data-lucide="refresh-cw"></i> Aggiorna tutti</button>
         </div>
+        <div id="loading-state" class="loading-state">
+          <i data-lucide="loader-2" class="spin"></i> Carico i pacchi dal foglio...
+        </div>
         <div id="packages-list" class="packages-list">
           <!-- Le card dei pacchi vengono generate qui via JS -->
         </div>
-        <div id="empty-state" class="empty-state">
+        <div id="empty-state" class="empty-state" hidden>
           <i data-lucide="package-search"></i>
           <p>Nessun pacco tracciato al momento.</p>
           <span>Aggiungine uno dal modulo qui sopra: partirà subito il primo controllo.</span>
