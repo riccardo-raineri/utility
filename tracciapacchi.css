@@ -352,6 +352,14 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 .empty-state p { margin: 6px 0 2px; font-weight: 500; color: var(--ink); }
 .empty-state span { font-size: 13px; }
 
+.loading-state {
+  text-align: center;
+  padding: 30px 20px;
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+.loading-state.error { color: var(--danger); }
+
 /* ---------- Card pacco: talloncino di spedizione ---------- */
 .package-card {
   background: var(--surface);
