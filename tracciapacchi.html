@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tracciapacchi</title>
+<title>TracciaPacchi</title>
 	
 	<!-- Favicon classica e SVG per Browser -->
   <link rel="icon" type="image/svg+xml" href="pacchi.svg">
@@ -15,7 +15,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+	
+		<!-- Foglio di stile CSS -->
 <link rel="stylesheet" href="tracciapacchi.css">
+	
+	    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
@@ -38,8 +43,8 @@
       <div class="hero">
         <div class="hero-badge"><i data-lucide="package"></i></div>
         <div>
-          <h1>Tracciapacchi</h1>
-          <p class="subtitle">Il tuo centro di smistamento personale. Tutti i pacchi, un solo binario.</p>
+          <h1>Traccia Pacchi</h1>
+          <p class="subtitle">Il tuo centro di smistamento personale.</p>
         </div>
       </div>
 
@@ -60,7 +65,7 @@
       <section class="card add-package">
         <h2><i data-lucide="plus-circle"></i> Nuovo pacco</h2>
         <form id="add-form" class="add-form">
-          <input type="text" id="input-label" placeholder="Nome pacco (opzionale)" autocomplete="off">
+          <input type="text" id="input-label" placeholder="Nome" autocomplete="off">
           <input type="text" id="input-number" placeholder="Numero di tracking" autocomplete="off" required>
           <button type="submit" class="btn btn-primary"><i data-lucide="plus"></i> Aggiungi</button>
         </form>
@@ -74,15 +79,16 @@
           <button id="refresh-all" class="btn btn-secondary"><i data-lucide="refresh-cw"></i> Aggiorna tutti</button>
         </div>
         <div id="loading-state" class="loading-state">
-          <i data-lucide="loader-2" class="spin"></i> Carico i pacchi dal foglio...
+          <i data-lucide="loader-2" class="spin"></i> Carico la lista delle spedizioni...
         </div>
         <div id="packages-list" class="packages-list">
+			
           <!-- Le card dei pacchi vengono generate qui via JS -->
         </div>
         <div id="empty-state" class="empty-state" hidden>
           <i data-lucide="package-search"></i>
           <p>Nessun pacco tracciato al momento.</p>
-          <span>Aggiungine uno dal modulo qui sopra: partirà subito il primo controllo.</span>
+          <span>Aggiungine uno qui sopra e inizia a tracciare.</span>
         </div>
       </section>
     </main>
@@ -152,8 +158,7 @@
     </article>
   </template>
 
-  <!-- Libreria icone Lucide -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Script -->
   <script src="tracciapacchi.js"></script>
 </body>
 </html>
