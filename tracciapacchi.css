@@ -357,8 +357,35 @@ input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   padding: 30px 20px;
   color: var(--ink-muted);
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
+.loading-state i { width: 16px; height: 16px; }
 .loading-state.error { color: var(--danger); }
+
+.spin { animation: spin 0.9s linear infinite; }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.config-warning {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+.config-warning h2 { color: var(--danger); }
+.config-warning h2 i { color: var(--danger); }
+.config-warning p { margin: 0; font-size: 13px; color: var(--ink); }
+.config-warning code {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
 
 /* ---------- Card pacco: talloncino di spedizione ---------- */
 .package-card {

@@ -1,16 +1,17 @@
 // tracciapacchi.js
 // Logica del tool: i pacchi sono salvati su un Google Sheet condiviso (via Apps Script),
-// così la lista è la stessa su tutti i dispositivi. Il Cloudflare Worker resta invece
-// dedicato solo al proxy verso Ship24 (registrazione/aggiornamento stato pacchi).
+// così la lista è la stessa su tutti i dispositivi. Il Cloudflare Worker fa da proxy
+// verso Ship24 (registrazione/aggiornamento stato pacchi).
+//
+// Configurazione: valorizza le tre costanti qui sotto. Se una manca o è rimasta
+// al valore segnaposto, la pagina mostra l'avviso "Configurazione mancante" e si ferma lì.
 
-const THEME_KEY = "toolbox_theme";       // chiave condivisa con gli altri tool del toolbox
-const WORKER_KEY = "tracciapacchi_worker_url";
-const MAX_PACCHI = 5;                    // limite pensato per il piano gratuito Ship24
+const SHIP24_WORKER_URL = "https://tracciapacchi.riccardo-05e.workers.dev";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_vqKk59Umc6d_iB79jWfGHuU8TCPMvRF_UX2gk3nRJ8v7mSr9VlbDpiXgNTSoa95f/exec";
+const APPS_SCRIPT_TOKEN = "0712";
 
-// URL del Web App Apps Script e token segreto: sostituisci questi due valori
-// con quelli ottenuti seguendo la guida (stesso token usato in Code.gs).
-const SHEET_PROXY_URL = "https://script.google.com/macros/s/AKfycbz_vqKk59Umc6d_iB79jWfGHuU8TCPMvRF_UX2gk3nRJ8v7mSr9VlbDpiXgNTSoa95f/exec";
-const SHEET_SECRET_TOKEN = "0712";
+const THEME_KEY = "toolbox_theme"; // chiave condivisa con gli altri tool del toolbox
+const MAX_PACCHI = 5;              // limite pensato per il piano gratuito Ship24
 
 // Ordine delle tappe principali usato dallo stepper visivo
 const MILESTONE_ORDER = ["info_received", "in_transit", "out_for_delivery", "delivered"];
@@ -21,19 +22,29 @@ let packagesCache = [];
 
 // --- Riferimenti agli elementi della pagina ---
 const themeToggle = document.getElementById("theme-toggle");
-const settingsPanel = document.getElementById("settings-panel");
-const workerUrlInput = document.getElementById("worker-url-input");
-const saveWorkerUrlBtn = document.getElementById("save-worker-url");
+const configWarning = document.getElementById("config-warning");
 const addForm = document.getElementById("add-form");
 const inputLabel = document.getElementById("input-label");
 const inputNumber = document.getElementById("input-number");
 const addError = document.getElementById("add-error");
 const packagesList = document.getElementById("packages-list");
 const packagesCount = document.getElementById("packages-count");
+const loadingState = document.getElementById("loading-state");
 const emptyState = document.getElementById("empty-state");
 const refreshAllBtn = document.getElementById("refresh-all");
 const cardTemplate = document.getElementById("package-card-template");
 const statsRow = document.getElementById("stats-row");
+
+// ------------------------------------------------------------------
+// Controllo configurazione: se manca qualcosa, mostriamo l'avviso e ci fermiamo
+// ------------------------------------------------------------------
+function isPlaceholder(value) {
+  return !value || value.trim() === "" || value.includes("INSERISCI_QUI");
+}
+
+function isConfigured() {
+  return !isPlaceholder(SHIP24_WORKER_URL) && !isPlaceholder(APPS_SCRIPT_URL) && !isPlaceholder(APPS_SCRIPT_TOKEN);
+}
 
 // ------------------------------------------------------------------
 // Tema chiaro/scuro (stesso pattern degli altri tool del toolbox)
@@ -55,56 +66,35 @@ themeToggle.addEventListener("click", () => {
 });
 
 // ------------------------------------------------------------------
-// Gestione URL del Worker Ship24 (richiesto una sola volta)
-// ------------------------------------------------------------------
-function getWorkerUrl() {
-  return localStorage.getItem(WORKER_KEY) || "";
-}
-
-function initSettings() {
-  const url = getWorkerUrl();
-  if (!url) {
-    settingsPanel.hidden = false;
-  } else {
-    workerUrlInput.value = url;
-  }
-}
-
-saveWorkerUrlBtn.addEventListener("click", () => {
-  const url = workerUrlInput.value.trim();
-  if (!url) return;
-  localStorage.setItem(WORKER_KEY, url);
-  settingsPanel.hidden = true;
-});
-
-// ------------------------------------------------------------------
 // Storage condiviso: Google Sheet via Apps Script
 // Struttura di ogni pacco:
 // { id, label, number, trackerId, status, detail, courier, transitDays,
 //   events: [{status, location, datetime}], lastUpdate }
 // ------------------------------------------------------------------
 async function loadPackages() {
-  packagesList.innerHTML = `<p class="loading-state">Caricamento pacchi…</p>`;
+  loadingState.hidden = false;
+  packagesList.innerHTML = "";
   try {
-    const res = await fetch(`${SHEET_PROXY_URL}?token=${encodeURIComponent(SHEET_SECRET_TOKEN)}`);
+    const res = await fetch(`${APPS_SCRIPT_URL}?token=${encodeURIComponent(APPS_SCRIPT_TOKEN)}`);
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     packagesCache = data.packages || [];
   } catch (err) {
-    packagesCache = [];
-    packagesList.innerHTML = `<p class="loading-state error">Impossibile caricare i pacchi dal foglio Google. Controlla SHEET_PROXY_URL e il token in tracciapacchi.js.</p>`;
+    loadingState.hidden = true;
+    packagesList.innerHTML = `<p class="loading-state error">Impossibile caricare i pacchi dal foglio Google. Controlla APPS_SCRIPT_URL e APPS_SCRIPT_TOKEN in tracciapacchi.js.</p>`;
     return;
   }
+  loadingState.hidden = true;
   renderPackages();
 }
 
 // Invia un'azione (add/update/remove) al Web App Apps Script
 async function sheetRequest(action, pacco) {
-  const res = await fetch(SHEET_PROXY_URL, {
+  const res = await fetch(APPS_SCRIPT_URL, {
     method: "POST",
     // text/plain evita il preflight CORS con Apps Script; il corpo resta comunque JSON valido
     headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ token: SHEET_SECRET_TOKEN, action, pacco }),
+    body: JSON.stringify({ token: APPS_SCRIPT_TOKEN, action, pacco }),
   });
   const data = await res.json();
   if (data.error) throw new Error(data.error);
@@ -115,12 +105,7 @@ async function sheetRequest(action, pacco) {
 // Chiamate al Worker Ship24
 // ------------------------------------------------------------------
 async function callWorker(payload) {
-  const url = getWorkerUrl();
-  if (!url) {
-    settingsPanel.hidden = false;
-    throw new Error("URL del Worker non configurato");
-  }
-  const res = await fetch(url, {
+  const res = await fetch(SHIP24_WORKER_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -254,7 +239,7 @@ addForm.addEventListener("submit", async (e) => {
     inputLabel.value = "";
     inputNumber.value = "";
   } catch (err) {
-    addError.textContent = "Non è stato possibile registrare il pacco. Controlla il numero, l'URL del Worker e la configurazione del foglio Google.";
+    addError.textContent = "Non è stato possibile registrare il pacco. Controlla il numero e la configurazione del Worker/foglio Google.";
     addError.hidden = false;
   }
 });
@@ -436,6 +421,12 @@ function renderPackages() {
 // Avvio
 // ------------------------------------------------------------------
 initTheme();
-initSettings();
-loadPackages();
 if (window.lucide) lucide.createIcons();
+
+if (isConfigured()) {
+  configWarning.hidden = true;
+  loadPackages();
+} else {
+  configWarning.hidden = false;
+  loadingState.hidden = true;
+}
