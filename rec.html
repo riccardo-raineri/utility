@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>REC — Toolbox Set</title>
+
+<!-- Font: Space Grotesk per le etichette UI, IBM Plex Mono per i dati numerici -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Icone Lucide -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<link rel="stylesheet" href="rec.css">
+</head>
+<body data-theme="dark">
+
+<div class="app">
+
+  <!-- ===================== HEADER ===================== -->
+  <header class="app-header">
+    <div class="header-title">
+      <span class="header-tally"></span>
+      <div>
+        <h1>KIT RIPRESA</h1>
+        <p class="header-sub">Strumenti per la giornata di set</p>
+      </div>
+    </div>
+    <button id="themeToggle" class="theme-toggle" title="Cambia tema" aria-label="Cambia tema chiaro/scuro">
+      <i data-lucide="sun-moon"></i>
+    </button>
+  </header>
+
+  <!-- ===================== TAB NAV (categorie) ===================== -->
+  <nav class="tab-nav" id="tabNav">
+    <button class="tab-chip active" data-panel="panel-pre">
+      <i data-lucide="clipboard-list"></i><span>Pre-produzione</span>
+    </button>
+    <button class="tab-chip" data-panel="panel-meteo">
+      <i data-lucide="cloud"></i><span>Luce &amp; Meteo</span>
+    </button>
+    <button class="tab-chip" data-panel="panel-calc">
+      <i data-lucide="calculator"></i><span>Calcolatori</span>
+    </button>
+    <button class="tab-chip" data-panel="panel-campo">
+      <i data-lucide="briefcase"></i><span>Sul campo</span>
+    </button>
+    <button class="tab-chip" data-panel="panel-utility">
+      <i data-lucide="wrench"></i><span>Utility set</span>
+    </button>
+    <button class="tab-chip" data-panel="panel-admin">
+      <i data-lucide="folder"></i><span>Amministrazione</span>
+    </button>
+  </nav>
+
+  <main class="app-main">
+
+    <!-- =================================================================== -->
+    <!-- PANNELLO: PRE-PRODUZIONE                                            -->
+    <!-- =================================================================== -->
+    <section class="panel active" id="panel-pre">
+
+      <!-- --- Checklist attrezzatura --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-checklist">
+          <i data-lucide="list-checks"></i>
+          <span>Checklist attrezzatura</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-checklist">
+          <form id="formChecklist" class="inline-form">
+            <input type="text" id="checklistItemInput" placeholder="Es. Batteria camera, treppiede..." required>
+            <select id="checklistCatInput">
+              <option>Camera</option>
+              <option>Ottiche</option>
+              <option>Audio</option>
+              <option>Luci</option>
+              <option>Drone</option>
+              <option>Varie</option>
+            </select>
+            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
+          </form>
+          <div class="list-toolbar">
+            <span id="checklistProgress" class="progress-text">0 / 0 spuntati</span>
+            <button id="btnChecklistReset" class="btn-ghost small">Deseleziona tutto</button>
+            <button id="btnChecklistClear" class="btn-ghost small danger">Svuota lista</button>
+          </div>
+          <div id="checklistList" class="checklist-groups"></div>
+        </div>
+      </div>
+
+      <!-- --- Shot list --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-shotlist">
+          <i data-lucide="clapperboard"></i>
+          <span>Shot list</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-shotlist">
+          <form id="formShot" class="inline-form">
+            <input type="text" id="shotScena" placeholder="Scena" style="max-width:90px" required>
+            <input type="text" id="shotDesc" placeholder="Inquadratura / descrizione" required>
+            <input type="text" id="shotNote" placeholder="Note tecniche">
+            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
+          </form>
+          <div id="shotList" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- --- Location scouting --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-location">
+          <i data-lucide="map-pin"></i>
+          <span>Location scouting</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-location">
+          <form id="formLocation" class="inline-form">
+            <input type="text" id="locNome" placeholder="Nome location" required>
+            <input type="text" id="locIndirizzo" placeholder="Indirizzo">
+            <input type="text" id="locOrario" placeholder="Orario di accesso">
+            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
+          </form>
+          <div id="locationList" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- --- Contatti rapidi troupe --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-contatti">
+          <i data-lucide="contact"></i>
+          <span>Contatti rapidi troupe</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-contatti">
+          <form id="formContatti" class="inline-form">
+            <input type="text" id="contNome" placeholder="Nome" required>
+            <input type="text" id="contRuolo" placeholder="Ruolo">
+            <input type="tel" id="contTel" placeholder="Telefono" required>
+            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
+          </form>
+          <div id="contattiList" class="item-list"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PANNELLO: LUCE & METEO                                              -->
+    <!-- =================================================================== -->
+    <section class="panel" id="panel-meteo">
+
+      <!-- --- Meteo dettagliato --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-meteo">
+          <i data-lucide="cloud-sun"></i>
+          <span>Meteo del giorno</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-meteo">
+          <button id="btnMeteoRefresh" class="btn-accent full">
+            <i data-lucide="refresh-cw"></i> Aggiorna meteo (posizione attuale)
+          </button>
+          <p id="meteoStatus" class="hint-text"></p>
+          <div id="meteoNow" class="meteo-now"></div>
+          <div id="meteoHourly" class="meteo-hourly"></div>
+        </div>
+      </div>
+
+      <!-- --- Vento per drone --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-vento">
+          <i data-lucide="wind"></i>
+          <span>Vento per drone</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-vento">
+          <p class="hint-text">Usa il pulsante "Aggiorna meteo" qui sopra per caricare i dati vento aggiornati.</p>
+          <label class="field-label">Soglia massima di sicurezza (km/h)
+            <input type="number" id="ventoSoglia" value="25" min="1">
+          </label>
+          <div id="ventoSemaforo" class="semaforo">
+            <div class="semaforo-luce" id="semaforoStato">—</div>
+            <div id="semaforoDettaglio" class="hint-text">Nessun dato vento caricato</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- --- Link Posizione Celeste --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-sole">
+          <i data-lucide="sun"></i>
+          <span>Posizione Celeste</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-sole">
+          <p class="hint-text">Golden hour, blue hour, fase lunare ed eclissi: apri il dashboard astronomico dedicato.</p>
+          <a href="sole.html" target="_blank" class="btn-accent full" style="text-decoration:none; display:flex;">
+            <i data-lucide="external-link"></i> Apri Posizione Celeste
+          </a>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PANNELLO: CALCOLATORI TECNICI                                       -->
+    <!-- =================================================================== -->
+    <section class="panel" id="panel-calc">
+
+      <!-- --- Iperfocale / DoF --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-iperfocale">
+          <i data-lucide="focus"></i>
+          <span>Iperfocale &amp; profondità di campo</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-iperfocale">
+          <div class="calc-grid">
+            <label class="field-label">Focale (mm)
+              <input type="number" id="hfFocale" value="35" min="1" step="0.1">
+            </label>
+            <label class="field-label">Apertura (f/)
+              <input type="number" id="hfApertura" value="2.8" min="0.5" step="0.1">
+            </label>
+            <label class="field-label">Formato sensore
+              <select id="hfSensore">
+                <option value="1">Full Frame (35mm)</option>
+                <option value="1.5">APS-C Nikon/Sony (1.5x)</option>
+                <option value="1.6">APS-C Canon (1.6x)</option>
+                <option value="2">Micro 4/3 (2x)</option>
+                <option value="1.4">Super 35 (1.4x)</option>
+              </select>
+            </label>
+            <label class="field-label">Distanza soggetto (m) — opzionale
+              <input type="number" id="hfDistanza" min="0" step="0.1" placeholder="es. 5">
+            </label>
+          </div>
+          <button id="btnCalcIperfocale" class="btn-accent full"><i data-lucide="equal"></i> Calcola</button>
+          <div id="hfResult" class="result-box"></div>
+        </div>
+      </div>
+
+      <!-- --- Esposizione / ND --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-nd">
+          <i data-lucide="aperture"></i>
+          <span>Esposizione &amp; filtro ND</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-nd">
+          <p class="hint-text">Inserisci l'esposizione corretta letta dalla camera e quella che vuoi ottenere: calcolo quanti stop di ND servono.</p>
+          <div class="calc-grid-2col">
+            <div class="calc-col">
+              <h4>Esposizione corretta (senza filtro)</h4>
+              <label class="field-label">Otturatore (1/x sec)
+                <input type="number" id="ndShutterCur" value="50" min="1">
+              </label>
+              <label class="field-label">Apertura (f/)
+                <input type="number" id="ndApertureCur" value="16" min="0.5" step="0.1">
+              </label>
+              <label class="field-label">ISO
+                <input type="number" id="ndIsoCur" value="800" min="25">
+              </label>
+            </div>
+            <div class="calc-col">
+              <h4>Esposizione desiderata</h4>
+              <label class="field-label">Otturatore (1/x sec)
+                <input type="number" id="ndShutterTgt" value="50" min="1">
+              </label>
+              <label class="field-label">Apertura (f/)
+                <input type="number" id="ndApertureTgt" value="2.8" min="0.5" step="0.1">
+              </label>
+              <label class="field-label">ISO
+                <input type="number" id="ndIsoTgt" value="800" min="25">
+              </label>
+            </div>
+          </div>
+          <button id="btnCalcNd" class="btn-accent full"><i data-lucide="equal"></i> Calcola ND necessario</button>
+          <div id="ndResult" class="result-box"></div>
+        </div>
+      </div>
+
+      <!-- --- Timelapse --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-timelapse">
+          <i data-lucide="timer"></i>
+          <span>Calcolatore timelapse</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-timelapse">
+          <div class="calc-grid">
+            <label class="field-label">Durata ripresa reale (minuti)
+              <input type="number" id="tlDurataReale" value="60" min="1">
+            </label>
+            <label class="field-label">Durata video finale (secondi)
+              <input type="number" id="tlDurataFinale" value="10" min="1">
+            </label>
+            <label class="field-label">FPS finale
+              <select id="tlFps">
+                <option value="24">24 fps</option>
+                <option value="25" selected>25 fps</option>
+                <option value="30">30 fps</option>
+                <option value="60">60 fps</option>
+              </select>
+            </label>
+            <label class="field-label">Peso medio scatto (MB)
+              <input type="number" id="tlPesoScatto" value="25" min="1">
+            </label>
+          </div>
+          <button id="btnCalcTimelapse" class="btn-accent full"><i data-lucide="equal"></i> Calcola</button>
+          <div id="tlResult" class="result-box"></div>
+        </div>
+      </div>
+
+      <!-- --- Storage / Bitrate --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-storage">
+          <i data-lucide="hard-drive"></i>
+          <span>Bitrate &amp; spazio storage</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-storage">
+          <div class="calc-grid">
+            <label class="field-label">Risoluzione
+              <select id="stRisoluzione">
+                <option value="hd">HD (1920x1080)</option>
+                <option value="4k" selected>4K UHD</option>
+                <option value="6k">6K</option>
+                <option value="8k">8K</option>
+              </select>
+            </label>
+            <label class="field-label">Frame rate
+              <select id="stFps">
+                <option value="24">24 fps</option>
+                <option value="25" selected>25 fps</option>
+                <option value="30">30 fps</option>
+                <option value="60">60 fps</option>
+                <option value="120">120 fps</option>
+              </select>
+            </label>
+            <label class="field-label">Codec
+              <select id="stCodec">
+                <option value="h264">H.264</option>
+                <option value="h265" selected>H.265 / HEVC</option>
+                <option value="prores422">ProRes 422</option>
+                <option value="proresraw">ProRes RAW</option>
+              </select>
+            </label>
+            <label class="field-label">Durata (minuti)
+              <input type="number" id="stDurata" value="30" min="1">
+            </label>
+          </div>
+          <button id="btnCalcStorage" class="btn-accent full"><i data-lucide="equal"></i> Calcola</button>
+          <div id="stResult" class="result-box"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PANNELLO: SUL CAMPO                                                 -->
+    <!-- =================================================================== -->
+    <section class="panel" id="panel-campo">
+
+      <!-- --- Tracker batterie --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-batterie">
+          <i data-lucide="battery-charging"></i>
+          <span>Tracker batterie</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-batterie">
+          <form id="formBatteria" class="inline-form">
+            <input type="text" id="battNome" placeholder="Es. Batteria camera 1" required>
+            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
+          </form>
+          <p class="hint-text">Tocca lo stato per farlo avanzare: Carica → In uso → Scarica.</p>
+          <div id="batterieList" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- --- Tracker schede memoria --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-schede">
+          <i data-lucide="save"></i>
+          <span>Tracker schede di memoria</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-schede">
+          <form id="formScheda" class="inline-form">
+            <input type="text" id="schedaNome" placeholder="Es. CFexpress A" required>
+            <input type="number" id="schedaCapacita" placeholder="Capacità GB" min="1" required>
+            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
+          </form>
+          <div id="schedeList" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- --- Log ciak --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-ciak">
+          <i data-lucide="film"></i>
+          <span>Log riprese / ciak digitale</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-ciak">
+          <form id="formCiak" class="inline-form">
+            <input type="text" id="ciakScena" placeholder="Scena" style="max-width:80px" required>
+            <input type="text" id="ciakNum" placeholder="Ciak" style="max-width:70px" required>
+            <select id="ciakGiudizio">
+              <option value="buona">Buona</option>
+              <option value="rifare">Da rifare</option>
+              <option value="ng">NG</option>
+            </select>
+            <input type="text" id="ciakNote" placeholder="Note">
+            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
+          </form>
+          <div id="ciakList" class="item-list"></div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PANNELLO: UTILITY SET                                               -->
+    <!-- =================================================================== -->
+    <section class="panel" id="panel-utility">
+
+      <!-- --- Livella / bussola --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-livella">
+          <i data-lucide="compass"></i>
+          <span>Livella &amp; bussola</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-livella">
+          <button id="btnLivellaAttiva" class="btn-accent full"><i data-lucide="play"></i> Attiva sensori</button>
+          <p id="livellaStatus" class="hint-text"></p>
+          <div class="livella-wrap">
+            <div class="livella-circle" id="livellaCircle">
+              <div class="livella-bubble" id="livellaBubble"></div>
+            </div>
+            <div class="livella-info">
+              <div>Inclinazione X: <span id="livellaGamma" class="mono">0°</span></div>
+              <div>Inclinazione Y: <span id="livellaBeta" class="mono">0°</span></div>
+              <div>Direzione: <span id="livellaAlpha" class="mono">—</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- --- Timer multipli --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-timer">
+          <i data-lucide="alarm-clock"></i>
+          <span>Timer &amp; cronometri</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-timer">
+          <form id="formTimer" class="inline-form">
+            <input type="text" id="timerNome" placeholder="Es. Posa, Intervista..." required>
+            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
+          </form>
+          <div id="timerList" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- --- Note vocali --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-note">
+          <i data-lucide="mic"></i>
+          <span>Note vocali rapide</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-note">
+          <form id="formNote" class="inline-form">
+            <input type="text" id="noteScena" placeholder="Tag scena (opzionale)" style="max-width:140px">
+            <button type="button" id="btnNoteMic" class="btn-ghost" title="Registra"><i data-lucide="mic"></i></button>
+          </form>
+          <textarea id="noteTesto" class="note-textarea" placeholder="Scrivi o detta una nota..."></textarea>
+          <button id="btnNoteSalva" class="btn-accent full"><i data-lucide="save"></i> Salva nota</button>
+          <div id="noteList" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- --- Metronomo --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-metronomo">
+          <i data-lucide="activity"></i>
+          <span>Metronomo movimenti camera</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-metronomo">
+          <div class="metro-wrap">
+            <div class="metro-pulse" id="metroPulse"></div>
+            <div class="metro-controls">
+              <label class="field-label">BPM: <span id="metroBpmVal" class="mono">60</span>
+                <input type="range" id="metroBpm" min="20" max="200" value="60">
+              </label>
+              <button id="btnMetroToggle" class="btn-accent full"><i data-lucide="play"></i> Avvia</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- PANNELLO: AMMINISTRAZIONE                                          -->
+    <!-- =================================================================== -->
+    <section class="panel" id="panel-admin">
+
+      <!-- --- Release / liberatoria --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-release">
+          <i data-lucide="file-signature"></i>
+          <span>Release / liberatoria digitale</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-release">
+          <div class="calc-grid">
+            <label class="field-label">Nome soggetto
+              <input type="text" id="relNome" required>
+            </label>
+            <label class="field-label">Data
+              <input type="date" id="relData">
+            </label>
+          </div>
+          <label class="field-label">Testo liberatoria
+            <textarea id="relTesto" class="note-textarea" rows="4">Il/la sottoscritto/a autorizza la ripresa, la registrazione e l'utilizzo della propria immagine e voce per le finalità concordate con la produzione, senza limiti di tempo e di supporto, rinunciando a qualsiasi compenso.</textarea>
+          </label>
+          <p class="field-label">Firma</p>
+          <canvas id="relCanvas" class="signature-canvas"></canvas>
+          <div class="list-toolbar">
+            <button id="btnRelClear" class="btn-ghost small">Cancella firma</button>
+            <button id="btnRelSalva" class="btn-accent small"><i data-lucide="save"></i> Salva liberatoria</button>
+          </div>
+          <div id="releaseList" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- --- Spese giornata --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-spese">
+          <i data-lucide="receipt"></i>
+          <span>Spese giornata</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-spese">
+          <form id="formSpesa" class="inline-form">
+            <input type="text" id="spesaDesc" placeholder="Descrizione" required>
+            <input type="number" id="spesaImporto" placeholder="€" min="0" step="0.01" required>
+            <select id="spesaCat">
+              <option>Carburante</option>
+              <option>Pasti</option>
+              <option>Noleggio</option>
+              <option>Parcheggio/Pedaggio</option>
+              <option>Altro</option>
+            </select>
+            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
+          </form>
+          <div class="total-box">Totale: <span id="speseTotale" class="mono">€ 0,00</span></div>
+          <div id="speseList" class="item-list"></div>
+        </div>
+      </div>
+
+      <!-- --- Promemoria --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-promemoria">
+          <i data-lucide="bell"></i>
+          <span>Promemoria &amp; allarmi</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-promemoria">
+          <form id="formPromemoria" class="inline-form">
+            <input type="text" id="promTesto" placeholder="Cosa ricordare" required>
+            <input type="time" id="promOrario" required>
+            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
+          </form>
+          <button id="btnPromNotifiche" class="btn-ghost full"><i data-lucide="bell-ring"></i> Attiva notifiche browser</button>
+          <div id="promemoriaList" class="item-list"></div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<script src="REC.js"></script>
+</body>
+</html>

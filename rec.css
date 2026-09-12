@@ -1,0 +1,534 @@
+/* =====================================================================
+   KIT RIPRESA — Foglio di stile
+   Estetica ispirata al display OSD di una camera da presa / monitor di
+   scena: fondo scuro, accento rosso "tally" (spia di registrazione),
+   dati numerici in monospace. Tema chiaro disponibile via toggle.
+   ===================================================================== */
+
+/* ---------- Variabili tema SCURO (default) ---------- */
+:root{
+  --bg: #0d0e0f;
+  --bg-elevated: #16181a;
+  --bg-input: #1e2022;
+  --border: #2b2e31;
+  --text: #e8e6e2;
+  --text-dim: #8b8d90;
+  --text-faint: #5c5e61;
+
+  --accent: #d42b2b;
+  --accent-dim: #7a1919;
+  --accent-text: #ffffff;
+
+  --success: #3a9d5f;
+  --success-bg: #14251c;
+  --warning: #c98a2c;
+  --warning-bg: #2a2216;
+  --danger: #d42b2b;
+  --danger-bg: #2a1616;
+
+  --radius: 6px;
+  --font-ui: 'Space Grotesk', -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+}
+
+/* ---------- Variabili tema CHIARO ---------- */
+body[data-theme="light"]{
+  --bg: #f1efeb;
+  --bg-elevated: #ffffff;
+  --bg-input: #f6f5f2;
+  --border: #d9d6cf;
+  --text: #1a1b1c;
+  --text-dim: #63666b;
+  --text-faint: #97999c;
+
+  --accent: #c81e1e;
+  --accent-dim: #f3d4d4;
+  --accent-text: #ffffff;
+
+  --success: #2c7a4a;
+  --success-bg: #e3f1e7;
+  --warning: #a56a1c;
+  --warning-bg: #f4e8d3;
+  --danger: #c81e1e;
+  --danger-bg: #f8e2e2;
+}
+
+*{ box-sizing: border-box; }
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  transition: background .2s ease, color .2s ease;
+}
+
+.mono{ font-family: var(--font-mono); }
+
+/* =====================================================================
+   HEADER
+   ===================================================================== */
+.app-header{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 20;
+}
+.header-title{ display: flex; align-items: center; gap: 12px; }
+.header-tally{
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  flex-shrink: 0;
+  animation: tally-pulse 2s ease-in-out infinite;
+}
+@keyframes tally-pulse{
+  0%,100%{ opacity: 1; }
+  50%{ opacity: .35; }
+}
+.app-header h1{
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: .04em;
+}
+.header-sub{
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.theme-toggle{
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text);
+  width: 38px; height: 38px;
+  border-radius: var(--radius);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.theme-toggle:active{ transform: scale(.94); }
+.theme-toggle i{ width: 18px; height: 18px; }
+
+/* =====================================================================
+   TAB NAV (categorie, chip orizzontali scrollabili)
+   ===================================================================== */
+.tab-nav{
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 66px;
+  background: var(--bg);
+  z-index: 19;
+  scrollbar-width: none;
+}
+.tab-nav::-webkit-scrollbar{ display: none; }
+.tab-chip{
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text-dim);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tab-chip i{ width: 15px; height: 15px; }
+.tab-chip.active{
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+}
+
+/* =====================================================================
+   LAYOUT PRINCIPALE
+   ===================================================================== */
+.app-main{
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px 16px 60px;
+}
+.panel{ display: none; }
+.panel.active{ display: block; }
+
+/* =====================================================================
+   TOOL CARD (accordion)
+   ===================================================================== */
+.tool-card{
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.tool-header{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+.tool-header i:first-child{ width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; }
+.tool-header span{ flex: 1; }
+.tool-header .chev{ width: 16px; height: 16px; color: var(--text-faint); transition: transform .2s ease; }
+.tool-header.open .chev{ transform: rotate(180deg); }
+
+.tool-body{
+  display: none;
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.tool-body.open{ display: block; }
+
+/* =====================================================================
+   FORM & CAMPI
+   ===================================================================== */
+.inline-form{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.inline-form input, .inline-form select{
+  flex: 1 1 120px;
+}
+
+input, select, textarea{
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  font-family: var(--font-ui);
+  font-size: 13.5px;
+  min-width: 0;
+}
+input:focus, select:focus, textarea:focus{
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+}
+
+.field-label{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.calc-grid{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 12px;
+  margin-bottom: 12px;
+}
+.calc-grid-2col{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+.calc-col h4{
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  color: var(--text-dim);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+}
+@media (max-width: 480px){
+  .calc-grid-2col{ grid-template-columns: 1fr; gap: 14px 0; }
+}
+
+/* =====================================================================
+   BOTTONI
+   ===================================================================== */
+.btn-accent{
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-accent:active{ transform: scale(.98); }
+.btn-accent.full{ width: 100%; margin-bottom: 10px; }
+.btn-accent.small{ padding: 7px 12px; font-size: 12.5px; }
+.btn-accent i{ width: 16px; height: 16px; }
+
+.btn-ghost{
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 12px;
+  font-family: var(--font-ui);
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-ghost.full{ width: 100%; margin-bottom: 10px; }
+.btn-ghost.small{ padding: 6px 10px; font-size: 12px; }
+.btn-ghost.danger{ color: var(--danger); border-color: var(--danger); }
+.btn-ghost i{ width: 15px; height: 15px; }
+
+.icon-btn{
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: var(--radius);
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.icon-btn i{ width: 15px; height: 15px; }
+.icon-btn.danger{ color: var(--danger); }
+.icon-btn.accent{ color: var(--accent); }
+
+/* =====================================================================
+   LISTE GENERICHE (voci con azioni)
+   ===================================================================== */
+.item-list{ display: flex; flex-direction: column; gap: 8px; }
+.list-empty{ color: var(--text-faint); font-size: 13px; padding: 10px 2px; }
+
+.item-row{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.item-main{ flex: 1; min-width: 0; }
+.item-title{ font-size: 13.5px; font-weight: 600; }
+.item-sub{ font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.item-actions{ display: flex; gap: 6px; flex-shrink: 0; }
+
+.badge{
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+}
+.badge-neutral{ background: var(--border); color: var(--text-dim); }
+.badge-success{ background: var(--success-bg); color: var(--success); }
+.badge-warning{ background: var(--warning-bg); color: var(--warning); }
+.badge-danger{ background: var(--danger-bg); color: var(--danger); }
+
+.list-toolbar{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.progress-text{ font-size: 12px; color: var(--text-dim); flex: 1; }
+.hint-text{ font-size: 12px; color: var(--text-dim); margin: 0 0 10px; line-height: 1.5; }
+
+/* =====================================================================
+   CHECKLIST
+   ===================================================================== */
+.checklist-groups{ display: flex; flex-direction: column; gap: 14px; }
+.checklist-group-title{
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text-faint);
+  letter-spacing: .03em;
+  margin-bottom: 6px;
+}
+.checklist-item{
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border);
+}
+.checklist-item:last-child{ border-bottom: none; }
+.checklist-item input[type="checkbox"]{
+  width: 18px; height: 18px; accent-color: var(--accent); flex-shrink: 0;
+}
+.checklist-item label{ flex: 1; font-size: 13.5px; cursor: pointer; }
+.checklist-item.done label{ color: var(--text-faint); text-decoration: line-through; }
+
+/* =====================================================================
+   RESULT BOX (calcolatori)
+   ===================================================================== */
+.result-box{
+  background: var(--bg-input);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  font-size: 13.5px;
+  line-height: 1.8;
+  color: var(--text-dim);
+}
+.result-box strong{ color: var(--text); font-family: var(--font-mono); }
+.result-box .result-highlight{
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* =====================================================================
+   METEO
+   ===================================================================== */
+.meteo-now{ display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+.meteo-now .stat{ display: flex; flex-direction: column; }
+.meteo-now .stat .val{ font-family: var(--font-mono); font-size: 20px; font-weight: 600; }
+.meteo-now .stat .lbl{ font-size: 11px; color: var(--text-dim); }
+.meteo-hourly{ display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.meteo-hour-card{
+  flex-shrink: 0;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  text-align: center;
+  min-width: 64px;
+}
+.meteo-hour-card .h-time{ font-size: 11px; color: var(--text-dim); }
+.meteo-hour-card .h-temp{ font-family: var(--font-mono); font-size: 14px; font-weight: 600; margin: 4px 0; }
+.meteo-hour-card .h-extra{ font-size: 10px; color: var(--text-faint); }
+
+/* Semaforo vento drone */
+.semaforo{ display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+.semaforo-luce{
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+  background: var(--border); color: var(--text-dim);
+  flex-shrink: 0;
+}
+.semaforo-luce.verde{ background: var(--success-bg); color: var(--success); box-shadow: 0 0 0 2px var(--success); }
+.semaforo-luce.giallo{ background: var(--warning-bg); color: var(--warning); box-shadow: 0 0 0 2px var(--warning); }
+.semaforo-luce.rosso{ background: var(--danger-bg); color: var(--danger); box-shadow: 0 0 0 2px var(--danger); }
+
+/* =====================================================================
+   LIVELLA / BUSSOLA
+   ===================================================================== */
+.livella-wrap{ display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+.livella-circle{
+  width: 140px; height: 140px; border-radius: 50%;
+  background: var(--bg-input);
+  border: 2px solid var(--border);
+  position: relative;
+  flex-shrink: 0;
+}
+.livella-circle::before, .livella-circle::after{
+  content: ''; position: absolute; background: var(--border);
+}
+.livella-circle::before{ width: 100%; height: 1px; top: 50%; left: 0; }
+.livella-circle::after{ width: 1px; height: 100%; left: 50%; top: 0; }
+.livella-bubble{
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent);
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform .1s linear;
+  box-shadow: 0 0 10px var(--accent);
+}
+.livella-info{ font-size: 13px; color: var(--text-dim); display: flex; flex-direction: column; gap: 6px; }
+
+/* =====================================================================
+   METRONOMO
+   ===================================================================== */
+.metro-wrap{ display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+.metro-pulse{
+  width: 70px; height: 70px; border-radius: 50%;
+  background: var(--bg-input);
+  border: 2px solid var(--accent);
+  flex-shrink: 0;
+  transition: transform .08s ease, background .08s ease;
+}
+.metro-pulse.beat{ background: var(--accent); transform: scale(1.12); }
+.metro-controls{ flex: 1; min-width: 180px; }
+.metro-controls input[type="range"]{ width: 100%; accent-color: var(--accent); margin-top: 6px; }
+
+/* =====================================================================
+   FIRMA / RELEASE
+   ===================================================================== */
+.signature-canvas{
+  width: 100%;
+  height: 160px;
+  background: var(--bg-input);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  touch-action: none;
+  display: block;
+  margin-bottom: 10px;
+}
+
+/* =====================================================================
+   NOTE VOCALI
+   ===================================================================== */
+.note-textarea{
+  width: 100%;
+  min-height: 70px;
+  resize: vertical;
+  margin-bottom: 10px;
+  font-family: var(--font-ui);
+}
+#btnNoteMic.recording{ color: var(--accent); border-color: var(--accent); }
+
+/* =====================================================================
+   TOTALE SPESE
+   ===================================================================== */
+.total-box{
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.total-box .mono{ font-size: 17px; font-weight: 600; color: var(--accent); }
+
+/* =====================================================================
+   RESPONSIVE — iPhone
+   ===================================================================== */
+@media (max-width: 480px){
+  .app-header{ padding: 14px 14px; }
+  .app-header h1{ font-size: 15.5px; }
+  .app-main{ padding: 12px 10px 50px; }
+  .calc-grid{ grid-template-columns: 1fr; }
+  .tool-header{ font-size: 13.5px; padding: 12px 12px; }
+  .inline-form input, .inline-form select{ flex: 1 1 100%; }
+}
+
+/* Rispetta le preferenze di riduzione del movimento */
+@media (prefers-reduced-motion: reduce){
+  .header-tally{ animation: none; }
+  *{ transition: none !important; }
+}
