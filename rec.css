@@ -1,5 +1,5 @@
 /* =====================================================================
-   KIT RIPRESA — Foglio di stile
+   REC — Foglio di stile
    Estetica ispirata al display OSD di una camera da presa / monitor di
    scena: fondo scuro, accento rosso "tally" (spia di registrazione),
    dati numerici in monospace. Tema chiaro disponibile via toggle.
@@ -525,6 +525,170 @@ input:focus, select:focus, textarea:focus{
   .calc-grid{ grid-template-columns: 1fr; }
   .tool-header{ font-size: 13.5px; padding: 12px 12px; }
   .inline-form input, .inline-form select{ flex: 1 1 100%; }
+}
+
+/* =====================================================================
+   MODALITÀ CIAK A SCHERMO INTERO
+   Overlay a tutta pagina con testi e tasti molto grandi, pensata per
+   restare aperta sul set e per essere usabile con un tocco solo.
+   ===================================================================== */
+.fullscreen-overlay{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--bg);
+  flex-direction: column;
+  padding: 16px;
+  overflow-y: auto;
+}
+.fullscreen-overlay.open{ display: flex; }
+
+.fs-topbar{ display: flex; justify-content: flex-end; margin-bottom: 8px; }
+.fs-exit-btn{
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  cursor: pointer;
+}
+.fs-exit-btn i{ width: 16px; height: 16px; }
+
+.fs-counters{
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin: 8px 0 20px;
+  flex-wrap: wrap;
+}
+.fs-counter-block{ text-align: center; }
+.fs-counter-label{
+  display: block;
+  font-size: 13px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 6px;
+}
+.fs-counter-row{ display: flex; align-items: center; gap: 14px; }
+.fs-counter-val{
+  font-family: var(--font-mono);
+  font-size: 52px;
+  font-weight: 700;
+  min-width: 70px;
+  color: var(--text);
+}
+.fs-step-btn{
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+.fs-step-btn:active{ transform: scale(.92); }
+
+.fs-giudizio-grid{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  min-height: 260px;
+}
+.fs-giudizio-btn{
+  flex: 1;
+  border: none;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: var(--font-ui);
+}
+.fs-giudizio-btn i{ width: 46px; height: 46px; }
+.fs-giudizio-btn span{ font-size: 26px; font-weight: 700; letter-spacing: .04em; }
+.fs-giudizio-btn:active{ transform: scale(.98); }
+
+.fs-buona{ background: var(--success-bg); color: var(--success); box-shadow: inset 0 0 0 2px var(--success); }
+.fs-rifare{ background: var(--warning-bg); color: var(--warning); box-shadow: inset 0 0 0 2px var(--warning); }
+.fs-ng{ background: var(--danger-bg); color: var(--danger); box-shadow: inset 0 0 0 2px var(--danger); }
+
+.fs-last-saved{
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin: 14px 0 4px;
+  min-height: 18px;
+}
+
+/* --- Sezione note dentro lo schermo intero --- */
+.fs-notes-section{
+  border-top: 1px solid var(--border);
+  margin-top: 16px;
+  padding-top: 12px;
+}
+.fs-notes-toggle{
+  width: 100%;
+  display: flex; align-items: center; gap: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 600;
+  padding: 6px 2px;
+  cursor: pointer;
+}
+.fs-notes-toggle span{ flex: 1; text-align: left; }
+.fs-notes-toggle .chev{ width: 18px; height: 18px; color: var(--text-faint); transition: transform .2s ease; }
+.fs-notes-toggle.open .chev{ transform: rotate(180deg); }
+.fs-notes-body{ display: none; padding-top: 10px; }
+.fs-notes-body.open{ display: block; }
+
+.fs-notes-input-row{ display: flex; gap: 8px; margin-bottom: 10px; }
+.fs-note-textarea{
+  flex: 1;
+  min-height: 60px;
+  resize: vertical;
+  font-family: var(--font-ui);
+  font-size: 15px;
+}
+.fs-mic-btn{
+  width: 46px; height: 46px;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.fs-mic-btn i{ width: 20px; height: 20px; }
+.fs-mic-btn.recording{ color: var(--accent); border-color: var(--accent); }
+.fs-note-list{ display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+
+.fs-recent-list{
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@media (max-width: 480px){
+  .fs-counter-val{ font-size: 42px; }
+  .fs-giudizio-btn span{ font-size: 22px; }
+  .fs-giudizio-btn i{ width: 38px; height: 38px; }
 }
 
 /* Rispetta le preferenze di riduzione del movimento */

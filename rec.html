@@ -24,8 +24,8 @@
     <div class="header-title">
       <span class="header-tally"></span>
       <div>
-        <h1>KIT RIPRESA</h1>
-        <p class="header-sub">Strumenti per la giornata di set</p>
+        <h1>REC</h1>
+        <p class="header-sub">Toolbox per la giornata di ripresa</p>
       </div>
     </div>
     <button id="themeToggle" class="theme-toggle" title="Cambia tema" aria-label="Cambia tema chiaro/scuro">
@@ -407,6 +407,7 @@
           <i data-lucide="chevron-down" class="chev"></i>
         </button>
         <div class="tool-body" id="body-ciak">
+          <button id="btnCiakFullscreen" class="btn-accent full"><i data-lucide="maximize"></i> Apri modalità schermo intero</button>
           <form id="formCiak" class="inline-form">
             <input type="text" id="ciakScena" placeholder="Scena" style="max-width:80px" required>
             <input type="text" id="ciakNum" placeholder="Ciak" style="max-width:70px" required>
@@ -590,6 +591,69 @@
   </main>
 </div>
 
-<script src="REC.js"></script>
+<!-- ===================================================================
+     MODALITÀ CIAK A SCHERMO INTERO
+     Pensata per restare aperta sul set: numeri e tasti grandi, pensata
+     per essere usata al volo con un tocco solo, anche con i guanti.
+     =================================================================== -->
+<div class="fullscreen-overlay" id="ciakFullscreen">
+
+  <div class="fs-topbar">
+    <button id="btnCiakFsExit" class="fs-exit-btn"><i data-lucide="x"></i> Chiudi</button>
+  </div>
+
+  <div class="fs-counters">
+    <div class="fs-counter-block">
+      <span class="fs-counter-label">Scena</span>
+      <div class="fs-counter-row">
+        <button class="fs-step-btn" id="fsScenaMeno">−</button>
+        <span class="fs-counter-val" id="fsScenaVal">1</span>
+        <button class="fs-step-btn" id="fsScenaPiu">+</button>
+      </div>
+    </div>
+    <div class="fs-counter-block">
+      <span class="fs-counter-label">Ciak</span>
+      <div class="fs-counter-row">
+        <button class="fs-step-btn" id="fsCiakMeno">−</button>
+        <span class="fs-counter-val" id="fsCiakVal">1</span>
+        <button class="fs-step-btn" id="fsCiakPiu">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="fs-giudizio-grid">
+    <button class="fs-giudizio-btn fs-buona" data-giudizio="buona">
+      <i data-lucide="check"></i><span>BUONA</span>
+    </button>
+    <button class="fs-giudizio-btn fs-rifare" data-giudizio="rifare">
+      <i data-lucide="rotate-ccw"></i><span>DA RIFARE</span>
+    </button>
+    <button class="fs-giudizio-btn fs-ng" data-giudizio="ng">
+      <i data-lucide="x"></i><span>NG</span>
+    </button>
+  </div>
+
+  <div id="fsLastSaved" class="fs-last-saved"></div>
+
+  <!-- --- Note scritte / vocali, richiamabili senza uscire dallo schermo intero --- -->
+  <div class="fs-notes-section">
+    <button class="fs-notes-toggle" id="fsNotesToggle">
+      <i data-lucide="mic"></i><span>Note scritte / vocali</span><i data-lucide="chevron-up" class="chev"></i>
+    </button>
+    <div class="fs-notes-body" id="fsNotesBody">
+      <div class="fs-notes-input-row">
+        <textarea id="fsNoteTesto" class="fs-note-textarea" placeholder="Scrivi o detta una nota veloce..."></textarea>
+        <button id="fsNoteMic" class="fs-mic-btn" title="Registra"><i data-lucide="mic"></i></button>
+      </div>
+      <button id="fsNoteSalva" class="btn-accent full"><i data-lucide="save"></i> Salva nota</button>
+      <div id="fsNoteList" class="fs-note-list"></div>
+    </div>
+  </div>
+
+  <div class="fs-recent-list" id="fsRecentList"></div>
+
+</div>
+
+<script src="rec.js"></script>
 </body>
 </html>

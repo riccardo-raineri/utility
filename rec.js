@@ -1,5 +1,5 @@
 /* =====================================================================
-   KIT RIPRESA — Logica applicativa
+   REC — Logica applicativa
    Tutti i dati vengono salvati in localStorage sul dispositivo: non c'è
    nessun backend, quindi i dati restano solo su questo browser/telefono.
    ===================================================================== */
@@ -732,6 +732,10 @@ function krRenderEmpty(container, message){
 /* =====================================================================
    13) LOG CIAK
    ===================================================================== */
+/* Riferimento globale al render del log ciak, riusato dalla modalità
+   schermo intero per aggiornare la lista principale dopo un salvataggio. */
+let krRenderCiak = null;
+
 (function ciakModule(){
   const KEY = 'kr_ciak';
   const form = document.getElementById('formCiak');
@@ -786,7 +790,185 @@ function krRenderEmpty(container, message){
     }
   });
 
+  krRenderCiak = render;
   render();
+
+  document.getElementById('btnCiakFullscreen').addEventListener('click', () => {
+    document.getElementById('ciakFullscreen').classList.add('open');
+    if(window.krOpenFullscreenCiak) window.krOpenFullscreenCiak();
+  });
+})();
+
+/* =====================================================================
+   13-bis) MODALITÀ CIAK A SCHERMO INTERO
+   Riusa la stessa chiave di storage "kr_ciak" del log normale, così le
+   voci registrate qui compaiono anche nella lista compatta e viceversa.
+   Le note scritte/vocali di questa sezione usano la stessa chiave
+   "kr_note" del modulo Note vocali rapide, taggate con la scena corrente.
+   ===================================================================== */
+(function ciakFullscreenModule(){
+  const KEY_CIAK = 'kr_ciak';
+  const KEY_NOTE = 'kr_note';
+  const KEY_COUNTERS = 'kr_ciak_counters';
+
+  const overlay = document.getElementById('ciakFullscreen');
+  const scenaVal = document.getElementById('fsScenaVal');
+  const ciakVal = document.getElementById('fsCiakVal');
+  const lastSaved = document.getElementById('fsLastSaved');
+  const recentList = document.getElementById('fsRecentList');
+
+  const GIUDIZI = { buona: 'Buona', rifare: 'Da rifare', ng: 'NG' };
+
+  function getCounters(){
+    return krLoad(KEY_COUNTERS, { scena: 1, ciak: 1 });
+  }
+  function setCounters(c){
+    krSave(KEY_COUNTERS, c);
+    scenaVal.textContent = c.scena;
+    ciakVal.textContent = c.ciak;
+  }
+
+  function renderRecent(){
+    const items = krLoad(KEY_CIAK).slice(-4).reverse();
+    if(items.length === 0){
+      recentList.innerHTML = '<div class="list-empty">Ancora nessun ciak registrato in questa sessione.</div>';
+      return;
+    }
+    recentList.innerHTML = items.map(it => `
+      <div class="item-row">
+        <div class="item-main">
+          <div class="item-title">Scena ${it.scena} · Ciak ${it.ciak} <span class="mono" style="color:var(--text-faint); font-size:11px;">${it.ora}</span></div>
+        </div>
+        <span class="badge ${it.giudizio === 'buona' ? 'badge-success' : it.giudizio === 'rifare' ? 'badge-warning' : 'badge-danger'}">${GIUDIZI[it.giudizio]}</span>
+      </div>
+    `).join('');
+  }
+
+  // Espone l'apertura per sincronizzare i contatori con l'ultimo ciak registrato
+  window.krOpenFullscreenCiak = function(){
+    setCounters(getCounters());
+    renderRecent();
+    renderFsNotes();
+  };
+
+  document.getElementById('btnCiakFsExit').addEventListener('click', () => {
+    overlay.classList.remove('open');
+  });
+
+  document.getElementById('fsScenaPiu').addEventListener('click', () => {
+    const c = getCounters(); c.scena += 1; c.ciak = 1; setCounters(c);
+  });
+  document.getElementById('fsScenaMeno').addEventListener('click', () => {
+    const c = getCounters(); c.scena = Math.max(1, c.scena - 1); setCounters(c);
+  });
+  document.getElementById('fsCiakPiu').addEventListener('click', () => {
+    const c = getCounters(); c.ciak += 1; setCounters(c);
+  });
+  document.getElementById('fsCiakMeno').addEventListener('click', () => {
+    const c = getCounters(); c.ciak = Math.max(1, c.ciak - 1); setCounters(c);
+  });
+
+  document.querySelectorAll('.fs-giudizio-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const giudizio = btn.dataset.giudizio;
+      const c = getCounters();
+      const items = krLoad(KEY_CIAK);
+      items.push({
+        id: krId(),
+        scena: c.scena,
+        ciak: c.ciak,
+        giudizio,
+        note: '',
+        ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+      });
+      krSave(KEY_CIAK, items);
+
+      lastSaved.textContent = `Salvato — Scena ${c.scena}, Ciak ${c.ciak}: ${GIUDIZI[giudizio]}`;
+
+      // Dopo un ciak buono si passa alla scena successiva, altrimenti si
+      // resta sulla stessa scena aumentando il numero di ciak (ripetizione)
+      if(giudizio === 'buona'){
+        c.scena += 1; c.ciak = 1;
+      }else{
+        c.ciak += 1;
+      }
+      setCounters(c);
+      renderRecent();
+      if(krRenderCiak) krRenderCiak();
+    });
+  });
+
+  /* --- Note scritte / vocali dentro lo schermo intero --- */
+  const notesToggle = document.getElementById('fsNotesToggle');
+  const notesBody = document.getElementById('fsNotesBody');
+  const noteTesto = document.getElementById('fsNoteTesto');
+  const noteMicBtn = document.getElementById('fsNoteMic');
+  const noteSalvaBtn = document.getElementById('fsNoteSalva');
+  const noteListEl = document.getElementById('fsNoteList');
+
+  notesToggle.addEventListener('click', () => {
+    const isOpen = notesBody.classList.toggle('open');
+    notesToggle.classList.toggle('open', isOpen);
+  });
+
+  const SpeechRecognitionApi = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let fsRecognition = null;
+  let fsAscoltando = false;
+  if(SpeechRecognitionApi){
+    fsRecognition = new SpeechRecognitionApi();
+    fsRecognition.lang = 'it-IT';
+    fsRecognition.continuous = true;
+    fsRecognition.interimResults = false;
+    fsRecognition.onresult = (e) => {
+      const testo = Array.from(e.results).map(r => r[0].transcript).join(' ');
+      noteTesto.value = (noteTesto.value + ' ' + testo).trim();
+    };
+    fsRecognition.onend = () => { fsAscoltando = false; noteMicBtn.classList.remove('recording'); };
+  }
+
+  noteMicBtn.addEventListener('click', () => {
+    if(!fsRecognition){
+      alert('Il riconoscimento vocale non è supportato su questo browser. Usa la tastiera per scrivere la nota.');
+      return;
+    }
+    if(fsAscoltando){
+      fsRecognition.stop(); fsAscoltando = false; noteMicBtn.classList.remove('recording');
+    }else{
+      fsRecognition.start(); fsAscoltando = true; noteMicBtn.classList.add('recording');
+    }
+  });
+
+  function renderFsNotes(){
+    const items = krLoad(KEY_NOTE).slice(-4).reverse();
+    if(items.length === 0){
+      noteListEl.innerHTML = '<div class="list-empty">Nessuna nota salvata in questa sessione.</div>';
+      return;
+    }
+    noteListEl.innerHTML = items.map(it => `
+      <div class="item-row">
+        <div class="item-main">
+          <div class="item-title">${it.scena ? '[' + it.scena + '] ' : ''}${it.testo}</div>
+          <div class="item-sub">${it.ora}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  noteSalvaBtn.addEventListener('click', () => {
+    const testo = noteTesto.value.trim();
+    if(!testo) return;
+    const c = getCounters();
+    const items = krLoad(KEY_NOTE);
+    items.push({
+      id: krId(),
+      testo,
+      scena: 'Scena ' + c.scena,
+      ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+    });
+    krSave(KEY_NOTE, items);
+    noteTesto.value = '';
+    renderFsNotes();
+  });
 })();
 
 /* =====================================================================
