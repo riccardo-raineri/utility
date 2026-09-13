@@ -25,6 +25,11 @@ function krSave(key, value){
   }catch(e){
     console.error('Errore scrittura storage', key, e);
   }
+  // Se la chiave corrisponde a una tabella sincronizzata, invia anche
+  // una copia al backend cloud (funzione definita più sotto nel file,
+  // disponibile qui grazie al hoisting delle dichiarazioni di funzione)
+  const table = KR_TABLES[key];
+  if(table) krCloudSave(table, value);
 }
 function krId(){
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -32,6 +37,118 @@ function krId(){
 /* Ricrea le icone Lucide dopo ogni render dinamico della UI */
 function krIcons(){
   if(window.lucide) lucide.createIcons();
+}
+
+/* =====================================================================
+   SINCRONIZZAZIONE CLOUD (Google Sheets + Apps Script)
+   Stesso schema già usato in Lista della Spesa, Spotify Tracker e
+   Tracciapacchi: un Web App Apps Script espone un'API JSON che legge e
+   scrive su un Google Sheet. Ogni tabella locale ("kr_...") corrisponde
+   a un foglio del backend.
+
+   COME CONFIGURARE:
+   1. Crea un nuovo Google Sheet vuoto.
+   2. Estensioni → Apps Script, incolla il codice fornito a parte (Code.gs).
+   3. In "Proprietà del progetto → Proprietà script" aggiungi una proprietà
+      SECRET_TOKEN con un valore a tua scelta (es. una password).
+   4. Distribuisci → Nuova distribuzione → Web app, accesso "Chiunque
+      abbia il link", copia l'URL.
+   5. Incolla URL e token qui sotto al posto dei segnaposto.
+   ===================================================================== */
+const CONFIG = {
+  APPS_SCRIPT_URL: 'INCOLLA_QUI_URL_WEB_APP',
+  SECRET_TOKEN: 'INCOLLA_QUI_TOKEN'
+};
+
+/* Mappa "chiave localStorage" -> "nome tabella sul backend".
+   Solo le chiavi qui elencate vengono sincronizzate nel cloud; le
+   impostazioni puramente locali (tema, contatori temporanei, soglia
+   vento, ecc.) restano solo sul dispositivo. */
+const KR_TABLES = {
+  kr_checklist: 'checklist',
+  kr_shotlist: 'shotlist',
+  kr_locations: 'locations',
+  kr_contatti: 'contatti',
+  kr_batterie: 'batterie',
+  kr_schede: 'schede',
+  kr_ciak: 'ciak',
+  kr_note: 'note',
+  kr_liberatorie: 'liberatorie',
+  kr_spese: 'spese',
+  kr_promemoria: 'promemoria',
+  kr_timer_nomi: 'timer'
+};
+
+function krCloudConfigured(){
+  return CONFIG.APPS_SCRIPT_URL && !CONFIG.APPS_SCRIPT_URL.includes('INCOLLA_QUI')
+      && CONFIG.SECRET_TOKEN && !CONFIG.SECRET_TOKEN.includes('INCOLLA_QUI');
+}
+
+/* Aggiorna l'indicatore di stato sincronizzazione nell'header */
+function krSetSyncStatus(stato){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.dataset.state = stato; // 'ok' | 'sync' | 'off' | 'error'
+  const icone = { ok: 'cloud', sync: 'refresh-cw', off: 'cloud-off', error: 'cloud-alert' };
+  const testi = { ok: 'Sincronizzato', sync: 'Sincronizzazione...', off: 'Solo locale', error: 'Errore di rete' };
+  el.innerHTML = `<i data-lucide="${icone[stato] || 'cloud-off'}"></i>`;
+  el.title = testi[stato] || '';
+  krIcons();
+}
+
+/* Salva una singola tabella sul backend (richiesta "fire and forget":
+   non blocca l'interfaccia, i dati restano comunque salvati in locale) */
+function krCloudSave(table, data){
+  if(!krCloudConfigured()) return;
+  krSetSyncStatus('sync');
+  fetch(CONFIG.APPS_SCRIPT_URL, {
+    method: 'POST',
+    // text/plain evita il preflight CORS: Apps Script legge comunque il JSON da e.postData
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: 'save', table, token: CONFIG.SECRET_TOKEN, data })
+  })
+    .then(r => r.json())
+    .then(res => krSetSyncStatus(res && res.ok ? 'ok' : 'error'))
+    .catch(err => { console.error('Errore salvataggio cloud', table, err); krSetSyncStatus('error'); });
+}
+
+/* Carica tutte le tabelle in un'unica chiamata e aggiorna la copia
+   locale, poi avvisa ogni modulo interessato con un evento dedicato
+   così ognuno può ridisegnare la propria lista. */
+function krCloudSyncAll(){
+  if(!krCloudConfigured()){
+    krSetSyncStatus('off');
+    return;
+  }
+  krSetSyncStatus('sync');
+  const url = `${CONFIG.APPS_SCRIPT_URL}?action=loadAll&token=${encodeURIComponent(CONFIG.SECRET_TOKEN)}`;
+  fetch(url)
+    .then(r => r.json())
+    .then(res => {
+      if(!res.ok){ console.error('Errore sync cloud', res.error); krSetSyncStatus('error'); return; }
+      Object.keys(KR_TABLES).forEach(key => {
+        const table = KR_TABLES[key];
+        const dati = (res.data[table] || []).map(riga => krNormalizeRow(table, riga));
+        // Scrittura diretta in localStorage: evita di ri-innescare un
+        // altro salvataggio cloud subito dopo averlo appena scaricato
+        localStorage.setItem(key, JSON.stringify(dati));
+        window.dispatchEvent(new CustomEvent('kr-cloud-updated', { detail: key }));
+      });
+      krSetSyncStatus('ok');
+    })
+    .catch(err => { console.error('Errore rete sync cloud', err); krSetSyncStatus('error'); });
+}
+
+/* Normalizza i tipi delle colonne che tornano da Google Sheets come
+   stringa (es. "TRUE"/"FALSE" o numeri salvati come testo) */
+function krNormalizeRow(table, row){
+  const r = Object.assign({}, row);
+  const bool = v => v === true || v === 'true' || v === 'TRUE' || v === 1;
+  if(table === 'checklist') r.done = bool(r.done);
+  if(table === 'schede'){ r.capacita = Number(r.capacita) || 0; r.usato = Number(r.usato) || 0; r.backup = bool(r.backup); }
+  if(table === 'spese') r.importo = Number(r.importo) || 0;
+  if(table === 'promemoria') r.notificato = bool(r.notificato);
+  return r;
 }
 
 /* =====================================================================
@@ -172,6 +289,7 @@ function krRenderEmpty(container, message){
   });
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
@@ -237,6 +355,7 @@ function krRenderEmpty(container, message){
   });
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
@@ -291,6 +410,7 @@ function krRenderEmpty(container, message){
   });
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
@@ -346,6 +466,7 @@ function krRenderEmpty(container, message){
   });
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
@@ -648,6 +769,7 @@ function krRenderEmpty(container, message){
   });
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
@@ -727,6 +849,7 @@ function krRenderEmpty(container, message){
   });
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
@@ -792,6 +915,7 @@ let krRenderCiak = null;
 
   krRenderCiak = render;
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 
   document.getElementById('btnCiakFullscreen').addEventListener('click', () => {
     document.getElementById('ciakFullscreen').classList.add('open');
@@ -1117,6 +1241,7 @@ let krRenderCiak = null;
   });
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
@@ -1211,6 +1336,7 @@ let krRenderCiak = null;
   });
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
@@ -1363,6 +1489,7 @@ let krRenderCiak = null;
   });
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
@@ -1424,6 +1551,7 @@ let krRenderCiak = null;
   });
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
@@ -1520,7 +1648,24 @@ let krRenderCiak = null;
   }, 30000);
 
   render();
+  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
+})();
+
+/* Mostra il banner di avviso solo se il backend cloud non è ancora
+   stato configurato con un URL e un token reali */
+(function checkConfigWarning(){
+  const banner = document.getElementById('configWarning');
+  if(banner) banner.style.display = krCloudConfigured() ? 'none' : 'flex';
 })();
 
 /* Prima inizializzazione delle icone Lucide al caricamento della pagina */
 krIcons();
+
+/* Al caricamento della pagina prova subito a sincronizzare con il cloud
+   (se configurato): se il backend risponde, sovrascrive i dati locali
+   con quelli più aggiornati e ridisegna le liste. */
+krCloudSyncAll();
+
+/* Pulsante manuale nell'header per forzare una nuova sincronizzazione */
+const btnSyncManual = document.getElementById('syncStatus');
+if(btnSyncManual) btnSyncManual.addEventListener('click', krCloudSyncAll);
