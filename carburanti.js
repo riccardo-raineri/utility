@@ -260,19 +260,30 @@ function inizializzaMappa() {
   // Inizializza Mappa
   stato.map = L.map('map').setView([41.9028, 12.4964], 6);
 
-  // Definizione Stili Mappa
+  // Attribuzione richiesta dai dati OpenStreetMap/OpenFreeMap, uguale per
+  // tutti gli stili vettoriali qui sotto.
+  const attribuzioneOFM =
+    '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors ' +
+    '&copy; <a href="https://openfreemap.org" target="_blank">OpenFreeMap</a>';
+
+  // Definizione Stili Mappa: le prime tre sono mappe vettoriali di
+  // OpenFreeMap (https://openfreemap.org, gratuite e senza chiave API),
+  // caricate tramite il plugin maplibre-gl-leaflet in modo che si
+  // comportino come un normale livello di Leaflet. Il satellite resta un
+  // livello raster Esri, perché OpenFreeMap fornisce solo mappe
+  // vettoriali (nessuna foto aerea).
   stato.baseLayers = {
-    "🌙 Scuro": L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap &copy; CARTO'
+    "🌙 Scuro": L.maplibreGL({
+      style: 'https://tiles.openfreemap.org/styles/dark',
+      attribution: attribuzioneOFM,
     }),
-    "☀️ Chiaro": L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap &copy; CARTO'
+    "☀️ Chiaro": L.maplibreGL({
+      style: 'https://tiles.openfreemap.org/styles/positron',
+      attribution: attribuzioneOFM,
     }),
-    "🗺️ Mappa": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap'
+    "🗺️ Mappa": L.maplibreGL({
+      style: 'https://tiles.openfreemap.org/styles/liberty',
+      attribution: attribuzioneOFM,
     }),
     "🛰️ Satellite": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 18,
