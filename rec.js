@@ -56,8 +56,8 @@ function krIcons(){
    5. Incolla URL e token qui sotto al posto dei segnaposto.
    ===================================================================== */
 const CONFIG = {
-  APPS_SCRIPT_URL: 'INCOLLA_QUI_URL_WEB_APP',
-  SECRET_TOKEN: 'INCOLLA_QUI_TOKEN'
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxGFo_Gf0y0pm84cgLusonjuKZuRVOYwK8SQeHu0WSDYcJVf1ID-Lzb0V-SU3hKcQoR1w/exec',
+  SECRET_TOKEN: '0712'
 };
 
 /* Mappa "chiave localStorage" -> "nome tabella sul backend".
@@ -69,14 +69,11 @@ const KR_TABLES = {
   kr_shotlist: 'shotlist',
   kr_locations: 'locations',
   kr_contatti: 'contatti',
-  kr_batterie: 'batterie',
-  kr_schede: 'schede',
   kr_ciak: 'ciak',
   kr_note: 'note',
   kr_liberatorie: 'liberatorie',
   kr_spese: 'spese',
-  kr_promemoria: 'promemoria',
-  kr_timer_nomi: 'timer'
+  kr_promemoria: 'promemoria'
 };
 
 function krCloudConfigured(){
@@ -145,7 +142,6 @@ function krNormalizeRow(table, row){
   const r = Object.assign({}, row);
   const bool = v => v === true || v === 'true' || v === 'TRUE' || v === 1;
   if(table === 'checklist') r.done = bool(r.done);
-  if(table === 'schede'){ r.capacita = Number(r.capacita) || 0; r.usato = Number(r.usato) || 0; r.backup = bool(r.backup); }
   if(table === 'spese') r.importo = Number(r.importo) || 0;
   if(table === 'promemoria') r.notificato = bool(r.notificato);
   return r;
@@ -470,90 +466,6 @@ function krRenderEmpty(container, message){
 })();
 
 /* =====================================================================
-   5) METEO DEL GIORNO + 6) VENTO PER DRONE
-   Usa l'API gratuita e senza chiave Open-Meteo, dati orari per la
-   giornata corrente nella posizione attuale del dispositivo.
-   ===================================================================== */
-(function meteoModule(){
-  const btn = document.getElementById('btnMeteoRefresh');
-  const statusEl = document.getElementById('meteoStatus');
-  const nowEl = document.getElementById('meteoNow');
-  const hourlyEl = document.getElementById('meteoHourly');
-  const sogliaInput = document.getElementById('ventoSoglia');
-  const semaforoLuce = document.getElementById('semaforoStato');
-  const semaforoDettaglio = document.getElementById('semaforoDettaglio');
-
-  function aggiornaSemaforo(ventoKmh){
-    const soglia = parseFloat(sogliaInput.value) || 25;
-    semaforoLuce.classList.remove('verde', 'giallo', 'rosso');
-    let stato, testo;
-    if(ventoKmh < soglia * 0.6){
-      stato = 'verde'; testo = 'Condizioni ottimali per il volo';
-    }else if(ventoKmh < soglia){
-      stato = 'giallo'; testo = 'Vento sostenuto: valuta con attenzione';
-    }else{
-      stato = 'rosso'; testo = 'Vento oltre la soglia di sicurezza: sconsigliato';
-    }
-    semaforoLuce.classList.add(stato);
-    semaforoLuce.textContent = Math.round(ventoKmh) + ' km/h';
-    semaforoDettaglio.textContent = testo;
-  }
-  sogliaInput.addEventListener('input', () => {
-    if(window.krUltimoVento !== undefined) aggiornaSemaforo(window.krUltimoVento);
-  });
-
-  function caricaMeteo(lat, lon){
-    statusEl.textContent = 'Caricamento dati meteo in corso...';
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,precipitation_probability,windspeed_10m,cloudcover&timezone=auto&forecast_days=1`;
-    fetch(url)
-      .then(r => r.json())
-      .then(data => {
-        statusEl.textContent = '';
-        const h = data.hourly;
-        const oraAttuale = new Date().getHours();
-        const idxAttuale = h.time.findIndex(t => new Date(t).getHours() === oraAttuale);
-        const idx = idxAttuale >= 0 ? idxAttuale : 0;
-
-        nowEl.innerHTML = `
-          <div class="stat"><span class="val">${Math.round(h.temperature_2m[idx])}°</span><span class="lbl">Temperatura</span></div>
-          <div class="stat"><span class="val">${Math.round(h.windspeed_10m[idx])} km/h</span><span class="lbl">Vento</span></div>
-          <div class="stat"><span class="val">${h.precipitation_probability[idx]}%</span><span class="lbl">Pioggia</span></div>
-          <div class="stat"><span class="val">${h.cloudcover[idx]}%</span><span class="lbl">Nuvolosità</span></div>
-        `;
-
-        hourlyEl.innerHTML = h.time.slice(idx, idx + 12).map((t, i) => `
-          <div class="meteo-hour-card">
-            <div class="h-time">${new Date(t).getHours()}:00</div>
-            <div class="h-temp">${Math.round(h.temperature_2m[idx + i])}°</div>
-            <div class="h-extra">${Math.round(h.windspeed_10m[idx + i])} km/h</div>
-            <div class="h-extra">${h.precipitation_probability[idx + i]}% pioggia</div>
-          </div>
-        `).join('');
-
-        window.krUltimoVento = h.windspeed_10m[idx];
-        aggiornaSemaforo(window.krUltimoVento);
-      })
-      .catch(err => {
-        console.error(err);
-        statusEl.textContent = 'Errore nel caricamento dei dati meteo. Controlla la connessione.';
-      });
-  }
-
-  btn.addEventListener('click', () => {
-    if(!navigator.geolocation){
-      statusEl.textContent = 'Geolocalizzazione non disponibile su questo dispositivo.';
-      return;
-    }
-    statusEl.textContent = 'Individuazione posizione in corso...';
-    navigator.geolocation.getCurrentPosition(
-      pos => caricaMeteo(pos.coords.latitude, pos.coords.longitude),
-      err => { statusEl.textContent = 'Posizione non disponibile: consenti l\'accesso alla posizione nelle impostazioni del browser.'; },
-      { enableHighAccuracy: false, timeout: 10000 }
-    );
-  });
-})();
-
-/* =====================================================================
    7) IPERFOCALE & PROFONDITÀ DI CAMPO
    ===================================================================== */
 (function iperfocaleModule(){
@@ -670,189 +582,6 @@ function krRenderEmpty(container, message){
 })();
 
 /* =====================================================================
-   10) BITRATE / STORAGE
-   Tabella di bitrate indicativi in Mbps per il 4K a 24-30fps: gli altri
-   valori vengono scalati in proporzione a risoluzione e framerate.
-   ===================================================================== */
-(function storageModule(){
-  const BITRATE_BASE_4K = { h264: 100, h265: 60, prores422: 500, proresraw: 800 };
-  const FATTORE_RISOLUZIONE = { hd: 0.25, '4k': 1, '6k': 2.2, '8k': 4 };
-
-  document.getElementById('btnCalcStorage').addEventListener('click', () => {
-    const ris = document.getElementById('stRisoluzione').value;
-    const fps = parseFloat(document.getElementById('stFps').value);
-    const codec = document.getElementById('stCodec').value;
-    const durataMin = parseFloat(document.getElementById('stDurata').value);
-    const resultEl = document.getElementById('stResult');
-
-    if(!durataMin){
-      resultEl.innerHTML = 'Inserisci una durata valida.';
-      return;
-    }
-    const fattoreFps = fps / 25; // il valore base della tabella è calcolato a 25fps
-    const bitrateMbps = BITRATE_BASE_4K[codec] * FATTORE_RISOLUZIONE[ris] * fattoreFps;
-    const durataSec = durataMin * 60;
-    const spazioGb = (bitrateMbps * durataSec) / 8 / 1024;
-
-    let velocitaConsigliata;
-    if(bitrateMbps < 90) velocitaConsigliata = 'UHS-I / V30 sufficiente';
-    else if(bitrateMbps < 300) velocitaConsigliata = 'UHS-II / V60 consigliata';
-    else velocitaConsigliata = 'CFexpress Type B consigliata';
-
-    resultEl.innerHTML = `Bitrate stimato: <span class="result-highlight">${Math.round(bitrateMbps)} Mbps</span><br>` +
-      `Spazio stimato: <strong>${spazioGb.toFixed(1)} GB</strong> per ${durataMin} minuti<br>` +
-      `Scheda consigliata: <strong>${velocitaConsigliata}</strong><br>` +
-      `<span style="font-size:11px">Stima indicativa: i valori reali variano in base a camera e compressione.</span>`;
-  });
-})();
-
-/* =====================================================================
-   11) TRACKER BATTERIE
-   ===================================================================== */
-(function batterieModule(){
-  const KEY = 'kr_batterie';
-  const form = document.getElementById('formBatteria');
-  const listEl = document.getElementById('batterieList');
-  const STATI = [
-    { key: 'carica', label: 'Carica', cls: 'badge-success' },
-    { key: 'uso', label: 'In uso', cls: 'badge-warning' },
-    { key: 'scarica', label: 'Scarica', cls: 'badge-danger' }
-  ];
-
-  function render(){
-    const items = krLoad(KEY);
-    if(items.length === 0){
-      krRenderEmpty(listEl, 'Nessuna batteria tracciata.');
-      return;
-    }
-    listEl.innerHTML = items.map(it => {
-      const s = STATI.find(s => s.key === it.stato) || STATI[0];
-      return `
-        <div class="item-row">
-          <div class="item-main"><div class="item-title">${it.nome}</div></div>
-          <div class="item-actions">
-            <button class="badge ${s.cls}" data-toggle="${it.id}">${s.label}</button>
-            <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
-          </div>
-        </div>
-      `;
-    }).join('');
-    krIcons();
-  }
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const items = krLoad(KEY);
-    items.push({ id: krId(), nome: document.getElementById('battNome').value.trim(), stato: 'carica' });
-    krSave(KEY, items);
-    form.reset();
-    render();
-  });
-
-  listEl.addEventListener('click', e => {
-    const toggleBtn = e.target.closest('[data-toggle]');
-    const delBtn = e.target.closest('[data-del]');
-    if(toggleBtn){
-      const items = krLoad(KEY);
-      const it = items.find(i => i.id === toggleBtn.dataset.toggle);
-      if(it){
-        const idx = STATI.findIndex(s => s.key === it.stato);
-        it.stato = STATI[(idx + 1) % STATI.length].key;
-      }
-      krSave(KEY, items);
-      render();
-    }
-    if(delBtn){
-      krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      render();
-    }
-  });
-
-  render();
-  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
-})();
-
-/* =====================================================================
-   12) TRACKER SCHEDE DI MEMORIA
-   ===================================================================== */
-(function schedeModule(){
-  const KEY = 'kr_schede';
-  const form = document.getElementById('formScheda');
-  const listEl = document.getElementById('schedeList');
-
-  function render(){
-    const items = krLoad(KEY);
-    if(items.length === 0){
-      krRenderEmpty(listEl, 'Nessuna scheda tracciata.');
-      return;
-    }
-    listEl.innerHTML = items.map(it => {
-      const usatoPct = Math.min(100, Math.round((it.usato / it.capacita) * 100)) || 0;
-      const libero = Math.max(0, it.capacita - it.usato);
-      return `
-        <div class="item-row" style="flex-direction:column; align-items:stretch;">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div class="item-main">
-              <div class="item-title">${it.nome}</div>
-              <div class="item-sub">${it.usato} / ${it.capacita} GB usati — ${libero} GB liberi</div>
-            </div>
-            <label style="display:flex; align-items:center; gap:5px; font-size:11px; color:var(--text-dim);">
-              <input type="checkbox" data-backup="${it.id}" ${it.backup ? 'checked' : ''}> Backup
-            </label>
-            <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px; margin-top:8px;">
-            <input type="range" min="0" max="${it.capacita}" value="${it.usato}" data-usato="${it.id}" style="flex:1; accent-color: var(--accent);">
-            <span class="mono" style="font-size:12px; width:40px; text-align:right;">${usatoPct}%</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-    krIcons();
-  }
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const items = krLoad(KEY);
-    items.push({
-      id: krId(),
-      nome: document.getElementById('schedaNome').value.trim(),
-      capacita: parseFloat(document.getElementById('schedaCapacita').value),
-      usato: 0,
-      backup: false
-    });
-    krSave(KEY, items);
-    form.reset();
-    render();
-  });
-
-  listEl.addEventListener('click', e => {
-    const delBtn = e.target.closest('[data-del]');
-    if(delBtn){
-      krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      render();
-    }
-  });
-  listEl.addEventListener('change', e => {
-    const items = krLoad(KEY);
-    if(e.target.matches('[data-backup]')){
-      const it = items.find(i => i.id === e.target.dataset.backup);
-      if(it) it.backup = e.target.checked;
-      krSave(KEY, items);
-    }
-    if(e.target.matches('[data-usato]')){
-      const it = items.find(i => i.id === e.target.dataset.usato);
-      if(it) it.usato = parseFloat(e.target.value);
-      krSave(KEY, items);
-      render();
-    }
-  });
-
-  render();
-  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
-})();
-
-/* =====================================================================
    13) LOG CIAK
    ===================================================================== */
 /* Riferimento globale al render del log ciak, riusato dalla modalità
@@ -863,20 +592,24 @@ let krRenderCiak = null;
   const KEY = 'kr_ciak';
   const form = document.getElementById('formCiak');
   const listEl = document.getElementById('ciakList');
+  const countEl = document.getElementById('ciakCount');
   const GIUDIZI = { buona: { label: 'Buona', cls: 'badge-success' }, rifare: { label: 'Da rifare', cls: 'badge-warning' }, ng: { label: 'NG', cls: 'badge-danger' } };
 
   function render(){
     const items = krLoad(KEY);
+    countEl.textContent = `${items.length} ciak registrati`;
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessun ciak registrato.');
       return;
     }
     listEl.innerHTML = items.slice().reverse().map(it => {
       const g = GIUDIZI[it.giudizio];
+      const clip = [it.clipVideo ? `Video: ${it.clipVideo}` : '', it.clipAudio ? `Audio: ${it.clipAudio}` : ''].filter(Boolean).join(' · ');
       return `
         <div class="item-row">
           <div class="item-main">
             <div class="item-title">Scena ${it.scena} · Ciak ${it.ciak} <span class="mono" style="color:var(--text-faint); font-size:11px;">${it.ora}</span></div>
+            ${clip ? `<div class="item-sub mono">${clip}</div>` : ''}
             ${it.note ? `<div class="item-sub">${it.note}</div>` : ''}
           </div>
           <div class="item-actions">
@@ -897,6 +630,8 @@ let krRenderCiak = null;
       scena: document.getElementById('ciakScena').value.trim(),
       ciak: document.getElementById('ciakNum').value.trim(),
       giudizio: document.getElementById('ciakGiudizio').value,
+      clipVideo: document.getElementById('ciakClipVideo').value.trim(),
+      clipAudio: document.getElementById('ciakClipAudio').value.trim(),
       note: document.getElementById('ciakNote').value.trim(),
       ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
     });
@@ -911,6 +646,27 @@ let krRenderCiak = null;
       krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
       render();
     }
+  });
+
+  /* Esporta l'intero log in un file CSV scaricabile (apribile con Excel/
+     Fogli Google), con tutte le informazioni di ogni ciak registrato */
+  document.getElementById('btnCiakEsporta').addEventListener('click', () => {
+    const items = krLoad(KEY);
+    if(items.length === 0){ alert('Non ci sono ciak da esportare.'); return; }
+    const intestazioni = ['Scena', 'Ciak', 'Giudizio', 'Clip video', 'Clip audio', 'Note', 'Ora'];
+    const escapeCsv = v => `"${String(v || '').replace(/"/g, '""')}"`;
+    const righe = items.map(it => [
+      it.scena, it.ciak, GIUDIZI[it.giudizio] ? GIUDIZI[it.giudizio].label : it.giudizio,
+      it.clipVideo, it.clipAudio, it.note, it.ora
+    ].map(escapeCsv).join(';'));
+    const csv = '\uFEFF' + [intestazioni.map(escapeCsv).join(';'), ...righe].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `log-ciak-REC-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   });
 
   krRenderCiak = render;
@@ -1096,155 +852,6 @@ let krRenderCiak = null;
 })();
 
 /* =====================================================================
-   14) LIVELLA / BUSSOLA
-   Usa l'evento deviceorientation; su iOS 13+ serve richiedere il
-   permesso esplicito tramite DeviceOrientationEvent.requestPermission().
-   ===================================================================== */
-(function livellaModule(){
-  const btn = document.getElementById('btnLivellaAttiva');
-  const statusEl = document.getElementById('livellaStatus');
-  const bubble = document.getElementById('livellaBubble');
-  const gammaEl = document.getElementById('livellaGamma');
-  const betaEl = document.getElementById('livellaBeta');
-  const alphaEl = document.getElementById('livellaAlpha');
-
-  function handleOrientation(e){
-    const beta = e.beta || 0;   // inclinazione avanti/indietro
-    const gamma = e.gamma || 0; // inclinazione sinistra/destra
-    const alpha = e.alpha;      // direzione bussola (0-360, non sempre disponibile)
-
-    // Sposta la bolla proporzionalmente all'inclinazione, con un limite massimo
-    const maxTilt = 45;
-    const clampedGamma = Math.max(-maxTilt, Math.min(maxTilt, gamma));
-    const clampedBeta = Math.max(-maxTilt, Math.min(maxTilt, beta));
-    const rangePx = 55; // raggio utile del cerchio in px
-    const x = (clampedGamma / maxTilt) * rangePx;
-    const y = (clampedBeta / maxTilt) * rangePx;
-    bubble.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px))`;
-
-    gammaEl.textContent = gamma.toFixed(1) + '°';
-    betaEl.textContent = beta.toFixed(1) + '°';
-    alphaEl.textContent = (alpha !== null && alpha !== undefined) ? Math.round(alpha) + '°' : 'non disponibile';
-  }
-
-  function attiva(){
-    if(!window.DeviceOrientationEvent){
-      statusEl.textContent = 'Sensori di orientamento non disponibili su questo dispositivo/browser.';
-      return;
-    }
-    window.addEventListener('deviceorientation', handleOrientation);
-    statusEl.textContent = 'Sensori attivi.';
-  }
-
-  btn.addEventListener('click', () => {
-    // iOS 13+ richiede un permesso esplicito, invocato solo da un tap utente
-    if(typeof DeviceOrientationEvent.requestPermission === 'function'){
-      DeviceOrientationEvent.requestPermission()
-        .then(risposta => {
-          if(risposta === 'granted') attiva();
-          else statusEl.textContent = 'Permesso sensori negato.';
-        })
-        .catch(() => { statusEl.textContent = 'Impossibile richiedere il permesso sensori.'; });
-    }else{
-      attiva();
-    }
-  });
-})();
-
-/* =====================================================================
-   15) TIMER / CRONOMETRI MULTIPLI
-   I nomi dei timer sono persistenti, il tempo trascorso resta solo
-   in memoria per la sessione corrente.
-   ===================================================================== */
-(function timerModule(){
-  const KEY = 'kr_timer_nomi';
-  const form = document.getElementById('formTimer');
-  const listEl = document.getElementById('timerList');
-  const runtime = {}; // id -> { secondi, running, intervalId }
-
-  function formatTempo(sec){
-    const m = Math.floor(sec / 60).toString().padStart(2, '0');
-    const s = Math.floor(sec % 60).toString().padStart(2, '0');
-    return `${m}:${s}`;
-  }
-
-  function render(){
-    const nomi = krLoad(KEY);
-    if(nomi.length === 0){
-      krRenderEmpty(listEl, 'Nessun timer creato.');
-      return;
-    }
-    listEl.innerHTML = nomi.map(it => {
-      if(!runtime[it.id]) runtime[it.id] = { secondi: 0, running: false, intervalId: null };
-      const r = runtime[it.id];
-      return `
-        <div class="item-row">
-          <div class="item-main">
-            <div class="item-title">${it.nome}</div>
-            <div class="item-sub mono" id="timerDisplay-${it.id}" style="font-size:16px;">${formatTempo(r.secondi)}</div>
-          </div>
-          <div class="item-actions">
-            <button class="icon-btn accent" data-start="${it.id}"><i data-lucide="${r.running ? 'pause' : 'play'}"></i></button>
-            <button class="icon-btn" data-reset="${it.id}"><i data-lucide="rotate-ccw"></i></button>
-            <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
-          </div>
-        </div>
-      `;
-    }).join('');
-    krIcons();
-  }
-
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    const nomi = krLoad(KEY);
-    nomi.push({ id: krId(), nome: document.getElementById('timerNome').value.trim() });
-    krSave(KEY, nomi);
-    form.reset();
-    render();
-  });
-
-  listEl.addEventListener('click', e => {
-    const startBtn = e.target.closest('[data-start]');
-    const resetBtn = e.target.closest('[data-reset]');
-    const delBtn = e.target.closest('[data-del]');
-
-    if(startBtn){
-      const id = startBtn.dataset.start;
-      const r = runtime[id];
-      if(r.running){
-        clearInterval(r.intervalId);
-        r.running = false;
-      }else{
-        r.running = true;
-        r.intervalId = setInterval(() => {
-          r.secondi += 1;
-          const disp = document.getElementById('timerDisplay-' + id);
-          if(disp) disp.textContent = formatTempo(r.secondi);
-        }, 1000);
-      }
-      render();
-    }
-    if(resetBtn){
-      const id = resetBtn.dataset.reset;
-      const r = runtime[id];
-      if(r.intervalId) clearInterval(r.intervalId);
-      runtime[id] = { secondi: 0, running: false, intervalId: null };
-      render();
-    }
-    if(delBtn){
-      const id = delBtn.dataset.del;
-      if(runtime[id] && runtime[id].intervalId) clearInterval(runtime[id].intervalId);
-      delete runtime[id];
-      krSave(KEY, krLoad(KEY).filter(i => i.id !== id));
-      render();
-    }
-  });
-
-  render();
-  window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
-})();
-
-/* =====================================================================
    16) NOTE VOCALI RAPIDE
    Usa la Web Speech API se disponibile (principalmente Chrome); su
    browser non supportati resta comunque utilizzabile come note testuali.
@@ -1337,62 +944,6 @@ let krRenderCiak = null;
 
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
-})();
-
-/* =====================================================================
-   17) METRONOMO PER MOVIMENTI CAMERA
-   Genera un click con la Web Audio API, senza bisogno di file audio.
-   ===================================================================== */
-(function metronomoModule(){
-  const bpmSlider = document.getElementById('metroBpm');
-  const bpmVal = document.getElementById('metroBpmVal');
-  const toggleBtn = document.getElementById('btnMetroToggle');
-  const pulseEl = document.getElementById('metroPulse');
-  let audioCtx = null;
-  let intervalId = null;
-  let attivo = false;
-
-  function click(){
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.frequency.value = 1000;
-    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.05);
-
-    pulseEl.classList.add('beat');
-    setTimeout(() => pulseEl.classList.remove('beat'), 100);
-  }
-
-  function avvia(){
-    const bpm = parseInt(bpmSlider.value, 10);
-    const intervalMs = 60000 / bpm;
-    intervalId = setInterval(click, intervalMs);
-  }
-
-  bpmSlider.addEventListener('input', () => {
-    bpmVal.textContent = bpmSlider.value;
-    if(attivo){
-      clearInterval(intervalId);
-      avvia();
-    }
-  });
-
-  toggleBtn.addEventListener('click', () => {
-    attivo = !attivo;
-    if(attivo){
-      avvia();
-      toggleBtn.innerHTML = '<i data-lucide="pause"></i> Ferma';
-    }else{
-      clearInterval(intervalId);
-      toggleBtn.innerHTML = '<i data-lucide="play"></i> Avvia';
-    }
-    krIcons();
-  });
 })();
 
 /* =====================================================================
@@ -1649,6 +1200,91 @@ let krRenderCiak = null;
 
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
+})();
+
+/* =====================================================================
+   21) REPORT PDF AMMINISTRAZIONE
+   Compila un report stampabile con logo, liberatorie, spese e
+   promemoria, poi apre la finestra di stampa del browser: l'utente
+   sceglie "Salva come PDF" come stampante di destinazione. Non serve
+   nessuna libreria esterna.
+   ===================================================================== */
+(function pdfReportModule(){
+  const btn = document.getElementById('btnGeneraPdf');
+  const container = document.getElementById('printReport');
+
+  function formatEuro(n){
+    return '€ ' + n.toFixed(2).replace('.', ',');
+  }
+
+  function costruisciReport(){
+    const liberatorie = krLoad('kr_liberatorie');
+    const spese = krLoad('kr_spese');
+    const promemoria = krLoad('kr_promemoria');
+    const oggi = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+    const totaleSpese = spese.reduce((s, i) => s + (Number(i.importo) || 0), 0);
+
+    let html = `
+      <div class="pr-header">
+        <div class="pr-logo"><span class="pr-logo-dot"></span>REC</div>
+        <div class="pr-header-text">
+          <h1>Report amministrazione giornata di ripresa</h1>
+          <p>Generato il ${oggi}</p>
+        </div>
+      </div>
+    `;
+
+    html += `<h2>Liberatorie (${liberatorie.length})</h2>`;
+    if(liberatorie.length === 0){
+      html += `<p class="pr-empty">Nessuna liberatoria registrata.</p>`;
+    }else{
+      liberatorie.forEach(it => {
+        html += `
+          <div class="pr-release">
+            <div><strong>${it.nome}</strong> — ${it.data}</div>
+            <div class="pr-release-text">${it.testo}</div>
+            ${it.firma ? `<img class="pr-signature" src="${it.firma}" alt="Firma di ${it.nome}">` : ''}
+          </div>
+        `;
+      });
+    }
+
+    html += `<h2>Spese (${spese.length})</h2>`;
+    if(spese.length === 0){
+      html += `<p class="pr-empty">Nessuna spesa registrata.</p>`;
+    }else{
+      html += `<table class="pr-table"><thead><tr><th>Descrizione</th><th>Categoria</th><th>Importo</th></tr></thead><tbody>`;
+      spese.forEach(it => {
+        html += `<tr><td>${it.desc}</td><td>${it.cat}</td><td>${formatEuro(Number(it.importo) || 0)}</td></tr>`;
+      });
+      html += `</tbody><tfoot><tr><td colspan="2">Totale</td><td>${formatEuro(totaleSpese)}</td></tr></tfoot></table>`;
+    }
+
+    html += `<h2>Promemoria (${promemoria.length})</h2>`;
+    if(promemoria.length === 0){
+      html += `<p class="pr-empty">Nessun promemoria impostato.</p>`;
+    }else{
+      html += `<table class="pr-table"><thead><tr><th>Orario</th><th>Testo</th></tr></thead><tbody>`;
+      promemoria.forEach(it => {
+        html += `<tr><td>${it.orario}</td><td>${it.testo}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+    }
+
+    container.innerHTML = html;
+  }
+
+  btn.addEventListener('click', () => {
+    costruisciReport();
+    document.body.classList.add('printing');
+    window.print();
+  });
+
+  // Ripristina la visualizzazione normale dell'app dopo la stampa
+  // (o dopo che l'utente annulla la finestra di stampa)
+  window.addEventListener('afterprint', () => {
+    document.body.classList.remove('printing');
+  });
 })();
 
 /* Mostra il banner di avviso solo se il backend cloud non è ancora

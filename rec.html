@@ -49,17 +49,11 @@
     <button class="tab-chip active" data-panel="panel-pre">
       <i data-lucide="clipboard-list"></i><span>Pre-produzione</span>
     </button>
-    <button class="tab-chip" data-panel="panel-meteo">
-      <i data-lucide="cloud"></i><span>Luce &amp; Meteo</span>
-    </button>
     <button class="tab-chip" data-panel="panel-calc">
       <i data-lucide="calculator"></i><span>Calcolatori</span>
     </button>
-    <button class="tab-chip" data-panel="panel-campo">
-      <i data-lucide="briefcase"></i><span>Sul campo</span>
-    </button>
-    <button class="tab-chip" data-panel="panel-utility">
-      <i data-lucide="wrench"></i><span>Utility set</span>
+    <button class="tab-chip" data-panel="panel-ciak">
+      <i data-lucide="film"></i><span>Log Ciak</span>
     </button>
     <button class="tab-chip" data-panel="panel-admin">
       <i data-lucide="folder"></i><span>Amministrazione</span>
@@ -153,64 +147,6 @@
             <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
           </form>
           <div id="contattiList" class="item-list"></div>
-        </div>
-      </div>
-
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- PANNELLO: LUCE & METEO                                              -->
-    <!-- =================================================================== -->
-    <section class="panel" id="panel-meteo">
-
-      <!-- --- Meteo dettagliato --- -->
-      <div class="tool-card">
-        <button class="tool-header" data-target="body-meteo">
-          <i data-lucide="cloud-sun"></i>
-          <span>Meteo del giorno</span>
-          <i data-lucide="chevron-down" class="chev"></i>
-        </button>
-        <div class="tool-body" id="body-meteo">
-          <button id="btnMeteoRefresh" class="btn-accent full">
-            <i data-lucide="refresh-cw"></i> Aggiorna meteo (posizione attuale)
-          </button>
-          <p id="meteoStatus" class="hint-text"></p>
-          <div id="meteoNow" class="meteo-now"></div>
-          <div id="meteoHourly" class="meteo-hourly"></div>
-        </div>
-      </div>
-
-      <!-- --- Vento per drone --- -->
-      <div class="tool-card">
-        <button class="tool-header" data-target="body-vento">
-          <i data-lucide="wind"></i>
-          <span>Vento per drone</span>
-          <i data-lucide="chevron-down" class="chev"></i>
-        </button>
-        <div class="tool-body" id="body-vento">
-          <p class="hint-text">Usa il pulsante "Aggiorna meteo" qui sopra per caricare i dati vento aggiornati.</p>
-          <label class="field-label">Soglia massima di sicurezza (km/h)
-            <input type="number" id="ventoSoglia" value="25" min="1">
-          </label>
-          <div id="ventoSemaforo" class="semaforo">
-            <div class="semaforo-luce" id="semaforoStato">—</div>
-            <div id="semaforoDettaglio" class="hint-text">Nessun dato vento caricato</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- --- Link Posizione Celeste --- -->
-      <div class="tool-card">
-        <button class="tool-header" data-target="body-sole">
-          <i data-lucide="sun"></i>
-          <span>Posizione Celeste</span>
-          <i data-lucide="chevron-down" class="chev"></i>
-        </button>
-        <div class="tool-body" id="body-sole">
-          <p class="hint-text">Golden hour, blue hour, fase lunare ed eclissi: apri il dashboard astronomico dedicato.</p>
-          <a href="sole.html" target="_blank" class="btn-accent full" style="text-decoration:none; display:flex;">
-            <i data-lucide="external-link"></i> Apri Posizione Celeste
-          </a>
         </div>
       </div>
 
@@ -326,89 +262,12 @@
         </div>
       </div>
 
-      <!-- --- Storage / Bitrate --- -->
-      <div class="tool-card">
-        <button class="tool-header" data-target="body-storage">
-          <i data-lucide="hard-drive"></i>
-          <span>Bitrate &amp; spazio storage</span>
-          <i data-lucide="chevron-down" class="chev"></i>
-        </button>
-        <div class="tool-body" id="body-storage">
-          <div class="calc-grid">
-            <label class="field-label">Risoluzione
-              <select id="stRisoluzione">
-                <option value="hd">HD (1920x1080)</option>
-                <option value="4k" selected>4K UHD</option>
-                <option value="6k">6K</option>
-                <option value="8k">8K</option>
-              </select>
-            </label>
-            <label class="field-label">Frame rate
-              <select id="stFps">
-                <option value="24">24 fps</option>
-                <option value="25" selected>25 fps</option>
-                <option value="30">30 fps</option>
-                <option value="60">60 fps</option>
-                <option value="120">120 fps</option>
-              </select>
-            </label>
-            <label class="field-label">Codec
-              <select id="stCodec">
-                <option value="h264">H.264</option>
-                <option value="h265" selected>H.265 / HEVC</option>
-                <option value="prores422">ProRes 422</option>
-                <option value="proresraw">ProRes RAW</option>
-              </select>
-            </label>
-            <label class="field-label">Durata (minuti)
-              <input type="number" id="stDurata" value="30" min="1">
-            </label>
-          </div>
-          <button id="btnCalcStorage" class="btn-accent full"><i data-lucide="equal"></i> Calcola</button>
-          <div id="stResult" class="result-box"></div>
-        </div>
-      </div>
-
     </section>
 
     <!-- =================================================================== -->
-    <!-- PANNELLO: SUL CAMPO                                                 -->
+    <!-- PANNELLO: LOG CIAK (pagina dedicata)                                -->
     <!-- =================================================================== -->
-    <section class="panel" id="panel-campo">
-
-      <!-- --- Tracker batterie --- -->
-      <div class="tool-card">
-        <button class="tool-header" data-target="body-batterie">
-          <i data-lucide="battery-charging"></i>
-          <span>Tracker batterie</span>
-          <i data-lucide="chevron-down" class="chev"></i>
-        </button>
-        <div class="tool-body" id="body-batterie">
-          <form id="formBatteria" class="inline-form">
-            <input type="text" id="battNome" placeholder="Es. Batteria camera 1" required>
-            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
-          </form>
-          <p class="hint-text">Tocca lo stato per farlo avanzare: Carica → In uso → Scarica.</p>
-          <div id="batterieList" class="item-list"></div>
-        </div>
-      </div>
-
-      <!-- --- Tracker schede memoria --- -->
-      <div class="tool-card">
-        <button class="tool-header" data-target="body-schede">
-          <i data-lucide="save"></i>
-          <span>Tracker schede di memoria</span>
-          <i data-lucide="chevron-down" class="chev"></i>
-        </button>
-        <div class="tool-body" id="body-schede">
-          <form id="formScheda" class="inline-form">
-            <input type="text" id="schedaNome" placeholder="Es. CFexpress A" required>
-            <input type="number" id="schedaCapacita" placeholder="Capacità GB" min="1" required>
-            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
-          </form>
-          <div id="schedeList" class="item-list"></div>
-        </div>
-      </div>
+    <section class="panel" id="panel-ciak">
 
       <!-- --- Log ciak --- -->
       <div class="tool-card">
@@ -427,60 +286,20 @@
               <option value="rifare">Da rifare</option>
               <option value="ng">NG</option>
             </select>
+            <input type="text" id="ciakClipVideo" placeholder="Nome clip video">
+            <input type="text" id="ciakClipAudio" placeholder="Nome clip audio">
             <input type="text" id="ciakNote" placeholder="Note">
             <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
           </form>
+          <div class="list-toolbar">
+            <span class="progress-text" id="ciakCount">0 ciak registrati</span>
+            <button id="btnCiakEsporta" class="btn-ghost small"><i data-lucide="download"></i> Esporta CSV</button>
+          </div>
           <div id="ciakList" class="item-list"></div>
         </div>
       </div>
 
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- PANNELLO: UTILITY SET                                               -->
-    <!-- =================================================================== -->
-    <section class="panel" id="panel-utility">
-
-      <!-- --- Livella / bussola --- -->
-      <div class="tool-card">
-        <button class="tool-header" data-target="body-livella">
-          <i data-lucide="compass"></i>
-          <span>Livella &amp; bussola</span>
-          <i data-lucide="chevron-down" class="chev"></i>
-        </button>
-        <div class="tool-body" id="body-livella">
-          <button id="btnLivellaAttiva" class="btn-accent full"><i data-lucide="play"></i> Attiva sensori</button>
-          <p id="livellaStatus" class="hint-text"></p>
-          <div class="livella-wrap">
-            <div class="livella-circle" id="livellaCircle">
-              <div class="livella-bubble" id="livellaBubble"></div>
-            </div>
-            <div class="livella-info">
-              <div>Inclinazione X: <span id="livellaGamma" class="mono">0°</span></div>
-              <div>Inclinazione Y: <span id="livellaBeta" class="mono">0°</span></div>
-              <div>Direzione: <span id="livellaAlpha" class="mono">—</span></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- --- Timer multipli --- -->
-      <div class="tool-card">
-        <button class="tool-header" data-target="body-timer">
-          <i data-lucide="alarm-clock"></i>
-          <span>Timer &amp; cronometri</span>
-          <i data-lucide="chevron-down" class="chev"></i>
-        </button>
-        <div class="tool-body" id="body-timer">
-          <form id="formTimer" class="inline-form">
-            <input type="text" id="timerNome" placeholder="Es. Posa, Intervista..." required>
-            <button type="submit" class="btn-accent"><i data-lucide="plus"></i></button>
-          </form>
-          <div id="timerList" class="item-list"></div>
-        </div>
-      </div>
-
-      <!-- --- Note vocali --- -->
+      <!-- --- Note vocali rapide (unita a questa pagina) --- -->
       <div class="tool-card">
         <button class="tool-header" data-target="body-note">
           <i data-lucide="mic"></i>
@@ -495,26 +314,6 @@
           <textarea id="noteTesto" class="note-textarea" placeholder="Scrivi o detta una nota..."></textarea>
           <button id="btnNoteSalva" class="btn-accent full"><i data-lucide="save"></i> Salva nota</button>
           <div id="noteList" class="item-list"></div>
-        </div>
-      </div>
-
-      <!-- --- Metronomo --- -->
-      <div class="tool-card">
-        <button class="tool-header" data-target="body-metronomo">
-          <i data-lucide="activity"></i>
-          <span>Metronomo movimenti camera</span>
-          <i data-lucide="chevron-down" class="chev"></i>
-        </button>
-        <div class="tool-body" id="body-metronomo">
-          <div class="metro-wrap">
-            <div class="metro-pulse" id="metroPulse"></div>
-            <div class="metro-controls">
-              <label class="field-label">BPM: <span id="metroBpmVal" class="mono">60</span>
-                <input type="range" id="metroBpm" min="20" max="200" value="60">
-              </label>
-              <button id="btnMetroToggle" class="btn-accent full"><i data-lucide="play"></i> Avvia</button>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -597,10 +396,30 @@
         </div>
       </div>
 
+      <!-- --- Report PDF --- -->
+      <div class="tool-card">
+        <button class="tool-header" data-target="body-pdf">
+          <i data-lucide="file-text"></i>
+          <span>Report PDF amministrazione</span>
+          <i data-lucide="chevron-down" class="chev"></i>
+        </button>
+        <div class="tool-body" id="body-pdf">
+          <p class="hint-text">Genera un PDF con tutte le liberatorie, le spese e i promemoria di questa giornata, con logo REC in testa. Si apre la finestra di stampa del browser: scegli "Salva come PDF" come destinazione.</p>
+          <button id="btnGeneraPdf" class="btn-accent full"><i data-lucide="file-text"></i> Genera PDF</button>
+        </div>
+      </div>
+
     </section>
 
   </main>
 </div>
+
+<!-- ===================================================================
+     REPORT STAMPABILE (usato solo per la generazione del PDF)
+     Nascosto normalmente, viene popolato e mostrato solo in fase di
+     stampa grazie alle regole @media print nel foglio di stile.
+     =================================================================== -->
+<div id="printReport" class="print-report"></div>
 
 <!-- ===================================================================
      MODALITÀ CIAK A SCHERMO INTERO

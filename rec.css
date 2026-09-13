@@ -426,79 +426,49 @@ input:focus, select:focus, textarea:focus{
 }
 
 /* =====================================================================
-   METEO
+   REPORT PDF STAMPABILE
+   Nascosto normalmente; visibile solo quando body ha la classe
+   "printing" (impostata da rec.js poco prima di chiamare window.print).
+   In stampa, tutto il resto dell'app viene nascosto.
    ===================================================================== */
-.meteo-now{ display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
-.meteo-now .stat{ display: flex; flex-direction: column; }
-.meteo-now .stat .val{ font-family: var(--font-mono); font-size: 20px; font-weight: 600; }
-.meteo-now .stat .lbl{ font-size: 11px; color: var(--text-dim); }
-.meteo-hourly{ display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
-.meteo-hour-card{
-  flex-shrink: 0;
-  background: var(--bg-input);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 8px 10px;
-  text-align: center;
-  min-width: 64px;
-}
-.meteo-hour-card .h-time{ font-size: 11px; color: var(--text-dim); }
-.meteo-hour-card .h-temp{ font-family: var(--font-mono); font-size: 14px; font-weight: 600; margin: 4px 0; }
-.meteo-hour-card .h-extra{ font-size: 10px; color: var(--text-faint); }
+.print-report{ display: none; }
 
-/* Semaforo vento drone */
-.semaforo{ display: flex; align-items: center; gap: 12px; margin-top: 6px; }
-.semaforo-luce{
-  width: 56px; height: 56px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-mono); font-weight: 700; font-size: 13px;
-  background: var(--border); color: var(--text-dim);
-  flex-shrink: 0;
+body.printing > .app,
+body.printing > .fullscreen-overlay{ display: none !important; }
+body.printing .print-report{
+  display: block;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px;
+  color: #111;
+  background: #fff;
+  font-family: var(--font-ui);
 }
-.semaforo-luce.verde{ background: var(--success-bg); color: var(--success); box-shadow: 0 0 0 2px var(--success); }
-.semaforo-luce.giallo{ background: var(--warning-bg); color: var(--warning); box-shadow: 0 0 0 2px var(--warning); }
-.semaforo-luce.rosso{ background: var(--danger-bg); color: var(--danger); box-shadow: 0 0 0 2px var(--danger); }
 
-/* =====================================================================
-   LIVELLA / BUSSOLA
-   ===================================================================== */
-.livella-wrap{ display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-.livella-circle{
-  width: 140px; height: 140px; border-radius: 50%;
-  background: var(--bg-input);
-  border: 2px solid var(--border);
-  position: relative;
-  flex-shrink: 0;
+.pr-header{ display: flex; align-items: center; gap: 16px; border-bottom: 2px solid #d42b2b; padding-bottom: 14px; margin-bottom: 18px; }
+.pr-logo{
+  font-family: var(--font-mono); font-weight: 700; font-size: 22px;
+  display: flex; align-items: center; gap: 8px; color: #111;
+  border: 2px solid #111; border-radius: 6px; padding: 6px 12px; flex-shrink: 0;
 }
-.livella-circle::before, .livella-circle::after{
-  content: ''; position: absolute; background: var(--border);
-}
-.livella-circle::before{ width: 100%; height: 1px; top: 50%; left: 0; }
-.livella-circle::after{ width: 1px; height: 100%; left: 50%; top: 0; }
-.livella-bubble{
-  width: 24px; height: 24px; border-radius: 50%;
-  background: var(--accent);
-  position: absolute; top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  transition: transform .1s linear;
-  box-shadow: 0 0 10px var(--accent);
-}
-.livella-info{ font-size: 13px; color: var(--text-dim); display: flex; flex-direction: column; gap: 6px; }
+.pr-logo-dot{ width: 9px; height: 9px; border-radius: 50%; background: #d42b2b; display: inline-block; }
+.pr-header-text h1{ margin: 0; font-size: 16px; }
+.pr-header-text p{ margin: 2px 0 0; font-size: 12px; color: #555; }
 
-/* =====================================================================
-   METRONOMO
-   ===================================================================== */
-.metro-wrap{ display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
-.metro-pulse{
-  width: 70px; height: 70px; border-radius: 50%;
-  background: var(--bg-input);
-  border: 2px solid var(--accent);
-  flex-shrink: 0;
-  transition: transform .08s ease, background .08s ease;
+.print-report h2{ font-size: 14px; margin: 22px 0 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
+.print-report .pr-empty{ font-size: 12.5px; color: #777; }
+
+.pr-release{ border: 1px solid #ddd; border-radius: 6px; padding: 10px 12px; margin-bottom: 10px; font-size: 12.5px; }
+.pr-release-text{ color: #555; margin: 4px 0 8px; font-size: 11.5px; }
+.pr-signature{ max-width: 220px; max-height: 90px; border: 1px solid #ddd; }
+
+.pr-table{ width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.pr-table th, .pr-table td{ border: 1px solid #ddd; padding: 6px 8px; text-align: left; }
+.pr-table tfoot td{ font-weight: 700; }
+
+@media print{
+  @page{ margin: 16mm; }
 }
-.metro-pulse.beat{ background: var(--accent); transform: scale(1.12); }
-.metro-controls{ flex: 1; min-width: 180px; }
-.metro-controls input[type="range"]{ width: 100%; accent-color: var(--accent); margin-top: 6px; }
 
 /* =====================================================================
    FIRMA / RELEASE
