@@ -1,8 +1,7 @@
 /* =====================================================================
    REC — Logica applicativa
    Tutti i dati vengono salvati in localStorage sul dispositivo: non c'è
-   nessun backend, quindi i dati restano solo su questo browser/telefono
-   a meno che il backend cloud sia configurato (vedi sotto).
+   nessun backend, quindi i dati restano solo su questo browser/telefono.
    ===================================================================== */
 
 /* ---------------------------------------------------------------------
@@ -39,23 +38,13 @@ function krId(){
 function krIcons(){
   if(window.lucide) lucide.createIcons();
 }
-/* Aggiorna il piccolo contatore mostrato sulla casella della griglia */
-function krSetTileCount(id, text){
-  const el = document.getElementById('tileCount-' + id);
-  if(el) el.textContent = text;
-}
-/* Cambia l'icona del pulsante di submit di un form (usato per passare
-   da "+" ad "assegno di spunta" quando si entra in modalità modifica) */
-function krSetSubmitIcon(form, iconName){
-  const btn = form.querySelector('button[type="submit"]');
-  if(btn) btn.innerHTML = `<i data-lucide="${iconName}"></i>`;
-  krIcons();
-}
 
 /* =====================================================================
    SINCRONIZZAZIONE CLOUD (Google Sheets + Apps Script)
-   Un Web App Apps Script espone un'API JSON che legge e scrive su un
-   Google Sheet. Ogni tabella locale ("kr_...") corrisponde a un foglio.
+   Stesso schema già usato in Lista della Spesa, Spotify Tracker e
+   Tracciapacchi: un Web App Apps Script espone un'API JSON che legge e
+   scrive su un Google Sheet. Ogni tabella locale ("kr_...") corrisponde
+   a un foglio del backend.
 
    COME CONFIGURARE:
    1. Crea un nuovo Google Sheet vuoto.
@@ -73,8 +62,8 @@ const CONFIG = {
 
 /* Mappa "chiave localStorage" -> "nome tabella sul backend".
    Solo le chiavi qui elencate vengono sincronizzate nel cloud; le
-   impostazioni puramente locali (tema, contatori temporanei, ecc.)
-   restano solo sul dispositivo. */
+   impostazioni puramente locali (tema, contatori temporanei, soglia
+   vento, ecc.) restano solo sul dispositivo. */
 const KR_TABLES = {
   kr_checklist: 'checklist',
   kr_shotlist: 'shotlist',
@@ -193,99 +182,25 @@ function krNormalizeRow(table, row){
 })();
 
 /* =====================================================================
-   MODALE STRUMENTI
-   Cliccando una casella della griglia (.tile) si apre la finestra
-   modale condivisa, mostrando il pannello (.modal-pane) corrispondente
-   al suo data-target. Tutti i pannelli restano nel DOM: solo quello
-   attivo riceve la classe "open".
+   ACCORDION DELLE TOOL CARD
+   Ogni header ha data-target = id del corpo da aprire/chiudere.
    ===================================================================== */
-(function initToolModal(){
-  const modal = document.getElementById('toolModal');
-  const modalTitle = document.getElementById('modalTitle');
-  const modalIconWrap = document.getElementById('modalIconWrap');
-  const closeBtn = document.getElementById('modalClose');
-
-  function openTool(tile){
-    document.querySelectorAll('.modal-pane').forEach(p => p.classList.remove('open'));
-    const pane = document.getElementById(tile.dataset.target);
-    if(pane) pane.classList.add('open');
-    modalTitle.textContent = tile.dataset.title || '';
-    modalIconWrap.innerHTML = `<i data-lucide="${tile.dataset.icon || 'square'}"></i>`;
-    krIcons();
-    modal.classList.add('open');
-  }
-  function closeTool(){
-    modal.classList.remove('open');
-  }
-
-  document.querySelectorAll('.tile').forEach(tile => {
-    tile.addEventListener('click', () => openTool(tile));
+(function initAccordion(){
+  document.querySelectorAll('.tool-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const body = document.getElementById(header.dataset.target);
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      header.classList.toggle('open', !isOpen);
+    });
   });
-  closeBtn.addEventListener('click', closeTool);
-  // Chiude anche cliccando fuori dalla finestra (sull'overlay scuro)
-  modal.addEventListener('click', e => { if(e.target === modal) closeTool(); });
 })();
 
 /* =====================================================================
-   HELPER: crea una riga generica per le liste vuote
+   HELPER: crea una riga generica per le liste (usato da più moduli)
    ===================================================================== */
 function krRenderEmpty(container, message){
   container.innerHTML = `<div class="list-empty">${message}</div>`;
-}
-
-/* =====================================================================
-   HELPER: RIORDINO MANUALE TRASCINABILE (drag & drop)
-   Funziona sia con mouse che con dita su touch screen grazie alle
-   Pointer Events, ed è agganciato all'icona "drag-handle" di ogni riga
-   così non interferisce con tap su checkbox/pulsanti. Va chiamato una
-   sola volta per lista (l'ascolto resta valido anche dopo i re-render,
-   perché è agganciato al contenitore stabile, non alle righe).
-   ===================================================================== */
-function krEnableDragReorder(listEl, key, onReordered){
-  let dragRow = null;
-
-  listEl.addEventListener('pointerdown', e => {
-    const handle = e.target.closest('.drag-handle');
-    if(!handle) return;
-    const row = handle.closest('.item-row');
-    if(!row) return;
-    e.preventDefault();
-    dragRow = row;
-    row.classList.add('dragging');
-    if(row.setPointerCapture){
-      try{ row.setPointerCapture(e.pointerId); }catch(err){ /* ignora */ }
-    }
-  });
-
-  listEl.addEventListener('pointermove', e => {
-    if(!dragRow) return;
-    e.preventDefault();
-    const rows = Array.from(listEl.querySelectorAll('.item-row')).filter(r => r !== dragRow);
-    for(const row of rows){
-      const rect = row.getBoundingClientRect();
-      if(e.clientY > rect.top && e.clientY < rect.bottom){
-        if(e.clientY < rect.top + rect.height / 2){
-          listEl.insertBefore(dragRow, row);
-        }else{
-          listEl.insertBefore(dragRow, row.nextSibling);
-        }
-        break;
-      }
-    }
-  });
-
-  function terminaDrag(){
-    if(!dragRow) return;
-    dragRow.classList.remove('dragging');
-    const idsOrdinati = Array.from(listEl.querySelectorAll('.item-row')).map(r => r.dataset.id);
-    const items = krLoad(key);
-    const riordinati = idsOrdinati.map(id => items.find(i => i.id === id)).filter(Boolean);
-    krSave(key, riordinati);
-    dragRow = null;
-    if(onReordered) onReordered();
-  }
-  listEl.addEventListener('pointerup', terminaDrag);
-  listEl.addEventListener('pointercancel', terminaDrag);
 }
 
 /* =====================================================================
@@ -298,28 +213,30 @@ function krEnableDragReorder(listEl, key, onReordered){
   const catSelect = document.getElementById('checklistCatInput');
   const listEl = document.getElementById('checklistList');
   const progressEl = document.getElementById('checklistProgress');
-  let editingId = null;
 
   function render(){
     const items = krLoad(KEY);
-    krSetTileCount('checklist', items.length === 0 ? '0 voci' : `${items.filter(i=>i.done).length}/${items.length} fatti`);
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessun oggetto in checklist. Aggiungi la tua attrezzatura qui sopra.');
       progressEl.textContent = '0 / 0 spuntati';
       return;
     }
-    listEl.innerHTML = items.map(it => `
-      <div class="item-row" data-id="${it.id}">
-        <i data-lucide="grip-vertical" class="drag-handle"></i>
-        <input type="checkbox" ${it.done ? 'checked' : ''} data-id="${it.id}" style="width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;">
-        <div class="item-main">
-          <div class="item-title" style="${it.done ? 'text-decoration:line-through;color:var(--text-faint);' : ''}">${it.text}</div>
-          <div class="item-sub">${it.cat}</div>
-        </div>
-        <div class="item-actions">
-          <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
-          <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
-        </div>
+    // Raggruppa per categoria mantenendo l'ordine di inserimento
+    const groups = {};
+    items.forEach(it => {
+      if(!groups[it.cat]) groups[it.cat] = [];
+      groups[it.cat].push(it);
+    });
+    listEl.innerHTML = Object.keys(groups).map(cat => `
+      <div class="checklist-group">
+        <div class="checklist-group-title">${cat.toUpperCase()}</div>
+        ${groups[cat].map(it => `
+          <div class="checklist-item ${it.done ? 'done' : ''}">
+            <input type="checkbox" id="chk-${it.id}" ${it.done ? 'checked' : ''} data-id="${it.id}">
+            <label for="chk-${it.id}">${it.text}</label>
+            <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
+          </div>
+        `).join('')}
       </div>
     `).join('');
     const doneCount = items.filter(i => i.done).length;
@@ -327,24 +244,12 @@ function krEnableDragReorder(listEl, key, onReordered){
     krIcons();
   }
 
-  function annullaModifica(){
-    editingId = null;
-    form.reset();
-    krSetSubmitIcon(form, 'plus');
-  }
-
   form.addEventListener('submit', e => {
     e.preventDefault();
     const items = krLoad(KEY);
-    if(editingId){
-      const it = items.find(i => i.id === editingId);
-      if(it){ it.text = input.value.trim(); it.cat = catSelect.value; }
-      annullaModifica();
-    }else{
-      items.push({ id: krId(), text: input.value.trim(), cat: catSelect.value, done: false });
-      form.reset();
-    }
+    items.push({ id: krId(), text: input.value.trim(), cat: catSelect.value, done: false });
     krSave(KEY, items);
+    input.value = '';
     render();
   });
 
@@ -359,21 +264,11 @@ function krEnableDragReorder(listEl, key, onReordered){
   });
 
   listEl.addEventListener('click', e => {
-    const delBtn = e.target.closest('[data-del]');
-    const editBtn = e.target.closest('[data-edit]');
-    if(delBtn){
-      krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      if(editingId === delBtn.dataset.del) annullaModifica();
+    const btn = e.target.closest('[data-del]');
+    if(btn){
+      const items = krLoad(KEY).filter(i => i.id !== btn.dataset.del);
+      krSave(KEY, items);
       render();
-    }
-    if(editBtn){
-      const it = krLoad(KEY).find(i => i.id === editBtn.dataset.edit);
-      if(!it) return;
-      editingId = it.id;
-      input.value = it.text;
-      catSelect.value = it.cat;
-      krSetSubmitIcon(form, 'check');
-      input.focus();
     }
   });
 
@@ -385,12 +280,10 @@ function krEnableDragReorder(listEl, key, onReordered){
   document.getElementById('btnChecklistClear').addEventListener('click', () => {
     if(confirm('Svuotare tutta la checklist?')){
       krSave(KEY, []);
-      annullaModifica();
       render();
     }
   });
 
-  krEnableDragReorder(listEl, KEY, render);
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
@@ -402,27 +295,23 @@ function krEnableDragReorder(listEl, key, onReordered){
   const KEY = 'kr_shotlist';
   const form = document.getElementById('formShot');
   const listEl = document.getElementById('shotList');
-  const annullaBtn = document.getElementById('btnShotAnnulla');
+
   const STATI = ['da fare', 'fatto'];
-  let editingId = null;
 
   function render(){
     const items = krLoad(KEY);
-    krSetTileCount('shotlist', `${items.length} inquadrature`);
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessuna inquadratura pianificata.');
       return;
     }
     listEl.innerHTML = items.map(it => `
-      <div class="item-row" data-id="${it.id}">
-        <i data-lucide="grip-vertical" class="drag-handle"></i>
+      <div class="item-row">
         <div class="item-main">
           <div class="item-title">Scena ${it.scena} — ${it.desc}</div>
           ${it.note ? `<div class="item-sub">${it.note}</div>` : ''}
         </div>
         <div class="item-actions">
           <button class="badge ${it.stato === 'fatto' ? 'badge-success' : 'badge-neutral'}" data-toggle="${it.id}">${it.stato}</button>
-          <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
           <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
         </div>
       </div>
@@ -430,38 +319,24 @@ function krEnableDragReorder(listEl, key, onReordered){
     krIcons();
   }
 
-  function annullaModifica(){
-    editingId = null;
-    form.reset();
-    annullaBtn.style.display = 'none';
-    krSetSubmitIcon(form, 'plus');
-  }
-  annullaBtn.addEventListener('click', annullaModifica);
-
   form.addEventListener('submit', e => {
     e.preventDefault();
     const items = krLoad(KEY);
-    const valori = {
+    items.push({
+      id: krId(),
       scena: document.getElementById('shotScena').value.trim(),
       desc: document.getElementById('shotDesc').value.trim(),
-      note: document.getElementById('shotNote').value.trim()
-    };
-    if(editingId){
-      const it = items.find(i => i.id === editingId);
-      if(it) Object.assign(it, valori);
-      annullaModifica();
-    }else{
-      items.push({ id: krId(), ...valori, stato: 'da fare' });
-      form.reset();
-    }
+      note: document.getElementById('shotNote').value.trim(),
+      stato: 'da fare'
+    });
     krSave(KEY, items);
+    form.reset();
     render();
   });
 
   listEl.addEventListener('click', e => {
     const toggleBtn = e.target.closest('[data-toggle]');
     const delBtn = e.target.closest('[data-del]');
-    const editBtn = e.target.closest('[data-edit]');
     if(toggleBtn){
       const items = krLoad(KEY);
       const it = items.find(i => i.id === toggleBtn.dataset.toggle);
@@ -471,22 +346,10 @@ function krEnableDragReorder(listEl, key, onReordered){
     }
     if(delBtn){
       krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      if(editingId === delBtn.dataset.del) annullaModifica();
       render();
-    }
-    if(editBtn){
-      const it = krLoad(KEY).find(i => i.id === editBtn.dataset.edit);
-      if(!it) return;
-      editingId = it.id;
-      document.getElementById('shotScena').value = it.scena;
-      document.getElementById('shotDesc').value = it.desc;
-      document.getElementById('shotNote').value = it.note || '';
-      annullaBtn.style.display = 'inline-flex';
-      krSetSubmitIcon(form, 'check');
     }
   });
 
-  krEnableDragReorder(listEl, KEY, render);
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
@@ -498,26 +361,21 @@ function krEnableDragReorder(listEl, key, onReordered){
   const KEY = 'kr_locations';
   const form = document.getElementById('formLocation');
   const listEl = document.getElementById('locationList');
-  const annullaBtn = document.getElementById('btnLocAnnulla');
-  let editingId = null;
 
   function render(){
     const items = krLoad(KEY);
-    krSetTileCount('location', `${items.length} location`);
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessuna location salvata.');
       return;
     }
     listEl.innerHTML = items.map(it => `
-      <div class="item-row" data-id="${it.id}">
-        <i data-lucide="grip-vertical" class="drag-handle"></i>
+      <div class="item-row">
         <div class="item-main">
           <div class="item-title">${it.nome}</div>
           <div class="item-sub">${[it.indirizzo, it.orario].filter(Boolean).join(' · ') || 'Nessun dettaglio'}</div>
         </div>
         <div class="item-actions">
           ${it.indirizzo ? `<a class="icon-btn accent" target="_blank" rel="noopener" href="https://maps.apple.com/?q=${encodeURIComponent(it.indirizzo)}"><i data-lucide="navigation"></i></a>` : ''}
-          <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
           <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
         </div>
       </div>
@@ -525,55 +383,28 @@ function krEnableDragReorder(listEl, key, onReordered){
     krIcons();
   }
 
-  function annullaModifica(){
-    editingId = null;
-    form.reset();
-    annullaBtn.style.display = 'none';
-    krSetSubmitIcon(form, 'plus');
-  }
-  annullaBtn.addEventListener('click', annullaModifica);
-
   form.addEventListener('submit', e => {
     e.preventDefault();
     const items = krLoad(KEY);
-    const valori = {
+    items.push({
+      id: krId(),
       nome: document.getElementById('locNome').value.trim(),
       indirizzo: document.getElementById('locIndirizzo').value.trim(),
       orario: document.getElementById('locOrario').value.trim()
-    };
-    if(editingId){
-      const it = items.find(i => i.id === editingId);
-      if(it) Object.assign(it, valori);
-      annullaModifica();
-    }else{
-      items.push({ id: krId(), ...valori });
-      form.reset();
-    }
+    });
     krSave(KEY, items);
+    form.reset();
     render();
   });
 
   listEl.addEventListener('click', e => {
     const delBtn = e.target.closest('[data-del]');
-    const editBtn = e.target.closest('[data-edit]');
     if(delBtn){
       krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      if(editingId === delBtn.dataset.del) annullaModifica();
       render();
-    }
-    if(editBtn){
-      const it = krLoad(KEY).find(i => i.id === editBtn.dataset.edit);
-      if(!it) return;
-      editingId = it.id;
-      document.getElementById('locNome').value = it.nome;
-      document.getElementById('locIndirizzo').value = it.indirizzo || '';
-      document.getElementById('locOrario').value = it.orario || '';
-      annullaBtn.style.display = 'inline-flex';
-      krSetSubmitIcon(form, 'check');
     }
   });
 
-  krEnableDragReorder(listEl, KEY, render);
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
@@ -585,19 +416,15 @@ function krEnableDragReorder(listEl, key, onReordered){
   const KEY = 'kr_contatti';
   const form = document.getElementById('formContatti');
   const listEl = document.getElementById('contattiList');
-  const annullaBtn = document.getElementById('btnContAnnulla');
-  let editingId = null;
 
   function render(){
     const items = krLoad(KEY);
-    krSetTileCount('contatti', `${items.length} contatti`);
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessun contatto salvato.');
       return;
     }
     listEl.innerHTML = items.map(it => `
-      <div class="item-row" data-id="${it.id}">
-        <i data-lucide="grip-vertical" class="drag-handle"></i>
+      <div class="item-row">
         <div class="item-main">
           <div class="item-title">${it.nome}</div>
           <div class="item-sub">${it.ruolo || 'Ruolo non specificato'}</div>
@@ -605,7 +432,6 @@ function krEnableDragReorder(listEl, key, onReordered){
         <div class="item-actions">
           <a class="icon-btn accent" href="tel:${it.tel}"><i data-lucide="phone"></i></a>
           <a class="icon-btn accent" target="_blank" rel="noopener" href="https://wa.me/${it.tel.replace(/[^0-9]/g,'')}"><i data-lucide="message-circle"></i></a>
-          <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
           <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
         </div>
       </div>
@@ -613,61 +439,34 @@ function krEnableDragReorder(listEl, key, onReordered){
     krIcons();
   }
 
-  function annullaModifica(){
-    editingId = null;
-    form.reset();
-    annullaBtn.style.display = 'none';
-    krSetSubmitIcon(form, 'plus');
-  }
-  annullaBtn.addEventListener('click', annullaModifica);
-
   form.addEventListener('submit', e => {
     e.preventDefault();
     const items = krLoad(KEY);
-    const valori = {
+    items.push({
+      id: krId(),
       nome: document.getElementById('contNome').value.trim(),
       ruolo: document.getElementById('contRuolo').value.trim(),
       tel: document.getElementById('contTel').value.trim()
-    };
-    if(editingId){
-      const it = items.find(i => i.id === editingId);
-      if(it) Object.assign(it, valori);
-      annullaModifica();
-    }else{
-      items.push({ id: krId(), ...valori });
-      form.reset();
-    }
+    });
     krSave(KEY, items);
+    form.reset();
     render();
   });
 
   listEl.addEventListener('click', e => {
     const delBtn = e.target.closest('[data-del]');
-    const editBtn = e.target.closest('[data-edit]');
     if(delBtn){
       krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      if(editingId === delBtn.dataset.del) annullaModifica();
       render();
-    }
-    if(editBtn){
-      const it = krLoad(KEY).find(i => i.id === editBtn.dataset.edit);
-      if(!it) return;
-      editingId = it.id;
-      document.getElementById('contNome').value = it.nome;
-      document.getElementById('contRuolo').value = it.ruolo || '';
-      document.getElementById('contTel').value = it.tel;
-      annullaBtn.style.display = 'inline-flex';
-      krSetSubmitIcon(form, 'check');
     }
   });
 
-  krEnableDragReorder(listEl, KEY, render);
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
-   5) IPERFOCALE & PROFONDITÀ DI CAMPO
+   7) IPERFOCALE & PROFONDITÀ DI CAMPO
    ===================================================================== */
 (function iperfocaleModule(){
   document.getElementById('btnCalcIperfocale').addEventListener('click', () => {
@@ -708,7 +507,7 @@ function krEnableDragReorder(listEl, key, onReordered){
 })();
 
 /* =====================================================================
-   6) ESPOSIZIONE / ND FILTER
+   8) ESPOSIZIONE / ND FILTER
    ===================================================================== */
 (function ndModule(){
   const NOMI_ND = [
@@ -731,8 +530,13 @@ function krEnableDragReorder(listEl, key, onReordered){
       resultEl.innerHTML = 'Compila tutti i campi con valori validi.';
       return;
     }
+    // Calcolo degli stop di differenza tra l'esposizione corretta e quella
+    // desiderata. Ogni componente contribuisce in stop (log2):
+    // - apertura: 2*log2(f_corrente/f_target)  (f più piccolo = più luce)
+    // - otturatore: log2(t_target/t_corrente) espresso come 1/x, quindi invertito
+    // - ISO: log2(ISO_target/ISO_corrente)
     const stopApertura = 2 * Math.log2(aC / aT);
-    const stopOtturatore = Math.log2(sC / sT);
+    const stopOtturatore = Math.log2(sC / sT); // 1/50 -> 1/25 raddoppia la luce
     const stopIso = Math.log2(iT / iC);
     const stopTotali = stopApertura + stopOtturatore + stopIso;
 
@@ -752,7 +556,7 @@ function krEnableDragReorder(listEl, key, onReordered){
 })();
 
 /* =====================================================================
-   7) TIMELAPSE
+   9) TIMELAPSE
    ===================================================================== */
 (function timelapseModule(){
   document.getElementById('btnCalcTimelapse').addEventListener('click', () => {
@@ -778,7 +582,7 @@ function krEnableDragReorder(listEl, key, onReordered){
 })();
 
 /* =====================================================================
-   8) LOG CIAK
+   13) LOG CIAK
    ===================================================================== */
 /* Riferimento globale al render del log ciak, riusato dalla modalità
    schermo intero per aggiornare la lista principale dopo un salvataggio. */
@@ -789,14 +593,11 @@ let krRenderCiak = null;
   const form = document.getElementById('formCiak');
   const listEl = document.getElementById('ciakList');
   const countEl = document.getElementById('ciakCount');
-  const annullaBtn = document.getElementById('btnCiakAnnulla');
   const GIUDIZI = { buona: { label: 'Buona', cls: 'badge-success' }, rifare: { label: 'Da rifare', cls: 'badge-warning' }, ng: { label: 'NG', cls: 'badge-danger' } };
-  let editingId = null;
 
   function render(){
     const items = krLoad(KEY);
     countEl.textContent = `${items.length} ciak registrati`;
-    krSetTileCount('ciak', `${items.length} ciak`);
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessun ciak registrato.');
       return;
@@ -805,8 +606,7 @@ let krRenderCiak = null;
       const g = GIUDIZI[it.giudizio];
       const clip = [it.clipVideo ? `Video: ${it.clipVideo}` : '', it.clipAudio ? `Audio: ${it.clipAudio}` : ''].filter(Boolean).join(' · ');
       return `
-        <div class="item-row" data-id="${it.id}">
-          <i data-lucide="grip-vertical" class="drag-handle"></i>
+        <div class="item-row">
           <div class="item-main">
             <div class="item-title">Scena ${it.scena} · Ciak ${it.ciak} <span class="mono" style="color:var(--text-faint); font-size:11px;">${it.ora}</span></div>
             ${clip ? `<div class="item-sub mono">${clip}</div>` : ''}
@@ -814,7 +614,6 @@ let krRenderCiak = null;
           </div>
           <div class="item-actions">
             <span class="badge ${g.cls}">${g.label}</span>
-            <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
             <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
           </div>
         </div>
@@ -823,57 +622,29 @@ let krRenderCiak = null;
     krIcons();
   }
 
-  function annullaModifica(){
-    editingId = null;
-    form.reset();
-    annullaBtn.style.display = 'none';
-    krSetSubmitIcon(form, 'plus');
-  }
-  annullaBtn.addEventListener('click', annullaModifica);
-
   form.addEventListener('submit', e => {
     e.preventDefault();
     const items = krLoad(KEY);
-    const valori = {
+    items.push({
+      id: krId(),
       scena: document.getElementById('ciakScena').value.trim(),
       ciak: document.getElementById('ciakNum').value.trim(),
       giudizio: document.getElementById('ciakGiudizio').value,
       clipVideo: document.getElementById('ciakClipVideo').value.trim(),
       clipAudio: document.getElementById('ciakClipAudio').value.trim(),
-      note: document.getElementById('ciakNote').value.trim()
-    };
-    if(editingId){
-      const it = items.find(i => i.id === editingId);
-      if(it) Object.assign(it, valori);
-      annullaModifica();
-    }else{
-      items.push({ id: krId(), ...valori, ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) });
-      form.reset();
-    }
+      note: document.getElementById('ciakNote').value.trim(),
+      ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+    });
     krSave(KEY, items);
+    form.reset();
     render();
   });
 
   listEl.addEventListener('click', e => {
     const delBtn = e.target.closest('[data-del]');
-    const editBtn = e.target.closest('[data-edit]');
     if(delBtn){
       krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      if(editingId === delBtn.dataset.del) annullaModifica();
       render();
-    }
-    if(editBtn){
-      const it = krLoad(KEY).find(i => i.id === editBtn.dataset.edit);
-      if(!it) return;
-      editingId = it.id;
-      document.getElementById('ciakScena').value = it.scena;
-      document.getElementById('ciakNum').value = it.ciak;
-      document.getElementById('ciakGiudizio').value = it.giudizio;
-      document.getElementById('ciakClipVideo').value = it.clipVideo || '';
-      document.getElementById('ciakClipAudio').value = it.clipAudio || '';
-      document.getElementById('ciakNote').value = it.note || '';
-      annullaBtn.style.display = 'inline-flex';
-      krSetSubmitIcon(form, 'check');
     }
   });
 
@@ -899,7 +670,6 @@ let krRenderCiak = null;
   });
 
   krRenderCiak = render;
-  krEnableDragReorder(listEl, KEY, render);
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 
@@ -910,7 +680,7 @@ let krRenderCiak = null;
 })();
 
 /* =====================================================================
-   8-bis) MODALITÀ CIAK A SCHERMO INTERO
+   13-bis) MODALITÀ CIAK A SCHERMO INTERO
    Riusa la stessa chiave di storage "kr_ciak" del log normale, così le
    voci registrate qui compaiono anche nella lista compatta e viceversa.
    Le note scritte/vocali di questa sezione usano la stessa chiave
@@ -1082,7 +852,7 @@ let krRenderCiak = null;
 })();
 
 /* =====================================================================
-   9) NOTE VOCALI RAPIDE
+   16) NOTE VOCALI RAPIDE
    Usa la Web Speech API se disponibile (principalmente Chrome); su
    browser non supportati resta comunque utilizzabile come note testuali.
    ===================================================================== */
@@ -1092,9 +862,7 @@ let krRenderCiak = null;
   const testoEl = document.getElementById('noteTesto');
   const sceneEl = document.getElementById('noteScena');
   const salvaBtn = document.getElementById('btnNoteSalva');
-  const annullaBtn = document.getElementById('btnNoteAnnulla');
   const listEl = document.getElementById('noteList');
-  let editingId = null;
 
   const SpeechRecognitionApi = window.SpeechRecognition || window.webkitSpeechRecognition;
   let recognition = null;
@@ -1132,20 +900,17 @@ let krRenderCiak = null;
 
   function render(){
     const items = krLoad(KEY);
-    krSetTileCount('note', `${items.length} note`);
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessuna nota salvata.');
       return;
     }
     listEl.innerHTML = items.slice().reverse().map(it => `
-      <div class="item-row" data-id="${it.id}">
-        <i data-lucide="grip-vertical" class="drag-handle"></i>
+      <div class="item-row">
         <div class="item-main">
           <div class="item-title">${it.scena ? '[' + it.scena + '] ' : ''}${it.testo}</div>
           <div class="item-sub">${it.ora}</div>
         </div>
         <div class="item-actions">
-          <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
           <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
         </div>
       </div>
@@ -1153,69 +918,38 @@ let krRenderCiak = null;
     krIcons();
   }
 
-  function annullaModifica(){
-    editingId = null;
-    testoEl.value = '';
-    sceneEl.value = '';
-    annullaBtn.style.display = 'none';
-    salvaBtn.innerHTML = '<i data-lucide="save"></i> Salva nota';
-    krIcons();
-  }
-  annullaBtn.addEventListener('click', annullaModifica);
-
   salvaBtn.addEventListener('click', () => {
     const testo = testoEl.value.trim();
     if(!testo) return;
     const items = krLoad(KEY);
-    if(editingId){
-      const it = items.find(i => i.id === editingId);
-      if(it){ it.testo = testo; it.scena = sceneEl.value.trim(); }
-      annullaModifica();
-    }else{
-      items.push({
-        id: krId(),
-        testo,
-        scena: sceneEl.value.trim(),
-        ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
-      });
-      testoEl.value = '';
-      sceneEl.value = '';
-    }
+    items.push({
+      id: krId(),
+      testo,
+      scena: sceneEl.value.trim(),
+      ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+    });
     krSave(KEY, items);
+    testoEl.value = '';
+    sceneEl.value = '';
     render();
   });
 
   listEl.addEventListener('click', e => {
     const delBtn = e.target.closest('[data-del]');
-    const editBtn = e.target.closest('[data-edit]');
     if(delBtn){
       krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      if(editingId === delBtn.dataset.del) annullaModifica();
       render();
-    }
-    if(editBtn){
-      const it = krLoad(KEY).find(i => i.id === editBtn.dataset.edit);
-      if(!it) return;
-      editingId = it.id;
-      testoEl.value = it.testo;
-      sceneEl.value = it.scena || '';
-      annullaBtn.style.display = 'inline-flex';
-      salvaBtn.innerHTML = '<i data-lucide="check"></i> Salva modifica';
-      krIcons();
     }
   });
 
-  krEnableDragReorder(listEl, KEY, render);
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
-   10) RELEASE / LIBERATORIA DIGITALE
+   18) RELEASE / LIBERATORIA DIGITALE
    Firma disegnata su canvas (mouse e touch), salvata come immagine
-   dataURL insieme ai dati testuali in localStorage. In modifica, la
-   firma esistente viene ridisegnata sul canvas così può essere lasciata
-   com'è oppure cancellata e rifatta.
+   dataURL insieme ai dati testuali in localStorage.
    ===================================================================== */
 (function releaseModule(){
   const KEY = 'kr_liberatorie';
@@ -1223,12 +957,7 @@ let krRenderCiak = null;
   const ctx = canvas.getContext('2d');
   const listEl = document.getElementById('releaseList');
   const dataInput = document.getElementById('relData');
-  const nomeInput = document.getElementById('relNome');
-  const testoInput = document.getElementById('relTesto');
-  const salvaBtn = document.getElementById('btnRelSalva');
-  const testoDefault = testoInput.value;
   dataInput.value = new Date().toISOString().slice(0, 10);
-  let editingId = null;
 
   // Adatta la risoluzione del canvas alla larghezza reale visualizzata
   function resizeCanvas(){
@@ -1266,21 +995,18 @@ let krRenderCiak = null;
 
   function render(){
     const items = krLoad(KEY);
-    krSetTileCount('release', `${items.length} firmate`);
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessuna liberatoria salvata.');
       return;
     }
     listEl.innerHTML = items.slice().reverse().map(it => `
-      <div class="item-row" data-id="${it.id}">
-        <i data-lucide="grip-vertical" class="drag-handle"></i>
+      <div class="item-row">
         <div class="item-main">
           <div class="item-title">${it.nome}</div>
           <div class="item-sub">${it.data}</div>
         </div>
         <div class="item-actions">
           <a class="icon-btn accent" download="liberatoria-${it.nome}.png" href="${it.firma}"><i data-lucide="download"></i></a>
-          <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
           <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
         </div>
       </div>
@@ -1288,78 +1014,43 @@ let krRenderCiak = null;
     krIcons();
   }
 
-  function annullaModifica(){
-    editingId = null;
-    nomeInput.value = '';
-    testoInput.value = testoDefault;
-    dataInput.value = new Date().toISOString().slice(0, 10);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    salvaBtn.innerHTML = '<i data-lucide="save"></i> Salva liberatoria';
-    krIcons();
-  }
-
-  salvaBtn.addEventListener('click', () => {
-    const nome = nomeInput.value.trim();
+  document.getElementById('btnRelSalva').addEventListener('click', () => {
+    const nome = document.getElementById('relNome').value.trim();
     if(!nome){ alert('Inserisci il nome del soggetto.'); return; }
     const items = krLoad(KEY);
-    const firma = canvas.toDataURL('image/png');
-    if(editingId){
-      const it = items.find(i => i.id === editingId);
-      if(it){ it.nome = nome; it.data = dataInput.value; it.testo = testoInput.value; it.firma = firma; }
-      annullaModifica();
-    }else{
-      items.push({ id: krId(), nome, data: dataInput.value, testo: testoInput.value, firma });
-      nomeInput.value = '';
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
+    items.push({
+      id: krId(),
+      nome,
+      data: dataInput.value,
+      testo: document.getElementById('relTesto').value,
+      firma: canvas.toDataURL('image/png')
+    });
     krSave(KEY, items);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    document.getElementById('relNome').value = '';
     render();
   });
 
   listEl.addEventListener('click', e => {
     const delBtn = e.target.closest('[data-del]');
-    const editBtn = e.target.closest('[data-edit]');
     if(delBtn){
       krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      if(editingId === delBtn.dataset.del) annullaModifica();
       render();
-    }
-    if(editBtn){
-      const it = krLoad(KEY).find(i => i.id === editBtn.dataset.edit);
-      if(!it) return;
-      editingId = it.id;
-      nomeInput.value = it.nome;
-      dataInput.value = it.data;
-      testoInput.value = it.testo;
-      // Ridisegna la firma esistente sul canvas: l'utente può lasciarla
-      // così com'è, oppure cancellarla e firmare di nuovo
-      const img = new Image();
-      img.onload = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(img, 0, 0, canvas.width / 2, canvas.height / 2);
-      };
-      img.src = it.firma;
-      salvaBtn.innerHTML = '<i data-lucide="check"></i> Salva modifica';
-      krIcons();
-      nomeInput.focus();
     }
   });
 
-  krEnableDragReorder(listEl, KEY, render);
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
-   11) SPESE GIORNATA
+   19) SPESE GIORNATA
    ===================================================================== */
 (function speseModule(){
   const KEY = 'kr_spese';
   const form = document.getElementById('formSpesa');
   const listEl = document.getElementById('speseList');
   const totaleEl = document.getElementById('speseTotale');
-  const annullaBtn = document.getElementById('btnSpesaAnnulla');
-  let editingId = null;
 
   function formatEuro(n){
     return '€ ' + n.toFixed(2).replace('.', ',');
@@ -1369,21 +1060,18 @@ let krRenderCiak = null;
     const items = krLoad(KEY);
     const totale = items.reduce((sum, i) => sum + i.importo, 0);
     totaleEl.textContent = formatEuro(totale);
-    krSetTileCount('spese', formatEuro(totale));
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessuna spesa registrata.');
       return;
     }
     listEl.innerHTML = items.slice().reverse().map(it => `
-      <div class="item-row" data-id="${it.id}">
-        <i data-lucide="grip-vertical" class="drag-handle"></i>
+      <div class="item-row">
         <div class="item-main">
           <div class="item-title">${it.desc}</div>
           <div class="item-sub">${it.cat}</div>
         </div>
         <div class="item-actions">
           <span class="mono" style="font-size:14px;">${formatEuro(it.importo)}</span>
-          <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
           <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
         </div>
       </div>
@@ -1391,61 +1079,34 @@ let krRenderCiak = null;
     krIcons();
   }
 
-  function annullaModifica(){
-    editingId = null;
-    form.reset();
-    annullaBtn.style.display = 'none';
-    krSetSubmitIcon(form, 'plus');
-  }
-  annullaBtn.addEventListener('click', annullaModifica);
-
   form.addEventListener('submit', e => {
     e.preventDefault();
     const items = krLoad(KEY);
-    const valori = {
+    items.push({
+      id: krId(),
       desc: document.getElementById('spesaDesc').value.trim(),
       importo: parseFloat(document.getElementById('spesaImporto').value),
       cat: document.getElementById('spesaCat').value
-    };
-    if(editingId){
-      const it = items.find(i => i.id === editingId);
-      if(it) Object.assign(it, valori);
-      annullaModifica();
-    }else{
-      items.push({ id: krId(), ...valori });
-      form.reset();
-    }
+    });
     krSave(KEY, items);
+    form.reset();
     render();
   });
 
   listEl.addEventListener('click', e => {
     const delBtn = e.target.closest('[data-del]');
-    const editBtn = e.target.closest('[data-edit]');
     if(delBtn){
       krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      if(editingId === delBtn.dataset.del) annullaModifica();
       render();
-    }
-    if(editBtn){
-      const it = krLoad(KEY).find(i => i.id === editBtn.dataset.edit);
-      if(!it) return;
-      editingId = it.id;
-      document.getElementById('spesaDesc').value = it.desc;
-      document.getElementById('spesaImporto').value = it.importo;
-      document.getElementById('spesaCat').value = it.cat;
-      annullaBtn.style.display = 'inline-flex';
-      krSetSubmitIcon(form, 'check');
     }
   });
 
-  krEnableDragReorder(listEl, KEY, render);
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
-   12) PROMEMORIA & ALLARMI
+   20) PROMEMORIA & ALLARMI
    Controlla ogni 30 secondi se un promemoria è scaduto e, se le
    notifiche del browser sono state autorizzate, invia una notifica.
    ===================================================================== */
@@ -1454,8 +1115,6 @@ let krRenderCiak = null;
   const form = document.getElementById('formPromemoria');
   const listEl = document.getElementById('promemoriaList');
   const notifBtn = document.getElementById('btnPromNotifiche');
-  const annullaBtn = document.getElementById('btnPromAnnulla');
-  let editingId = null;
 
   notifBtn.addEventListener('click', () => {
     if(!('Notification' in window)){
@@ -1477,7 +1136,6 @@ let krRenderCiak = null;
 
   function render(){
     const items = krLoad(KEY).sort((a, b) => a.orario.localeCompare(b.orario));
-    krSetTileCount('promemoria', `${items.length} impostati`);
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessun promemoria impostato.');
       return;
@@ -1486,14 +1144,12 @@ let krRenderCiak = null;
     listEl.innerHTML = items.map(it => {
       const passato = it.orario < ora;
       return `
-        <div class="item-row" data-id="${it.id}" style="${passato ? 'opacity:.5;' : ''}">
-          <i data-lucide="grip-vertical" class="drag-handle"></i>
+        <div class="item-row" style="${passato ? 'opacity:.5;' : ''}">
           <div class="item-main">
             <div class="item-title">${it.testo}</div>
             <div class="item-sub mono">${it.orario}</div>
           </div>
           <div class="item-actions">
-            <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
             <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
           </div>
         </div>
@@ -1502,49 +1158,25 @@ let krRenderCiak = null;
     krIcons();
   }
 
-  function annullaModifica(){
-    editingId = null;
-    form.reset();
-    annullaBtn.style.display = 'none';
-    krSetSubmitIcon(form, 'plus');
-  }
-  annullaBtn.addEventListener('click', annullaModifica);
-
   form.addEventListener('submit', e => {
     e.preventDefault();
     const items = krLoad(KEY);
-    const valori = {
+    items.push({
+      id: krId(),
       testo: document.getElementById('promTesto').value.trim(),
-      orario: document.getElementById('promOrario').value
-    };
-    if(editingId){
-      const it = items.find(i => i.id === editingId);
-      if(it) Object.assign(it, valori, { notificato: false });
-      annullaModifica();
-    }else{
-      items.push({ id: krId(), ...valori, notificato: false });
-      form.reset();
-    }
+      orario: document.getElementById('promOrario').value,
+      notificato: false
+    });
     krSave(KEY, items);
+    form.reset();
     render();
   });
 
   listEl.addEventListener('click', e => {
     const delBtn = e.target.closest('[data-del]');
-    const editBtn = e.target.closest('[data-edit]');
     if(delBtn){
       krSave(KEY, krLoad(KEY).filter(i => i.id !== delBtn.dataset.del));
-      if(editingId === delBtn.dataset.del) annullaModifica();
       render();
-    }
-    if(editBtn){
-      const it = krLoad(KEY).find(i => i.id === editBtn.dataset.edit);
-      if(!it) return;
-      editingId = it.id;
-      document.getElementById('promTesto').value = it.testo;
-      document.getElementById('promOrario').value = it.orario;
-      annullaBtn.style.display = 'inline-flex';
-      krSetSubmitIcon(form, 'check');
     }
   });
 
@@ -1558,7 +1190,7 @@ let krRenderCiak = null;
         it.notificato = true;
         cambiato = true;
         if('Notification' in window && Notification.permission === 'granted'){
-          new Notification('Promemoria REC', { body: it.testo });
+          new Notification('Promemoria Kit Ripresa', { body: it.testo });
         }
       }
     });
@@ -1566,13 +1198,12 @@ let krRenderCiak = null;
     render();
   }, 30000);
 
-  krEnableDragReorder(listEl, KEY, render);
   render();
   window.addEventListener('kr-cloud-updated', (e) => { if(e.detail === KEY) render(); });
 })();
 
 /* =====================================================================
-   13) REPORT PDF AMMINISTRAZIONE
+   21) REPORT PDF AMMINISTRAZIONE
    Compila un report stampabile con logo, liberatorie, spese e
    promemoria, poi apre la finestra di stampa del browser: l'utente
    sceglie "Salva come PDF" come stampante di destinazione. Non serve
