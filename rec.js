@@ -56,8 +56,8 @@ function krIcons(){
    5. Incolla URL e token qui sotto al posto dei segnaposto.
    ===================================================================== */
 const CONFIG = {
-  APPS_SCRIPT_URL: 'INCOLLA_QUI_URL_WEB_APP',
-  SECRET_TOKEN: 'INCOLLA_QUI_TOKEN'
+  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxGFo_Gf0y0pm84cgLusonjuKZuRVOYwK8SQeHu0WSDYcJVf1ID-Lzb0V-SU3hKcQoR1w/exec',
+  SECRET_TOKEN: '0712'
 };
 
 /* Mappa "chiave localStorage" -> "nome tabella sul backend".
