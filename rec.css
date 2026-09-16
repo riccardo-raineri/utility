@@ -190,42 +190,117 @@ body{
 .panel.active{ display: block; }
 
 /* =====================================================================
-   TOOL CARD (accordion)
+   GRIGLIA CASELLE (stile Trello)
+   Ogni casella è un pulsante quadrato che apre la finestra modale con
+   lo strumento corrispondente.
    ===================================================================== */
-.tool-card{
+.tile-grid{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.tile{
   background: var(--bg-elevated);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  margin-bottom: 12px;
-  overflow: hidden;
+  border-radius: 10px;
+  padding: 18px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 108px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s ease, transform .1s ease;
 }
-.tool-header{
+.tile:active{ transform: scale(.97); }
+.tile:hover{ border-color: var(--accent); }
+.tile i{ width: 24px; height: 24px; color: var(--accent); }
+.tile-title{
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.25;
+}
+.tile-count{
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  margin-top: auto;
+}
+.tile-sub{
+  font-family: var(--font-ui);
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-top: auto;
+}
+
+@media (max-width: 420px){
+  .tile-grid{ grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .tile{ padding: 14px 12px; min-height: 96px; }
+}
+
+/* =====================================================================
+   MODALE STRUMENTI
+   Finestra unica condivisa: mostra il pannello (.modal-pane) dello
+   strumento cliccato nella griglia. Tutti i pannelli restano nel DOM,
+   solo quello attivo è visibile (display gestito da rec.js).
+   ===================================================================== */
+.modal-overlay{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(0,0,0,.55);
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open{ display: flex; }
+
+.modal-box{
+  background: var(--bg);
   width: 100%;
+  max-width: 720px;
+  max-height: 88vh;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modal-slide-up .2s ease;
+}
+@keyframes modal-slide-up{
+  from{ transform: translateY(24px); opacity: .6; }
+  to{ transform: translateY(0); opacity: 1; }
+}
+@media (min-width: 720px){
+  .modal-box{ border-radius: 16px; max-height: 82vh; margin-bottom: 4vh; }
+}
+
+.modal-header{
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 16px;
-  background: transparent;
-  border: none;
-  color: var(--text);
-  font-family: var(--font-ui);
-  font-size: 14.5px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: left;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
 }
-.tool-header i:first-child{ width: 18px; height: 18px; color: var(--accent); flex-shrink: 0; }
-.tool-header span{ flex: 1; }
-.tool-header .chev{ width: 16px; height: 16px; color: var(--text-faint); transition: transform .2s ease; }
-.tool-header.open .chev{ transform: rotate(180deg); }
+.modal-header #modalIconWrap{ display: flex; flex-shrink: 0; }
+.modal-header #modalIconWrap i, .modal-header #modalIconWrap svg{ width: 19px; height: 19px; color: var(--accent); }
+.modal-header h2{
+  flex: 1;
+  margin: 0;
+  font-size: 15.5px;
+  font-weight: 700;
+}
 
-.tool-body{
-  display: none;
-  padding: 0 16px 16px;
-  border-top: 1px solid var(--border);
-  padding-top: 14px;
+.modal-body-scroll{
+  overflow-y: auto;
+  padding: 16px 18px 24px;
+  flex: 1;
 }
-.tool-body.open{ display: block; }
+.modal-pane{ display: none; }
+.modal-pane.open{ display: block; }
 
 /* =====================================================================
    FORM & CAMPI
@@ -353,6 +428,15 @@ input:focus, select:focus, textarea:focus{
   border-radius: var(--radius);
   padding: 10px 12px;
 }
+.item-row.dragging{ opacity: .4; border-style: dashed; }
+.item-row[draggable="true"]{ cursor: grab; }
+.drag-handle{
+  color: var(--text-faint);
+  flex-shrink: 0;
+  width: 16px; height: 16px;
+  cursor: grab;
+  touch-action: none;
+}
 .item-main{ flex: 1; min-width: 0; }
 .item-title{ font-size: 13.5px; font-weight: 600; }
 .item-sub{ font-size: 12px; color: var(--text-dim); margin-top: 2px; }
@@ -434,7 +518,8 @@ input:focus, select:focus, textarea:focus{
 .print-report{ display: none; }
 
 body.printing > .app,
-body.printing > .fullscreen-overlay{ display: none !important; }
+body.printing > .fullscreen-overlay,
+body.printing > .modal-overlay{ display: none !important; }
 body.printing .print-report{
   display: block;
   max-width: 720px;
@@ -518,7 +603,7 @@ body.printing .print-report{
   .app-header h1{ font-size: 15.5px; }
   .app-main{ padding: 12px 10px 50px; }
   .calc-grid{ grid-template-columns: 1fr; }
-  .tool-header{ font-size: 13.5px; padding: 12px 12px; }
+  .modal-header h2{ font-size: 14px; }
   .inline-form input, .inline-form select{ flex: 1 1 100%; }
 }
 
