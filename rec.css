@@ -81,16 +81,11 @@ body{
   z-index: 20;
 }
 .header-title{ display: flex; align-items: center; gap: 12px; }
-.header-tally{
-  width: 10px; height: 10px; border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 8px var(--accent);
+.header-logo{
+  width: 38px; height: 38px;
+  border-radius: 8px;
   flex-shrink: 0;
-  animation: tally-pulse 2s ease-in-out infinite;
-}
-@keyframes tally-pulse{
-  0%,100%{ opacity: 1; }
-  50%{ opacity: .35; }
+  object-fit: contain;
 }
 .app-header h1{
   margin: 0;
@@ -427,9 +422,21 @@ input:focus, select:focus, textarea:focus{
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 10px 12px;
+  transition: transform .15s ease, box-shadow .15s ease, opacity .15s ease;
 }
-.item-row.dragging{ opacity: .4; border-style: dashed; }
-.item-row[draggable="true"]{ cursor: grab; }
+.item-row.dragging{
+  opacity: .96;
+  box-shadow: 0 12px 26px rgba(0,0,0,.35);
+  border-color: var(--accent);
+  z-index: 5;
+  position: relative;
+}
+/* Piccolo "assestamento" quando la riga viene rilasciata nella nuova posizione */
+@keyframes kr-drop-settle{
+  0%{ transform: scale(1.05); box-shadow: 0 8px 18px rgba(0,0,0,.3); }
+  100%{ transform: scale(1); box-shadow: none; }
+}
+.item-row.drop-settle{ animation: kr-drop-settle .25s ease; }
 .drag-handle{
   color: var(--text-faint);
   flex-shrink: 0;
@@ -437,6 +444,7 @@ input:focus, select:focus, textarea:focus{
   cursor: grab;
   touch-action: none;
 }
+.drag-handle:active{ cursor: grabbing; }
 .item-main{ flex: 1; min-width: 0; }
 .item-title{ font-size: 13.5px; font-weight: 600; }
 .item-sub{ font-size: 12px; color: var(--text-dim); margin-top: 2px; }
@@ -531,12 +539,8 @@ body.printing .print-report{
 }
 
 .pr-header{ display: flex; align-items: center; gap: 16px; border-bottom: 2px solid #d42b2b; padding-bottom: 14px; margin-bottom: 18px; }
-.pr-logo{
-  font-family: var(--font-mono); font-weight: 700; font-size: 22px;
-  display: flex; align-items: center; gap: 8px; color: #111;
-  border: 2px solid #111; border-radius: 6px; padding: 6px 12px; flex-shrink: 0;
-}
-.pr-logo-dot{ width: 9px; height: 9px; border-radius: 50%; background: #d42b2b; display: inline-block; }
+.pr-logo{ flex-shrink: 0; }
+.pr-logo img{ width: 48px; height: 48px; object-fit: contain; border-radius: 8px; }
 .pr-header-text h1{ margin: 0; font-size: 16px; }
 .pr-header-text p{ margin: 2px 0 0; font-size: 12px; color: #555; }
 
@@ -773,6 +777,5 @@ body.printing .print-report{
 
 /* Rispetta le preferenze di riduzione del movimento */
 @media (prefers-reduced-motion: reduce){
-  .header-tally{ animation: none; }
   *{ transition: none !important; }
 }

@@ -67,8 +67,8 @@ function krSetSubmitIcon(form, iconName){
    5. Incolla URL e token qui sotto al posto dei segnaposto.
    ===================================================================== */
 const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxGFo_Gf0y0pm84cgLusonjuKZuRVOYwK8SQeHu0WSDYcJVf1ID-Lzb0V-SU3hKcQoR1w/exec',
-  SECRET_TOKEN: '0712'
+  APPS_SCRIPT_URL: 'INCOLLA_QUI_URL_WEB_APP',
+  SECRET_TOKEN: 'INCOLLA_QUI_TOKEN'
 };
 
 /* Mappa "chiave localStorage" -> "nome tabella sul backend".
@@ -243,6 +243,8 @@ function krRenderEmpty(container, message){
    ===================================================================== */
 function krEnableDragReorder(listEl, key, onReordered){
   let dragRow = null;
+  let startY = 0;
+  const LIFT = 'scale(1.03) rotate(-1deg)';
 
   listEl.addEventListener('pointerdown', e => {
     const handle = e.target.closest('.drag-handle');
@@ -251,7 +253,9 @@ function krEnableDragReorder(listEl, key, onReordered){
     if(!row) return;
     e.preventDefault();
     dragRow = row;
+    startY = e.clientY;
     row.classList.add('dragging');
+    row.style.transform = LIFT;
     if(row.setPointerCapture){
       try{ row.setPointerCapture(e.pointerId); }catch(err){ /* ignora */ }
     }
@@ -260,15 +264,28 @@ function krEnableDragReorder(listEl, key, onReordered){
   listEl.addEventListener('pointermove', e => {
     if(!dragRow) return;
     e.preventDefault();
-    const rows = Array.from(listEl.querySelectorAll('.item-row')).filter(r => r !== dragRow);
+    // La riga trascinata segue il dito/il mouse verticalmente, mantenendo
+    // anche il leggero "sollevamento" (scala + rotazione) impostato al grab
+    dragRow.style.transform = `translateY(${e.clientY - startY}px) ${LIFT}`;
+
+    // Se le righe hanno un raggruppamento (es. checklist per categoria),
+    // il riordino resta confinato allo stesso gruppo: righe senza
+    // raggruppamento hanno dataset.cat undefined su entrambi i lati, quindi
+    // il confronto passa sempre e il comportamento per le altre liste resta invariato
+    const gruppo = dragRow.dataset.cat;
+    const rows = Array.from(listEl.querySelectorAll('.item-row')).filter(r => r !== dragRow && r.dataset.cat === gruppo);
     for(const row of rows){
       const rect = row.getBoundingClientRect();
       if(e.clientY > rect.top && e.clientY < rect.bottom){
-        if(e.clientY < rect.top + rect.height / 2){
-          listEl.insertBefore(dragRow, row);
-        }else{
-          listEl.insertBefore(dragRow, row.nextSibling);
-        }
+        const before = e.clientY < rect.top + rect.height / 2;
+        krAnimateSwap(listEl, dragRow, () => {
+          listEl.insertBefore(dragRow, before ? row : row.nextSibling);
+        });
+        // Ricalibra il punto di riferimento: la riga trascinata è ora nella
+        // nuova posizione, quindi il trascinamento riparte da zero per
+        // evitare salti visivi
+        startY = e.clientY;
+        dragRow.style.transform = LIFT;
         break;
       }
     }
@@ -276,7 +293,13 @@ function krEnableDragReorder(listEl, key, onReordered){
 
   function terminaDrag(){
     if(!dragRow) return;
-    dragRow.classList.remove('dragging');
+    const row = dragRow;
+    row.classList.remove('dragging');
+    row.style.transform = '';
+    // Piccola animazione di assestamento quando la riga si ferma nel punto di rilascio
+    row.classList.add('drop-settle');
+    setTimeout(() => row.classList.remove('drop-settle'), 250);
+
     const idsOrdinati = Array.from(listEl.querySelectorAll('.item-row')).map(r => r.dataset.id);
     const items = krLoad(key);
     const riordinati = idsOrdinati.map(id => items.find(i => i.id === id)).filter(Boolean);
@@ -286,6 +309,29 @@ function krEnableDragReorder(listEl, key, onReordered){
   }
   listEl.addEventListener('pointerup', terminaDrag);
   listEl.addEventListener('pointercancel', terminaDrag);
+}
+
+/* Piccola animazione "FLIP": quando la riga trascinata supera un'altra
+   riga e la scavalca, questa non scatta di colpo alla nuova posizione ma
+   ci scorre dolcemente, per rendere visibile ed evidente il riordino */
+function krAnimateSwap(container, dragRow, mutationFn){
+  const rows = Array.from(container.querySelectorAll('.item-row')).filter(r => r !== dragRow);
+  const posizioniPrima = new Map();
+  rows.forEach(r => posizioniPrima.set(r, r.getBoundingClientRect().top));
+  mutationFn();
+  rows.forEach(r => {
+    const prima = posizioniPrima.get(r);
+    const dopo = r.getBoundingClientRect().top;
+    const delta = prima - dopo;
+    if(delta){
+      r.style.transition = 'none';
+      r.style.transform = `translateY(${delta}px)`;
+      requestAnimationFrame(() => {
+        r.style.transition = 'transform .18s ease';
+        r.style.transform = '';
+      });
+    }
+  });
 }
 
 /* =====================================================================
@@ -308,18 +354,30 @@ function krEnableDragReorder(listEl, key, onReordered){
       progressEl.textContent = '0 / 0 spuntati';
       return;
     }
-    listEl.innerHTML = items.map(it => `
-      <div class="item-row" data-id="${it.id}">
-        <i data-lucide="grip-vertical" class="drag-handle"></i>
-        <input type="checkbox" ${it.done ? 'checked' : ''} data-id="${it.id}" style="width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;">
-        <div class="item-main">
-          <div class="item-title" style="${it.done ? 'text-decoration:line-through;color:var(--text-faint);' : ''}">${it.text}</div>
-          <div class="item-sub">${it.cat}</div>
-        </div>
-        <div class="item-actions">
-          <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
-          <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
-        </div>
+    // Raggruppa per categoria mantenendo l'ordine di prima apparizione:
+    // ogni categoria resta un blocco separato e visivamente distinto
+    const categorie = [];
+    const gruppi = {};
+    items.forEach(it => {
+      if(!gruppi[it.cat]){ gruppi[it.cat] = []; categorie.push(it.cat); }
+      gruppi[it.cat].push(it);
+    });
+    listEl.innerHTML = categorie.map(cat => `
+      <div class="checklist-group">
+        <div class="checklist-group-title">${cat.toUpperCase()}</div>
+        ${gruppi[cat].map(it => `
+          <div class="item-row" data-id="${it.id}" data-cat="${it.cat}">
+            <i data-lucide="grip-vertical" class="drag-handle"></i>
+            <input type="checkbox" ${it.done ? 'checked' : ''} data-id="${it.id}" style="width:18px;height:18px;accent-color:var(--accent);flex-shrink:0;">
+            <div class="item-main">
+              <div class="item-title" style="${it.done ? 'text-decoration:line-through;color:var(--text-faint);' : ''}">${it.text}</div>
+            </div>
+            <div class="item-actions">
+              <button class="icon-btn" data-edit="${it.id}"><i data-lucide="pencil"></i></button>
+              <button class="icon-btn danger" data-del="${it.id}"><i data-lucide="trash-2"></i></button>
+            </div>
+          </div>
+        `).join('')}
       </div>
     `).join('');
     const doneCount = items.filter(i => i.done).length;
@@ -1595,7 +1653,7 @@ let krRenderCiak = null;
 
     let html = `
       <div class="pr-header">
-        <div class="pr-logo"><span class="pr-logo-dot"></span>REC</div>
+        <div class="pr-logo"><img src="logo.png" alt="REC"></div>
         <div class="pr-header-text">
           <h1>Report amministrazione giornata di ripresa</h1>
           <p>Generato il ${oggi}</p>
