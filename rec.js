@@ -67,8 +67,8 @@ function krSetSubmitIcon(form, iconName){
    5. Incolla URL e token qui sotto al posto dei segnaposto.
    ===================================================================== */
 const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxGFo_Gf0y0pm84cgLusonjuKZuRVOYwK8SQeHu0WSDYcJVf1ID-Lzb0V-SU3hKcQoR1w/exec',
-  SECRET_TOKEN: '0712'
+  APPS_SCRIPT_URL: 'INCOLLA_QUI_URL_WEB_APP',
+  SECRET_TOKEN: 'INCOLLA_QUI_TOKEN'
 };
 
 /* Mappa "chiave localStorage" -> "nome tabella sul backend".
@@ -246,22 +246,7 @@ function krEnableDragReorder(listEl, key, onReordered){
   let startY = 0;
   const LIFT = 'scale(1.03) rotate(-1deg)';
 
-  listEl.addEventListener('pointerdown', e => {
-    const handle = e.target.closest('.drag-handle');
-    if(!handle) return;
-    const row = handle.closest('.item-row');
-    if(!row) return;
-    e.preventDefault();
-    dragRow = row;
-    startY = e.clientY;
-    row.classList.add('dragging');
-    row.style.transform = LIFT;
-    if(row.setPointerCapture){
-      try{ row.setPointerCapture(e.pointerId); }catch(err){ /* ignora */ }
-    }
-  });
-
-  listEl.addEventListener('pointermove', e => {
+  function spostaESeServe(e){
     if(!dragRow) return;
     e.preventDefault();
     // La riga trascinata segue il dito/il mouse verticalmente, mantenendo
@@ -289,7 +274,7 @@ function krEnableDragReorder(listEl, key, onReordered){
         break;
       }
     }
-  });
+  }
 
   function terminaDrag(){
     if(!dragRow) return;
@@ -305,10 +290,34 @@ function krEnableDragReorder(listEl, key, onReordered){
     const riordinati = idsOrdinati.map(id => items.find(i => i.id === id)).filter(Boolean);
     krSave(key, riordinati);
     dragRow = null;
+
+    // Rimuove gli ascoltatori globali attivati solo durante il trascinamento
+    window.removeEventListener('pointermove', spostaESeServe);
+    window.removeEventListener('pointerup', terminaDrag);
+    window.removeEventListener('pointercancel', terminaDrag);
+
     if(onReordered) onReordered();
   }
-  listEl.addEventListener('pointerup', terminaDrag);
-  listEl.addEventListener('pointercancel', terminaDrag);
+
+  listEl.addEventListener('pointerdown', e => {
+    const handle = e.target.closest('.drag-handle');
+    if(!handle) return;
+    const row = handle.closest('.item-row');
+    if(!row) return;
+    e.preventDefault();
+    dragRow = row;
+    startY = e.clientY;
+    row.classList.add('dragging');
+    row.style.transform = LIFT;
+
+    // Gli ascoltatori vengono agganciati alla finestra (non solo al
+    // contenitore della lista) così il trascinamento resta affidabile anche
+    // se il dito/il puntatore si sposta rapidamente fuori dai bordi della
+    // riga o della lista durante il movimento, sia su desktop che su touch
+    window.addEventListener('pointermove', spostaESeServe, { passive: false });
+    window.addEventListener('pointerup', terminaDrag);
+    window.addEventListener('pointercancel', terminaDrag);
+  });
 }
 
 /* Piccola animazione "FLIP": quando la riga trascinata supera un'altra
@@ -859,7 +868,7 @@ let krRenderCiak = null;
       krRenderEmpty(listEl, 'Nessun ciak registrato.');
       return;
     }
-    listEl.innerHTML = items.slice().reverse().map(it => {
+    listEl.innerHTML = items.map(it => {
       const g = GIUDIZI[it.giudizio];
       const clip = [it.clipVideo ? `Video: ${it.clipVideo}` : '', it.clipAudio ? `Audio: ${it.clipAudio}` : ''].filter(Boolean).join(' · ');
       return `
@@ -905,7 +914,7 @@ let krRenderCiak = null;
       if(it) Object.assign(it, valori);
       annullaModifica();
     }else{
-      items.push({ id: krId(), ...valori, ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) });
+      items.unshift({ id: krId(), ...valori, ora: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' }) });
       form.reset();
     }
     krSave(KEY, items);
@@ -997,7 +1006,7 @@ let krRenderCiak = null;
   }
 
   function renderRecent(){
-    const items = krLoad(KEY_CIAK).slice(-4).reverse();
+    const items = krLoad(KEY_CIAK).slice(0, 4);
     if(items.length === 0){
       recentList.innerHTML = '<div class="list-empty">Ancora nessun ciak registrato in questa sessione.</div>';
       return;
@@ -1041,7 +1050,7 @@ let krRenderCiak = null;
       const giudizio = btn.dataset.giudizio;
       const c = getCounters();
       const items = krLoad(KEY_CIAK);
-      items.push({
+      items.unshift({
         id: krId(),
         scena: c.scena,
         ciak: c.ciak,
@@ -1107,7 +1116,7 @@ let krRenderCiak = null;
   });
 
   function renderFsNotes(){
-    const items = krLoad(KEY_NOTE).slice(-4).reverse();
+    const items = krLoad(KEY_NOTE).slice(0, 4);
     if(items.length === 0){
       noteListEl.innerHTML = '<div class="list-empty">Nessuna nota salvata in questa sessione.</div>';
       return;
@@ -1127,7 +1136,7 @@ let krRenderCiak = null;
     if(!testo) return;
     const c = getCounters();
     const items = krLoad(KEY_NOTE);
-    items.push({
+    items.unshift({
       id: krId(),
       testo,
       scena: 'Scena ' + c.scena,
@@ -1195,7 +1204,7 @@ let krRenderCiak = null;
       krRenderEmpty(listEl, 'Nessuna nota salvata.');
       return;
     }
-    listEl.innerHTML = items.slice().reverse().map(it => `
+    listEl.innerHTML = items.map(it => `
       <div class="item-row" data-id="${it.id}">
         <i data-lucide="grip-vertical" class="drag-handle"></i>
         <div class="item-main">
@@ -1230,7 +1239,7 @@ let krRenderCiak = null;
       if(it){ it.testo = testo; it.scena = sceneEl.value.trim(); }
       annullaModifica();
     }else{
-      items.push({
+      items.unshift({
         id: krId(),
         testo,
         scena: sceneEl.value.trim(),
@@ -1329,7 +1338,7 @@ let krRenderCiak = null;
       krRenderEmpty(listEl, 'Nessuna liberatoria salvata.');
       return;
     }
-    listEl.innerHTML = items.slice().reverse().map(it => `
+    listEl.innerHTML = items.map(it => `
       <div class="item-row" data-id="${it.id}">
         <i data-lucide="grip-vertical" class="drag-handle"></i>
         <div class="item-main">
@@ -1366,7 +1375,7 @@ let krRenderCiak = null;
       if(it){ it.nome = nome; it.data = dataInput.value; it.testo = testoInput.value; it.firma = firma; }
       annullaModifica();
     }else{
-      items.push({ id: krId(), nome, data: dataInput.value, testo: testoInput.value, firma });
+      items.unshift({ id: krId(), nome, data: dataInput.value, testo: testoInput.value, firma });
       nomeInput.value = '';
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
@@ -1432,7 +1441,7 @@ let krRenderCiak = null;
       krRenderEmpty(listEl, 'Nessuna spesa registrata.');
       return;
     }
-    listEl.innerHTML = items.slice().reverse().map(it => `
+    listEl.innerHTML = items.map(it => `
       <div class="item-row" data-id="${it.id}">
         <i data-lucide="grip-vertical" class="drag-handle"></i>
         <div class="item-main">
@@ -1470,7 +1479,7 @@ let krRenderCiak = null;
       if(it) Object.assign(it, valori);
       annullaModifica();
     }else{
-      items.push({ id: krId(), ...valori });
+      items.unshift({ id: krId(), ...valori });
       form.reset();
     }
     krSave(KEY, items);
@@ -1534,7 +1543,7 @@ let krRenderCiak = null;
   }
 
   function render(){
-    const items = krLoad(KEY).sort((a, b) => a.orario.localeCompare(b.orario));
+    const items = krLoad(KEY);
     krSetTileCount('promemoria', `${items.length} impostati`);
     if(items.length === 0){
       krRenderEmpty(listEl, 'Nessun promemoria impostato.');

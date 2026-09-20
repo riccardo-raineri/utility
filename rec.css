@@ -430,6 +430,7 @@ input:focus, select:focus, textarea:focus{
   border-color: var(--accent);
   z-index: 5;
   position: relative;
+  touch-action: none;
 }
 /* Piccolo "assestamento" quando la riga viene rilasciata nella nuova posizione */
 @keyframes kr-drop-settle{
