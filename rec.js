@@ -67,8 +67,8 @@ function krSetSubmitIcon(form, iconName){
    5. Incolla URL e token qui sotto al posto dei segnaposto.
    ===================================================================== */
 const CONFIG = {
-  APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxGFo_Gf0y0pm84cgLusonjuKZuRVOYwK8SQeHu0WSDYcJVf1ID-Lzb0V-SU3hKcQoR1w/exec',
-  SECRET_TOKEN: '0712'
+  APPS_SCRIPT_URL: 'INCOLLA_QUI_URL_WEB_APP',
+  SECRET_TOKEN: 'INCOLLA_QUI_TOKEN'
 };
 
 /* Mappa "chiave localStorage" -> "nome tabella sul backend".
@@ -263,9 +263,19 @@ function krEnableDragReorder(listEl, key, onReordered){
       const rect = row.getBoundingClientRect();
       if(e.clientY > rect.top && e.clientY < rect.bottom){
         const before = e.clientY < rect.top + rect.height / 2;
-        krAnimateSwap(listEl, dragRow, () => {
-          listEl.insertBefore(dragRow, before ? row : row.nextSibling);
-        });
+        // Importante: l'inserimento va fatto rispetto al genitore reale della
+        // riga di riferimento (row.parentNode), non rispetto al contenitore
+        // esterno "listEl" — nella checklist, ad esempio, le righe sono
+        // annidate dentro un contenitore di gruppo per categoria, quindi
+        // "listEl.insertBefore" fallirebbe silenziosamente (l'errore veniva
+        // ignorato e il riordino non aveva alcun effetto visibile)
+        try{
+          krAnimateSwap(listEl, dragRow, () => {
+            row.parentNode.insertBefore(dragRow, before ? row : row.nextSibling);
+          });
+        }catch(err){
+          console.error('Errore riordino drag', err);
+        }
         // Ricalibra il punto di riferimento: la riga trascinata è ora nella
         // nuova posizione, quindi il trascinamento riparte da zero per
         // evitare salti visivi
