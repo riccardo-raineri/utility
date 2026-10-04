@@ -60,11 +60,21 @@ scartate e contate, non fanno fallire l'intero aggiornamento.
 import csv
 import io
 import json
+import re
 import sys
 import urllib.request
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+
+# Soglie minime di righe valide attese. Il dataset reale ha circa 24.000
+# impianti e 90.000+ prezzi: se un giorno ne arrivano drasticamente meno,
+# quasi certamente il CSV scaricato NON è quello vero (pagina di errore,
+# contenuto troncato, risposta di una cache non aggiornata...) e NON va
+# pubblicato come se fosse un aggiornamento valido. Meglio far fallire
+# l'Action (job rosso, notifica) che pubblicare dati sbagliati in silenzio.
+MIN_IMPIANTI_ATTESI = 15_000
+MIN_PREZZI_ATTESI = 50_000
 
 # ---------------------------------------------------------------------------
 # Configurazione
@@ -159,27 +169,53 @@ CARBURANTI_NOTI = {
 # Funzioni di supporto
 # ---------------------------------------------------------------------------
 
-def scarica_csv(url: str) -> list[str]:
-    """Scarica un CSV dal MIMIT e lo restituisce come lista di righe di testo.
+def scarica_csv(url: str) -> tuple[list[str], str | None]:
+    """Scarica un CSV dal MIMIT. Restituisce (righe, data_estrazione).
 
-    Prova prima con encoding UTF-8, poi con ISO-8859-1 (i CSV della PA
-    italiana a volte usano la Latin-1 invece dell'UTF-8).
+    data_estrazione è la data dichiarata nella primissima riga del file
+    ("Estrazione del AAAA-MM-GG") — cioè il giorno a cui si riferiscono
+    DAVVERO i dati che abbiamo appena scaricato. In precedenza questa
+    riga veniva scartata senza leggerla, e il "manifest" usava la data
+    di oggi (l'orologio del runner) come se fosse automaticamente anche
+    la data dei dati: se per qualunque motivo il MIMIT avesse restituito
+    una risposta non aggiornata, lo script non se ne sarebbe accorto.
+
+    Aggiunge inoltre un parametro di cache-busting nell'URL e header
+    anti-cache espliciti: nel caso il "congelamento" fosse dovuto a una
+    cache (CDN/proxy) davanti al sito del MIMIT, questo aumenta le
+    probabilità di ottenere comunque la risposta fresca.
     """
-    req = urllib.request.Request(url, headers=HEADERS)
+    cache_bust = f"{url}?_={int(datetime.now(timezone.utc).timestamp())}"
+    req = urllib.request.Request(cache_bust, headers={
+        **HEADERS,
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+    })
     with urllib.request.urlopen(req, timeout=60) as resp:
         raw_bytes = resp.read()
 
+    testo = None
     for encoding in ("utf-8", "iso-8859-1"):
         try:
             testo = raw_bytes.decode(encoding)
-            return testo.splitlines()
+            break
         except UnicodeDecodeError:
             continue
+    if testo is None:
+        # Ultima spiaggia: decodifica "tollerante" ignorando i byte non
+        # validi, piuttosto che far fallire l'intero aggiornamento per un
+        # carattere illeggibile in un indirizzo.
+        testo = raw_bytes.decode("utf-8", errors="replace")
 
-    # Ultima spiaggia: decodifica "tollerante" ignorando i byte non validi,
-    # piuttosto che far fallire l'intero aggiornamento per un carattere
-    # illeggibile in un indirizzo.
-    return raw_bytes.decode("utf-8", errors="replace").splitlines()
+    righe = testo.splitlines()
+
+    data_estrazione = None
+    if righe:
+        m = re.match(r"Estrazione del (\d{4}-\d{2}-\d{2})", righe[0].strip())
+        if m:
+            data_estrazione = m.group(1)
+
+    return righe, data_estrazione
 
 
 def leggi_righe_pipe(righe: list[str], n_colonne_attese: int) -> list[list[str]]:
@@ -226,14 +262,24 @@ def to_float_prezzo(valore: str):
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    oggi = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    print(f"Aggiornamento prezzi carburanti - {oggi}")
+    eseguito_il = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    print(f"Aggiornamento prezzi carburanti - eseguito il {eseguito_il}")
 
     # --- 1) Anagrafica impianti ------------------------------------------------
     print("Scarico anagrafica impianti...")
-    righe_anagrafica = scarica_csv(URL_ANAGRAFICA)
+    righe_anagrafica, data_anagrafica = scarica_csv(URL_ANAGRAFICA)
     dati_anagrafica = leggi_righe_pipe(righe_anagrafica, n_colonne_attese=10)
-    print(f"  {len(dati_anagrafica)} impianti letti")
+    print(f"  {len(dati_anagrafica)} impianti letti (estrazione dichiarata: {data_anagrafica})")
+
+    if len(dati_anagrafica) < MIN_IMPIANTI_ATTESI:
+        # Non pubblichiamo dati sospetti: meglio un'Action rossa (che
+        # notifica) che un aggiornamento silenzioso con dati sbagliati o
+        # vecchi spacciati per freschi.
+        sys.exit(
+            f"ERRORE: solo {len(dati_anagrafica)} impianti letti, attesi almeno "
+            f"{MIN_IMPIANTI_ATTESI}. Il file scaricato è probabilmente una pagina "
+            f"di errore o una risposta non aggiornata (cache?): non pubblico."
+        )
 
     impianti = {}
     province_viste = set()
@@ -271,9 +317,27 @@ def main() -> None:
 
     # --- 2) Prezzi praticati -----------------------------------------------------
     print("Scarico prezzi praticati...")
-    righe_prezzi = scarica_csv(URL_PREZZI)
+    righe_prezzi, data_prezzi = scarica_csv(URL_PREZZI)
     dati_prezzi = leggi_righe_pipe(righe_prezzi, n_colonne_attese=5)
-    print(f"  {len(dati_prezzi)} prezzi letti")
+    print(f"  {len(dati_prezzi)} prezzi letti (estrazione dichiarata: {data_prezzi})")
+
+    if len(dati_prezzi) < MIN_PREZZI_ATTESI:
+        sys.exit(
+            f"ERRORE: solo {len(dati_prezzi)} prezzi letti, attesi almeno "
+            f"{MIN_PREZZI_ATTESI}. Il file scaricato è probabilmente una pagina "
+            f"di errore o una risposta non aggiornata (cache?): non pubblico."
+        )
+
+    # La data "vera" dei dati è quella dichiarata nei CSV, non l'orologio
+    # del runner. Normalmente anagrafica e prezzi dichiarano la stessa
+    # data; se per caso differiscono usiamo quella dei prezzi (è il dato
+    # che interessa di più agli utenti) e lo segnaliamo nei log.
+    data_dati = data_prezzi or data_anagrafica or eseguito_il
+    if data_anagrafica and data_prezzi and data_anagrafica != data_prezzi:
+        print(
+            f"  attenzione: anagrafica datata {data_anagrafica} ma prezzi datati "
+            f"{data_prezzi} — uso {data_dati}"
+        )
 
     prezzi_senza_impianto = 0
     for campi in dati_prezzi:
@@ -334,7 +398,7 @@ def main() -> None:
         nome_file = _slug(regione) + ".json"
         payload = {
             "regione": regione,
-            "aggiornato": oggi,
+            "aggiornato": data_dati,
             "mediaRegionale": medie_regionali.get(regione, {}),
             "impianti": lista_impianti,
         }
@@ -364,7 +428,8 @@ def main() -> None:
     # senza dover scaricare tutti i dati regione per regione.
     province_ordinate = sorted(province_viste, key=lambda x: x[0])
     manifest = {
-        "aggiornato": oggi,
+        "aggiornato": data_dati,
+        "eseguitoIl": eseguito_il,
         "fonte": "MIMIT - Osservatorio Prezzi Carburanti",
         "totaleImpianti": len(impianti_con_prezzo),
         "regioni": sorted({r for _, r in province_viste}),
