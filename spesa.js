@@ -339,15 +339,16 @@ async function aggiungiProdottoALista() {
   const supermercato = supermercatoSelezionato() || 'Non specificato';
 
   const hasOfferta = !isNaN(prezzoOfferta) && prezzoOfferta > 0;
-  const prezzoRilevante = hasOfferta ? prezzoOfferta : prezzo;
+  const prezzoRilevante = hasOfferta ? prezzoOfferta : (isNaN(prezzo) ? 0 : prezzo);
+	const pesoRilevante = isNaN(peso) ? 0 : peso;
 
-  if (!nome || !peso || isNaN(prezzoRilevante)) {
-    mostraToast('Inserisci almeno prodotto, peso e prezzo');
+  if (!nome) {
+    mostraToast('Inserisci almeno il nome del prodotto');
     return;
   }
 
   const nuovoItem = { 
-    prodotto: nome, marca: marca, categoria: categoria, unita: unita, peso: peso, 
+    prodotto: nome, marca: marca, categoria: categoria, unita: unita, peso: pesoRilevante, 
     prezzo: prezzoRilevante, prezzoOriginale: hasOfferta ? prezzo : null,
     inOfferta: hasOfferta, supermercato: supermercato, spuntato: false,
     preferito: isPreferitoInForm
@@ -477,7 +478,7 @@ function creaRigaProdotto(item, indice) {
   const prezzoKg = calcolaPrezzoKg(item.peso, item.unita, item.prezzo);
   const dettagli = [];
   if (item.marca) dettagli.push(item.marca);
-  dettagli.push(item.peso + ' ' + item.unita);
+  if (item.peso > 0) dettagli.push(item.peso + ' ' + item.unita);
   dettagli.push(item.supermercato);
   dettagli.push('‚Ç¨/kg ' + prezzoKg.toFixed(2));
 
@@ -496,8 +497,8 @@ function creaRigaProdotto(item, indice) {
     prezzo.innerHTML = `<span class="prezzo-originale">‚Ç¨ ${Number(item.prezzoOriginale).toFixed(2)}</span> ` +
                        `<span class="prezzo-offerta">‚Ç¨ ${Number(item.prezzo).toFixed(2)}</span>`;
   } else {
-    prezzo.textContent = '‚Ç¨ ' + Number(item.prezzo).toFixed(2);
-  }
+  prezzo.textContent = item.prezzo > 0 ? 'Ä ' + Number(item.prezzo).toFixed(2) : 'Ä ó';
+}
 
   const modifica = document.createElement('button');
   modifica.className = 'riga-modifica'; modifica.textContent = '‚úè';
