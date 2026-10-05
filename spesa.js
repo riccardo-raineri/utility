@@ -497,7 +497,7 @@ function creaRigaProdotto(item, indice) {
     prezzo.innerHTML = `<span class="prezzo-originale">â‚¬ ${Number(item.prezzoOriginale).toFixed(2)}</span> ` +
                        `<span class="prezzo-offerta">â‚¬ ${Number(item.prezzo).toFixed(2)}</span>`;
   } else {
-  prezzo.textContent = item.prezzo > 0 ? '€ ' + Number(item.prezzo).toFixed(2) : '€ —';
+  prezzo.textContent = item.prezzo > 0 ? 'â‚¬ ' + Number(item.prezzo).toFixed(2) : 'â‚¬ —';
 }
 
   const modifica = document.createElement('button');
