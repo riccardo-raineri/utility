@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Gym Track - Allenamento</title>
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+:root {
+  --bg: #0f172a;
+  --sf: #1e293b;
+  --sf2: #334155;
+  --tx: #f8fafc;
+  --mt: #94a3b8;
+  --ac: #38bdf8;
+  --ac-glow: rgba(56, 189, 248, 0.2);
+  --ok: #22c55e;
+  --rd: #ef4444;
+  --border: #334155;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+* { box-sizing: inherit; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+body {
+  background: var(--bg);
+  color: var(--tx);
+  padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+  font-size: 15px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+  -webkit-tap-highlight-color: transparent;
+}
+main { max-width: 640px; margin: 0 auto; padding: 16px; }
+
+h1 { font-size: 24px; font-weight: 800; letter-spacing: -0.5px; margin: 4px 0 16px; display: flex; align-items: center; gap: 8px; }
+h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--mt); margin: 20px 0 10px; }
+
+button, input, select { font: inherit; color: inherit; }
+button {
+  background: var(--sf2);
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+button:active { transform: scale(0.97); }
+button.p { background: var(--ac); color: #0f172a; font-weight: 700; box-shadow: 0 0 12px var(--ac-glow); }
+button.g { background: transparent; color: var(--mt); }
+button.d { color: var(--rd); background: rgba(239, 68, 68, 0.1); }
+button.icon-only { padding: 8px; border-radius: 10px; }
+
+input, select {
+  background: var(--sf);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  width: 100%;
+  color: var(--tx);
+}
+input:focus, select:focus { outline: 2px solid var(--ac); border-color: transparent; }
+
+.card {
+  background: var(--sf);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  background: var(--sf);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-bottom: 8px;
+}
+.row .t { flex: 1; min-width: 0; }
+.row b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 15px; }
+.m { color: var(--mt); font-size: 13px; }
+
+.th { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; background: #fff; flex: none; }
+.fl { position: relative; width: 100%; aspect-ratio: 4/3; background: #fff; border-radius: 14px; overflow: hidden; margin-bottom: 12px; }
+.fl img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.fl img+img { animation: fl 1.6s steps(1) infinite; }
+@keyframes fl { 50% { opacity: 0; } }
+
+.hd { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+.hd b { flex: 1; font-size: 16px; }
+
+.st { display: grid; grid-template-columns: 28px 1fr 70px 70px 40px; gap: 6px; align-items: center; margin-bottom: 8px; }
+.st input { text-align: center; padding: 8px 4px; font-weight: 600; }
+.st .pv { color: var(--mt); font-size: 12px; text-align: center; }
+.st > span:first-child { color: var(--mt); text-align: center; font-weight: 700; font-size: 13px; }
+
+.ck {
+  height: 38px;
+  border-radius: 10px;
+  background: var(--sf2);
+  color: var(--mt);
+  border: none;
+}
+.ck.on { background: var(--ok); color: #022c22; }
+
+.bar { display: flex; gap: 8px; align-items: center; }
+.bar > * { flex: 1; }
+#tm { font-size: 28px; font-weight: 800; font-mono: monospace; color: var(--ac); }
+
+nav {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  background: var(--sf);
+  display: flex;
+  padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--border);
+  z-index: 20;
+}
+nav button {
+  flex: 1;
+  background: none;
+  color: var(--mt);
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  padding: 6px 0;
+  border-radius: 8px;
+}
+nav button.on { color: var(--ac); font-weight: 700; }
+
+#rest {
+  position: fixed;
+  left: 12px; right: 12px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px));
+  background: var(--ac);
+  color: #0f172a;
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: none;
+  align-items: center;
+  gap: 10px;
+  z-index: 15;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  font-weight: 700;
+}
+#rest span { flex: 1; font-size: 18px; }
+#rest button { background: rgba(15,23,42,0.15); color: #0f172a; padding: 6px 10px; font-size: 13px; }
+
+#sheet {
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  overflow: auto;
+  display: none;
+  z-index: 30;
+  padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 40px;
+}
+#sheet > div { max-width: 640px; margin: 0 auto; }
+
+ol { padding-left: 20px; color: var(--mt); }
+ol li { margin-bottom: 8px; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--sf2);
+  color: var(--tx);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0 4px 6px 0;
+}
+.pill.gear { background: rgba(56, 189, 248, 0.15); color: var(--ac); }
+
+a.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  text-decoration: none; background: var(--sf2); border-radius: 12px;
+  padding: 12px; font-weight: 600; color: var(--tx); margin: 12px 0;
+}
+</style>
+</head>
+<body>
+
+<main id="v"></main>
+
+<div id="rest">
+  <i data-lucide="timer"></i>
+  <span id="rt">00:00</span>
+  <button onclick="RS(-15)">-15s</button>
+  <button onclick="RS(15)">+15s</button>
+  <button onclick="RS(0,1)">Salta</button>
+</div>
+
+<div id="sheet"></div>
+
+<nav id="nav">
+  <button data-t="oggi" onclick="go('oggi')"><i data-lucide="dumbbell"></i>Allenamento</button>
+  <button data-t="schede" onclick="go('schede')"><i data-lucide="clipboard-list"></i>Schede</button>
+  <button data-t="esercizi" onclick="go('esercizi')"><i data-lucide="search"></i>Esercizi</button>
+  <button data-t="storico" onclick="go('storico')"><i data-lucide="history"></i>Storico</button>
+</nav>
+
+<script>
+const BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/';
+const DEF = { r: [], h: [], a: null, rest: 90 };
+let DB = [], tab = 'oggi', S = load(), restEnd = 0, PKCB = null, CURRENT_ROUTINE_EDIT = null;
+
+function load() { try { return Object.assign({}, DEF, JSON.parse(localStorage.getItem('gym_v1'))); } catch(e) { return {...DEF}; } }
+function save() { try { localStorage.setItem('gym_v1', JSON.stringify(S)); } catch(e) {} }
+const $ = s => document.querySelector(s);
+const esc = s => String(s || '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+const MU = { abdominals:'Addome', abductors:'Abduttori', adductors:'Adduttori', biceps:'Bicipiti', calves:'Polpacci', chest:'Petto', forearms:'Avambracci', glutes:'Glutei', hamstrings:'Femorali', 'lower back':'Lombari', 'middle back':'Schiena media', lats:'Dorsali', neck:'Collo', quadriceps:'Quadricipiti', shoulders:'Spalle', traps:'Trapezio', triceps:'Tricipiti' };
+const EQ = { barbell:'Bilanciere', dumbbell:'Manubri', cable:'Cavo', machine:'Macchina', bodyweight:'Corpo Libero', kettlebell:'Kettlebell', band:'Elastico', ez_bar:'Bilanciere EZ' };
+
+const mu = x => MU[x] || x;
+const eq = x => EQ[x] || x || 'A corpo libero';
+const E = id => DB.find(e => e.id === id);
+const img = (e, c) => e && e.images && e.images[0] ? `<img class="${c}" loading="lazy" src="${BASE}exercises/${e.images[0]}" alt="">` : '';
+const anim = e => `<div class="fl">${(e.images||[]).map(i => `<img src="${BASE}exercises/${i}" alt="${esc(e.name)}">`).join('')}</div>`;
+const fmt = s => { s = Math.max(0, Math.round(s)); return Math.floor(s/60) + ':' + String(s%60).padStart(2, '0'); };
+
+const prevOf = id => { for(const h of S.h) { const it = h.items.find(i => i.id === id); if(it) return it.sets; } return []; };
+const record = id => { let m = 0; S.h.forEach(h => h.items.forEach(i => { if(i.id === id) i.sets.forEach(s => { m = Math.max(m, +s.kg || 0); }); })); return m; };
+
+fetch(BASE + 'dist/exercises.json').then(r => r.json()).then(d => { DB = d; render(); }).catch(() => { $('#v').innerHTML = '<p class="m">Impossibile caricare il database degli esercizi. Verifica la connessione.</p>'; });
+
+function go(t) { tab = t; render(); }
+function render() {
+  document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
+  if(!DB.length) { $('#v').innerHTML = '<p class="m">Caricamento esercizi in corso...</p>'; return; }
+  ({ oggi: vOggi, schede: vSchede, esercizi: vEs, storico: vSt })[tab]();
+  if(window.lucide) lucide.createIcons();
+  scrollTo(0,0);
+}
+
+/* ---------- ALLENAMENTO ---------- */
+function vOggi() {
+  const a = S.a;
+  if(!a) {
+    $('#v').innerHTML = `
+    <h1><i data-lucide="play-circle"></i> Allenamento</h1>
+    <div class="card">
+      <button class="p" style="width:100%" onclick="startFree()"><i data-lucide="plus"></i> Inizia Allenamento Libero</button>
+      <h2>Riposo predefinito</h2>
+      <select onchange="S.rest=+this.value;save()">
+        ${[45,60,90,120,180,240].map(s => `<option value="${s}" ${S.rest==s?'selected':''}>${fmt(s)} (${s} sec)</option>`).join('')}
+      </select>
+    </div>
+    <h2>Le Tue Schede</h2>
+    ${S.r.length ? S.r.map((r, i) => `
+      <div class="card">
+        <div class="bar" style="margin-bottom:8px">
+          <div><b>${esc(r.name)}</b><div class="m">${r.ex.length} esercizi</div></div>
+          <button class="p" style="flex:none" onclick="startR(${i})"><i data-lucide="play"></i> Avvia</button>
+        </div>
+        <div style="margin-top:6px">
+          ${r.ex.map(id => {
+            const ex = E(id);
+            return ex ? `<span class="pill gear"><i data-lucide="wrench" style="width:12px;height:12px"></i> ${eq(ex.equipment)}</span>` : '';
+          }).filter((v, idx, self) => self.indexOf(v) === idx).join('')}
+        </div>
+      </div>
+    `).join('') : '<p class="m">Nessuna scheda creata. Vai nella sezione Schede per crearne una.</p>'}`;
+    return;
+  }
+
+  $('#v').innerHTML = `
+  <div class="bar" style="margin-bottom:12px">
+    <div>
+      <div class="m">${esc(a.name)}</div>
+      <div id="tm">${fmt((Date.now()-a.start)/1000)}</div>
+    </div>
+    <button class="p" onclick="finish()" style="flex:none"><i data-lucide="check-circle"></i> Termina</button>
+  </div>
+  ${a.items.map((it, i) => {
+    const e = E(it.id), pv = prevOf(it.id);
+    return `
+    <section class="card">
+      <div class="hd" onclick="det('${it.id}')">
+        ${e ? img(e, 'th') : ''}
+        <div>
+          <b>${esc(it.name)}</b>${e ? `<div class="m"><span class="pill gear"><i data-lucide="wrench" style="width:12px"></i> ${eq(e.equipment)}</span></div>` : ''}
+        </div>
+        <button class="g d icon-only" onclick="event.stopPropagation();rmEx(${i})"><i data-lucide="trash-2"></i></button>
+      </div>
+      <div class="st m">
+        <span>#</span><span class="pv">Prima</span><span>kg</span><span>Rip</span><span></span>
+      </div>
+      ${it.sets.map((s, j) => `
+        <div class="st">
+          <span>${j+1}</span>
+          <span class="pv">${pv[j] ? pv[j].kg + '×' + pv[j].reps : '–'}</span>
+          <input inputmode="decimal" placeholder="0" value="${s.kg}" oninput="U(${i},${j},'kg',this.value)">
+          <input inputmode="numeric" placeholder="0" value="${s.reps}" oninput="U(${i},${j},'reps',this.value)">
+          <button class="ck ${s.d?'on':''}" onclick="T(${i},${j})"><i data-lucide="${s.d?'check':'square'}"></i></button>
+        </div>
+      `).join('')}
+      <div class="bar" style="margin-top:10px">
+        <button onclick="addSet(${i})"><i data-lucide="plus"></i> Serie</button>
+        <button onclick="det('${it.id}')"><i data-lucide="info"></i> Come si fa</button>
+      </div>
+    </section>`;
+  }).join('')}
+  <button class="p" style="width:100%;margin-top:10px" onclick="pick(id=>{addEx(id)}, true)"><i data-lucide="plus"></i> Aggiungi Esercizio</button>
+  <button class="g d" style="width:100%;margin-top:8px" onclick="discard()"><i data-lucide="x"></i> Annulla Allenamento</button>`;
+}
+
+function newItem(id) {
+  const e = E(id), pv = prevOf(id), n = Math.max(3, pv.length);
+  return { id, name: e ? e.name : 'Esercizio', sets: Array.from({length: Math.min(n,3)}, (_, j) => ({ kg: pv[j]?pv[j].kg:'', reps: pv[j]?pv[j].reps:'', d: 0 })) };
+}
+function startFree() { S.a = { name: 'Allenamento Libero', start: Date.now(), items: [] }; save(); render(); pick(id => addEx(id), true); }
+function startR(i) { const r = S.r[i]; S.a = { name: r.name, start: Date.now(), items: r.ex.filter(E).map(newItem) }; save(); render(); }
+function addEx(id) { S.a.items.push(newItem(id)); save(); if(tab === 'oggi') vOggi(); }
+function rmEx(i) { S.a.items.splice(i, 1); save(); vOggi(); }
+function addSet(i) { const s = S.a.items[i].sets, l = s[s.length-1] || {kg:'', reps:''}; s.push({kg: l.kg, reps: l.reps, d:0}); save(); vOggi(); }
+function U(i,j,k,v) { S.a.items[i].sets[j][k] = v.replace(',','.'); save(); }
+function T(i,j) { const s = S.a.items[i].sets[j]; s.d = s.d ? 0 : 1; save(); render(); if(s.d) startRest(S.rest); }
+
+function finish() {
+  const items = S.a.items.map(i => ({ id: i.id, name: i.name, sets: i.sets.filter(s => s.d).map(s => ({ kg: +s.kg||0, reps: +s.reps||0 })) })).filter(i => i.sets.length);
+  if(!items.length) { if(confirm('Nessuna serie completata. Annullare l\'allenamento?')) discard(); return; }
+  S.h.unshift({ d: Date.now(), n: S.a.name, dur: Math.round((Date.now()-S.a.start)/1000), items });
+  S.a = null; save(); stopRest(); go('storico');
+}
+function discard() { if(!S.a || confirm('Annullare l\'allenamento in corso?')) { S.a = null; save(); stopRest(); render(); } }
+
+/* Timer */
+function startRest(s) { restEnd = Date.now() + s*1000; $('#rest').style.display = 'flex'; tickRest(); }
+function stopRest() { restEnd = 0; $('#rest').style.display = 'none'; }
+function RS(d, skip) { if(skip) return stopRest(); restEnd += d*1000; tickRest(); }
+function beep() {
+  try {
+    const c = new (window.AudioContext||window.webkitAudioContext)(), o = c.createOscillator();
+    o.frequency.value = 880; o.connect(c.destination); o.start(); o.stop(c.currentTime + 0.4);
+  } catch(e) {}
+  if(navigator.vibrate) navigator.vibrate([200,100,200]);
+}
+function tickRest() {
+  const l = (restEnd - Date.now()) / 1000;
+  if(l <= 0) { stopRest(); beep(); return; }
+  $('#rt').textContent = 'Riposo ' + fmt(l);
+}
+setInterval(() => {
+  if(restEnd) tickRest();
+  const t = $('#tm'); if(t && S.a) t.textContent = fmt((Date.now()-S.a.start)/1000);
+}, 500);
+
+/* ---------- DETTAGLIO ESERCIZIO ---------- */
+function det(id) {
+  const e = E(id), r = record(id); if(!e) return;
+  const q = encodeURIComponent(e.name + ' esercizio corretta esecuzione');
+  sheet(`
+    <div class="bar" style="margin-bottom:12px">
+      <h1 style="margin:0;flex:1">${esc(e.name)}</h1>
+      <button class="g icon-only" onclick="closeSheet()"><i data-lucide="x"></i></button>
+    </div>
+    ${anim(e)}
+    <div style="margin-bottom:12px">
+      ${e.primaryMuscles.map(m => `<span class="pill">${mu(m)}</span>`).join('')}
+      <span class="pill gear"><i data-lucide="wrench" style="width:12px"></i> ${eq(e.equipment)}</span>
+      <span class="pill">${esc(e.level)}</span>
+    </div>
+    ${r ? `<p class="m" style="margin-bottom:12px"><i data-lucide="trophy" style="width:14px;color:var(--ac)"></i> Tuo Record: <b>${r} kg</b></p>` : ''}
+    <a class="btn" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${q}">
+      <i data-lucide="youtube"></i> Guarda Video Tutorial
+    </a>
+    <h2>Esecuzione</h2>
+    <ol>${(e.instructions||[]).map(x => `<li>${esc(x)}</li>`).join('')}</ol>
+    <button style="width:100%;margin-top:16px" onclick="closeSheet()"><i data-lucide="check"></i> Chiudi</button>
+  `);
+}
+
+function sheet(h) {
+  const s = $('#sheet'); s.innerHTML = '<div>' + h + '</div>';
+  s.style.display = 'block'; s.scrollTop = 0;
+  if(window.lucide) lucide.createIcons();
+}
+function closeSheet() { $('#sheet').style.display = 'none'; $('#sheet').innerHTML = ''; }
+
+/* ---------- RICERCA / PICKER ESERCIZI ---------- */
+function searchUI(cb, autoClose = false) {
+  PKCB = (id) => {
+    cb(id);
+    if(autoClose) closeSheet();
+  };
+  const ms = [...new Set(DB.flatMap(e => e.primaryMuscles))].sort();
+  const eqs = [...new Set(DB.map(e => e.equipment).filter(Boolean))].sort();
+
+  return `
+  <input id="q" type="search" placeholder="Cerca esercizio..." oninput="lst(${autoClose})" style="margin-bottom:8px">
+  <div style="display:flex;gap:8px;margin-bottom:12px">
+    <select id="mf" onchange="lst(${autoClose})" style="flex:1">
+      <option value="">Tutti i muscoli</option>
+      ${ms.map(m => `<option value="${m}">${mu(m)}</option>`).join('')}
+    </select>
+    <select id="eqf" onchange="lst(${autoClose})" style="flex:1">
+      <option value="">Tutti i Gear</option>
+      ${eqs.map(g => `<option value="${g}">${eq(g)}</option>`).join('')}
+    </select>
+  </div>
+  <div id="res"></div>`;
+}
+
+function lst(autoClose = false) {
+  const q = ($('#q').value || '').toLowerCase().trim();
+  const m = $('#mf').value;
+  const g = $('#eqf').value;
+  const r = DB.filter(e => (!m || e.primaryMuscles.includes(m)) && (!g || e.equipment === g) && (!q || q.split(' ').every(w => e.name.toLowerCase().includes(w)))).slice(0, 50);
+
+  $('#res').innerHTML = r.length ? r.map(e => `
+    <div class="row">
+      ${img(e, 'th')}
+      <div class="t" onclick="PKCB('${e.id}')">
+        <b>${esc(e.name)}</b>
+        <span class="m">${e.primaryMuscles.map(mu).join(', ')} • ${eq(e.equipment)}</span>
+      </div>
+      <button class="g icon-only" title="Dettagli" onclick="event.stopPropagation(); det('${e.id}')">
+        <i data-lucide="info"></i>
+      </button>
+      <button class="p icon-only" title="Aggiungi" onclick="PKCB('${e.id}')">
+        <i data-lucide="plus"></i>
+      </button>
+    </div>
+  `).join('') : '<p class="m">Nessun esercizio trovato.</p>';
+  if(window.lucide) lucide.createIcons();
+}
+
+function pick(cb, autoClose = false) {
+  sheet(`
+    <div class="bar" style="margin-bottom:10px">
+      <h1 style="margin:0;flex:1"><i data-lucide="dumbbell"></i> Scegli Esercizio</h1>
+      <button class="g icon-only" onclick="closeSheet()"><i data-lucide="x"></i></button>
+    </div>
+    ${searchUI(cb, autoClose)}
+  `);
+  lst(autoClose);
+}
+
+function vEs() {
+  $('#v').innerHTML = '<h1><i data-lucide="book-open"></i> Libreria Esercizi</h1>' + searchUI(det, false);
+  lst(false);
+}
+
+/* ---------- TAB SCHEDE (CREAZIONE / MODIFICA) ---------- */
+let draft = null;
+
+function vSchede() {
+  if(draft) {
+    $('#v').innerHTML = `
+    <h1>${draft.index !== undefined ? '<i data-lucide="edit-3"></i> Modifica Scheda' : '<i data-lucide="plus-circle"></i> Nuova Scheda'}</h1>
+    <input placeholder="Nome Scheda (es. Push, Pull, Gambe)" value="${esc(draft.name)}" oninput="draft.name=this.value" style="margin-bottom:12px">
+    <h2>Esercizi Inseriti</h2>
+    ${draft.ex.length ? draft.ex.map((id, i) => {
+      const e = E(id);
+      return `
+      <div class="row">
+        ${img(e, 'th')}
+        <div class="t">
+          <b>${esc(e ? e.name : 'Esercizio')}</b>
+          <span class="m">${e ? eq(e.equipment) : ''}</span>
+        </div>
+        <button class="g icon-only" onclick="draft.ex.splice(${i},1); vSchede()"><i data-lucide="trash-2"></i></button>
+      </div>`;
+    }).join('') : '<p class="m" style="margin-bottom:12px">Nessun esercizio aggiunto.</p>'}
+    
+    <button style="width:100%;margin:10px 0" onclick="pick(id => { draft.ex.push(id); vSchede(); }, true)">
+      <i data-lucide="plus"></i> Aggiungi Esercizio
+    </button>
+    <div class="bar" style="margin-top:12px">
+      <button class="g" onclick="draft=null; vSchede()"><i data-lucide="x"></i> Annulla</button>
+      <button class="p" onclick="saveDraft()"><i data-lucide="save"></i> Salva Scheda</button>
+    </div>`;
+    if(window.lucide) lucide.createIcons();
+    return;
+  }
+
+  $('#v').innerHTML = `
+  <h1><i data-lucide="clipboard-list"></i> Le Tue Schede</h1>
+  <button class="p" style="width:100%;margin-bottom:16px" onclick="draft={name:'',ex:[]}; vSchede()">
+    <i data-lucide="plus"></i> Crea Nuova Scheda
+  </button>
+  ${S.r.map((r, i) => `
+    <div class="card">
+      <div class="bar" style="margin-bottom:8px">
+        <b>${esc(r.name)}</b>
+        <div style="display:flex;gap:4px">
+          <button class="g icon-only" title="Modifica Scheda" onclick="editRoutine(${i})"><i data-lucide="edit-2"></i></button>
+          <button class="g d icon-only" title="Elimina" onclick="deleteRoutine(${i})"><i data-lucide="trash-2"></i></button>
+        </div>
+      </div>
+      <div class="m" style="margin-bottom:8px">${r.ex.map(id => E(id) ? esc(E(id).name) : '').filter(Boolean).join(' • ')}</div>
+      <button class="p" style="width:100%" onclick="startR(${i}); go('oggi')"><i data-lucide="play"></i> Avvia Allenamento</button>
+    </div>
+  `).join('') || '<p class="m">Nessuna scheda salvata. Creane una per iniziare!</p>'}`;
+  if(window.lucide) lucide.createIcons();
+}
+
+function editRoutine(i) {
+  draft = { index: i, name: S.r[i].name, ex: [...S.r[i].ex] };
+  vSchede();
+}
+
+function deleteRoutine(i) {
+  if(confirm('Sei sicuro di voler eliminare questa scheda?')) {
+    S.r.splice(i, 1); save(); vSchede();
+  }
+}
+
+function saveDraft() {
+  if(!draft.ex.length) { alert('Aggiungi almeno un esercizio alla scheda.'); return; }
+  const name = draft.name.trim() || 'Scheda ' + (S.r.length + 1);
+  if(draft.index !== undefined) {
+    S.r[draft.index] = { name, ex: draft.ex };
+  } else {
+    S.r.push({ name, ex: draft.ex });
+  }
+  draft = null; save(); vSchede();
+}
+
+/* ---------- STORICO ---------- */
+function vSt() {
+  $('#v').innerHTML = `
+  <h1><i data-lucide="history"></i> Storico Allenamenti</h1>
+  ${S.h.map((h, i) => {
+    const vol = h.items.reduce((a, it) => a + it.sets.reduce((b, s) => b + (s.kg * s.reps), 0), 0);
+    return `
+    <div class="card">
+      <div class="bar">
+        <div>
+          <b>${esc(h.n)}</b>
+          <div class="m">${new Date(h.d).toLocaleDateString('it-IT', {weekday:'short', day:'numeric', month:'short'})} • ${fmt(h.dur)} •${Math.round(vol)} kg totali</div>
+        </div>
+        <button class="g d icon-only" onclick="if(confirm('Eliminare questo allenamento?')){S.h.splice(${i},1);save();vSt()}"><i data-lucide="trash-2"></i></button>
+      </div>
+      ${h.items.map(it => `
+        <div style="margin-top:8px">
+          <div style="font-size:14px;font-weight:600">${esc(it.name)}</div>
+          <div class="m">${it.sets.map(s => s.kg + 'kg × ' + s.reps).join(' • ')}</div>
+        </div>
+      `).join('')}
+    </div>`;
+  }).join('') || '<p class="m">Nessun allenamento registrato nello storico.</p>'}
+  <div class="bar" style="margin-top:16px">
+    <button onclick="exp()"><i data-lucide="download"></i> Esporta Backup</button>
+    <button onclick="$('#imp').click()"><i data-lucide="upload"></i> Importa</button>
+  </div>
+  <input id="imp" type="file" accept="application/json" hidden onchange="imp(this)">`;
+  if(window.lucide) lucide.createIcons();
+}
+
+function exp() {
+  const b = new Blob([JSON.stringify(S)], {type:'application/json'}), a = document.createElement('a');
+  a.href = URL.createObjectURL(b); a.download = 'gym-backup.json'; a.click();
+}
+function imp(i) {
+  const f = i.files[0]; if(!f) return;
+  f.text().then(t => {
+    try { S = Object.assign({}, DEF, JSON.parse(t)); save(); render(); } catch(e) { alert('File di backup non valido.'); }
+  });
+}
+</script>
+</body>
+</html>
