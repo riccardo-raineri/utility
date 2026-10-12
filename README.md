@@ -1,6 +1,6 @@
 # 🛠️ MY TOOLBOX Dashboard
 
-<p align="center"><img src="banner.jpg" alt="GPT-Image2 Prompt System" width="800" /></p>
+<p align="center"><img src="https://github.com/riccardo-raineri/utility/banner.jpg" alt="MYTOOLBOX" width="800" /></p>
 
 Una raccolta modulare di strumenti web: calcolatrici, utilità, tool per fotografia e video, produttività, viaggi e intrattenimento. Ogni strumento è una pagina indipendente, raggiungibile da una dashboard centrale con ricerca, filtri e preferiti. Interfaccia responsive, pensata prima di tutto per essere usata da smartphone, con tema chiaro/scuro.
 
