@@ -1,5 +1,5 @@
 // tracciapacchi.js
-// Logica del tool: i pacchi sono salvati su un Google Sheet condiviso (via Apps Script),
+// I pacchi sono salvati su un Google Sheet condiviso (via Apps Script),
 // così la lista è la stessa su tutti i dispositivi. Il Cloudflare Worker fa da proxy
 // verso Ship24 (registrazione/aggiornamento stato pacchi).
 //

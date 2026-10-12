@@ -1,5 +1,7 @@
 # 🛠️ MY TOOLBOX Dashboard
 
+![MY TOOLBOX Dashboard](data/img/banner.jpeg)
+
 Una raccolta modulare di strumenti web: calcolatrici, utilità, tool per fotografia e video, produttività, viaggi e intrattenimento. Ogni strumento è una pagina indipendente, raggiungibile da una dashboard centrale con ricerca, filtri e preferiti. Interfaccia responsive, pensata prima di tutto per essere usata da smartphone, con tema chiaro/scuro.
 
 ---

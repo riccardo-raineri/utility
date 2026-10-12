@@ -1,7 +1,6 @@
 /* tracciapacchi.css
-   Stile "centro di smistamento": palette calda da etichetta di spedizione,
-   accento arancione corriere, card a forma di talloncino con perforazione,
-   coerente con il tema chiaro/scuro condiviso dal toolbox. */
+   Palette calda, accento arancione, card a forma di talloncino con perforazione,
+*/
 
 :root {
   --bg: #FBF7F1;
