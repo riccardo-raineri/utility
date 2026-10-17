@@ -1,23 +1,19 @@
 // tracciapacchi.js
-// I pacchi sono salvati su un Google Sheet condiviso (via Apps Script),
-// così la lista è la stessa su tutti i dispositivi. Il Cloudflare Worker fa da proxy
-// verso Ship24 (registrazione/aggiornamento stato pacchi).
-//
-// Configurazione: valorizza le tre costanti qui sotto. Se una manca o è rimasta
-// al valore segnaposto, la pagina mostra l'avviso "Configurazione mancante" e si ferma lì.
+// Versione Ottimizzata con Batch Update e Archiviazione
 
+// Configurazione base: il frontend comunica solo con il tuo Web App (Apps Script)
 const SHIP24_WORKER_URL = "https://tracciapacchi.riccardo-05e.workers.dev";
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_vqKk59Umc6d_iB79jWfGHuU8TCPMvRF_UX2gk3nRJ8v7mSr9VlbDpiXgNTSoa95f/exec";
 const APPS_SCRIPT_TOKEN = "0712";
 
-const THEME_KEY = "toolbox_theme"; // chiave condivisa con gli altri tool del toolbox
-const MAX_PACCHI = 5;              // limite pensato per il piano gratuito Ship24
+const THEME_KEY = "toolbox_theme";
+const MAX_PACCHI = 5;
 
 // Ordine delle tappe principali usato dallo stepper visivo
 const MILESTONE_ORDER = ["info_received", "in_transit", "out_for_delivery", "delivered"];
 const EXCEPTION_STATUSES = ["exception", "failed_attempt", "return_to_sender"];
 
-// Cache locale dei pacchi, popolata dal Google Sheet a ogni caricamento/modifica
+// Cache locale dei pacchi
 let packagesCache = [];
 
 // --- Riferimenti agli elementi della pagina ---
@@ -36,7 +32,7 @@ const cardTemplate = document.getElementById("package-card-template");
 const statsRow = document.getElementById("stats-row");
 
 // ------------------------------------------------------------------
-// Controllo configurazione: se manca qualcosa, mostriamo l'avviso e ci fermiamo
+// Controllo configurazione
 // ------------------------------------------------------------------
 function isPlaceholder(value) {
   return !value || value.trim() === "" || value.includes("INSERISCI_QUI");
@@ -47,7 +43,7 @@ function isConfigured() {
 }
 
 // ------------------------------------------------------------------
-// Tema chiaro/scuro (stesso pattern degli altri tool del toolbox)
+// Tema chiaro/scuro
 // ------------------------------------------------------------------
 function applyTheme(theme) {
   document.body.classList.toggle("theme-dark", theme === "dark");
@@ -67,9 +63,6 @@ themeToggle.addEventListener("click", () => {
 
 // ------------------------------------------------------------------
 // Storage condiviso: Google Sheet via Apps Script
-// Struttura di ogni pacco:
-// { id, label, number, trackerId, status, detail, courier, transitDays,
-//   events: [{status, location, datetime}], lastUpdate }
 // ------------------------------------------------------------------
 async function loadPackages() {
   loadingState.hidden = false;
@@ -81,18 +74,16 @@ async function loadPackages() {
     packagesCache = data.packages || [];
   } catch (err) {
     loadingState.hidden = true;
-    packagesList.innerHTML = `<p class="loading-state error">Impossibile caricare i pacchi dal foglio Google. Controlla APPS_SCRIPT_URL e APPS_SCRIPT_TOKEN in tracciapacchi.js.</p>`;
+    packagesList.innerHTML = `<p class="loading-state error">Impossibile caricare i pacchi. Controlla la connessione o l'URL dello script.</p>`;
     return;
   }
   loadingState.hidden = true;
   renderPackages();
 }
 
-// Invia un'azione (add/update/remove) al Web App Apps Script
 async function sheetRequest(action, pacco) {
   const res = await fetch(APPS_SCRIPT_URL, {
     method: "POST",
-    // text/plain evita il preflight CORS con Apps Script; il corpo resta comunque JSON valido
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ token: APPS_SCRIPT_TOKEN, action, pacco }),
   });
@@ -101,43 +92,26 @@ async function sheetRequest(action, pacco) {
   return data;
 }
 
-// ------------------------------------------------------------------
-// Chiamate al Worker Ship24
-// ------------------------------------------------------------------
 async function callWorker(payload) {
   const res = await fetch(SHIP24_WORKER_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) {
-    throw new Error(`Errore dal Worker (${res.status})`);
-  }
+  if (!res.ok) throw new Error(`Errore dal Worker (${res.status})`);
   return res.json();
 }
 
-// Ship24 rileva automaticamente il corriere dal formato del numero di tracking
-// e lo restituisce come courierCode (es. "poste-italiane", "gls-italy").
-// Qui lo trasformiamo in un nome leggibile ("Poste Italiane").
 function extractCourierName(shipment, tracker) {
   let code = shipment?.courierCode ?? tracker?.courierCode;
-  if (Array.isArray(code)) code = code[0]; // un pacco può passare per più corrieri: mostriamo il principale
+  if (Array.isArray(code)) code = code[0];
   if (!code) return null;
-  return code
-    .toString()
-    .replace(/[-_]+/g, " ")
-    .replace(/\b\w/g, (c) => c.toUpperCase());
+  return code.toString().replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// Estrae dallo schema di risposta Ship24 stato, corriere e cronologia eventi.
-// NB: alcuni nomi di campo vanno verificati contro la risposta reale della tua
-// API key, potrebbero cambiare leggermente rispetto a questa versione.
 function parseShip24Result(data) {
   const tracking = data?.data?.trackings?.[0];
-  if (!tracking) {
-    return { status: "pending", detail: "In attesa di aggiornamenti", trackerId: null, courier: null, events: [] };
-  }
-
+  if (!tracking) return { status: "pending", detail: "In attesa di aggiornamenti", trackerId: null, courier: null, events: [] };
   const shipment = tracking.shipment || {};
   const events = (tracking.events || []).map((e) => ({
     status: e.status || "Aggiornamento",
@@ -145,13 +119,10 @@ function parseShip24Result(data) {
     datetime: e.datetime || e.occurrenceDatetime || null,
   }));
   const lastEvent = events[0];
-
   return {
     trackerId: tracking.tracker?.trackerId || null,
     status: shipment.statusMilestone || "pending",
-    detail: lastEvent
-      ? `${lastEvent.status}${lastEvent.location ? " · " + lastEvent.location : ""}`
-      : "Nessun evento disponibile ancora",
+    detail: lastEvent ? `${lastEvent.status}${lastEvent.location ? " · " + lastEvent.location : ""}` : "Nessun evento disponibile ancora",
     courier: extractCourierName(shipment, tracking.tracker) || shipment.courierName || null,
     events,
   };
@@ -187,15 +158,13 @@ function statusToLabel(status) {
   return labels[status] || "Stato sconosciuto";
 }
 
-// Calcola i giorni trascorsi dal primo evento registrato ad oggi (o alla consegna)
 function computeTransitDays(events, status) {
   if (!events || events.length === 0) return null;
   const dated = events.filter((e) => e.datetime);
   if (dated.length === 0) return null;
   const first = new Date(dated[dated.length - 1].datetime);
   const end = status === "delivered" && dated[0].datetime ? new Date(dated[0].datetime) : new Date();
-  const days = Math.max(0, Math.round((end - first) / 86400000));
-  return days;
+  return Math.max(0, Math.round((end - first) / 86400000));
 }
 
 // ------------------------------------------------------------------
@@ -204,13 +173,11 @@ function computeTransitDays(events, status) {
 addForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   addError.hidden = true;
-
   if (packagesCache.length >= MAX_PACCHI) {
     addError.textContent = `Puoi tracciare al massimo ${MAX_PACCHI} pacchi contemporaneamente.`;
     addError.hidden = false;
     return;
   }
-
   const number = inputNumber.value.trim();
   if (!number) return;
   const label = inputLabel.value.trim() || `Pacco ${packagesCache.length + 1}`;
@@ -218,7 +185,6 @@ addForm.addEventListener("submit", async (e) => {
   try {
     const data = await callWorker({ action: "track", trackingNumber: number });
     const parsed = parseShip24Result(data);
-
     const pkg = {
       id: crypto.randomUUID(),
       label,
@@ -231,28 +197,26 @@ addForm.addEventListener("submit", async (e) => {
       transitDays: computeTransitDays(parsed.events, parsed.status),
       lastUpdate: new Date().toISOString(),
     };
-
     await sheetRequest("add", pkg);
     packagesCache.push(pkg);
     renderPackages();
-
     inputLabel.value = "";
     inputNumber.value = "";
   } catch (err) {
-    addError.textContent = "Non è stato possibile registrare il pacco. Controlla il numero e la configurazione del Worker/foglio Google.";
+    addError.textContent = "Errore durante l'aggiunta. Controlla il numero o la configurazione.";
     addError.hidden = false;
   }
 });
 
 // ------------------------------------------------------------------
-// Aggiornamento stato di un pacco
+// Aggiornamento e Gestione
 // ------------------------------------------------------------------
+
+// Aggiornamento singola card
 async function refreshPackage(id) {
   const pkg = packagesCache.find((p) => p.id === id);
   if (!pkg || !pkg.trackerId) return;
-
   const wasDelivered = pkg.status === "delivered";
-
   try {
     const data = await callWorker({ action: "results", trackerId: pkg.trackerId });
     const parsed = parseShip24Result(data);
@@ -262,29 +226,54 @@ async function refreshPackage(id) {
     pkg.events = parsed.events.length ? parsed.events : pkg.events;
     pkg.transitDays = computeTransitDays(pkg.events, pkg.status);
     pkg.lastUpdate = new Date().toISOString();
-    pkg._justDelivered = !wasDelivered && pkg.status === "delivered"; // per l'evidenziazione una tantum
-
+    pkg._justDelivered = !wasDelivered && pkg.status === "delivered";
     await sheetRequest("update", pkg);
     renderPackages();
-  } catch {
-    // In caso di errore silenzioso, lo stato mostrato resta quello precedente
+  } catch (err) { console.error(err); }
+}
+
+// AGGIORNAMENTO VELOCE (BATCH)
+async function batchRefreshAll() {
+  loadingState.hidden = false;
+  try {
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ token: APPS_SCRIPT_TOKEN, action: "batch_update" }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (data.packages) packagesCache = data.packages;
+  } catch (err) {
+    addError.textContent = "Errore durante l'aggiornamento massivo.";
+    addError.hidden = false;
+  }
+  loadingState.hidden = true;
+  renderPackages();
+}
+
+refreshAllBtn.addEventListener("click", batchRefreshAll);
+
+async function archivePackage(id) {
+  if (!confirm("Vuoi archiviare questo pacco? Sparirà dalla lista principale.")) return;
+  try {
+    await sheetRequest("archive", { id });
+    packagesCache = packagesCache.filter((p) => p.id !== id);
+    renderPackages();
+  } catch (err) {
+    addError.textContent = "Errore durante l'archiviazione.";
+    addError.hidden = false;
   }
 }
 
-refreshAllBtn.addEventListener("click", () => {
-  packagesCache.forEach((p) => refreshPackage(p.id));
-});
-
-// ------------------------------------------------------------------
-// Rimozione pacco
-// ------------------------------------------------------------------
 async function removePackage(id) {
+  if (!confirm("Rimuovere definitivamente il pacco?")) return;
   try {
     await sheetRequest("remove", { id });
     packagesCache = packagesCache.filter((p) => p.id !== id);
     renderPackages();
-  } catch {
-    addError.textContent = "Non è stato possibile rimuovere il pacco dal foglio Google. Riprova.";
+  } catch (err) {
+    addError.textContent = "Errore nella rimozione.";
     addError.hidden = false;
   }
 }
@@ -299,15 +288,13 @@ function formatRelativeTime(isoString) {
   if (diffMin < 60) return `Aggiornato ${diffMin} min fa`;
   const diffH = Math.round(diffMin / 60);
   if (diffH < 24) return `Aggiornato ${diffH} h fa`;
-  const diffG = Math.round(diffH / 24);
-  return `Aggiornato ${diffG} g fa`;
+  return `Aggiornato ${Math.round(diffH / 24)} g fa`;
 }
 
 function formatEventDate(isoString) {
   if (!isoString) return "";
   const d = new Date(isoString);
-  if (isNaN(d)) return "";
-  return d.toLocaleString("it-IT", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+  return isNaN(d) ? "" : d.toLocaleString("it-IT", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 }
 
 function updateStatsRow(packages) {
@@ -327,7 +314,6 @@ function renderStepper(node, status) {
   const stepper = node.querySelector(".stepper");
   const isException = EXCEPTION_STATUSES.includes(status);
   stepper.classList.toggle("stepper-exception", isException);
-
   const currentIndex = isException ? -1 : MILESTONE_ORDER.indexOf(status);
   stepper.querySelectorAll(".step").forEach((stepEl) => {
     const stepName = stepEl.dataset.step;
@@ -342,29 +328,21 @@ function renderHistory(node, events) {
   const toggleBtn = node.querySelector(".history-toggle");
   const toggleText = node.querySelector(".history-toggle-text");
   const wrap = node.querySelector(".history-wrap");
-
   list.innerHTML = "";
-  if (!events || events.length === 0) {
-    toggleBtn.hidden = true;
-    return;
-  }
+  if (!events || events.length === 0) { toggleBtn.hidden = true; return; }
   toggleBtn.hidden = false;
-  toggleText.textContent = `Mostra cronologia (${events.length} event${events.length === 1 ? "o" : "i"})`;
-
+  toggleText.textContent = `Mostra cronologia (${events.length} event${events.length === 1 ? "o" : "i})`;
   events.forEach((ev) => {
     const li = document.createElement("li");
     li.className = "history-item";
     li.innerHTML = `<div class="h-status">${ev.status}</div><div class="h-meta">${[formatEventDate(ev.datetime), ev.location].filter(Boolean).join(" · ")}</div>`;
     list.appendChild(li);
   });
-
-  toggleBtn.addEventListener("click", () => {
+  toggleBtn.onclick = () => {
     const isOpen = wrap.classList.toggle("open");
     toggleBtn.setAttribute("aria-expanded", String(isOpen));
-    toggleText.textContent = isOpen
-      ? "Nascondi cronologia"
-      : `Mostra cronologia (${events.length} event${events.length === 1 ? "o" : "i"})`;
-  });
+    toggleText.textContent = isOpen ? "Nascondi cronologia" : `Mostra cronologia (${events.length} event${events.length === 1 ? "o" : "i})`;
+  };
 }
 
 function renderPackages() {
@@ -376,53 +354,47 @@ function renderPackages() {
   packagesCache.forEach((pkg) => {
     const node = cardTemplate.content.cloneNode(true);
     const card = node.querySelector(".package-card");
-
     node.querySelector(".package-label").textContent = pkg.label;
     node.querySelector(".package-number").textContent = pkg.number;
-
     const pill = node.querySelector(".status-pill");
     pill.classList.add(statusToPillClass(pkg.status));
     pill.querySelector(".status-pill-icon").setAttribute("data-lucide", statusToIcon(pkg.status));
     pill.querySelector(".status-text").textContent = statusToLabel(pkg.status);
-
     node.querySelector(".courier-name").textContent = pkg.courier || "Corriere non identificato";
-    node.querySelector(".transit-days").textContent =
-      pkg.transitDays != null ? `${pkg.transitDays} giorn${pkg.transitDays === 1 ? "o" : "i"} in viaggio` : "In attesa di eventi";
-
+    node.querySelector(".transit-days").textContent = pkg.transitDays != null ? `${pkg.transitDays} giorn${pkg.transitDays === 1 ? "o" : "i} in viaggio` : "In attesa di eventi";
     node.querySelector(".status-detail").textContent = pkg.detail || "";
     node.querySelector(".last-update").textContent = formatRelativeTime(pkg.lastUpdate);
 
     renderStepper(node, pkg.status);
     renderHistory(node, pkg.events);
 
-    if (pkg._justDelivered) {
-      card.classList.add("just-delivered");
-      pkg._justDelivered = false; // l'evidenziazione è una tantum, non va riproposta ai render successivi
+    // Gestione tasto Archivia (visibile solo se consegnato)
+    const archiveBtn = node.querySelector(".archive-btn");
+    if (pkg.status === "delivered") {
+      archiveBtn.style.display = "flex";
+      archiveBtn.onclick = () => archivePackage(pkg.id);
+    } else {
+      archiveBtn.style.display = "none";
     }
 
-    node.querySelector(".remove-btn").addEventListener("click", () => removePackage(pkg.id));
-    node.querySelector(".refresh-btn").addEventListener("click", () => refreshPackage(pkg.id));
-    node.querySelector(".copy-btn").addEventListener("click", (ev) => {
+    if (pkg._justDelivered) { card.classList.add("just-delivered"); pkg._justDelivered = false; }
+
+    node.querySelector(".remove-btn").onclick = () => removePackage(pkg.id);
+    node.querySelector(".refresh-btn").onclick = () => refreshPackage(pkg.id);
+    node.querySelector(".copy-btn").onclick = (ev) => {
       navigator.clipboard.writeText(pkg.number);
       const btn = ev.currentTarget;
       btn.classList.add("copied");
-      clearTimeout(btn._copyTimeout);
-      btn._copyTimeout = setTimeout(() => btn.classList.remove("copied"), 1400);
-    });
-
+      setTimeout(() => btn.classList.remove("copied"), 1400);
+    };
     packagesList.appendChild(node);
   });
-
-  // Ridisegna le icone Lucide per tutti i nodi appena inseriti nel DOM
   if (window.lucide) lucide.createIcons();
 }
 
-// ------------------------------------------------------------------
-// Avvio
-// ------------------------------------------------------------------
+// --- Avvio ---
 initTheme();
 if (window.lucide) lucide.createIcons();
-
 if (isConfigured()) {
   configWarning.hidden = true;
   loadPackages();

@@ -1,25 +1,25 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TracciaPacchi</title>
-	
-	<!-- Favicon classica e SVG per Browser -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TracciaPacchi</title>
+
+  <!-- Favicon classica e SVG per Browser -->
   <link rel="icon" type="image/svg+xml" href="data/img/pacchi.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="data/img/apple-touch-icon-5.png">
-	
+
 <!-- Icona per iPhone / iPad (Apple Touch Icon) -->
   <link rel="apple-touch-icon" sizes="180x180" href="data/img/apple-touch-icon-5.png">
-	
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
-	
-		<!-- Foglio di stile CSS -->
-<link rel="stylesheet" href="css/tracciapacchi.css">
-	
-	    <!-- Lucide Icons -->
+
+    <!-- Foglio di stile CSS -->
+  <link rel="stylesheet" href="css/tracciapacchi.css">
+
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
@@ -55,10 +55,10 @@
         <span class="stat-chip stat-delivered"><i data-lucide="check-circle-2"></i><span id="stat-delivered">0</span> consegnati</span>
       </div>
 
-      <!-- Avviso di configurazione mancante: compare solo se le costanti in cima a tracciapacchi.js non sono state valorizzate -->
+      <!-- Avviso di configurazione mancante -->
       <section id="config-warning" class="card config-warning" hidden>
         <h2><i data-lucide="alert-triangle"></i> Configurazione mancante</h2>
-        <p>Apri <code>tracciapacchi.js</code> e valorizza le costanti <code>SHIP24_WORKER_URL</code>, <code>APPS_SCRIPT_URL</code> e <code>APPS_SCRIPT_TOKEN</code> in cima al file.</p>
+        <p>Controlla la configurazione nel file JavaScript.</p>
       </section>
 
       <!-- Form per aggiungere un nuovo pacco -->
@@ -82,7 +82,6 @@
           <i data-lucide="loader-2" class="spin"></i> Carico la lista delle spedizioni...
         </div>
         <div id="packages-list" class="packages-list">
-			
           <!-- Le card dei pacchi vengono generate qui via JS -->
         </div>
         <div id="empty-state" class="empty-state" hidden>
@@ -153,7 +152,10 @@
 
       <div class="package-footer">
         <span class="last-update"></span>
-        <button class="refresh-btn btn btn-small"><i data-lucide="refresh-cw"></i> Aggiorna</button>
+        <div class="footer-actions" style="display: flex; gap: 8px;">
+          <button class="archive-btn btn btn-small" title="Archivia" style="display: none;"><i data-lucide="archive"></i> Archivia</button>
+          <button class="refresh-btn btn btn-small"><i data-lucide="refresh-cw"></i> Aggiorna</button>
+        </div>
       </div>
     </article>
   </template>
