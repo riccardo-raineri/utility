@@ -3,7 +3,7 @@
 
 // Configurazione base: il frontend comunica solo con il tuo Web App (Apps Script)
 const SHIP24_WORKER_URL = "https://tracciapacchi.riccardo-05e.workers.dev";
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_vqKk59Umc6d_iB79jWfGHuU8TCPMvRF_UX2gk3nRJ8v7mSr9VlbDpiXgNTSoa95f/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxV06xxgDSGl8B76C9wJ_sOLUh22mrvNeqjZxt7WYgNN4OPq-dfMx9wIjEhGU6xRRAt/exec";
 const APPS_SCRIPT_TOKEN = "0712";
 
 const THEME_KEY = "toolbox_theme";
