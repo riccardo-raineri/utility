@@ -1,30 +1,34 @@
 /**
-   * =====================================================================
-   * DASHBOARD.JS — Interactive Engine (SECURE VERSION)
-   * =====================================================================
-   */
+ * =====================================================================
+ * DASHBOARD.JS — Interactive Engine (SECURE VERSION)
+ * =====================================================================
+ */
 
-  document.addEventListener('DOMContentLoaded', () => {
-      if (window.lucide) {
-          lucide.createIcons();
-      }
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Inizializzazione base
+    if (window.lucide) {
+        lucide.createIcons();
+    }
 
-      initParticles();
-      initSpotlight();
-      initSoft3DTilt();
-      initSearchAndFilters();
-      initFiltersHamburger();
-      initFavoritesDrawer();
-      initPrivateSection(); // Ora viene chiamata correttamente una sola volta
-  });
+    // 2. Avvio moduli visivi
+    initParticles();
+    initSpotlight();
+    initSoft3DTilt();
 
-  /* =========================================================
-     PARTICELLE, SPOTLIGHT E 3D
-     ========================================================= */
-  function initParticles() {
-      const container = document.getElementById('particlesContainer');
-      if (!container) return;
-      const particleCount = 14;
+    // 3. Avvio moduli interattivi
+    initSearchAndFilters();
+    initFiltersHamburger();
+    initFavoritesDrawer();
+
+    // 4. Avvio modulo sicurezza
+    initPrivateSection();
+});
+
+/* =========================================================
+   PARTICELLE, SPOTLIGHT E 3D
+   ========================================================= */
+function initParticles() {
+    const container = document.getElementById('particlesContainer');
     if (!container) return;
     const particleCount = 14;
     for (let i = 0; i < particleCount; i++) {
@@ -228,7 +232,10 @@ function initSearchAndFilters() {
                 card.style.display = 'none';
             }
         });
-        if (noResults) noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+
+        if (noResults) {
+            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
     }
 
     if (searchInput) {
@@ -283,6 +290,8 @@ function initPrivateSection() {
     unlockBtn.addEventListener('click', () => {
         pinInput.value = '';
         modal.removeAttribute('hidden');
+        // Focus automatico sul primo campo per facilitare l'uso mobile
+        setTimeout(() => pinInput.focus(), 100);
     });
 
     // 2. Chiusura Modal
@@ -333,7 +342,7 @@ function initPrivateSection() {
             }
         } catch (err) {
             console.error("Errore login:", err);
-            alert("Errore di connessione al server.");
+            alert("Errore di connessione al server. Riprova più tardi.");
         } finally {
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i data-lucide="check"></i>';
