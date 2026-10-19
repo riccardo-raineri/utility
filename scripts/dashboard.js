@@ -1,6 +1,6 @@
 /**
  * =====================================================================
- * DASHBOARD.JS — Interactive Engine (SECURE VERSION + KEYBOARD SUPPORT)
+ * DASHBOARD.JS
  * =====================================================================
  */
 
@@ -79,7 +79,7 @@ function initSoft3DTilt() {
 }
 
 /* =========================================================
-   HAMBURGER FILTRI & MOBILE FIX
+   HAMBURGER FILTRI
    ========================================================= */
 function initFiltersHamburger() {
     const hamburgerBtn = document.getElementById('filtersHamburgerBtn');
@@ -256,7 +256,7 @@ function initSearchAndFilters() {
 }
 
 /* =========================================================
-   🔐 AREA RISERVATA (NUOVO SISTEMA SICURO + KEYBOARD)
+   AREA RISERVATA (SISTEMA SICURO)
    ========================================================= */
 function initPrivateSection() {
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvi-j5A8rbAKjyQu52_lCcoFNnuVIRPepU5PmZtaUuTrURWfDjHUr-rb-IBTGg6XrOzQ/exec';
