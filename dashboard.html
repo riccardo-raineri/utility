@@ -216,6 +216,39 @@
             </section>
 
             <!-- SEZIONE 2: ALTRI STRUMENTI & UTILITY -->
+			
+			 <!-- MODAL PER PASSWORD (Personalizzato) -->
+      <div id="passwordModal" class="modal-overlay" hidden>
+          <div class="modal-content glass-card">
+              <button id="closeModalBtn" class="close-btn"><i data-lucide="x"></i></button>
+              <div class="modal-header">
+                  <i data-lucide="lock" class="modal-icon"></i>
+                  <h2>Area Riservata</h2>
+                  <p>Inserisci il PIN per continuare</p>
+              </div>
+              <div class="modal-body">
+                  <!-- Input che mostra i pallini per la privacy -->
+                  <input type="password" id="pinInput" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="one-time-code" placeholder="••••" readonly>
+
+                  <!-- Tastierino numerico personalizzato -->
+                  <div class="pin-keypad">
+                      <button class="key" data-val="1">1</button>
+                      <button class="key" data-val="2">2</button>
+                      <button class="key" data-val="3">3</button>
+                      <button class="key" data-val="4">4</button>
+                      <button class="key" data-val="5">5</button>
+                      <button class="key" data-val="6">6</button>
+                      <button class="key" data-val="7">7</button>
+                      <button class="key" data-val="8">8</button>
+                      <button class="key" data-val="9">9</button>
+                      <button class="key action-btn" id="clearPin">C</button>
+                      <button class="key" data-val="0">0</button>
+                      <button class="key action-btn" id="submitPin"><i data-lucide="check"></i></button>
+                  </div>
+              </div>
+          </div>
+      </div>
+			
             <section class="tools-section">
                 <div class="section-header">
                     <h2 class="section-title">

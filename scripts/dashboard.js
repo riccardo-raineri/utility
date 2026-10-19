@@ -1,306 +1,30 @@
 /**
- * =====================================================================
- * DASHBOARD.JS — Interactive Engine
- * =====================================================================
- */
+   * =====================================================================
+   * DASHBOARD.JS — Interactive Engine (SECURE VERSION)
+   * =====================================================================
+   */
 
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.lucide) {
-        lucide.createIcons();
-    }
+  document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+          lucide.createIcons();
+      }
 
-    initParticles();
-    initSpotlight();
-    initSoft3DTilt();
-    initSearchAndFilters();
-    initFiltersHamburger();
-    initFavoritesDrawer();
-});
+      initParticles();
+      initSpotlight();
+      initSoft3DTilt();
+      initSearchAndFilters();
+      initFiltersHamburger();
+      initFavoritesDrawer();
+      initPrivateSection(); // Ora viene chiamata correttamente una sola volta
+  });
 
-/* =========================================================
-   PARTICELLE, SPOTLIGHT E 3D
-   ========================================================= */
-function initParticles() {
-    const container = document.getElementById('particlesContainer');
-    if (!container) return;
-    const particleCount = 14;
-    for (let i = 0; i < particleCount; i++) {
-        const particle = document.createElement('div');
-        particle.className = 'particle';
-        const size = Math.random() * 2 + 1;
-        const left = Math.random() * 100;
-        const duration = Math.random() * 10 + 10;
-        const delay = Math.random() * 5;
-        particle.style.width = `${size}px`;
-        particle.style.height = `${size}px`;
-        particle.style.left = `${left}%`;
-        particle.style.animationDuration = `${duration}s`;
-        particle.style.animationDelay = `${delay}s`;
-        container.appendChild(particle);
-    }
-}
-
-function initSpotlight() {
-    let ticking = false;
-    window.addEventListener('mousemove', (e) => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                const x = (e.clientX / window.innerWidth) * 100;
-                const y = (e.clientY / window.innerHeight) * 100;
-                document.documentElement.style.setProperty('--mouse-x', `${x}%`);
-                document.documentElement.style.setProperty('--mouse-y', `${y}%`);
-                ticking = false;
-            });
-            ticking = true;
-        }
-    });
-}
-
-function initSoft3DTilt() {
-    const cards = document.querySelectorAll('.tool-card:not(.disabled)');
-    cards.forEach(card => {
-        card.addEventListener('mousemove', (e) => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            card.style.setProperty('--card-mouse-x', `${x}px`);
-            card.style.setProperty('--card-mouse-y', `${y}px`);
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateX = ((y - centerY) / centerY) * -1.5; 
-            const rotateY = ((x - centerX) / centerX) * 1.5;  
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
-        });
-        card.addEventListener('mouseleave', () => {
-            card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)';
-        });
-    });
-}
-
-/* =========================================================
-   HAMBURGER FILTRI (solo mobile)
-   ========================================================= */
-function initFiltersHamburger() {
-    const hamburgerBtn = document.getElementById('filtersHamburgerBtn');
-    const pillsPanel = document.getElementById('filterPillsPanel');
-    if (!hamburgerBtn || !pillsPanel) return;
-
-    // Apre/chiude il pannello dei filtri categoria
-    hamburgerBtn.addEventListener('click', () => {
-        const isOpen = pillsPanel.classList.toggle('is-open');
-        hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-    });
-
-    // Scelta una categoria, richiude subito il pannello: su mobile non ha
-    // senso lasciarlo aperto sopra ai risultati appena filtrati
-    pillsPanel.querySelectorAll('.filter-pill').forEach(pill => {
-        pill.addEventListener('click', () => {
-            pillsPanel.classList.remove('is-open');
-            hamburgerBtn.setAttribute('aria-expanded', 'false');
-        });
-    });
-
-    // Chiude il pannello anche cliccando fuori (sia dal pannello che dal bottone)
-    document.addEventListener('click', (e) => {
-        const clickedInsidePanel = pillsPanel.contains(e.target);
-        const clickedHamburger = hamburgerBtn.contains(e.target);
-        if (!clickedInsidePanel && !clickedHamburger) {
-            pillsPanel.classList.remove('is-open');
-            hamburgerBtn.setAttribute('aria-expanded', 'false');
-        }
-    });
-}
-
-/* =========================================================
-   GESTIONE PREFERITI & DRAWER LATERALE
-   ========================================================= */
-function getFavorites() {
-    const favs = localStorage.getItem('toolbox_favorites');
-    return favs ? JSON.parse(favs) : [];
-}
-
-function toggleFavorite(toolId, event) {
-    if (event) {
-        event.preventDefault();
-        event.stopPropagation();
-    }
-
-    let favs = getFavorites();
-    if (favs.includes(toolId)) {
-        favs = favs.filter(id => id !== toolId);
-    } else {
-        favs.push(toolId);
-    }
-
-    localStorage.setItem('toolbox_favorites', JSON.stringify(favs));
-    updateFavoritesUI();
-}
-
-function initFavoritesDrawer() {
-    const overlay = document.getElementById('favoritesOverlay');
-    const openBtn = document.getElementById('openFavoritesDrawer');
-    const closeBtn = document.getElementById('closeFavoritesDrawer');
-
-    if (openBtn && overlay) {
-        openBtn.addEventListener('click', () => overlay.classList.add('is-open'));
-    }
-    if (closeBtn && overlay) {
-        closeBtn.addEventListener('click', () => overlay.classList.remove('is-open'));
-    }
-    if (overlay) {
-        overlay.addEventListener('click', (e) => {
-            if (e.target === overlay) overlay.classList.remove('is-open');
-        });
-    }
-
-    updateFavoritesUI();
-}
-
-function updateFavoritesUI() {
-    const favs = getFavorites();
-    const countBadge = document.getElementById('favCountBadge');
-    const drawerContent = document.getElementById('favoritesDrawerContent');
-
-    if (countBadge) {
-        countBadge.textContent = favs.length;
-    }
-
-    document.querySelectorAll('#toolsGrid .tool-card').forEach(card => {
-        const toolId = card.dataset.toolId;
-        const favBtn = card.querySelector('.fav-btn');
-        if (favBtn) {
-            if (favs.includes(toolId)) {
-                favBtn.classList.add('is-favorite');
-            } else {
-                favBtn.classList.remove('is-favorite');
-            }
-        }
-    });
-
-    if (drawerContent) {
-        if (favs.length === 0) {
-            drawerContent.innerHTML = `
-                <div class="drawer-empty">
-                    <i data-lucide="star"></i>
-                    <p>Non hai ancora aggiunto nessun preferito.<br>Clicca sulla stella delle card per salvarle qui.</p>
-                </div>
-            `;
-        } else {
-            drawerContent.innerHTML = '';
-            favs.forEach(toolId => {
-                const originalCard = document.querySelector(`#toolsGrid .tool-card[data-tool-id="${toolId}"]`);
-                if (originalCard) {
-                    const clone = originalCard.cloneNode(true);
-                    const clonedBtn = clone.querySelector('.fav-btn');
-                    if (clonedBtn) {
-                        clonedBtn.classList.add('is-favorite');
-                        clonedBtn.addEventListener('click', (e) => toggleFavorite(toolId, e));
-                    }
-                    drawerContent.appendChild(clone);
-                }
-            });
-        }
-    }
-
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-}
-
-/* =========================================================
-   RICERCA E FILTRI
-   ========================================================= */
-function initSearchAndFilters() {
-    const searchInput = document.getElementById('searchInput');
-    // :not(.apps-link) esclude il link "Le mie apps": ha la stessa classe
-    // .filter-pill per lo stile, ma è un link vero e non una categoria da filtrare
-    const filterPills = document.querySelectorAll('.filter-pill:not(.apps-link)');
-    const cards = document.querySelectorAll('#toolsGrid .tool-card');
-    const noResults = document.getElementById('noResults');
-
-    let activeCategory = 'tutti';
-    let searchQuery = '';
-
-    function filterGrid() {
-        let visibleCount = 0;
-
-        cards.forEach((card) => {
-            const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
-            const desc = card.querySelector('.card-desc')?.textContent.toLowerCase() || '';
-            const category = card.dataset.category || '';
-
-            const matchesCategory = (activeCategory === 'tutti') || (category === activeCategory);
-            const matchesSearch = title.includes(searchQuery) || desc.includes(searchQuery);
-
-            if (matchesCategory && matchesSearch) {
-                card.style.display = 'block';
-                card.style.opacity = '1';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-
-        if (noResults) {
-            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-        }
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value.toLowerCase().trim();
-            filterGrid();
-        });
-    }
-
-    filterPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            filterPills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-
-            activeCategory = pill.dataset.filter;
-            filterGrid();
-        });
-    });
-
-    document.addEventListener('keydown', (e) => {
-        const activeTag = document.activeElement.tagName;
-        if (e.key === '/' && activeTag !== 'INPUT' && activeTag !== 'TEXTAREA') {
-            e.preventDefault();
-            if (searchInput) searchInput.focus();
-        }
-    });
-}
-	
-	document.addEventListener('DOMContentLoaded', () => {
-    // ... le tue funzioni esistenti ...
-    initPrivateSection();
-});
-
-/**
- * =====================================================================
- * DASHBOARD.JS — Interactive Engine
- * =====================================================================
- */
-
-document.addEventListener('DOMContentLoaded', () => {
-    if (window.lucide) {
-        lucide.createIcons();
-    }
-
-    initParticles();
-    initSpotlight();
-    initSoft3DTilt();
-    initSearchAndFilters();
-    initFiltersHamburger();
-    initFavoritesDrawer();
-});
-
-/* =========================================================
-   PARTICELLE, SPOTLIGHT E 3D
-   ========================================================= */
-function initParticles() {
-    const container = document.getElementById('particlesContainer');
+  /* =========================================================
+     PARTICELLE, SPOTLIGHT E 3D
+     ========================================================= */
+  function initParticles() {
+      const container = document.getElementById('particlesContainer');
+      if (!container) return;
+      const particleCount = 14;
     if (!container) return;
     const particleCount = 14;
     for (let i = 0; i < particleCount; i++) {
@@ -357,33 +81,21 @@ function initSoft3DTilt() {
 }
 
 /* =========================================================
-   HAMBURGER FILTRI (solo mobile)
+   HAMBURGER FILTRI & MOBILE FIX
    ========================================================= */
 function initFiltersHamburger() {
     const hamburgerBtn = document.getElementById('filtersHamburgerBtn');
     const pillsPanel = document.getElementById('filterPillsPanel');
     if (!hamburgerBtn || !pillsPanel) return;
 
-    // Apre/chiude il pannello dei filtri categoria
-    hamburgerBtn.addEventListener('click', () => {
+    hamburgerBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const isOpen = pillsPanel.classList.toggle('is-open');
         hamburgerBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
     });
 
-    // Scelta una categoria, richiude subito il pannello: su mobile non ha
-    // senso lasciarlo aperto sopra ai risultati appena filtrati
-    pillsPanel.querySelectorAll('.filter-pill').forEach(pill => {
-        pill.addEventListener('click', () => {
-            pillsPanel.classList.remove('is-open');
-            hamburgerBtn.setAttribute('aria-expanded', 'false');
-        });
-    });
-
-    // Chiude il pannello anche cliccando fuori (sia dal pannello che dal bottone)
     document.addEventListener('click', (e) => {
-        const clickedInsidePanel = pillsPanel.contains(e.target);
-        const clickedHamburger = hamburgerBtn.contains(e.target);
-        if (!clickedInsidePanel && !clickedHamburger) {
+        if (!hamburgerBtn.contains(e.target) && !pillsPanel.contains(e.target)) {
             pillsPanel.classList.remove('is-open');
             hamburgerBtn.setAttribute('aria-expanded', 'false');
         }
@@ -491,8 +203,6 @@ function updateFavoritesUI() {
    ========================================================= */
 function initSearchAndFilters() {
     const searchInput = document.getElementById('searchInput');
-    // :not(.apps-link) esclude il link "Le mie apps": ha la stessa classe
-    // .filter-pill per lo stile, ma è un link vero e non una categoria da filtrare
     const filterPills = document.querySelectorAll('.filter-pill:not(.apps-link)');
     const cards = document.querySelectorAll('#toolsGrid .tool-card');
     const noResults = document.getElementById('noResults');
@@ -502,7 +212,6 @@ function initSearchAndFilters() {
 
     function filterGrid() {
         let visibleCount = 0;
-
         cards.forEach((card) => {
             const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
             const desc = card.querySelector('.card-desc')?.textContent.toLowerCase() || '';
@@ -519,10 +228,7 @@ function initSearchAndFilters() {
                 card.style.display = 'none';
             }
         });
-
-        if (noResults) {
-            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-        }
+        if (noResults) noResults.style.display = visibleCount === 0 ? 'block' : 'none';
     }
 
     if (searchInput) {
@@ -533,10 +239,10 @@ function initSearchAndFilters() {
     }
 
     filterPills.forEach(pill => {
-        pill.addEventListener('click', () => {
+        pill.addEventListener('click', (e) => {
+            e.stopPropagation();
             filterPills.forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
-
             activeCategory = pill.dataset.filter;
             filterGrid();
         });
@@ -551,56 +257,89 @@ function initSearchAndFilters() {
     });
 }
 
-    document.addEventListener('DOMContentLoaded', () => {
-    // ... le tue funzioni esistenti ...
-    initPrivateSection();
-});
-
+/* =========================================================
+   🔐 AREA RISERVATA (NUOVO SISTEMA SICURO)
+   ========================================================= */
 function initPrivateSection() {
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvi-j5A8rbAKjyQu52_lCcoFNnuVIRPepU5PmZtaUuTrURWfDjHUr-rb-IBTGg6XrOzQ/exec';
+
     const unlockBtn = document.getElementById('unlockPrivateBtn');
     const unlockIcon = document.getElementById('unlockIcon');
     const unlockText = document.getElementById('unlockBtnText');
+    const modal = document.getElementById('passwordModal');
+    const pinInput = document.getElementById('pinInput');
+    const closeBtn = document.getElementById('closeModalBtn');
+    const submitBtn = document.getElementById('submitPin');
+    const clearBtn = document.getElementById('clearPin');
 
     if (!unlockBtn) return;
 
-    // Controllo se l'utente si è già autenticato durante la sessione attuale
+    // Check session
     if (sessionStorage.getItem('private_unlocked') === 'true') {
         enablePrivateAccess();
     }
 
-    unlockBtn.addEventListener('click', async () => {
-        const isUnlocked = document.body.classList.contains('private-unlocked');
+    // 1. Apertura Modal
+    unlockBtn.addEventListener('click', () => {
+        pinInput.value = '';
+        modal.removeAttribute('hidden');
+    });
 
-        if (isUnlocked) {
-            // Se è già sbloccato, cliccando di nuovo blocca l'accesso
-            disablePrivateAccess();
-        } else {
-            // Chiede la password
-            const userInput = prompt("Inserisci la password per effettuare il Login:");
-            if (userInput) {
-                try {
-                    const response = await fetch(APPS_SCRIPT_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({ action: 'login', password: userInput })
-                    });
+    // 2. Chiusura Modal
+    closeBtn.addEventListener('click', () => modal.setAttribute('hidden', 'true'));
 
-                    const data = await response.json();
-
-                    if (data.ok) {
-                        enablePrivateAccess();
-                        sessionStorage.setItem('private_unlocked', 'true');
-                    } else {
-                        alert("Password errata!");
-                    }
-                } catch (err) {
-                    console.error("Errore durante il login:", err);
-                    alert("Errore di connessione al server. Riprova più tardi.");
+    // 3. Gestione Tastierino
+    document.querySelectorAll('.key').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.id === 'submitPin') {
+                handleLogin();
+            } else if (btn.id === 'clearPin') {
+                pinInput.value = '';
+            } else {
+                if (pinInput.value.length < 4) {
+                    pinInput.value += btn.dataset.val;
                 }
             }
-        }
+        });
     });
+
+    async function handleLogin() {
+        const password = pinInput.value;
+        if (password.length < 4) {
+            alert("Inserisci un PIN di 4 cifre");
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i>';
+        if (window.lucide) lucide.createIcons();
+
+        try {
+            const response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({ action: 'login', password: password })
+            });
+
+            const data = await response.json();
+
+            if (data.ok) {
+                enablePrivateAccess();
+                sessionStorage.setItem('private_unlocked', 'true');
+                modal.setAttribute('hidden', 'true');
+            } else {
+                alert("Password errata!");
+                pinInput.value = '';
+            }
+        } catch (err) {
+            console.error("Errore login:", err);
+            alert("Errore di connessione al server.");
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i data-lucide="check"></i>';
+            if (window.lucide) lucide.createIcons();
+        }
+    }
 
     function enablePrivateAccess() {
         document.body.classList.add('private-unlocked');
