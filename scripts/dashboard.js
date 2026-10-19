@@ -1,26 +1,20 @@
 /**
  * =====================================================================
- * DASHBOARD.JS — Interactive Engine (SECURE VERSION)
+ * DASHBOARD.JS — Interactive Engine (SECURE VERSION + KEYBOARD SUPPORT)
  * =====================================================================
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Inizializzazione base
     if (window.lucide) {
         lucide.createIcons();
     }
 
-    // 2. Avvio moduli visivi
     initParticles();
     initSpotlight();
     initSoft3DTilt();
-
-    // 3. Avvio moduli interattivi
     initSearchAndFilters();
     initFiltersHamburger();
     initFavoritesDrawer();
-
-    // 4. Avvio modulo sicurezza
     initPrivateSection();
 });
 
@@ -101,7 +95,7 @@ function initFiltersHamburger() {
     document.addEventListener('click', (e) => {
         if (!hamburgerBtn.contains(e.target) && !pillsPanel.contains(e.target)) {
             pillsPanel.classList.remove('is-open');
-            hamburgerBtn.setAttribute('aria-expanded', 'false');
+            hamburgerBtn.setAttribute('aria_expanded', 'false');
         }
     });
 }
@@ -232,10 +226,7 @@ function initSearchAndFilters() {
                 card.style.display = 'none';
             }
         });
-
-        if (noResults) {
-            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
-        }
+        if (noResults) noResults.style.display = visibleCount === 0 ? 'block' : 'none';
     }
 
     if (searchInput) {
@@ -265,7 +256,7 @@ function initSearchAndFilters() {
 }
 
 /* =========================================================
-   🔐 AREA RISERVATA (NUOVO SISTEMA SICURO)
+   🔐 AREA RISERVATA (NUOVO SISTEMA SICURO + KEYBOARD)
    ========================================================= */
 function initPrivateSection() {
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyvi-j5A8rbAKjyQu52_lCcoFNnuVIRPepU5PmZtaUuTrURWfDjHUr-rb-IBTGg6XrOzQ/exec';
@@ -290,14 +281,16 @@ function initPrivateSection() {
     unlockBtn.addEventListener('click', () => {
         pinInput.value = '';
         modal.removeAttribute('hidden');
-        // Focus automatico sul primo campo per facilitare l'uso mobile
         setTimeout(() => pinInput.focus(), 100);
     });
 
     // 2. Chiusura Modal
-    closeBtn.addEventListener('click', () => modal.setAttribute('hidden', 'true'));
+    closeBtn.addEventListener('click', () => {
+        modal.setAttribute('hidden', 'true');
+        pinInput.value = '';
+    });
 
-    // 3. Gestione Tastierino
+    // 3. Gestione Tastierino Touch
     document.querySelectorAll('.key').forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.id === 'submitPin') {
@@ -310,6 +303,34 @@ function initPrivateSection() {
                 }
             }
         });
+    });
+
+    // 4. Gestione Tastiera Fisica (Desktop)
+    document.addEventListener('keydown', (e) => {
+        if (modal.hasAttribute('hidden')) return;
+
+        // Se l'utente preme un tasto numerico
+        if (e.key >= '0' && e.key <= '9') {
+            e.preventDefault();
+            if (pinInput.value.length < 4) {
+                pinInput.value += e.key;
+            }
+        }
+        // Se preme Backspace
+        else if (e.key === 'Backspace') {
+            if (pinInput.value.length > 0) {
+                pinInput.value = pinInput.value.slice(0, -1);
+            }
+        }
+        // Se preme Enter
+        else if (e.key === 'Enter') {
+            handleLogin();
+        }
+        // Se preme Escape
+        else if (e.key === 'Escape') {
+            modal.setAttribute('hidden', 'true');
+            pinInput.value = '';
+        }
     });
 
     async function handleLogin() {

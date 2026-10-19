@@ -939,12 +939,15 @@ body.private-unlocked .unlock-btn {
       text-align: center;
       position: relative;
       border: 1px solid rgba(255, 255, 255, 0.2);
+      /* Angoli arrotondati come le card */
+      border-radius: var(--radius-lg, 16px);
+      background: rgba(30, 34, 40, 0.9);
   }
 
   .close-btn {
       position: absolute;
-      top: 10px;
-      right: 10px;
+      top: 15px;
+      right: 15px;
       background: none;
       border: none;
       color: var(--text-secondary);
@@ -960,6 +963,7 @@ body.private-unlocked .unlock-btn {
   .modal-header h2 {
       margin: 0;
       font-size: 1.5rem;
+      color: var(--text-primary);
   }
 
   .modal-header p {
@@ -971,20 +975,21 @@ body.private-unlocked .unlock-btn {
       width: 100%;
       font-size: 2.5rem;
       text-align: center;
-      letter-spacing: 1rem;
-      background: rgba(255, 255, 255, 0.05);
+      letter-spacing: 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      color: var(--text-primary);
+      color: var(--accent);
       padding: 0.5rem;
       margin: 1.5rem 0;
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-md, 8px);
+      outline: none;
   }
 
   /* Tastierino */
   .pin-keypad {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
+      gap: 12px;
   }
 
   .key {
@@ -994,18 +999,22 @@ body.private-unlocked .unlock-btn {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: var(--text-primary);
-      border-radius: var(--radius-md);
+      border-radius: var(--radius-md, 8px);
       cursor: pointer;
       transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
   }
 
   .key:active {
-      transform: scale(0.95);
-      background: rgba(255, 255, 255, 0.2);
+      transform: scale(0.92);
+      background: var(--accent);
+      color: white;
   }
 
   .key.action-btn {
-      font-size: 1rem;
+      font-size: 1.1rem;
       color: var(--accent);
       font-weight: bold;
   }
