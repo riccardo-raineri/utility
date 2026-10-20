@@ -32,8 +32,25 @@ const cardTemplate = document.getElementById("package-card-template");
 const statsRow = document.getElementById("stats-row");
 
 // ------------------------------------------------------------------
-// Controllo configurazione
+// Utility
 // ------------------------------------------------------------------
+function generateUUID() {
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function updateIcons() {
+  if (window.lucide) {
+    window.lucide.createIcons();
+  }
+}
+
 function isPlaceholder(value) {
   return !value || value.trim() === "" || value.includes("INSERISCI_QUI");
 }
@@ -41,6 +58,7 @@ function isPlaceholder(value) {
 function isConfigured() {
   return !isPlaceholder(SHIP24_WORKER_URL) && !isPlaceholder(APPS_SCRIPT_URL) && !isPlaceholder(APPS_SCRIPT_TOKEN);
 }
+
 
 // ------------------------------------------------------------------
 // Tema chiaro/scuro
@@ -186,7 +204,7 @@ addForm.addEventListener("submit", async (e) => {
     const data = await callWorker({ action: "track", trackingNumber: number });
     const parsed = parseShip24Result(data);
     const pkg = {
-      id: crypto.randomUUID(),
+      id: generateUUID(),
       label,
       number,
       trackerId: parsed.trackerId,
@@ -389,16 +407,24 @@ function renderPackages() {
     };
     packagesList.appendChild(node);
   });
-  if (window.lucide) lucide.createIcons();
+  updateIcons();
 }
 
+
 // --- Avvio ---
-initTheme();
-if (window.lucide) lucide.createIcons();
-if (isConfigured()) {
-  configWarning.hidden = true;
-  loadPackages();
-} else {
-  configWarning.hidden = false;
-  loadingState.hidden = true;
-}
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    initTheme();
+    updateIcons();
+    if (isConfigured()) {
+      configWarning.hidden = true;
+      loadPackages();
+    } else {
+      configWarning.hidden = false;
+      loadingState.hidden = true;
+    }
+  } catch (err) {
+    console.error("Errore critico durante l'avvio di TracciaPacchi:", err);
+    loadingState.innerHTML = `<p class="loading-state error">Errore di sistema: ${err.message}</p>`;
+  }
+});
