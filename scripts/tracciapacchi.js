@@ -140,7 +140,7 @@ function parseShip24Result(data) {
   return {
     trackerId: tracking.tracker?.trackerId || null,
     status: shipment.statusMilestone || "pending",
-    detail: lastEvent ? `${lastEvent.status}${lastEvent.location ? " · " + lastEvent.location : ""}` : "Nessun evento disponibile ancora",
+    detail: lastEvent ? lastEvent.status + (lastEvent.location ? " · " + lastEvent.location : "") : "Nessun evento disponibile ancora",
     courier: extractCourierName(shipment, tracking.tracker) || shipment.courierName || null,
     events,
   };
@@ -349,7 +349,7 @@ function renderHistory(node, events) {
   list.innerHTML = "";
   if (!events || events.length === 0) { toggleBtn.hidden = true; return; }
   toggleBtn.hidden = false;
-  toggleText.textContent = `Mostra cronologia (${events.length} event${events.length === 1 ? "o" : "i})`;
+  toggleText.textContent = "Mostra cronologia (" + events.length + " event" + (events.length === 1 ? "o" : "i") + ")";
   events.forEach((ev) => {
     const li = document.createElement("li");
     li.className = "history-item";
@@ -359,7 +359,7 @@ function renderHistory(node, events) {
   toggleBtn.onclick = () => {
     const isOpen = wrap.classList.toggle("open");
     toggleBtn.setAttribute("aria-expanded", String(isOpen));
-    toggleText.textContent = isOpen ? "Nascondi cronologia" : `Mostra cronologia (${events.length} event${events.length === 1 ? "o" : "i})`;
+    toggleText.textContent = isOpen ? "Nascondi cronologia" : "Mostra cronologia (" + events.length + " event" + (events.length === 1 ? "o" : "i") + ")";
   };
 }
 
@@ -379,7 +379,7 @@ function renderPackages() {
     pill.querySelector(".status-pill-icon").setAttribute("data-lucide", statusToIcon(pkg.status));
     pill.querySelector(".status-text").textContent = statusToLabel(pkg.status);
     node.querySelector(".courier-name").textContent = pkg.courier || "Corriere non identificato";
-    node.querySelector(".transit-days").textContent = pkg.transitDays != null ? `${pkg.transitDays} giorn${pkg.transitDays === 1 ? "o" : "i} in viaggio` : "In attesa di eventi";
+    node.querySelector(".transit-days").textContent = pkg.transitDays != null ? pkg.transitDays + " giorn" + (pkg.transitDays === 1 ? "o" : "i") + " in viaggio" : "In attesa di eventi";
     node.querySelector(".status-detail").textContent = pkg.detail || "";
     node.querySelector(".last-update").textContent = formatRelativeTime(pkg.lastUpdate);
 
