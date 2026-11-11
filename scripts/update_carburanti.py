@@ -62,6 +62,8 @@ import io
 import json
 import re
 import sys
+import time
+import urllib.error
 import urllib.request
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -191,8 +193,24 @@ def scarica_csv(url: str) -> tuple[list[str], str | None]:
         "Cache-Control": "no-cache",
         "Pragma": "no-cache",
     })
-    with urllib.request.urlopen(req, timeout=60) as resp:
-        raw_bytes = resp.read()
+    # Fino a 4 tentativi con attesa crescente e timeout lungo (180 s): il
+    # sito del MIMIT a volte è lento o non risponde subito ai server di
+    # GitHub. Se tutti i tentativi falliscono, l'errore viene rilanciato
+    # e l'Action diventa rossa (non pubblichiamo mai dati vecchi).
+    raw_bytes = None
+    ultimo_errore = None
+    for tentativo in range(1, 5):
+        try:
+            with urllib.request.urlopen(req, timeout=180) as resp:
+                raw_bytes = resp.read()
+            break
+        except (urllib.error.URLError, TimeoutError, ConnectionError) as errore:
+            ultimo_errore = errore
+            print(f"  tentativo {tentativo}/4 fallito: {errore}", file=sys.stderr)
+            if tentativo < 4:
+                time.sleep(15 * tentativo)
+    if raw_bytes is None:
+        raise ultimo_errore
 
     testo = None
     for encoding in ("utf-8", "iso-8859-1"):
