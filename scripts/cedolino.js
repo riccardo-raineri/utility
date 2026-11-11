@@ -12,16 +12,30 @@ const state = {
 // ---------- Utility Valori e Numeri ----------
 function parseNum(v) {
   if (v === '' || v === undefined || v === null) return 0;
-  const str = String(v).replace(/\./g, '').replace(',', '.');
+  if (typeof v === 'number') return isNaN(v) ? 0 : v;
+  let str = String(v).trim().replace(/[€\s]/g, '');
+  const hasDot = str.includes('.');
+  const hasComma = str.includes(',');
+  if (hasDot && hasComma) {
+    // Il separatore decimale è l'ultimo dei due: l'altro è delle migliaia
+    if (str.lastIndexOf(',') > str.lastIndexOf('.')) str = str.replace(/\./g, '').replace(',', '.');
+    else str = str.replace(/,/g, '');
+  } else if (hasComma) {
+    // Solo virgole: una sola = decimale ("845,01"), più d'una = migliaia
+    str = (str.match(/,/g) || []).length > 1 ? str.replace(/,/g, '') : str.replace(',', '.');
+  } else if (hasDot && (str.match(/\./g) || []).length > 1) {
+    // Più punti: migliaia ("1.234.567"). Un punto solo resta decimale ("845.01", "7.083")
+    str = str.replace(/\./g, '');
+  }
   const n = parseFloat(str);
   return isNaN(n) ? 0 : n;
 }
 
 function fmt(v) {
   if (v === '' || v === undefined || v === null) return '0,00';
-  const str = String(v).replace(',', '.');
-  const n = parseFloat(str);
-  return isNaN(n) ? String(v) : n.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const n = parseNum(v);
+  if (n === 0 && !/^[\s0.,€-]*$/.test(String(v))) return String(v);
+  return n.toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
 function monthLabel(meseAnno) {
@@ -319,7 +333,7 @@ function renderInteractiveChart() {
   const container = $('#netChart');
 
   const points = state.cedolini
-    .filter((c) => c.MeseAnno && c.Netto)
+    .filter((c) => c.MeseAnno && parseNum(c.Netto) > 0)
     .slice()
     .sort((a, b) => (a.MeseAnno > b.MeseAnno ? 1 : -1));
 
@@ -331,8 +345,11 @@ function renderInteractiveChart() {
 
   const W = 640, H = 190, PAD_X = 40, PAD_Y = 30;
   const values = points.map((p) => parseNum(p.Netto));
-  const min = Math.min(...values) * 0.95;
-  const max = Math.max(...values) * 1.05;
+  const rawMin = Math.min(...values);
+  const rawMax = Math.max(...values);
+  const pad = (rawMax - rawMin) * 0.15 || rawMax * 0.05 || 1;
+  const min = rawMin - pad;
+  const max = rawMax + pad;
   const range = max - min || 1;
 
   const stepX = (W - PAD_X * 2) / (points.length - 1);
